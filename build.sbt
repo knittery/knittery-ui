@@ -5,7 +5,8 @@ version := "1.0-SNAPSHOT"
 libraryDependencies ++= Seq(
   jdbc,
   anorm,
-  cache
+  cache,
+  "org.rxtx" % "rxtx" % "2.1.7"
 )     
 
 play.Project.playScalaSettings
