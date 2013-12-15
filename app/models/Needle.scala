@@ -8,7 +8,7 @@ sealed trait Needle {
 }
 
 object Needle {
-  def needleCount = 100
+  def needleCount = 200
 
   def atIndex(index: Int): Needle = {
     require(index >= 0)
