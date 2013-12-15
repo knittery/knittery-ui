@@ -10,9 +10,10 @@ sealed trait Needle {
 object Needle {
   def needleCount = 100
 
-  def atIndex(index: Int) = {
+  def atIndex(index: Int): Needle = {
     require(index >= 0)
     require(index < needleCount)
+    NeedleImpl(index)
   }
 
   private case class NeedleImpl(index: Int) extends Needle {
