@@ -10,7 +10,7 @@ import Serial._
 import models._
 import play.Logger
 
-class BrotherConnector(port: String, parser: String => Option[MachineEvent]) extends Actor with ActorLogging {
+class BrotherConnector(listener: ActorRef, port: String, parser: String => Option[MachineEvent]) extends Actor with ActorLogging {
   protected def serialManager: ActorRef = akka.io.IO(Serial)(context.system)
 
   private val (rawEnumerator, channel) = Concurrent.broadcast[ByteString]
@@ -24,6 +24,9 @@ class BrotherConnector(port: String, parser: String => Option[MachineEvent]) ext
       Enumeratee.mapConcat(_.toSeq.map(_.toChar)) &>
       Enumeratee.grouped(takeLine)
   }
+  def eventEnumerator = {
+    lineEnumerator &> Enumeratee.mapFlatten(in => Enumerator(parser(in).toSeq: _*))
+  }
 
   override def preStart = {
     serialManager ! Open(port, 115200)
@@ -32,19 +35,32 @@ class BrotherConnector(port: String, parser: String => Option[MachineEvent]) ext
   override def receive = {
     case Opened(operator, `port`) =>
       log.info(s"Serial port connection to brother opened on $port")
+      //Start sending parsed events to the listener
+      eventEnumerator(Iteratee.foreach(event => listener ! event))
       context become open(operator)
+
     case CommandFailed(Open(port, _), error) =>
       throw new RuntimeException("Could not open serial port for brother", error)
   }
 
   def open(operator: ActorRef): Receive = {
-    case Received(data) => channel.push(data)
-    case Closed => throw new RuntimeException("Unexpected close of serial port")
+    case Received(data) =>
+      //Feed into the parser that will then send it to the listener
+      channel.push(data)
+
+    case Closed =>
+      throw new RuntimeException("Unexpected close of serial port")
   }
 }
 
+/**
+ *  Actor that will send MachineEvents to a listener. The actor will crash if there
+ *  is a problem with the connection to the machine.
+ */
 object BrotherConnector {
-  def props(port: String) = Props(new BrotherConnector(port, parser))
+  def props(listener: ActorRef, port: String) = {
+    Props(new BrotherConnector(listener, port, parser))
+  }
 
   def parser(input: String): Option[MachineEvent] = {
     input.split('\t').toList match {
