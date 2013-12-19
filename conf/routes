@@ -7,6 +7,7 @@ GET     /                           controllers.Application.index
 
 GET     /simulator                  controllers.SerialSimulator.show
 POST    /simulator/send             controllers.SerialSimulator.send
+GET     /simulator/subscribe        controllers.SerialSimulator.subscribe
 
 # Assets
 GET     /assets/javascripts/routes.js               controllers.Application.javascriptRoutes()

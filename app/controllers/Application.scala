@@ -13,7 +13,7 @@ object Application extends Controller {
     import routes.javascript._
     Ok(
       Routes.javascriptRouter("jsRoutes")(
-        SerialSimulator.send)). //
+        SerialSimulator.send, SerialSimulator.subscribe)). //
       as("text/javascript")
   }
 }

@@ -20,12 +20,20 @@ object SerialSimulator extends Controller {
   def send = Action { req =>
     req.body.asText match {
       case Some(text) =>
-        channelToPort.push(ByteString(text, "ASCII"))
+        channelToPort.push(ByteString(text, encoding))
         Ok(Json.obj("status" -> "ok"))
       case None =>
         Ok(Json.obj("status" -> "error", "reason" -> "no data"))
     }
   }
+
+  def subscribe = WebSocket.using[String] { request =>
+    val out = enumeratorFromPort &> Enumeratee.map(">" + _.decodeString(encoding))
+    val in = enumeratorToPort &> Enumeratee.map("<" + _.decodeString(encoding))
+    (Iteratee.ignore, out.interleave(in))
+  }
+
+  val encoding = "ASCII"
 
   private val (enumeratorFromPort, channelFromPort) = Concurrent.broadcast[ByteString]
   private val (enumeratorToPort, channelToPort) = Concurrent.broadcast[ByteString]
