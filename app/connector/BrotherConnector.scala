@@ -11,9 +11,7 @@ import Serial._
 import models._
 import play.Logger
 
-class BrotherConnector(listener: ActorRef, port: String, parser: String => Option[MachineEvent]) extends Actor with ActorLogging {
-  protected def serialManager: ActorRef = akka.io.IO(Serial)(context.system)
-
+class BrotherConnector(port: String, serialManager: ActorRef, parser: String => Option[MachineEvent]) extends Actor with ActorLogging {
   private val (rawEnumerator, channel) = Concurrent.broadcast[ByteString]
   def lineEnumerator = {
     def takeLine = for {
@@ -38,7 +36,7 @@ class BrotherConnector(listener: ActorRef, port: String, parser: String => Optio
     case Opened(operator, `port`) =>
       log.info(s"Serial port connection to brother opened on $port")
       //Start sending parsed events to the listener
-      eventEnumerator(Iteratee.foreach(event => listener ! event))
+      eventEnumerator(Iteratee.foreach(event => context.parent ! event))
       context.setReceiveTimeout(Duration.Undefined)
       context become open(operator)
 
@@ -64,8 +62,8 @@ class BrotherConnector(listener: ActorRef, port: String, parser: String => Optio
  *  is a problem with the connection to the machine.
  */
 object BrotherConnector {
-  def props(listener: ActorRef, port: String) = {
-    Props(new BrotherConnector(listener, port, parser))
+  def props(port: String, serialManager: ActorRef) = {
+    Props(new BrotherConnector(port, serialManager, parser))
   }
 
   def parser(input: String): Option[MachineEvent] = {
