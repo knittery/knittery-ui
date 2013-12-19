@@ -6,8 +6,9 @@
 GET     /                           controllers.Application.index
 
 GET     /simulator                  controllers.SerialSimulator.show
+POST    /simulator/send             controllers.SerialSimulator.send
 
-# Map static resources from the /public folder to the /assets URL path
+# Assets
+GET     /assets/javascripts/routes.js               controllers.Application.javascriptRoutes()
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
-# Webjars
 GET     /libraries/*file              controllers.WebJarAssets.at(file)

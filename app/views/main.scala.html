@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String)(content: Html)(implicit scripts: List[String] = Nil)
 
 <!DOCTYPE html>
 
@@ -40,5 +40,10 @@
 
       <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery"+min+".js"))'></script>
       <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("js/bootstrap"+min+".js"))'></script>
+      <script src="@routes.Application.javascriptRoutes()" type="text/javascript" ></script>
+	    @scripts.map { s =>
+	      <script src="@routes.Assets.at("javascripts/"+s+min+".js")" type="text/javascript"></script>
+	    }
+	  </div>
   </body>
 </html>

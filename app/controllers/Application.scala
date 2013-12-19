@@ -9,4 +9,11 @@ object Application extends Controller {
     Ok(views.html.index("Your new application is ready."))
   }
 
+  def javascriptRoutes = Action { implicit request ⇒
+    import routes.javascript._
+    Ok(
+      Routes.javascriptRouter("jsRoutes")(
+        SerialSimulator.send)). //
+      as("text/javascript")
+  }
 }

@@ -5,6 +5,7 @@ import play.api.mvc._
 import play.api.libs.iteratee._
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.json._
 import akka.actor._
 import akka.util.ByteString
 import rxtxio.Serial._
@@ -14,6 +15,16 @@ object SerialSimulator extends Controller {
 
   def show = Action {
     Ok(views.html.serialsimulator())
+  }
+
+  def send = Action { req =>
+    req.body.asText match {
+      case Some(text) =>
+        channelToPort.push(ByteString(text, "ASCII"))
+        Ok(Json.obj("status" -> "ok"))
+      case None =>
+        Ok(Json.obj("status" -> "error", "reason" -> "no data"))
+    }
   }
 
   private val (enumeratorFromPort, channelFromPort) = Concurrent.broadcast[ByteString]
