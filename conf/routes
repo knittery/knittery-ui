@@ -9,6 +9,9 @@ GET     /simulator                  controllers.SerialSimulator.show
 POST    /simulator/send             controllers.SerialSimulator.send
 GET     /simulator/subscribe        controllers.SerialSimulator.subscribe
 
+GET     /display                    controllers.Display.show
+GET     /display/subscribe          controllers.Display.subscribe
+
 # Assets
 GET     /assets/javascripts/routes.js               controllers.Application.javascriptRoutes()
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
