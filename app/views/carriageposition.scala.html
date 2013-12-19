@@ -1,0 +1,16 @@
+@(position: Option[CarriagePosition])
+
+@position match {
+  case Some(CarriageOverNeedles(needle)) => {
+    @needle.number
+  }
+  case Some(CarriageLeft(overlapped))   => {
+    -@overlapped left
+  }
+  case Some(CarriageRight(overlapped))   => {
+    -@overlapped right
+  }
+  case None => {
+    unknown
+  }
+}

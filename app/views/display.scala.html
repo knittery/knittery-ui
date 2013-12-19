@@ -1,6 +1,39 @@
-@()
+@(kPos: Option[CarriagePosition], lPos: Option[CarriagePosition], gPos: Option[CarriagePosition])
 
 @main("Carriage Display") {
+
+	<div class="panel panel-default carriage-positions">
+	  <div class="panel-heading">
+	    <h3 class="panel-title">Positions</h3>
+	  </div>
+	  <div class="panel-body">
+		  <div id="k-position" class="carriage-position">
+		    <div class="carriage-name">
+		      K
+		    </div>
+		    <div class="carriage-value">
+		      @carriageposition(kPos)
+		    </div>
+		  </div>
+		  <div id="l-position" class="carriage-position">
+		    <div class="carriage-name">
+		      L
+		    </div>
+		    <div class="carriage-value">
+		      @carriageposition(lPos)
+		    </div>
+		  </div>
+		  <div id="g-position" class="carriage-position">
+		    <div class="carriage-name">
+		      G
+		    </div>
+		    <div class="carriage-value">
+		      @carriageposition(gPos)
+		    </div>
+		  </div>
+	  </div>
+	</div>
+
 
   <div id="log">waiting...</div>
 
