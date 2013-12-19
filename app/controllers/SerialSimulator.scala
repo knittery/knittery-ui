@@ -9,6 +9,7 @@ import play.api.libs.json._
 import akka.actor._
 import akka.util.ByteString
 import rxtxio.Serial._
+import scala.concurrent.Future
 
 /** Simulates the serial port the knitting machine is normally attached to. */
 object SerialSimulator extends Controller {
@@ -50,11 +51,17 @@ object SerialSimulator extends Controller {
     }
   }
   class OperatorActor(commander: ActorRef) extends Actor {
-    val iteratee = Iteratee.foreach[ByteString](data => self ! Received(data))
+    @volatile var stopped = false
+    val iteratee = Iteratee.fold2[ByteString, Unit](()) { (_, data) =>
+      self ! data
+      Future.successful((), stopped)
+    }
     override def preStart = {
       enumeratorToPort(iteratee)
+      context watch commander
     }
     override def postStop = {
+      stopped = true
       commander ! Closed
     }
 
@@ -65,7 +72,7 @@ object SerialSimulator extends Controller {
       case Write(data, ack) =>
         channelFromPort.push(data)
         if (ack != NoAck) sender ! ack
-      case Received(data) =>
+      case data: ByteString =>
         commander ! Received(data)
     }
   }

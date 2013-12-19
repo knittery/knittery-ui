@@ -49,6 +49,7 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
 
   def open(operator: ActorRef): Receive = {
     case Received(data) =>
+      log.debug(s"Input for serial port ${data.decodeString("ASCII")}")
       //Feed into the parser that will then send it to the listener
       channel.push(data)
 
@@ -66,15 +67,17 @@ object BrotherConnector {
     Props(new BrotherConnector(port, serialManager, parser))
   }
 
+  private val carriageWidth = 24
   def parser(input: String): Option[MachineEvent] = {
     input.split('\t').toList match {
-      case needle :: direction :: carriage :: cpos :: _ if needle.startsWith("@") =>
+      case needle :: position :: direction :: carriage :: cpos :: _ if needle.startsWith("@") =>
         val value = for {
           index <- Try(needle.drop(1).toInt)
+          index2 <- Try(position.toInt)
           n <- Try(Needle.atIndex(index))
           p <- Try(cpos match {
-            case "<" => CarriageLeft(0) //  TODO change protocol to include that
-            case ">" => CarriageRight(0) // TODO change protocol to include that
+            case "<" => CarriageLeft((carriageWidth + index2).max(0).min(24))
+            case ">" => CarriageRight((24 - (index2 - 199)).max(0).min(24))
             case "_" => CarriageOverNeedles(n)
             case other => throw new IllegalArgumentException(s"Unknown needle position: $other")
           })
