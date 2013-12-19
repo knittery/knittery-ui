@@ -5,6 +5,7 @@ $("input#send").click(() ->
     contentType: "text/plain"
     dataType: "text"
   })
+  false
 )
 
 $(() ->
@@ -12,7 +13,7 @@ $(() ->
   ws = new WebSocket(jsRoutes.controllers.SerialSimulator.subscribe().webSocketURL())
   ws.onmessage = (msg) ->
     value = htmlEncode(msg.data)
-    log.html(value + "<br/>" + log.html())
+    log.html(log.html() + "<br/>" + value)
 )
 
 htmlEncode = (html) ->
