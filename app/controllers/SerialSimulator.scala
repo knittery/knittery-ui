@@ -1,17 +1,20 @@
 package controllers
 
-import play.api.libs.concurrent.Akka
 import play.api.Play._
 import play.api.mvc._
-import akka.actor._
-import rxtxio.Serial._
-import play.api.libs.iteratee.Concurrent
-import akka.util.ByteString
-import play.api.libs.iteratee.Iteratee
+import play.api.libs.iteratee._
+import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
+import akka.actor._
+import akka.util.ByteString
+import rxtxio.Serial._
 
 /** Simulates the serial port the knitting machine is normally attached to. */
 object SerialSimulator extends Controller {
+
+  def show = Action {
+    Ok(views.html.serialsimulator())
+  }
 
   private val (enumeratorFromPort, channelFromPort) = Concurrent.broadcast[ByteString]
   private val (enumeratorToPort, channelToPort) = Concurrent.broadcast[ByteString]
