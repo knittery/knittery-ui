@@ -5,6 +5,7 @@ $("input#send").click(() ->
     contentType: "text/plain"
     dataType: "text"
   })
+  $("input#toSend").select()
   false
 )
 
