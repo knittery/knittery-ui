@@ -1,12 +1,18 @@
-$("input#send").click(() ->
-  data = $("input#toSend").val()
+send = (data) ->
   req = jsRoutes.controllers.SerialSimulator.send().ajax({
     data: data
     contentType: "text/plain"
     dataType: "text"
   })
+
+$("input#send").click(() ->
+  send($("input#toSend").val())
   $("input#toSend").select()
   false
+)
+
+$(".send-templates a").click(() ->
+  send($(this).data("value"))
 )
 
 $(() ->
