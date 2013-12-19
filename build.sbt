@@ -6,7 +6,7 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   "com.typesafe.akka" %% "akka-actor" % "2.2.3",
-  "rxtx-akka-io" %% "rxtx-akka-io" % "1.0.0"
+  "ch.inventsoft.akka" %% "rxtx-akka-io" % "1.0.0-SNAPSHOT"
 )     
 
 play.Project.playScalaSettings
