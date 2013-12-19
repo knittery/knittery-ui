@@ -14,7 +14,7 @@ object Global extends GlobalSettings {
 
     val port = "/dev/cu.example"
     val connector = BrotherConnector.props(port, SerialSimulator.manager)
-    _machine = Some(system.actorOf(Machine.props(connector)))
+    _machine = Some(system.actorOf(Machine.props(connector), "machine"))
   }
 
   @volatile private var _machine: Option[ActorRef] = None
