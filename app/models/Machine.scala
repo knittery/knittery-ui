@@ -46,10 +46,11 @@ class Machine(connectorProps: Props) extends Actor {
     case Terminated => // subscriber terminates
       subscribers -= sender
   }
-
 }
 
 object Machine {
+  def props(connector: Props) = Props(new Machine(connector))
+
   sealed trait Command
   sealed trait Event
 
