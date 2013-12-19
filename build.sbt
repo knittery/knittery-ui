@@ -7,6 +7,9 @@ libraryDependencies ++= Seq(
   anorm,
   "com.typesafe.akka" %% "akka-actor" % "2.2.3",
   "ch.inventsoft.akka" %% "rxtx-akka-io" % "1.0.0-SNAPSHOT"
-)     
+)
+
+resolvers +=
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 play.Project.playScalaSettings
