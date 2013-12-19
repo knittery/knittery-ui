@@ -20,7 +20,8 @@ object SerialSimulator extends Controller {
   def send = Action { req =>
     req.body.asText match {
       case Some(text) =>
-        channelToPort.push(ByteString(text, encoding))
+        val decoded = text.replaceAll("\\\\t", "\t") + "\n"
+        channelToPort.push(ByteString(decoded, encoding))
         Ok(Json.obj("status" -> "ok"))
       case None =>
         Ok(Json.obj("status" -> "error", "reason" -> "no data"))
