@@ -40,7 +40,8 @@ object SerialSimulator extends Controller {
   private val (enumeratorFromPort, channelFromPort) = Concurrent.broadcast[ByteString]
   private val (enumeratorToPort, channelToPort) = Concurrent.broadcast[ByteString]
 
-  val manager = Akka.system.actorOf(Props(new ManagerActor))
+  private val _manager = Akka.system.actorOf(Props(new ManagerActor), "serial-simulator")
+  def manager = Akka.system.actorSelection("akka://application/user/serial-simulator")
 
   class ManagerActor extends Actor {
     override def receive = {
