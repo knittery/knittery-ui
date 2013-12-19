@@ -1,4 +1,4 @@
-name := "knittery"
+name := "knittery-ui"
 
 version := "1.0-SNAPSHOT"
 
