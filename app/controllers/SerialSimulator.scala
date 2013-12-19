@@ -65,7 +65,8 @@ object SerialSimulator extends Controller {
       case Write(data, ack) =>
         channelFromPort.push(data)
         if (ack != NoAck) sender ! ack
-      case Received(data) => commander ! Received
+      case Received(data) =>
+        commander ! Received(data)
     }
   }
 
