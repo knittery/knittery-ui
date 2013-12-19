@@ -1,6 +1,7 @@
 package connector
 
 import scala.util.Try
+import scala.concurrent.duration._
 import play.api.libs.iteratee._
 import play.api.libs.concurrent.Execution.Implicits._
 import akka.actor._
@@ -30,6 +31,7 @@ class BrotherConnector(listener: ActorRef, port: String, parser: String => Optio
 
   override def preStart = {
     serialManager ! Open(port, 115200)
+    context.setReceiveTimeout(5.seconds)
   }
 
   override def receive = {
@@ -37,10 +39,14 @@ class BrotherConnector(listener: ActorRef, port: String, parser: String => Optio
       log.info(s"Serial port connection to brother opened on $port")
       //Start sending parsed events to the listener
       eventEnumerator(Iteratee.foreach(event => listener ! event))
+      context.setReceiveTimeout(Duration.Undefined)
       context become open(operator)
 
     case CommandFailed(Open(port, _), error) =>
       throw new RuntimeException("Could not open serial port for brother", error)
+
+    case ReceiveTimeout =>
+      throw new RuntimeException("Could not open serial port for brother within timeout")
   }
 
   def open(operator: ActorRef): Receive = {
