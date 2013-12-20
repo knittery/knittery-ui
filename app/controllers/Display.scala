@@ -12,6 +12,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import models._
 import models.Machine._
+import utils.JsonSerialization._
 
 object Display extends Controller {
 
@@ -30,23 +31,7 @@ object Display extends Controller {
   }
 
   def subscribe = WebSocket.using[JsValue] { req =>
-    val jsE = Subscription.enumerator &> Enumeratee.map {
-      case PositionChanged(carriage, pos) =>
-        val c = carriage match {
-          case KCarriage => "K"
-          case LCarriage => "L"
-          case GCarriage => "G"
-        }
-        val p = pos match {
-          case CarriageLeft(i) => Json.obj("where" -> "left", "overlap" -> i)
-          case CarriageRight(i) => Json.obj("where" -> "right", "overlap" -> i)
-          case CarriageOverNeedles(i) => Json.obj("where" -> "needles", "needle" -> i.number, "index" -> i.index)
-        }
-        val json: JsValue = Json.obj(
-          "event" -> "positionChange", "carriage" -> c, "position" -> p)
-        json
-    }
-    (Iteratee.ignore, jsE)
+    (Iteratee.ignore, Subscription.enumerator &> Json.toJson)
   }
 
   object Subscription {
