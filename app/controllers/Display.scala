@@ -19,13 +19,16 @@ object Display extends Controller {
   protected def machine = Akka.system.actorSelection("akka://application/user/machine")
   protected implicit val timeout: Timeout = 2.seconds
 
-  def show = Action.async {
+  def show = Action {
+    Ok(views.html.display())
+  }
+
+  def positions = Action.async {
     (machine ? GetPositions).map {
       case Positions(data) =>
-        val kPos = data.get(KCarriage)
-        val lPos = data.get(LCarriage)
-        val gPos = data.get(GCarriage)
-        Ok(views.html.display(kPos, lPos, gPos))
+        Ok(JsObject(data.map {
+          case (c, p) => Json.toJson(c).as[String] -> Json.toJson(p)
+        }.toSeq))
       case _ => InternalServerError("Machine actor did not respond.")
     }
   }

@@ -11,6 +11,7 @@ GET     /simulator/subscribe        controllers.SerialSimulator.subscribe
 
 GET     /display                    controllers.Display.show
 GET     /display/subscribe          controllers.Display.subscribe
+GET     /display/positions          controllers.Display.positions
 
 # Assets
 GET     /assets/javascripts/routes.js               controllers.Application.javascriptRoutes()

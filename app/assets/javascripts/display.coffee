@@ -1,5 +1,9 @@
 $(() ->
-  log = $("#log")
+  req = jsRoutes.controllers.Display.positions().ajax({
+    success: (data) ->
+      setPosition(carriage, position) for carriage, position of data
+  })
+
   ws = new WebSocket(jsRoutes.controllers.Display.subscribe().webSocketURL())
   ws.onmessage = (msg) ->
     parsed = $.parseJSON(msg.data)
@@ -18,9 +22,9 @@ setPosition = (carriage, position) ->
     else ""
 
   $("#"+carriage+"-position .carriage-value").text(text)
-  
+
   $(".graphical .carriage-type").text("Carriage (#{carriage})")
-  
+
   bar = $("#bar .progress-bar")
   color = switch carriage
     when "K" then "info"
