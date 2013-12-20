@@ -11,10 +11,28 @@ updateFrom = (msg) ->
     setPosition(msg.carriage, msg.position)
   
 setPosition = (carriage, position) ->
-  elem = $("#"+carriage+"-position .carriage-value")
-  value = switch position.where
-    when "left"    then "-#{position.overlap} left"
-    when "right"   then "-#{position.overlap} right"
-    when "needles" then position.needle
+  [needle,text] = switch position.where
+    when "left"    then [0, "-#{position.overlap} left"]
+    when "right"   then [199, "-#{position.overlap} right"]
+    when "needles" then [position.index, position.needle]
     else ""
-  elem.text(value)
+
+  $("#"+carriage+"-position .carriage-value").text(text)
+  
+  $(".graphical .carriage-type").text("Carriage (#{carriage})")
+  
+  bar = $("#bar .progress-bar")
+  color = switch carriage
+    when "K" then "info"
+    when "L" then "success"
+    when "G" then "warning"
+  bar.removeClass("progress-bar-#{c}") for c in ["info", "warning", "success"]
+  bar.addClass("progress-bar-#{color}")
+  bar.attr("aria-valuenow", needle)
+  bar.width((needle*100/199) + "%")
+  bar.find("span.sr-only").text(text)
+
+  $(".graphical .needle-pos").text(switch position.where
+    when "needles" then position.needle
+    else position.where
+  )
