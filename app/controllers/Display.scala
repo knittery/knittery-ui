@@ -70,7 +70,6 @@ object Display extends Controller {
       }
       def subscribed(to: ActorRef): Receive = {
         case event: PositionChanged =>
-          log.info(s"Received $event")
           channel push event
         case Terminated if sender == to =>
           log.debug(s"Resubscribing, $sender has crashed")

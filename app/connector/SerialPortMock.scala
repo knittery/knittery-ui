@@ -14,7 +14,7 @@ object SerialPortMock {
   def enumerator = enumeratorFromPort
   /** Use to send data as the serial port. */
   def channel = channelToPort
-  
+
   def enumeratorOfChannel = enumeratorToPort
 
   def props = Props(new ManagerActor)
@@ -26,7 +26,8 @@ object SerialPortMock {
     override def receive = {
       case ListPorts => sender ! Ports(Vector("SerialPortMock"))
       case Open(port, bauds) =>
-        val operator = context.actorOf(Props(new OperatorActor(sender)))
+        val commander = sender
+        val operator = context.actorOf(Props(new OperatorActor(commander)))
         sender ! Opened(operator, port)
     }
   }
