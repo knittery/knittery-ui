@@ -5,17 +5,14 @@ import play.api.libs.concurrent.Akka
 import akka.actor._
 import akka.util.Timeout
 import rxtxio.Serial
-import connector.BrotherConnector
-import controllers.SerialSimulator
+import connector._
 import models._
 
 object Global extends GlobalSettings {
 
   private def serialManager(implicit system: ActorSystem) = {
     implicit val timeout = 1.second
-    val selection = SerialSimulator.manager
-    val f = selection.resolveOne(timeout)
-    Await.result(f, timeout)
+    system.actorOf(SerialPortMock.props, "SerialPortManager")
   }
 
   override def onStart(app: Application) {

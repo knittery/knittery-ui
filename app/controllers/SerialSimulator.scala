@@ -10,6 +10,7 @@ import akka.actor._
 import akka.util.ByteString
 import rxtxio.Serial._
 import scala.concurrent.Future
+import connector.SerialPortMock
 
 /** Simulates the serial port the knitting machine is normally attached to. */
 object SerialSimulator extends Controller {
@@ -29,6 +30,10 @@ object SerialSimulator extends Controller {
     }
   }
 
+  val channelToPort = SerialPortMock.channel
+  val enumeratorFromPort = SerialPortMock.enumerator
+  def enumeratorToPort = SerialPortMock.enumeratorOfChannel
+
   def subscribe = WebSocket.using[String] { request =>
     val out = enumeratorFromPort &> Enumeratee.map(">" + _.decodeString(encoding))
     val in = enumeratorToPort &> Enumeratee.map("<" + _.decodeString(encoding))
@@ -36,46 +41,4 @@ object SerialSimulator extends Controller {
   }
 
   val encoding = "ASCII"
-
-  private val (enumeratorFromPort, channelFromPort) = Concurrent.broadcast[ByteString]
-  private val (enumeratorToPort, channelToPort) = Concurrent.broadcast[ByteString]
-
-  private val _manager = Akka.system.actorOf(Props(new ManagerActor), "serial-simulator")
-  def manager = Akka.system.actorSelection("akka://application/user/serial-simulator")
-
-  class ManagerActor extends Actor {
-    override def receive = {
-      case ListPorts => sender ! Ports(Vector("simulator"))
-      case Open(port, bauds) =>
-        val operator = context.actorOf(Props(new OperatorActor(sender)))
-        sender ! Opened(operator, port)
-    }
-  }
-  class OperatorActor(commander: ActorRef) extends Actor {
-    @volatile var stopped = false
-    val iteratee = Iteratee.fold2[ByteString, Unit](()) { (_, data) =>
-      self ! data
-      Future.successful((), stopped)
-    }
-    override def preStart = {
-      enumeratorToPort(iteratee)
-      context watch commander
-    }
-    override def postStop = {
-      stopped = true
-      commander ! Closed
-    }
-
-    override def receive = {
-      case Close =>
-        if (sender != commander) sender ! Closed
-        context stop self
-      case Write(data, ack) =>
-        channelFromPort.push(data)
-        if (ack != NoAck) sender ! ack
-      case data: ByteString =>
-        commander ! Received(data)
-    }
-  }
-
 }
