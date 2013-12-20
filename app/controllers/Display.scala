@@ -40,7 +40,7 @@ object Display extends Controller {
         val p = pos match {
           case CarriageLeft(i) => Json.obj("where" -> "left", "overlap" -> i)
           case CarriageRight(i) => Json.obj("where" -> "right", "overlap" -> i)
-          case CarriageOverNeedles(i) => Json.obj("where" -> "right", "needle" -> i.number, "index" -> i.index)
+          case CarriageOverNeedles(i) => Json.obj("where" -> "needles", "needle" -> i.number, "index" -> i.index)
         }
         val json: JsValue = Json.obj(
           "event" -> "positionChange", "carriage" -> c, "position" -> p)
