@@ -34,13 +34,13 @@ object Display extends Controller {
   }
 
   def subscribe = WebSocket.using[JsValue] { req =>
-    (Iteratee.ignore, Subscription.enumerator &> Json.toJson)
+    (Iteratee.ignore, Subscription.enumerator)
   }
 
   object Subscription {
     def enumerator = e
 
-    private val (e, channel) = Concurrent.broadcast[PositionChanged]
+    private val (e, channel) = Concurrent.broadcast[JsValue]
     Akka.system.actorOf(Props(new SubscriptionActor), "display-subscription")
 
     class SubscriptionActor extends Actor with ActorLogging {
@@ -58,7 +58,9 @@ object Display extends Controller {
       }
       def subscribed(to: ActorRef): Receive = {
         case event: PositionChanged =>
-          channel push event
+          channel push Json.toJson(event)
+        case event: KnittingEvent =>
+          channel push Json.toJson(event)
         case Terminated if sender == to =>
           log.debug(s"Resubscribing, $sender has crashed")
           machine ! Subscribe

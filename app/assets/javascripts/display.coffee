@@ -11,8 +11,10 @@ $(() ->
 )
 
 updateFrom = (msg) ->
-  if (msg.event == "positionChange")
-    setPosition(msg.carriage, msg.position)
+  switch msg.event
+    when "positionChange" then setPosition(msg.carriage, msg.position)
+    when "knitting"
+      $(".graphical .row-index").text(msg.row)
   
 setPosition = (carriage, position) ->
   [needle,text] = switch position.where

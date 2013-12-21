@@ -29,4 +29,11 @@ object JsonSerialization {
         "position" -> event.position)
     }
   }
+
+  implicit object KnittingEventWrite extends Writes[KnittingEvent] {
+    override def writes(event: KnittingEvent) = {
+      Json.obj("event" -> "knitting",
+        "row" -> event.row)
+    }
+  }
 }
