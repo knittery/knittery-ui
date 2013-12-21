@@ -4,7 +4,7 @@
   Simulates the serial port where normally the knitting machine is attached to.
   For debugging purposes or if no knitting machine is available.
 
-  <div class="panel panel-default log-panel">
+  <div class="panel panel-default serial-simulator">
 	  <div class="panel-heading">
 	    <h3 class="panel-title">Log</h3>
 	  </div>
@@ -16,7 +16,7 @@
     <input type="submit" value="Send" id="send" default="true"/>
   </form>
 
-  <div class="templates">
+  <div class="templates serial-simulator">
     <h3>Templates</h3>
     <ul class="send-templates">
       <li><a data-value="@@34\t34\t<-\tK\t_"   href="#">K at 34</a></li>
@@ -31,5 +31,17 @@
       <li><a data-value="@@0\t-14\t<-\tG\t<"   href="#">G at -14</a></li>
       <li><a data-value="@@199\t204\t<-\tG\t>" href="#">G at 204</a></li>
     </ul>
+
+    <h3>Automatic</h3>
+    <span class="automatic">
+    <ul>
+      <li>
+        <a data-carriage="K" data-min="10" data-max="189" data-speed="100" href="#" class="start">
+          Wide knitting with K
+        </a>
+      </li>
+    </ul>
+    <a href="#" class="stop">Stop</a>
+    </span>
   </div>
 }(List("simulator"))
