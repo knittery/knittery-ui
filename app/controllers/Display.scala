@@ -24,11 +24,19 @@ object Display extends Controller {
   }
 
   def positions = Action.async {
-    (machine ? GetPositions).map {
-      case Positions(data) =>
-        Ok(JsObject(data.map {
+    val pos = machine ? GetPositions
+    val kni = machine ? GetKnittingStatus
+    for {
+      p <- pos
+      k <- kni
+    } yield (p, k) match {
+      case (Positions(data), KnittingStatus(row)) =>
+        val positions = JsObject(data.map {
           case (c, p) => Json.toJson(c).as[String] -> Json.toJson(p)
-        }.toSeq))
+        }.toSeq)
+        Ok(Json.obj(
+          "positions" -> positions,
+          "row" -> row))
       case _ => InternalServerError("Machine actor did not respond.")
     }
   }

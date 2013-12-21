@@ -1,7 +1,8 @@
 $(() ->
   req = jsRoutes.controllers.Display.positions().ajax({
     success: (data) ->
-      setPosition(carriage, position) for carriage, position of data
+      setPosition(carriage, position) for carriage, position of data.positions
+      setKnittingStatus(data.row)
   })
 
   ws = new WebSocket(jsRoutes.controllers.Display.subscribe().webSocketURL())
@@ -13,8 +14,10 @@ $(() ->
 updateFrom = (msg) ->
   switch msg.event
     when "positionChange" then setPosition(msg.carriage, msg.position)
-    when "knitting"
-      $(".graphical .row-index").text(msg.row)
+    when "knitting"       then setKnittingStatus(msg.row)
+
+setKnittingStatus = (row) ->
+  $(".graphical .row-index").text(row)
   
 setPosition = (carriage, position) ->
   [needle,text] = switch position.where
