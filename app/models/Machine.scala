@@ -10,15 +10,18 @@ import connector.PositionUpdate
  */
 class Machine(connectorProps: Props) extends Actor {
   import Machine._
+  import RowTracker._
 
-  val connector = context.actorOf(connectorProps, "connector")
-  context watch connector
   override def supervisorStrategy = OneForOneStrategy() {
     case _ => SupervisorStrategy.Restart
   }
 
+  val connector = context.actorOf(connectorProps, "connector")
+  val rowTracker = context.actorOf(RowTracker.props(self))
+
   var subscribers = Set.empty[ActorRef]
-  def notify(msg: Any) = subscribers.foreach(_ ! msg)
+  def notify(msg: Event) =
+    subscribers.foreach(_ ! msg)
 
   var positions = Map.empty[CarriageType, CarriagePosition]
 
@@ -34,10 +37,15 @@ class Machine(connectorProps: Props) extends Actor {
       sender ! Positions(positions)
 
     //MachineEvents
-    case PositionUpdate(pos, direction, Some(carriage)) =>
+    case pu @ PositionUpdate(pos, direction, Some(carriage)) =>
+      rowTracker ! pu
       notify(PositionChanged(carriage, pos))
       positions += carriage -> pos
     case PositionUpdate(_, _, _) => () //ignore
+
+    //Events from subactors
+    case RowChanged(row) =>
+      notify(KnittingEvent(row))
 
     case Terminated if sender == connector => //Connector crashed
       //TODO handle the crash
@@ -45,6 +53,54 @@ class Machine(connectorProps: Props) extends Actor {
       ()
     case Terminated => // subscriber terminates
       subscribers -= sender
+  }
+}
+
+/** Keeps track of the current row number. */
+private object RowTracker {
+  case class SetRow(row: Int)
+  val ResetRow = SetRow(0)
+  case class RowChanged(row: Int)
+
+  def props(commander: ActorRef) = Props(new RowTracker(commander))
+
+  private class RowTracker(commander: ActorRef) extends Actor {
+    context watch commander
+    var row: Int = -1
+
+    override def receive = general orElse {
+      case PositionUpdate(CarriageOverNeedles(needle), direction, _) =>
+        context.become(verifyDirection(direction, needle), false)
+    }
+
+    def knitting(direction: Direction): Receive = general orElse {
+      case PositionUpdate(CarriageOverNeedles(needle), dir, _) if dir != direction =>
+        context.become(verifyDirection(dir, needle), false)
+    }
+
+    def verifyDirection(candidate: Direction, startAt: Needle): Receive = general orElse {
+      case PositionUpdate(CarriageOverNeedles(needle), `candidate`, _) =>
+        val distance = (needle.index - startAt.index) * (if (candidate == Left) -1 else 1)
+        if (distance < 0 || distance > 30) context.unbecome
+        else if (distance > 5) {
+          context.unbecome // so we don't leak memory
+          nextRow
+          context become knitting(candidate)
+        }
+      case PositionUpdate(CarriageOverNeedles(_), _, _) =>
+        context.unbecome
+    }
+
+    def general: Receive = {
+      case SetRow(r) =>
+        row = r
+        commander ! RowChanged(row)
+    }
+
+    def nextRow = {
+      row = row + 1
+      commander ! RowChanged(row)
+    }
   }
 }
 
@@ -62,4 +118,6 @@ object Machine {
 
   case object GetPositions extends Command
   case class Positions(positions: Map[CarriageType, CarriagePosition]) extends Event
+
+  case class KnittingEvent(row: Int) extends Event
 }
