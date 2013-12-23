@@ -16,6 +16,9 @@ updateFrom = (msg) ->
     when "positionChange"
       setPosition(msg.carriage, msg.position)
       setRow(msg.row)
+    when "needlePatternUpdate"
+      $(".needles").data("needles", msg.patternRow)
+      $(".needles").trigger("updated")
 
 setRow = (row) ->
   $(".row-position .positions-value").text(row)

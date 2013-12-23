@@ -8,7 +8,8 @@ sealed trait Needle {
 }
 
 object Needle {
-  def needleCount = 200
+  val needleCount = 200
+  val all = (0 until needleCount).map(atIndex)
 
   def atIndex(index: Int): Needle = {
     require(index >= 0)

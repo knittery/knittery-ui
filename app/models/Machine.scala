@@ -27,6 +27,8 @@ class Machine(connectorProps: Props) extends Actor {
   var lastCarriage: CarriageType = KCarriage
   var row: Int = -1
 
+  var pattern = NeedlePattern.empty
+
   override def receive = {
     case Subscribe =>
       subscribers += sender
@@ -49,6 +51,10 @@ class Machine(connectorProps: Props) extends Actor {
       row = r
       notify(PositionChanged(lastCarriage, positions.get(lastCarriage).getOrElse(CarriageLeft(0)),
         row))
+      val prow =
+        if (row < 0 || row >= pattern.height) NeedlePattern.empty.apply(0) _
+        else pattern.apply(row) _
+      notify(NeedlePatternUpdate(prow, pattern))
 
     case Terminated if sender == connector => //Connector crashed
       //TODO handle the crash
@@ -70,6 +76,7 @@ object Machine {
 
   case object Subscribed extends Event
   case class PositionChanged(carriage: CarriageType, position: CarriagePosition, row: Int) extends Event
+  case class NeedlePatternUpdate(currentRow: NeedlePatternRow, pattern: NeedlePattern) extends Event
 
   case object GetPositions extends Command
   case class Positions(positions: Map[CarriageType, CarriagePosition], row: Int) extends Event

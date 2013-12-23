@@ -30,4 +30,16 @@ object JsonSerialization {
         "row" -> event.row)
     }
   }
+
+  implicit object NeedlePatternRowWrite extends Writes[NeedlePatternRow] {
+    override def writes(row: NeedlePatternRow) = {
+      val values = Needle.all.map(row).map {
+        case NeedleA => "A"
+        case NeedleB => "B"
+        case NeedleC => "C"
+        case NeedleD => "D"
+      }.mkString
+      JsString(values)
+    }
+  }
 }

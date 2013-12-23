@@ -62,6 +62,10 @@ object Display extends Controller {
       def subscribed(to: ActorRef): Receive = {
         case event: PositionChanged =>
           channel push Json.toJson(event)
+        case NeedlePatternUpdate(row, _) =>
+          channel push Json.toJson(Json.obj(
+            "event" -> "needlePatternUpdate",
+            "patternRow" -> row))
         case Terminated if sender == to =>
           log.debug(s"Resubscribing, $sender has crashed")
           machine ! Subscribe

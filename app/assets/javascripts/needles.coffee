@@ -38,9 +38,7 @@ jQuery.fn.extend({
         ctx.translate(needleWidth, 0)
       ctx.restore()
 
-    root.bind("changeData", (e, key, value) ->
-      if key == "needles" then draw()
-    )
+    root.bind("updated", () -> draw())
     draw()  	
 })
 
