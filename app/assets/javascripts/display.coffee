@@ -3,6 +3,7 @@ $(() ->
     success: (data) ->
       setPosition(carriage, position) for carriage, position of data.positions
       setRow(data.row)
+      setNeedles(data.patternRow)
   })
 
   ws = new WebSocket(jsRoutes.controllers.Display.subscribe().webSocketURL())
@@ -17,11 +18,14 @@ updateFrom = (msg) ->
       setPosition(msg.carriage, msg.position)
       setRow(msg.row)
     when "needlePatternUpdate"
-      $(".needles").data("needles", msg.patternRow)
-      $(".needles").trigger("updated")
+      setNeedles(msg.patternRow)
 
 setRow = (row) ->
   $(".row-position .positions-value").text(row)
+
+setNeedles = (patternRow) ->
+  $(".needles").data("needles", patternRow)
+  $(".needles").trigger("updated")
   
 setPosition = (carriage, position) ->
   [needlePercentage, text] = switch position.where

@@ -22,11 +22,12 @@ class Machine(connectorProps: Props) extends Actor {
   var subscribers = Set.empty[ActorRef]
   def notify(msg: Event) =
     subscribers.foreach(_ ! msg)
-  def notifyPattern = {
+
+  def patternUpdate = {
     val prow =
       if (row < 0 || row >= pattern.height) NeedlePattern.empty.apply(0) _
       else pattern.apply(row) _
-    notify(NeedlePatternUpdate(prow, pattern))
+    NeedlePatternUpdate(prow, pattern)
   }
 
   var positions = Map.empty[CarriageType, CarriagePosition]
@@ -49,7 +50,10 @@ class Machine(connectorProps: Props) extends Actor {
     case LoadPattern(p) =>
       pattern = p
       row = -1
-      notifyPattern
+      notify(patternUpdate)
+
+    case GetNeedlePattern =>
+      sender ! patternUpdate
 
     //MachineEvents
     case pu @ PositionUpdate(pos, direction, Some(carriage)) =>
@@ -62,7 +66,7 @@ class Machine(connectorProps: Props) extends Actor {
       row = r
       notify(PositionChanged(lastCarriage, positions.get(lastCarriage).getOrElse(CarriageLeft(0)),
         row))
-      notifyPattern
+      notify(patternUpdate)
 
     case Terminated if sender == connector => //Connector crashed
       //TODO handle the crash
@@ -91,4 +95,7 @@ object Machine {
 
   case class LoadPattern(pattern: NeedlePattern) extends Command
   case class PatternLoaded(pattern: NeedlePattern) extends Event
+
+  /** Will be answered by a NeedlePatternUpdate. */
+  case object GetNeedlePattern extends Command
 }

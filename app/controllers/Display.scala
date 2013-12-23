@@ -24,16 +24,22 @@ object Display extends Controller {
   }
 
   def positions = Action.async {
-    (machine ? GetPositions).map(_ match {
-      case Positions(data, row) =>
+    val pos = machine ? GetPositions
+    val pat = machine ? GetNeedlePattern
+    for {
+      position <- pos
+      pattern <- pat
+    } yield (position, pattern) match {
+      case (Positions(data, row), NeedlePatternUpdate(patternRow, _)) =>
         val positions = JsObject(data.map {
           case (c, p) => Json.toJson(c).as[String] -> Json.toJson(p)
         }.toSeq)
         Ok(Json.obj(
           "positions" -> positions,
-          "row" -> row))
+          "row" -> row,
+          "patternRow" -> patternRow))
       case _ => InternalServerError("Machine actor did not respond.")
-    })
+    }
   }
 
   def subscribe = WebSocket.using[JsValue] { req =>
