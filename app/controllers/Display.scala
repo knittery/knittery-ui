@@ -24,13 +24,8 @@ object Display extends Controller {
   }
 
   def positions = Action.async {
-    val pos = machine ? GetPositions
-    val kni = machine ? GetKnittingStatus
-    for {
-      p <- pos
-      k <- kni
-    } yield (p, k) match {
-      case (Positions(data), KnittingStatus(row)) =>
+    (machine ? GetPositions).map(_ match {
+      case Positions(data, row) =>
         val positions = JsObject(data.map {
           case (c, p) => Json.toJson(c).as[String] -> Json.toJson(p)
         }.toSeq)
@@ -38,7 +33,7 @@ object Display extends Controller {
           "positions" -> positions,
           "row" -> row))
       case _ => InternalServerError("Machine actor did not respond.")
-    }
+    })
   }
 
   def subscribe = WebSocket.using[JsValue] { req =>
@@ -66,8 +61,6 @@ object Display extends Controller {
       }
       def subscribed(to: ActorRef): Receive = {
         case event: PositionChanged =>
-          channel push Json.toJson(event)
-        case event: KnittingEvent =>
           channel push Json.toJson(event)
         case Terminated if sender == to =>
           log.debug(s"Resubscribing, $sender has crashed")

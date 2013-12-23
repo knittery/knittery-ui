@@ -24,6 +24,7 @@ class Machine(connectorProps: Props) extends Actor {
     subscribers.foreach(_ ! msg)
 
   var positions = Map.empty[CarriageType, CarriagePosition]
+  var lastCarriage: CarriageType = KCarriage
   var row: Int = -1
 
   override def receive = {
@@ -35,20 +36,19 @@ class Machine(connectorProps: Props) extends Actor {
       subscribers -= sender
 
     case GetPositions =>
-      sender ! Positions(positions)
-    case GetKnittingStatus =>
-      sender ! KnittingStatus(row)
+      sender ! Positions(positions, row)
 
     //MachineEvents
     case pu @ PositionUpdate(pos, direction, Some(carriage)) =>
       rowTracker ! pu
-      notify(PositionChanged(carriage, pos))
+      notify(PositionChanged(carriage, pos, row))
       positions += carriage -> pos
 
     //Events from subactors
     case RowChanged(r) =>
       row = r
-      notify(KnittingEvent(row))
+      notify(PositionChanged(lastCarriage, positions.get(lastCarriage).getOrElse(CarriageLeft(0)),
+        row))
 
     case Terminated if sender == connector => //Connector crashed
       //TODO handle the crash
@@ -117,12 +117,8 @@ object Machine {
   case object Unsubscribe extends Command
 
   case object Subscribed extends Event
-  case class PositionChanged(carriage: CarriageType, position: CarriagePosition) extends Event
-  case class KnittingEvent(row: Int) extends Event
+  case class PositionChanged(carriage: CarriageType, position: CarriagePosition, row: Int) extends Event
 
   case object GetPositions extends Command
-  case class Positions(positions: Map[CarriageType, CarriagePosition]) extends Event
-
-  case object GetKnittingStatus extends Command
-  case class KnittingStatus(row: Int) extends Event
+  case class Positions(positions: Map[CarriageType, CarriagePosition], row: Int) extends Event
 }
