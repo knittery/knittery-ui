@@ -18,7 +18,7 @@ updateFrom = (msg) ->
       setRow(msg.row)
 
 setRow = (row) ->
-  $(".graphical .row-index").text(row)
+  $(".row-position .positions-value").text(row)
   
 setPosition = (carriage, position) ->
   [needle,text] = switch position.where
@@ -27,7 +27,7 @@ setPosition = (carriage, position) ->
     when "needles" then [position.index, position.needle]
     else ""
 
-  $("#"+carriage+"-position .carriage-value").text(text)
+  $("#"+carriage+"-position .positions-value").text(text)
 
   $(".graphical .carriage-type").text("Carriage (#{carriage})")
 
