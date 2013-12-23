@@ -1,3 +1,5 @@
+import java.io.File
+import javax.imageio.ImageIO
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import play.api._
@@ -23,6 +25,10 @@ object Global extends GlobalSettings {
 
     val connector = BrotherConnector.props(port, serialManager)
     _machine = Some(system.actorOf(Machine.props(connector), "machine"))
+
+    val img = ImageIO.read(new File("example.png"))
+    val pattern = NeedlePattern.loadCenter(img)
+    machine ! Machine.LoadPattern(pattern)
   }
 
   @volatile private var _machine: Option[ActorRef] = None
