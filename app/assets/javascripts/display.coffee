@@ -46,3 +46,7 @@ setPosition = (carriage, position) ->
     when "needles" then position.needle
     else position.where
   )
+
+$(() ->
+  $(".needles").needles(200)
+)
