@@ -21,10 +21,10 @@ setRow = (row) ->
   $(".row-position .positions-value").text(row)
   
 setPosition = (carriage, position) ->
-  [needle,text] = switch position.where
+  [needlePercentage, text] = switch position.where
     when "left"    then [0, "-#{position.overlap} left"]
-    when "right"   then [199, "-#{position.overlap} right"]
-    when "needles" then [position.index, position.needle]
+    when "right"   then [100, "-#{position.overlap} right"]
+    when "needles" then [(position.index+0.5)*100/200, position.needle]
     else ""
 
   $("#"+carriage+"-position .positions-value").text(text)
@@ -38,8 +38,8 @@ setPosition = (carriage, position) ->
     when "G" then "warning"
   bar.removeClass("progress-bar-#{c}") for c in ["info", "warning", "success"]
   bar.addClass("progress-bar-#{color}")
-  bar.attr("aria-valuenow", needle)
-  bar.width((needle*100/199) + "%")
+  bar.attr("aria-valuenow", needlePercentage)
+  bar.width(needlePercentage + "%")
   bar.find("span.sr-only").text(text)
 
   $(".graphical .needle-pos").text(switch position.where
