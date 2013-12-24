@@ -28,6 +28,9 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
     lineEnumerator &> Enumeratee.mapFlatten(in => Enumerator(parser(in).toSeq: _*))
   }
 
+  private val encoding = "ASCII"
+  private case class PatternLoadAck(pattern: Needle => NeedleAction) extends AckEvent
+
   override def preStart = {
     serialManager ! Open(port, 115200)
     context.setReceiveTimeout(5.seconds)
@@ -50,9 +53,24 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
 
   def open(operator: ActorRef): Receive = {
     case Received(data) =>
-      log.debug(s"Input for serial port ${data.decodeString("ASCII")}")
+      log.debug(s"Input for serial port ${data.decodeString(encoding)}")
       //Feed into the parser that will then send it to the listener
       channel.push(data)
+
+    case LoadPatternRow(pattern) =>
+      val values = Needle.all.map(pattern).map {
+        case NeedleToB => "1"
+        case NeedleToD => "0"
+      }.mkString
+      val data = ByteString.apply("$" + values + "\n", encoding)
+      operator ! Write(data, PatternLoadAck(pattern))
+
+    case PatternLoadAck(pattern) =>
+      context.parent ! PatternLoaded(pattern)
+    //TODO it would be nicer to await the confirmation from the arduino before PatternLoaded is sent
+
+    case CommandFailed(w @ Write(data, PatternLoadAck(_)), e) =>
+      operator ! w // retry
 
     case Closed =>
       throw new RuntimeException("Unexpected close of serial port")

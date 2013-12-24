@@ -4,6 +4,7 @@ import models._
 
 object Connector {
   sealed trait Event
+  sealed trait Command
 
   /** Position of the carriage has changed. */
   case class PositionUpdate(
@@ -17,4 +18,12 @@ object Connector {
       case _ => None
     }
   }
+
+  sealed trait NeedleAction
+  case object NeedleToB extends NeedleAction
+  case object NeedleToD extends NeedleAction
+
+  /** Load a new pattern row. Must be defined for all needles. */
+  case class LoadPatternRow(values: Needle => NeedleAction) extends Command
+  case class PatternLoaded(values: Needle => NeedleAction) extends Event
 }
