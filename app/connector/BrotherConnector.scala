@@ -2,6 +2,7 @@ package connector
 
 import scala.util.Try
 import scala.concurrent.duration._
+import play.Logger
 import play.api.libs.iteratee._
 import play.api.libs.concurrent.Execution.Implicits._
 import akka.actor._
@@ -9,9 +10,9 @@ import akka.util.ByteString
 import rxtxio._
 import Serial._
 import models._
-import play.Logger
+import Connector._
 
-class BrotherConnector(port: String, serialManager: ActorRef, parser: String => Option[MachineEvent]) extends Actor with ActorLogging {
+class BrotherConnector(port: String, serialManager: ActorRef, parser: String => Option[Connector.Event]) extends Actor with ActorLogging {
   private val (rawEnumerator, channel) = Concurrent.broadcast[ByteString]
   def lineEnumerator = {
     def takeLine = for {
@@ -68,7 +69,7 @@ object BrotherConnector {
   }
 
   private val carriageWidth = 24
-  def parser(input: String): Option[MachineEvent] = {
+  def parser(input: String): Option[Connector.Event] = {
     input.split('\t').toList match {
       case needle :: position :: direction :: carriage :: cpos :: _ if needle.startsWith("@") =>
         val value = for {

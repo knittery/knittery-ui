@@ -1,7 +1,7 @@
 package models
 
 import akka.actor._
-import connector.PositionUpdate
+import connector.Connector.PositionUpdate
 
 /**
  * Actor representing the knitting machine.
