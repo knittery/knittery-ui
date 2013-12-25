@@ -29,7 +29,7 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
   }
 
   private val encoding = "ASCII"
-  private case class PatternLoadAck(pattern: Needle => NeedleAction) extends AckEvent
+  private case class PatternLoadAck(pattern: LoadPatternRow) extends AckEvent
 
   override def preStart = {
     serialManager ! Open(port, 115200)
@@ -40,7 +40,8 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
     case Opened(operator, `port`) =>
       log.info(s"Serial port connection to brother opened on $port")
       //Start sending parsed events to the listener
-      eventEnumerator(Iteratee.foreach(event => context.parent ! event))
+      val me = self
+      eventEnumerator(Iteratee.foreach(event => me ! event))
       context.setReceiveTimeout(Duration.Undefined)
       context become open(operator)
 
@@ -51,26 +52,39 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
       throw new RuntimeException("Could not open serial port for brother within timeout")
   }
 
+  private var loadingPattern: Option[LoadPatternRow] = None
+
   def open(operator: ActorRef): Receive = {
     case Received(data) =>
       log.debug(s"Input for serial port ${data.decodeString(encoding)}")
       //Feed into the parser that will then send it to the listener
       channel.push(data)
 
-    case LoadPatternRow(pattern) =>
+    case posup: PositionUpdate =>
+      context.parent ! posup
+
+    case lpr @ LoadPatternRow(pattern) =>
       val values = Needle.all.map(pattern).map {
         case NeedleToB => "1"
         case NeedleToD => "0"
       }.mkString
       val data = ByteString.apply("$\t>\t" + values + "\n", encoding)
-      operator ! Write(data, PatternLoadAck(pattern))
+      operator ! Write(data, PatternLoadAck(lpr))
+      loadingPattern = Some(lpr)
 
     case PatternLoadAck(pattern) =>
-      context.parent ! PatternLoaded(pattern)
-    //TODO it would be nicer to await the confirmation from the arduino before PatternLoaded is sent
+      loadingPattern match {
+        case Some(`pattern`) => loadingPattern = None
+        case _ => ()
+      }
+    case CommandFailed(w @ Write(data, PatternLoadAck(pattern)), e) =>
+      loadingPattern match {
+        case Some(`pattern`) => operator ! w //retry
+        case _ => () //discard
+      }
 
-    case CommandFailed(w @ Write(data, PatternLoadAck(_)), e) =>
-      operator ! w // retry
+    case pl: PatternLoaded =>
+      context.parent ! pl
 
     case Closed =>
       throw new RuntimeException("Unexpected close of serial port")
@@ -120,6 +134,29 @@ object BrotherConnector {
               None
           }.
           get
+
+      case "$" :: "<" :: pattern :: _ =>
+        (for {
+          actions <- Try {
+            Needle.all.zip(pattern.map {
+              case '1' => NeedleToB
+              case '0' => NeedleToD
+            }).toMap
+          }
+        } yield {
+          if (actions.size == Needle.needleCount) Some(PatternLoaded(actions))
+          else {
+            Logger.debug(s"Incomplete needle pattern received (${actions.size} instead of ${Needle.needleCount}) actions).")
+            None
+          }
+        }).getOrElse {
+          Logger.debug(s"Malformed needle pattern: $pattern")
+          None
+        }
+
+      case "*" :: msg =>
+        Logger.info(s"Machine complains: $msg")
+        None
 
       case malformed if malformed.nonEmpty =>
         Logger.debug(s"Malformed input from machine: $malformed")

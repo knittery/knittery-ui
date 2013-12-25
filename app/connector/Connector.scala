@@ -24,6 +24,12 @@ object Connector {
   case object NeedleToD extends NeedleAction
 
   /** Load a new pattern row. Must be defined for all needles. */
-  case class LoadPatternRow(values: Needle => NeedleAction) extends Command
+  case class LoadPatternRow(values: Needle => NeedleAction) extends Command {
+    protected def valuesNormalized = Needle.all.map(values).toVector
+    override def hashCode = valuesNormalized.hashCode
+    override def equals(o: Any) = o match {
+      case other: LoadPatternRow => valuesNormalized == other.valuesNormalized
+    }
+  }
   case class PatternLoaded(values: Needle => NeedleAction) extends Event
 }
