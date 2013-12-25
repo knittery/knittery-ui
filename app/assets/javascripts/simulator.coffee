@@ -41,7 +41,7 @@ $(".automatic a.start").click(() ->
       when autoPos < 0 then ["<", 0]
       when autoPos > 199 then [">", 199]
       else ["_", autoPos]
-    send("@#{needle}\t#{autoPos}\t#{dir}\t#{carriage}\t#{cp}")
+    send("@\t#{needle}\t#{autoPos}\t#{dir}\t#{carriage}\t#{cp}")
 
   autoRunning = true
   autoTimer = window.setInterval(handle, speed)

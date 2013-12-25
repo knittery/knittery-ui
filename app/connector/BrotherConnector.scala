@@ -62,7 +62,7 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
         case NeedleToB => "1"
         case NeedleToD => "0"
       }.mkString
-      val data = ByteString.apply("$" + values + "\n", encoding)
+      val data = ByteString.apply("$\t>\t" + values + "\n", encoding)
       operator ! Write(data, PatternLoadAck(pattern))
 
     case PatternLoadAck(pattern) =>
@@ -89,9 +89,9 @@ object BrotherConnector {
   private val carriageWidth = 24
   def parser(input: String): Option[Connector.Event] = {
     input.split('\t').toList match {
-      case needle :: position :: direction :: carriage :: cpos :: _ if needle.startsWith("@") =>
+      case "@" :: needle :: position :: direction :: carriage :: cpos :: _ =>
         val value = for {
-          index <- Try(needle.drop(1).toInt)
+          index <- Try(needle.toInt)
           index2 <- Try(position.toInt)
           n <- Try(Needle.atIndex(index))
           p <- Try(cpos match {
