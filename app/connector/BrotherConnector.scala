@@ -1,6 +1,7 @@
 package connector
 
 import scala.util.Try
+import scala.collection.immutable.BitSet
 import scala.concurrent.duration._
 import play.Logger
 import play.api.libs.iteratee._
@@ -11,7 +12,6 @@ import rxtxio._
 import Serial._
 import models._
 import Connector._
-import scala.collection.immutable.BitSet
 
 class BrotherConnector(port: String, serialManager: ActorRef, parser: String => Option[Connector.Event]) extends Actor with ActorLogging {
   private val (rawEnumerator, channel) = Concurrent.broadcast[ByteString]
