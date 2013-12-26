@@ -162,7 +162,7 @@ private object NeedleEncoder {
     }
   }
 
-  val stringLength = (Needle.needleCount / 4d).ceil.round.toInt
+  val stringLength = (Needle.needleCount + 3) / 4
 }
 
 /**
