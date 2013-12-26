@@ -203,6 +203,10 @@ object BrotherConnector {
         Logger.debug(s"Problem setting the pattern: $msg")
         Some(PatternRowLoadFailure)
 
+      case "*" :: "Ready" :: _ =>
+        Logger.info("Brother connector is ready.")
+        None
+
       case "*" :: msg =>
         Logger.info(s"Machine complains: $msg")
         None
