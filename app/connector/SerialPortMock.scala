@@ -25,7 +25,7 @@ object SerialPortMock {
   class ManagerActor extends Actor {
     override def receive = {
       case ListPorts => sender ! Ports(Vector("SerialPortMock"))
-      case Open(port, bauds) =>
+      case Open(port, bauds, _, _, _, _) =>
         val commander = sender
         val operator = context.actorOf(Props(new OperatorActor(commander)))
         sender ! Opened(operator, port)

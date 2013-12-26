@@ -51,7 +51,7 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
       context.setReceiveTimeout(Duration.Undefined)
       context become open(operator, patternManager)
 
-    case CommandFailed(Open(port, _), error) =>
+    case CommandFailed(Open(port, _, _, _, _, _), error) =>
       throw new RuntimeException("Could not open serial port for brother", error)
 
     case ReceiveTimeout =>
