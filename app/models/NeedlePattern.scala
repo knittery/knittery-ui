@@ -23,12 +23,25 @@ trait NeedlePattern {
 
   /** Value at the position (pattern starts at 0). */
   def apply(row: Int)(needle: Needle): NeedlePosition
+
+  def orElse(p2: NeedlePattern) = {
+    val p1 = this
+    new NeedlePattern {
+      override def height = p1.height max p2.height
+      override def apply(row: Int)(needle: Needle) = {
+        if (row < 0 || row >= p1.height) p2(row)(needle)
+        else p1(row)(needle)
+      }
+      override def toString = s"$p1 orElse $p2"
+    }
+  }
 }
 
 object NeedlePattern {
   val empty: NeedlePattern = new NeedlePattern {
     def height = 1
     def apply(row: Int)(needle: Needle) = NeedleA
+    override def toString = "empty"
   }
 
   def loadCenter(img: BufferedImage) =
@@ -46,5 +59,6 @@ object NeedlePattern {
         else NeedleD
       }
     }
+    override def toString = s"NeedlePattern($img, $xOffset)"
   }
 }
