@@ -62,6 +62,8 @@ class Machine(connectorProps: Props) extends Actor {
       notify(PositionChanged(lastCarriage, positions.get(lastCarriage).getOrElse(CarriageLeft(0)),
         row))
       patternKnitter ! event
+    case NeedlePatternRowChanged(rp, _, pattern) =>
+      notify(NeedlePatternUpdate(rp, pattern))
 
     case Terminated if sender == patternKnitter => //Pattern knitter crashed
       patternKnitter ! SetNeedlePattern(pattern, row)
