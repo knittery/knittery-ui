@@ -143,7 +143,7 @@ object BrotherConnector {
 
   private val carriageWidth = 24
   def parser(input: String): Option[Connector.Event] = {
-    input.split('\t').toList match {
+    input.filterNot(_ == '\r').split('\t').toList match {
       case "@" :: needle :: position :: direction :: carriage :: cpos :: _ =>
         val value = for {
           index <- Try(needle.toInt)
@@ -199,7 +199,7 @@ object BrotherConnector {
         Logger.info(s"Machine complains: $msg")
         None
 
-      case malformed if malformed.nonEmpty =>
+      case malformed if malformed.filter(_.trim.nonEmpty).nonEmpty =>
         Logger.debug(s"Malformed input from machine: $malformed")
         None
       case empty => None
