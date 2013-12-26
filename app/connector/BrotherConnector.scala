@@ -195,6 +195,10 @@ object BrotherConnector {
           None
         }
 
+      case "$" :: "!" :: msg =>
+        Logger.debug(s"Problem setting the pattern: $msg")
+        None
+
       case "*" :: msg =>
         Logger.info(s"Machine complains: $msg")
         None
