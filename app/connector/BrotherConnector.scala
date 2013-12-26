@@ -11,6 +11,7 @@ import rxtxio._
 import Serial._
 import models._
 import Connector._
+import scala.collection.immutable.BitSet
 
 class BrotherConnector(port: String, serialManager: ActorRef, parser: String => Option[Connector.Event]) extends Actor with ActorLogging {
   private val (rawEnumerator, channel) = Concurrent.broadcast[ByteString]
@@ -128,12 +129,40 @@ private class BrotherPatternManger(operator: ActorRef, encoding: String) extends
 
   def offPattern(needle: Needle) = NeedleToD
   def serializePattern(pattern: Needle => NeedleAction) = {
-    val values = Needle.all.map(pattern).map {
-      case NeedleToB => "1"
-      case NeedleToD => "0"
-    }.mkString
+    val values = NeedleEncoder.asString(pattern)
     ByteString.apply("$\t>\t" + values + "\n", encoding)
   }
+}
+
+private object NeedleEncoder {
+  def toBitSet(pattern: Needle => NeedleAction): BitSet = {
+    Needle.all.map(pattern).zipWithIndex.
+      filter(_._1 == NeedleToB).
+      foldLeft(BitSet.empty)((bs, v) => bs + v._2)
+  }
+
+  def fromBitSet(bs: BitSet) = (needle: Needle) => {
+    if (bs(needle.index)) NeedleToB
+    else NeedleToD
+  }
+
+  def asString(pattern: Needle => NeedleAction) = {
+    val bs = toBitSet(pattern)
+    val s = bs.toBitMask.
+      map(java.lang.Long.reverse).
+      map(_.toHexString).map(s => ("0" * (16 - s.length)) + s).
+      mkString.take(stringLength)
+    s + ("0" * (stringLength - s.length))
+  }
+  def fromString(string: String) = {
+    val int = BigInt(string, 16)
+    (n: Needle) => {
+      if (int.testBit(Needle.needleCount - n.index - 1)) NeedleToB
+      else NeedleToD
+    }
+  }
+
+  val stringLength = (Needle.needleCount / 4d).ceil.round.toInt
 }
 
 /**
@@ -182,16 +211,11 @@ object BrotherConnector {
 
       case "$" :: "<" :: pattern :: _ =>
         (for {
-          actions <- Try {
-            Needle.all.zip(pattern.map {
-              case '1' => NeedleToB
-              case '0' => NeedleToD
-            }).toMap
-          }
+          actions <- Try { NeedleEncoder.fromString(pattern) }
         } yield {
-          if (actions.size == Needle.needleCount) Some(PatternRowLoaded(actions))
+          if (pattern.length == NeedleEncoder.stringLength) Some(PatternRowLoaded(actions))
           else {
-            Logger.debug(s"Incomplete needle pattern received (${actions.size} instead of ${Needle.needleCount}) actions).")
+            Logger.debug(s"Incomplete needle pattern received (${pattern.length} instead of ${NeedleEncoder.stringLength}) actions).")
             Some(PatternRowLoadFailure)
           }
         }).getOrElse {
