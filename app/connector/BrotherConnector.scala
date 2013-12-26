@@ -46,6 +46,8 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
         val props = Props(new BrotherPatternManger(operator, encoding))
         context.actorOf(props)
       }
+      //TODO add an actor that sleeps the pattern manager (turns off all solenoids) after
+      // a sleep timeout
       context.setReceiveTimeout(Duration.Undefined)
       context become open(operator, patternManager)
 
