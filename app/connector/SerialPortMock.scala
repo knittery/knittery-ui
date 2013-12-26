@@ -38,6 +38,8 @@ object SerialPortMock {
       self ! data
       Future.successful((), stopped)
     }
+    val encoding = "ASCII"
+
     override def preStart = {
       enumeratorToPort(iteratee)
       context watch commander
@@ -54,6 +56,12 @@ object SerialPortMock {
       case Write(data, ack) =>
         channelFromPort.push(data)
         if (ack != NoAck) sender ! ack
+        //Confirm stuff
+        data.decodeString(encoding).split('\t').toList match {
+          case "$" :: ">" :: pattern :: rest =>
+            commander ! Received(ByteString(s"$$\t<\t$pattern", encoding))
+          case _ => ()
+        }
       case data: ByteString =>
         commander ! Received(data)
     }
