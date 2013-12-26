@@ -31,5 +31,5 @@ object Connector {
       case other: LoadPatternRow => valuesNormalized == other.valuesNormalized
     }
   }
-  case class PatternLoaded(values: Needle => NeedleAction) extends Event
+  case class PatternRowLoaded(values: Needle => NeedleAction) extends Event
 }

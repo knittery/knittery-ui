@@ -29,7 +29,6 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
   }
 
   private val encoding = "ASCII"
-  private case class PatternLoadAck(pattern: LoadPatternRow) extends AckEvent
 
   override def preStart = {
     serialManager ! Open(port, 115200)
@@ -41,9 +40,14 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
       log.info(s"Serial port connection to brother opened on $port")
       //Start sending parsed events to the listener
       val me = self
-      eventEnumerator(Iteratee.foreach(event => me ! event))
+      eventEnumerator(Iteratee.foreach(me.tell(_, me)))
+      //Start the pattern manager
+      val patternManager = {
+        val props = Props(new BrotherPatternManger(operator, encoding))
+        context.actorOf(props)
+      }
       context.setReceiveTimeout(Duration.Undefined)
-      context become open(operator)
+      context become open(operator, patternManager)
 
     case CommandFailed(Open(port, _), error) =>
       throw new RuntimeException("Could not open serial port for brother", error)
@@ -52,9 +56,7 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
       throw new RuntimeException("Could not open serial port for brother within timeout")
   }
 
-  private var loadingPattern: Option[LoadPatternRow] = None
-
-  def open(operator: ActorRef): Receive = {
+  def open(operator: ActorRef, patternManager: ActorRef): Receive = {
     case Received(data) =>
       log.debug(s"Input for serial port ${data.decodeString(encoding)}")
       //Feed into the parser that will then send it to the listener
@@ -63,31 +65,68 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
     case posup: PositionUpdate =>
       context.parent ! posup
 
-    case lpr @ LoadPatternRow(pattern) =>
-      val values = Needle.all.map(pattern).map {
-        case NeedleToB => "1"
-        case NeedleToD => "0"
-      }.mkString
-      val data = ByteString.apply("$\t>\t" + values + "\n", encoding)
-      operator ! Write(data, PatternLoadAck(lpr))
-      loadingPattern = Some(lpr)
+    case load: LoadPatternRow =>
+      patternManager ! load
 
-    case PatternLoadAck(pattern) =>
-      loadingPattern match {
-        case Some(`pattern`) => loadingPattern = None
-        case _ => ()
-      }
-    case CommandFailed(w @ Write(data, PatternLoadAck(pattern)), e) =>
-      loadingPattern match {
-        case Some(`pattern`) => operator ! w //retry
-        case _ => () //discard
-      }
-
-    case pl: PatternLoaded =>
-      context.parent ! pl
+    case loaded: PatternRowLoaded if sender == self => //from parser
+      patternManager ! loaded
+    case loaded: PatternRowLoaded => //confirmation by pattern manager
+      context.parent ! loaded
 
     case Closed =>
       throw new RuntimeException("Unexpected close of serial port")
+  }
+}
+
+private class BrotherPatternManger(operator: ActorRef, encoding: String) extends Actor with ActorLogging {
+  override def preStart = {
+    // Turn solenoids off
+    loadPattern(offPattern, self)
+  }
+  override def postStop = {
+    // Turn solenoids off
+    operator ! Write(serializePattern(offPattern))
+  }
+
+  override def receive = {
+    case LoadPatternRow(pattern) => loadPattern(pattern, sender)
+  }
+
+  def loadPattern(pattern: Needle => NeedleAction, by: ActorRef) = {
+    val data = serializePattern(pattern)
+    val ack = new AckEvent {}
+    operator ! Write(data, ack)
+    context.setReceiveTimeout(50.millis)
+    context become waitPatternSent(ack, pattern, by)
+  }
+  def waitPatternSent(ack: AckEvent, pattern: Needle => NeedleAction, by: ActorRef): Receive = receive orElse {
+    case `ack` =>
+      context.setReceiveTimeout(200.millis)
+      context become waitPatternConfirmation(pattern, by)
+    case CommandFailed(w @ Write(_, `ack`), e) =>
+      log.debug(s"Could not set pattern, write command failed: $e. Retrying.")
+      operator ! w //retry
+    case ReceiveTimeout =>
+      log.debug("Could not set pattern, write command failed: Timeout. Retrying.")
+      operator ! Write(serializePattern(pattern), ack) //retry
+  }
+  def waitPatternConfirmation(pattern: Needle => NeedleAction, by: ActorRef): Receive = receive orElse {
+    case PatternRowLoaded(p) if Needle.all.forall(n => p(n) == pattern(n)) =>
+      by ! PatternRowLoaded(pattern)
+      log.debug("Pattern loaded")
+      context become receive
+    case ReceiveTimeout =>
+      log.debug("Did not receive confirmation for pattern loading within the timeout. Retrying.")
+      loadPattern(pattern, by) //retry
+  }
+
+  def offPattern(needle: Needle) = NeedleToD
+  def serializePattern(pattern: Needle => NeedleAction) = {
+    val values = Needle.all.map(pattern).map {
+      case NeedleToB => "1"
+      case NeedleToD => "0"
+    }.mkString
+    ByteString.apply("$\t>\t" + values + "\n", encoding)
   }
 }
 
@@ -144,7 +183,7 @@ object BrotherConnector {
             }).toMap
           }
         } yield {
-          if (actions.size == Needle.needleCount) Some(PatternLoaded(actions))
+          if (actions.size == Needle.needleCount) Some(PatternRowLoaded(actions))
           else {
             Logger.debug(s"Incomplete needle pattern received (${actions.size} instead of ${Needle.needleCount}) actions).")
             None
