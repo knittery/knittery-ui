@@ -32,7 +32,7 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
   private val encoding = "ASCII"
 
   override def preStart = {
-    serialManager ! Open(port, 115200)
+    serialManager ! Open(port, 19200)
     context.setReceiveTimeout(5.seconds)
   }
 
