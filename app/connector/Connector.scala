@@ -32,4 +32,5 @@ object Connector {
     }
   }
   case class PatternRowLoaded(values: Needle => NeedleAction) extends Event
+  case object PatternRowLoadFailure extends Event
 }

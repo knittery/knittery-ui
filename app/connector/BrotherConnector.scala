@@ -38,14 +38,17 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
   override def receive = {
     case Opened(operator, `port`) =>
       log.info(s"Serial port connection to brother opened on $port")
-      //Start sending parsed events to the listener
       val me = self
-      eventEnumerator(Iteratee.foreach(me.tell(_, me)))
       //Start the pattern manager
       val patternManager = {
         val props = Props(new BrotherPatternManger(operator, encoding))
         context.actorOf(props)
       }
+      //Start sending parsed events to the listener
+      eventEnumerator(Iteratee.foreach { event =>
+        me.tell(event, me)
+        patternManager.tell(event, me)
+      })
       //TODO add an actor that sleeps the pattern manager (turns off all solenoids) after
       // a sleep timeout
       context.setReceiveTimeout(Duration.Undefined)
@@ -70,9 +73,7 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
     case load: LoadPatternRow =>
       patternManager ! load
 
-    case loaded: PatternRowLoaded if sender == self => //from parser
-      patternManager ! loaded
-    case loaded: PatternRowLoaded => //confirmation by pattern manager
+    case loaded: PatternRowLoaded if sender == patternManager => //confirmation by pattern manager
       context.parent ! loaded
 
     case Closed =>
@@ -117,6 +118,9 @@ private class BrotherPatternManger(operator: ActorRef, encoding: String) extends
       by ! PatternRowLoaded(pattern)
       log.debug("Pattern loaded")
       context become receive
+    case PatternRowLoadFailure =>
+      log.debug("Got negative for pattern loading within the timeout. Retry now.")
+      loadPattern(pattern, by) //retry
     case ReceiveTimeout =>
       log.debug("Did not receive confirmation for pattern loading within the timeout. Retrying.")
       loadPattern(pattern, by) //retry
@@ -188,16 +192,16 @@ object BrotherConnector {
           if (actions.size == Needle.needleCount) Some(PatternRowLoaded(actions))
           else {
             Logger.debug(s"Incomplete needle pattern received (${actions.size} instead of ${Needle.needleCount}) actions).")
-            None
+            Some(PatternRowLoadFailure)
           }
         }).getOrElse {
           Logger.debug(s"Malformed needle pattern: $pattern")
-          None
+          Some(PatternRowLoadFailure)
         }
 
       case "$" :: "!" :: msg =>
         Logger.debug(s"Problem setting the pattern: $msg")
-        None
+        Some(PatternRowLoadFailure)
 
       case "*" :: msg =>
         Logger.info(s"Machine complains: $msg")
