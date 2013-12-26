@@ -59,7 +59,7 @@ object SerialPortMock {
         //Confirm stuff
         data.decodeString(encoding).split('\t').toList match {
           case "$" :: ">" :: pattern :: rest =>
-            commander ! Received(ByteString(s"$$\t<\t$pattern", encoding))
+            channel push ByteString(s"$$\t<\t$pattern", encoding)
           case _ => ()
         }
       case data: ByteString =>
