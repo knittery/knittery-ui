@@ -15,4 +15,8 @@ libraryDependencies ++= Seq(
 resolvers +=
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
+initialize ~= { _ =>
+  System.setProperty("java.awt.headless", "true")
+}
+
 play.Project.playScalaSettings
