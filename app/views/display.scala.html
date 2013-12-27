@@ -1,47 +1,6 @@
 @()
 
-@main("Carriage Display") {
-
-	<div class="panel panel-default positions">
-	  <div class="panel-heading">
-	    <h3 class="panel-title">Positions</h3>
-	  </div>
-	  <div class="panel-body">
-		  <div id="K-position" class="carriage-position">
-		    <div class="positions-name">
-		      K
-		    </div>
-		    <div class="positions-value">
-		      unknown
-		    </div>
-		  </div>
-		  <div id="L-position" class="carriage-position">
-		    <div class="positions-name">
-		      L
-		    </div>
-		    <div class="positions-value">
-		      unknown
-		    </div>
-		  </div>
-		  <div id="G-position" class="carriage-position">
-		    <div class="positions-name">
-		      G
-		    </div>
-		    <div class="positions-value">
-		      unknown
-		    </div>
-		  </div>
-      <div id="row-position" class="row-position">
-        <div class="positions-name">
-          Row
-        </div>
-        <div class="positions-value">
-          0
-        </div>
-      </div>
-	  </div>
-	</div>
-
+@main("Carriage Display", "wide-container") {
   <div class="panel panel-default graphical">
     <div class="panel-heading">
       <h3 class="panel-title carriage-type">Carriage</h3>
@@ -61,4 +20,44 @@
 			</div>
 	  </div>
 	</div>
+
+  <div class="panel panel-default positions">
+    <div class="panel-heading">
+      <h3 class="panel-title">Positions</h3>
+    </div>
+    <div class="panel-body">
+      <div id="K-position" class="carriage-position">
+        <div class="positions-name">
+          K
+        </div>
+        <div class="positions-value">
+          unknown
+        </div>
+      </div>
+      <div id="L-position" class="carriage-position">
+        <div class="positions-name">
+          L
+        </div>
+        <div class="positions-value">
+          unknown
+        </div>
+      </div>
+      <div id="G-position" class="carriage-position">
+        <div class="positions-name">
+          G
+        </div>
+        <div class="positions-value">
+          unknown
+        </div>
+      </div>
+      <div id="row-position" class="row-position">
+        <div class="positions-name">
+          Row
+        </div>
+        <div class="positions-value">
+          0
+        </div>
+      </div>
+    </div>
+  </div>
 }(List("display", "needles"))
