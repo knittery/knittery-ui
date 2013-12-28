@@ -27,7 +27,7 @@ case class KnittedRow(stiches: Seq[Stich]) {
 sealed trait Stich {
   def patternString: String
 }
-case object NoStrich extends Stich {
+case object NoStich extends Stich {
   override def patternString = " "
 }
 case class PlainStich(yarn: Yarn) extends Stich {
