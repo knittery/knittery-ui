@@ -31,7 +31,7 @@ case class KnitPatternRow(carriage: CarriageType, direction: Direction, patternT
       case (CarriageRight(_), Right) => invalidState("Cannot move carriage from right to right")
       case (_, _) => () // ok
     }
-    val needlesBeforePattern = c.modifyNeedles(direction)(state.needles).get
+    val needlesBeforePattern = c.modifyNeedles(direction)(state.needles.pattern).get
     Needle.all.foreach { n =>
       (needlesBeforePattern(n), patternToSet(n)) match {
         case (NeedleB, NeedleD) => () //pattern knitting does that
