@@ -36,8 +36,8 @@ object JsonSerialization {
       val values = Needle.all.map(row).map {
         case NeedleA => "A"
         case NeedleB => "B"
-        case NeedleC => "C"
         case NeedleD => "D"
+        case NeedleE => "E"
       }.mkString
       JsString(values)
     }

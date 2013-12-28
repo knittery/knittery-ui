@@ -9,10 +9,10 @@ sealed trait NeedlePosition
 case object NeedleA extends NeedlePosition
 /** Needle in B position. */
 case object NeedleB extends NeedlePosition
-/** Needle in C position. */
-case object NeedleC extends NeedlePosition
 /** Needle in D position. */
 case object NeedleD extends NeedlePosition
+/** Needle in E position. */
+case object NeedleE extends NeedlePosition
 
 /**
  * Positions of needles.
