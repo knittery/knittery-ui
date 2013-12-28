@@ -24,13 +24,14 @@ case class KnitPatternRow(carriage: CarriageType, direction: Direction, patternT
 
   override def apply(state: KnittingState) = Try {
     val (settings, pos) = state.carriages.get(carriage).getOrElse(invalidState(s"Undefined state for $carriage"))
+    val c = KnittingCarriage(carriage, settings, yarnA, yarnB)
     //Preconditions
     (pos, direction) match {
       case (CarriageLeft(_), Left) => invalidState("Cannot move carriage from left to left")
       case (CarriageRight(_), Right) => invalidState("Cannot move carriage from right to right")
       case (_, _) => () // ok
     }
-    val needlesBeforePattern = settings.applyOnNeedles(direction)(state.needles)
+    val needlesBeforePattern = c.modifyNeedles(direction)(state.needles).get
     Needle.all.foreach { n =>
       (needlesBeforePattern(n), patternToSet(n)) match {
         case (NeedleB, NeedleD) => () //pattern knitting does that
