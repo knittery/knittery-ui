@@ -1,5 +1,6 @@
 package controllers
 
+import scala.concurrent.Future
 import play.api.Play._
 import play.api.mvc._
 import play.api.libs.iteratee._
@@ -9,8 +10,7 @@ import play.api.libs.json._
 import akka.actor._
 import akka.util.ByteString
 import rxtxio.Serial._
-import scala.concurrent.Future
-import connector.SerialPortMock
+import models.connector.SerialPortMock
 
 /** Simulates the serial port the knitting machine is normally attached to. */
 object SerialSimulator extends Controller {

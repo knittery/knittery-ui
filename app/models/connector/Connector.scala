@@ -1,4 +1,4 @@
-package connector
+package models.connector
 
 import models._
 

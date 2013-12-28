@@ -1,4 +1,4 @@
-package connector
+package models.connector
 
 import scala.util.Try
 import scala.collection.immutable.BitSet
@@ -9,7 +9,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import akka.actor._
 import akka.util.ByteString
 import rxtxio._
-import Serial._
+import rxtxio.Serial._
 import models._
 import Connector._
 

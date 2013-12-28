@@ -8,8 +8,8 @@ import akka.actor._
 import akka.util.Timeout
 import akka.io.IO
 import rxtxio.Serial
-import connector._
 import models._
+import models.connector.{ BrotherConnector, SerialPortMock }
 
 object Global extends GlobalSettings {
 

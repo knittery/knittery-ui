@@ -1,4 +1,4 @@
-package connector
+package models.connector
 
 import org.specs2.mutable.Specification
 import org.specs2.matcher._

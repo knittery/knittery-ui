@@ -1,12 +1,11 @@
-package connector
+package models.connector
 
 import scala.concurrent.Future
 import akka.actor._
 import akka.util.ByteString
 import play.api.libs.iteratee._
 import play.api.libs.concurrent.Execution.Implicits._
-import rxtxio.Serial
-import Serial._
+import rxtxio.Serial._
 
 /** Mock for a serial port. Uses the rxtxio.Serial interface. */
 object SerialPortMock {
