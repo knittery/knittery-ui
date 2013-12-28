@@ -1,7 +1,8 @@
-package models
+package models.machine
 
 import akka.actor._
-import connector.Connector.PositionUpdate
+import models._
+import models.connector.Connector.PositionUpdate
 
 /** Keeps track of the current row number. */
 private object RowTracker {

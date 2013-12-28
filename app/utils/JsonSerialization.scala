@@ -2,7 +2,7 @@ package utils
 
 import play.api.libs.json._
 import models._
-import Machine._
+import models.machine.Machine._
 
 object JsonSerialization {
 

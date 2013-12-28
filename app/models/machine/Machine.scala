@@ -1,8 +1,11 @@
-package models
+package models.machine
 
 import akka.actor._
-import connector._
-import connector.Connector.PositionUpdate
+import models._
+import models.connector.Connector._
+import NeedlePatternKnitter.NeedlePatternRowChanged
+import NeedlePatternKnitter.SetNeedlePattern
+import RowTracker.RowChanged
 
 /**
  * Actor representing the knitting machine.

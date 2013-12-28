@@ -10,6 +10,7 @@ import akka.io.IO
 import rxtxio.Serial
 import models._
 import models.connector.{ BrotherConnector, SerialPortMock }
+import models.machine.Machine
 
 object Global extends GlobalSettings {
 

@@ -1,7 +1,9 @@
-package models
+package models.machine
 
 import akka.actor._
-import connector.Connector._
+import models._
+import models.connector.Connector._
+import RowTracker.RowChanged
 
 /**
  * Takes care of the current position in the pattern and updating the connector with the
