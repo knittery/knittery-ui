@@ -1,6 +1,6 @@
 package models
 
-sealed trait Needle {
+sealed trait Needle extends Ordered[Needle] {
   /** Numbered from left to right starting with 0 (leftmost needle is 0). */
   def index: Int
   /** Number as shown on the machine (-100 to 100, 0 does not exist, negative are yellow). */
@@ -23,6 +23,7 @@ object Needle {
       if (index < 100) -100 + index
       else index - 99
     }
+    override def compare(other: Needle) = index - other.index
     override def toString = s"Needle($index)"
   }
 
