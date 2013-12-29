@@ -4,21 +4,27 @@ import java.awt.image.BufferedImage
 import java.awt.Color
 
 /** Knitting position of a needle. */
-sealed trait NeedlePosition
+sealed trait NeedlePosition {
+  def isWorking: Boolean
+}
 /** Needle in A position. */
 case object NeedleA extends NeedlePosition {
+  override def isWorking = false
   override def toString = "A"
 }
 /** Needle in B position. */
 case object NeedleB extends NeedlePosition {
+  override def isWorking = true
   override def toString = "B"
 }
 /** Needle in D position. */
 case object NeedleD extends NeedlePosition {
+  override def isWorking = true
   override def toString = "D"
 }
 /** Needle in E position. */
 case object NeedleE extends NeedlePosition {
+  override def isWorking = true
   override def toString = "E"
 }
 

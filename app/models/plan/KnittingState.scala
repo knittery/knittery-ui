@@ -1,5 +1,7 @@
 package models.plan
 
+import scalaz._
+import Scalaz._
 import models._
 
 case class KnittingState(needles: NeedleStateRow,
@@ -7,6 +9,15 @@ case class KnittingState(needles: NeedleStateRow,
   carriageSettings: Map[CarriageType, CarriageSettings],
   carriagePosition: Map[CarriageType, CarriagePosition],
   output: Knitted) {
+
+  def workingNeedles = Needle.all.filter(needles(_).position.isWorking)
+  def nextDirection(carriage: CarriageType) = carriagePosition.get(carriage) match {
+    case Some(pos) =>
+      val overlapped = carriage.over(pos)
+      if (overlapped.nonEmpty) s"carriage still over working needeles ${overlapped.mkString(",")}".fail
+      else Right.success
+    case None => Right.success
+  }
 
   def modifyCarriageSettings(settings: CarriageSettings) =
     copy(carriageSettings = carriageSettings + (settings.carriage -> settings))
