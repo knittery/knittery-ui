@@ -16,7 +16,7 @@ case object KKnobCR extends KKnob
 case object KKnobKC2 extends KKnob
 
 // TODO complete
-case class KCarriageSettings(holdingCamLever: HoldingCamLever, knob: KKnob) extends CarriageSettings {
+case class KCarriageSettings(holdingCamLever: HoldingCamLever, knob: KKnob, mc: Boolean) extends CarriageSettings {
   val carriage = KCarriage
 }
 
