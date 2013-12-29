@@ -26,8 +26,6 @@ object KnittingCarriage {
     pattern: Option[NeedleActionRow])
     extends KnittingCarriage {
 
-    if (!settings.mc)
-      require(yarnB.isEmpty, "Cannot have two yarns if MC is disabled")
     if (settings.knob == KC2) require(pattern.isDefined, "Need pattern for KC knitting")
     else require(pattern.isEmpty, s"No pattern supported for ${settings.knob}")
 
