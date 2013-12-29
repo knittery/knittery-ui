@@ -66,6 +66,22 @@ case class ThreadYarn(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends Knitting
   }
 }
 
+/**
+ *  Performs a closed cast on for the needles. The needles are then moved to D position.
+ *  All other needles are not touched.
+ */
+case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends KnittingStep {
+  def needles = Needle.interval(from, until)
+  override def apply(state: KnittingState) = {
+    state.moveNeedles { n =>
+      val before = state.needles(n)
+      if (needles.contains(n)) {
+        NeedleState(NeedleD, yarn :: before.yarn)
+      } else before
+    }.success[String]
+  }
+}
+
 trait ManualAction extends KnittingStep {
   def name: String
 
