@@ -37,7 +37,7 @@ class KnittingCarriageSpec extends Specification {
     }
   }
 
-  "KKnittigCarriage on NL" should {
+  "K-KnittigCarriage on NL" should {
     "knit plain red stiches with one yarn and needles to B" in new K {
       val (needles, knitted) = carriageNL(Right)(allBWithRed).check
       knitted.stiches must_== (1 to Needle.count).map(_ => PlainStich(red))
@@ -65,7 +65,7 @@ class KnittingCarriageSpec extends Specification {
     }
   }
 
-  "KKnittigCarriage on KC2 with MC" should {
+  "K-KnittigCarriage on KC2 with MC" should {
     "knit plain red stiches with one yarn and needles to B" in new K {
       val (needles, knitted) = carriageKC2MC(evenOddPattern)(Right)(allBWithRed).check
       knitted.stiches must_== (0 until Needle.count).map(_ => PlainStich(red))
