@@ -52,7 +52,7 @@ class BrotherConnectorSpec extends Specification {
       Needle.all.forall(n => p1(n) == p2(n))
 
     "serialize & parse all one needle patterns" in {
-      (0 until Needle.needleCount).map { x =>
+      (0 until Needle.count).map { x =>
         def pattern(n: Needle) = if (n.index == x) NeedleToB else NeedleToD
         val string = NeedleEncoder.asString(pattern)
         string.length must_!= 0
@@ -61,7 +61,7 @@ class BrotherConnectorSpec extends Specification {
       }
     }
     "serialize & parse all inverse-one needle patterns" in {
-      (0 until Needle.needleCount).map { x =>
+      (0 until Needle.count).map { x =>
         def pattern(n: Needle) = if (n.index == x) NeedleToD else NeedleToB
         val string = NeedleEncoder.asString(pattern)
         string.length must_!= 0

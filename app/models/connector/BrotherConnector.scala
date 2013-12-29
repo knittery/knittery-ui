@@ -157,12 +157,12 @@ private object NeedleEncoder {
   def fromString(string: String) = {
     val int = BigInt(string, 16)
     (n: Needle) => {
-      if (int.testBit(Needle.needleCount - n.index - 1)) NeedleToB
+      if (int.testBit(Needle.count - n.index - 1)) NeedleToB
       else NeedleToD
     }
   }
 
-  val stringLength = (Needle.needleCount + 3) / 4
+  val stringLength = (Needle.count + 3) / 4
 }
 
 /**

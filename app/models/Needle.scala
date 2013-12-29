@@ -8,17 +8,18 @@ sealed trait Needle {
 }
 
 object Needle {
-  val needleCount = 200
-  val all = (0 until needleCount).map(atIndex)
+  val count = 200
+  val all = (0 until count).map(atIndex)
+  val middle = atIndex(count / 2)
 
   def atIndex(index: Int): Needle = {
     require(index >= 0)
-    require(index < needleCount)
+    require(index < count)
     NeedleImpl(index)
   }
 
   private case class NeedleImpl(index: Int) extends Needle {
-    override def number = {
+    override val number = {
       if (index < 100) -100 + index
       else index - 99
     }
