@@ -7,7 +7,11 @@ import models._
 case class KnittingPlan(steps: Seq[KnittingStep]) {
   def +(other: KnittingPlan) = KnittingPlan(steps ++ other.steps)
 
-  def apply(state: KnittingState) = {
+  /** Run the knitting plan to produce the final knitting state. */
+  def run: Validation[KnittingPlanError, KnittingState] =
+    run(KnittingState.initial)
+
+  def run(state: KnittingState) = {
     steps.zipWithIndex.
       foldLeft(state.success[KnittingPlanError]) {
         case (state, (step, index)) => state.flatMap { st =>

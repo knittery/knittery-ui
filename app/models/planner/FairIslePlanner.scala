@@ -16,7 +16,7 @@ object FairIslePlanner {
    *  Does not change the working position of the needles, at least one needle (or better all for the
    *  pattern) must be in working position.
    */
-  def singleBed(pattern: Matrix[Yarn], startNeedle: Option[Needle] = None): Planner = (initial: KnittingState) => {
+  def singleBed(pattern: Matrix[Yarn], startNeedle: Option[Needle] = None) = Planner { initial =>
     pattern.validate
     pattern.rows.map(_.toSet).zipWithIndex.foreach {
       case (yarns, index) =>

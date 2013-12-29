@@ -8,7 +8,7 @@ import PlannerUtils._
 
 object CastOnPlanner {
 
-  def closed(from: Needle, until: Needle, withYarn: Yarn): Planner = { initial =>
+  def closed(from: Needle, until: Needle, withYarn: Yarn) = Planner { initial =>
     StepAcc(ClosedCastOn(from, until, withYarn), initial).toPlan
   }
 
