@@ -1,4 +1,5 @@
 package models.plan
 
-trait Yarn {
-}
+import java.awt.Color
+
+case class Yarn(name: String, color: Color)
