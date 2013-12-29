@@ -20,4 +20,6 @@ initialize ~= { _ =>
   System.setProperty("java.awt.headless", "true")
 }
 
+javaOptions in Test := Seq("-Djava.awt.headless=true")
+
 play.Project.playScalaSettings
