@@ -19,10 +19,6 @@ object Connector {
     }
   }
 
-  sealed trait NeedleAction
-  case object NeedleToB extends NeedleAction
-  case object NeedleToD extends NeedleAction
-
   /** Load a new pattern row. Must be defined for all needles. */
   case class LoadPatternRow(values: Needle => NeedleAction) extends Command {
     protected def valuesNormalized = Needle.all.map(values).toVector
