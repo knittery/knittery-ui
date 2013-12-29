@@ -15,9 +15,6 @@ sealed trait KnitARow extends KnittingStep {
   def direction: Direction
   protected def needleActionRow: Option[NeedleActionRow]
 
-  def yarnA: Option[Yarn]
-  def yarnB: Option[Yarn]
-
   override def apply(state: KnittingState) = {
     for {
       kc <- knittingCarriage(state, needleActionRow)
@@ -33,7 +30,7 @@ sealed trait KnitARow extends KnittingStep {
     for {
       pos <- state.carriagePosition.get(carriage).toSuccess(s"Undefined position for $carriage")
       settings <- state.carriageSettings.get(carriage).toSuccess(s"Undefined settings for $carriage")
-      c = KnittingCarriage(carriage, settings, yarnA, yarnB, pattern)
+      c = KnittingCarriage(carriage, settings, state.yarnA, state.yarnB, pattern)
       nextDir <- state.nextDirection(carriage)
       _ <- {
         if (nextDir != direction) s"Cannot move carriage from $direction to $direction".fail[KnittingCarriage]
@@ -48,8 +45,7 @@ case class KnitRow(carriage: CarriageType, direction: Direction, yarnA: Option[Y
   def yarnB = None
 }
 
-case class KnitPatternRow(carriage: CarriageType, direction: Direction, pattern: NeedleActionRow,
-  yarnA: Option[Yarn], yarnB: Option[Yarn] = None) extends KnitARow {
+case class KnitPatternRow(carriage: CarriageType, direction: Direction, pattern: NeedleActionRow) extends KnitARow {
   override protected def needleActionRow = Some(pattern)
 }
 
