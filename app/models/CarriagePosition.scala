@@ -18,7 +18,13 @@ case class CarriageRight(
   extends CarriagePosition
 
 /** Direction of movement */
-sealed trait Direction
-case object Left extends Direction
-case object Right extends Direction
+sealed trait Direction {
+  def reverse: Direction
+}
+case object Left extends Direction {
+  override def reverse = Right
+}
+case object Right extends Direction {
+  override def reverse = Left
+}
 
