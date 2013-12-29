@@ -10,13 +10,14 @@ case object HoldingCamH extends HoldingCamLever
 //case object HoldingCamI extends HoldingCamLever  //TODO implement 
 
 sealed trait KKnob
-case object KKnobNL extends KKnob
-case object KKnobCR extends KKnob
+case object NL extends KKnob
+case object CR extends KKnob
 //do not use KCI, always use KCII, since we control the pattern. Therefore we don't implement it.
-case object KKnobKC2 extends KKnob
+case object KC2 extends KKnob
 
 // TODO complete
-case class KCarriageSettings(holdingCamLever: HoldingCamLever, knob: KKnob, mc: Boolean) extends CarriageSettings {
+case class KCarriageSettings(knob: KKnob, mc: Boolean = false,
+  holdingCamLever: HoldingCamLever = HoldingCamN) extends CarriageSettings {
   val carriage = KCarriage
 }
 

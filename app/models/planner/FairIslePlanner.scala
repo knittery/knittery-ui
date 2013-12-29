@@ -38,7 +38,7 @@ object FairIslePlanner {
 
     val step0 = ChangeKCarriageSettings(KCarriageSettings(
       holdingCamLever = HoldingCamN,
-      knob = KKnobKC2,
+      knob = KC2,
       mc = true))
 
     pattern.rows.foldStep(StepAcc(step0, initial)) { (state, row) =>

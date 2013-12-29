@@ -28,11 +28,11 @@ object KnittingCarriage {
 
     if (!settings.mc)
       require(yarnB.isEmpty, "Cannot have two yarns if MC is disabled")
-    if (settings.knob == KKnobKC2) require(pattern.isDefined, "Need pattern for KC knitting")
+    if (settings.knob == KC2) require(pattern.isDefined, "Need pattern for KC knitting")
     else require(pattern.isEmpty, s"No pattern supported for ${settings.knob}")
 
     override def apply(direction: Direction)(needles: NeedleStateRow) = Try {
-      if (settings.knob == KKnobCR) throw new IllegalStateException("Not knitting in CR setting")
+      if (settings.knob == CR) throw new IllegalStateException("Not knitting in CR setting")
 
       //Basic movement of needles and putting yarn on needles
       val baseState = (needle: Needle) => {
