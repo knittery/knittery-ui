@@ -30,7 +30,8 @@ sealed trait KnitARow extends KnittingStep {
     }
   }
   protected def knittingCarriage(state: KnittingState, pattern: Option[NeedleActionRow]) = Try {
-    val (settings, pos) = state.carriages.get(carriage).getOrElse(invalidState(s"Undefined state for $carriage"))
+    val pos = state.carriagePosition.get(carriage).getOrElse(invalidState(s"Undefined position for $carriage"))
+    val settings = state.carriageSettings.get(carriage).getOrElse(invalidState(s"Undefined settings for $carriage"))
     val c = KnittingCarriage(carriage, settings, yarnA, yarnB, pattern)
     //check preconditions
     (pos, direction) match {

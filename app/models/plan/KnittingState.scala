@@ -4,18 +4,17 @@ import models._
 
 case class KnittingState(needles: NeedleStateRow,
   yarnA: Option[Yarn], yarnB: Option[Yarn],
-  carriages: Map[CarriageType, (CarriageSettings, CarriagePosition)],
+  carriageSettings: Map[CarriageType, CarriageSettings],
+  carriagePosition: Map[CarriageType, CarriagePosition],
   output: Knitted) {
 
-  def moveCarriage(carriage: CarriageType, pos: CarriagePosition) = {
-    val (settings, _) = carriages.get(carriage).getOrElse(throw new IllegalStateException(s"undefined carriage: $carriage"))
-    copy(carriages = carriages + (carriage -> (settings, pos)))
-  }
+  def moveCarriage(carriage: CarriageType, pos: CarriagePosition) =
+    copy(carriagePosition = carriagePosition + (carriage -> pos))
   def moveNeedles(newNeedles: NeedleStateRow) = copy(needles = newNeedles)
   def knit(row: KnittedRow) = copy(output = output + row)
 }
 
 object KnittingState {
-  val initial = KnittingState(_ => NeedleState(NeedleA), None, None, Map.empty, Knitted.empty)
+  val initial = KnittingState(_ => NeedleState(NeedleA), None, None, Map.empty, Map.empty, Knitted.empty)
 }
 
