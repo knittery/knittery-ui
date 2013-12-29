@@ -6,6 +6,7 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   "com.typesafe.akka" %% "akka-actor" % "2.2.3",
+  "org.scalaz" %% "scalaz-core" % "7.0.5",
   "ch.inventsoft.akka" %% "rxtx-akka-io" % "1.0.2-SNAPSHOT",
   "org.webjars" %% "webjars-play" % "2.2.1",
   "org.webjars" % "jquery" % "2.0.3-1",
