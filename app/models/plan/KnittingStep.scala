@@ -53,9 +53,16 @@ case class KnitPatternRow(carriage: CarriageType, direction: Direction, pattern:
   override protected def needleActionRow = Some(pattern)
 }
 
-trait ChangeCarriageSettings extends KnittingStep {
-  def carriage: CarriageType
+sealed trait ChangeCarriageSettings extends KnittingStep {
+  val settings: CarriageSettings
+  def carriage: CarriageType = settings.carriage
+  override def apply(state: KnittingState) = Try {
+    state.modifyCarriageSettings(settings)
+  }
 }
+case class ChangeKCarriageSettings(settings: KCarriageSettings) extends ChangeCarriageSettings
+case class ChangeLCarriageSettings(settings: LCarriageSettings) extends ChangeCarriageSettings
+case class ChangeGCarriageSettings(settings: GCarriageSettings) extends ChangeCarriageSettings
 
 trait ManualAction extends KnittingStep {
   def name: String
