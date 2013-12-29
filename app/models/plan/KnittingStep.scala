@@ -1,18 +1,27 @@
 package models.plan
 
 import scala.util.Try
+import scalaz._
+import Scalaz._
 import models._
 
 /** Step to perform during knitting. */
-sealed trait KnittingStep extends Function[KnittingState, Try[KnittingState]] {
-  /** Check if the step can be applied to the state. */
-  def checkPreconditions(state: KnittingState) = apply(state).isSuccess
+sealed trait KnittingStep extends (KnittingState => Validation[String, KnittingState])
+
+/** Utility trait to allow Try based steps (mostly easier to write). */
+trait TryKnitting { self: KnittingStep =>
+  protected def tryApply(state: KnittingState): Try[KnittingState]
+  override def apply(state: KnittingState) = {
+    tryApply(state).map(_.success).recover {
+      case e: Exception => e.getMessage.fail
+    }.get
+  }
 
   protected def invalidState(reason: String) = throw new IllegalStateException(reason)
 }
 
 /** Knits a row using a carriage. */
-sealed trait KnitARow extends KnittingStep {
+sealed trait KnitARow extends KnittingStep with TryKnitting {
   def carriage: CarriageType
   def direction: Direction
   protected def needleActionRow: Option[NeedleActionRow]
@@ -20,7 +29,7 @@ sealed trait KnitARow extends KnittingStep {
   def yarnA: Option[Yarn]
   def yarnB: Option[Yarn]
 
-  override def apply(state: KnittingState) = {
+  override def tryApply(state: KnittingState) = {
     val c = knittingCarriage(state, needleActionRow)
     c.flatMap(_(direction)(state.needles)).map {
       case (needles, knitted) => state.
@@ -56,8 +65,8 @@ case class KnitPatternRow(carriage: CarriageType, direction: Direction, pattern:
 sealed trait ChangeCarriageSettings extends KnittingStep {
   val settings: CarriageSettings
   def carriage: CarriageType = settings.carriage
-  override def apply(state: KnittingState) = Try {
-    state.modifyCarriageSettings(settings)
+  override def apply(state: KnittingState) = {
+    state.modifyCarriageSettings(settings).success
   }
 }
 case class ChangeKCarriageSettings(settings: KCarriageSettings) extends ChangeCarriageSettings
