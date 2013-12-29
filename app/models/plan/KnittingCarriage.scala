@@ -1,10 +1,13 @@
 package models.plan
 
-import scala.util.{ Try, Success, Failure }
+import scala.util.Try
+import scalaz._
+import Scalaz._
 import models._
+import utils._
 
 trait KnittingCarriage {
-  def apply(direction: Direction)(needles: NeedleStateRow): Try[(NeedleStateRow, KnittedRow)]
+  def apply(direction: Direction)(needles: NeedleStateRow): Validation[String, (NeedleStateRow, KnittedRow)]
 }
 
 object KnittingCarriage {
