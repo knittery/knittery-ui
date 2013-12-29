@@ -30,15 +30,24 @@ sealed trait Stich {
 case object NoStich extends Stich {
   override def patternString = " "
 }
+
 case class PlainStich(yarns: List[Yarn]) extends Stich {
   override def patternString = "^"
 }
 object PlainStich {
   def apply(yarn: Yarn): PlainStich = PlainStich(yarn :: Nil)
 }
+
 case class PurlStich(yarns: List[Yarn]) extends Stich {
   override def patternString = "-"
 }
 object PurlStich {
   def apply(yarn: Yarn): PurlStich = PurlStich(yarn :: Nil)
+}
+
+case class CastOnStich(yarn: List[Yarn]) extends Stich {
+  override def patternString = "_"
+}
+object CastOnStich {
+  def apply(yarn: Yarn): CastOnStich = CastOnStich(yarn :: Nil)
 }

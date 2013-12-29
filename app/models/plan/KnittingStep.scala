@@ -73,12 +73,18 @@ case class ThreadYarn(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends Knitting
 case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends KnittingStep {
   def needles = Needle.interval(from, until)
   override def apply(state: KnittingState) = {
-    state.moveNeedles { n =>
-      val before = state.needles(n)
-      if (needles.contains(n)) {
-        NeedleState(NeedleD, yarn :: before.yarn)
-      } else before
-    }.success[String]
+    state.
+      moveNeedles { n =>
+        val before = state.needles(n)
+        if (needles.contains(n)) {
+          NeedleState(NeedleD, yarn :: before.yarn)
+        } else before
+      }.
+      knit { n =>
+        if (needles.contains(n)) CastOnStich(yarn)
+        else NoStich
+      }.
+      success[String]
   }
 }
 
