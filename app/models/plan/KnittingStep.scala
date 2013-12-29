@@ -4,24 +4,13 @@ import scala.util.Try
 import scalaz._
 import Scalaz._
 import models._
+import utils._
 
 /** Step to perform during knitting. */
 sealed trait KnittingStep extends (KnittingState => Validation[String, KnittingState])
 
-/** Utility trait to allow Try based steps (mostly easier to write). */
-trait TryKnitting { self: KnittingStep =>
-  protected def tryApply(state: KnittingState): Try[KnittingState]
-  override def apply(state: KnittingState) = {
-    tryApply(state).map(_.success).recover {
-      case e: Exception => e.getMessage.fail
-    }.get
-  }
-
-  protected def invalidState(reason: String) = throw new IllegalStateException(reason)
-}
-
 /** Knits a row using a carriage. */
-sealed trait KnitARow extends KnittingStep with TryKnitting {
+sealed trait KnitARow extends KnittingStep {
   def carriage: CarriageType
   def direction: Direction
   protected def needleActionRow: Option[NeedleActionRow]
@@ -29,26 +18,28 @@ sealed trait KnitARow extends KnittingStep with TryKnitting {
   def yarnA: Option[Yarn]
   def yarnB: Option[Yarn]
 
-  override def tryApply(state: KnittingState) = {
-    val c = knittingCarriage(state, needleActionRow)
-    c.flatMap(_(direction)(state.needles)).map {
-      case (needles, knitted) => state.
+  override def apply(state: KnittingState) = {
+    for {
+      kc <- knittingCarriage(state, needleActionRow)
+      (needles, knitted) <- kc(direction)(state.needles)
+    } yield {
+      state.
         moveCarriage(carriage, direction).
         moveNeedles(needles).
         knit(knitted)
     }
   }
-  protected def knittingCarriage(state: KnittingState, pattern: Option[NeedleActionRow]) = Try {
-    val pos = state.carriagePosition.get(carriage).getOrElse(invalidState(s"Undefined position for $carriage"))
-    val settings = state.carriageSettings.get(carriage).getOrElse(invalidState(s"Undefined settings for $carriage"))
-    val c = KnittingCarriage(carriage, settings, yarnA, yarnB, pattern)
-    //check preconditions
-    (pos, direction) match {
-      case (CarriageLeft(_), Left) => invalidState("Cannot move carriage from left to left")
-      case (CarriageRight(_), Right) => invalidState("Cannot move carriage from right to right")
-      case (_, _) => () // ok
-    }
-    c
+  protected def knittingCarriage(state: KnittingState, pattern: Option[NeedleActionRow]) = {
+    for {
+      pos <- state.carriagePosition.get(carriage).toSuccess(s"Undefined position for $carriage")
+      settings <- state.carriageSettings.get(carriage).toSuccess(s"Undefined settings for $carriage")
+      c = KnittingCarriage(carriage, settings, yarnA, yarnB, pattern)
+      nextDir <- state.nextDirection(carriage)
+      _ <- {
+        if (nextDir != direction) s"Cannot move carriage from $direction to $direction".fail[KnittingCarriage]
+        else ().success
+      }
+    } yield c
   }
 }
 

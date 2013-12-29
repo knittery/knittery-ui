@@ -1,3 +1,7 @@
+import scalaz._
+import Scalaz._
+import scala.util.Try
+
 package object utils {
   type Matrix[A] = IndexedSeq[IndexedSeq[A]]
 
@@ -21,4 +25,14 @@ package object utils {
       override def length = matrix.width
     }
   }
+
+  implicit class RichTry[A](val t: Try[A]) {
+    def toSuccess: Validation[String, A] = {
+      t.map(_.success).recover {
+        case e: Exception => e.getMessage.fail
+      }.get
+
+    }
+  }
+  implicit def tryToValidation[A](t: Try[A]): Validation[String, A] = t.toSuccess
 }
