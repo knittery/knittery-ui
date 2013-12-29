@@ -60,6 +60,12 @@ case class ChangeKCarriageSettings(settings: KCarriageSettings) extends ChangeCa
 case class ChangeLCarriageSettings(settings: LCarriageSettings) extends ChangeCarriageSettings
 case class ChangeGCarriageSettings(settings: GCarriageSettings) extends ChangeCarriageSettings
 
+case class ThreadYarn(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends KnittingStep {
+  override def apply(state: KnittingState) = {
+    state.copy(yarnA = yarnA, yarnB = yarnB).success[String]
+  }
+}
+
 trait ManualAction extends KnittingStep {
   def name: String
 
