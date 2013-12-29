@@ -33,7 +33,7 @@ object JsonSerialization {
 
   implicit object NeedlePatternRowWrite extends Writes[NeedlePatternRow] {
     override def writes(row: NeedlePatternRow) = {
-      val values = Needle.all.map(row).map {
+      val values = row.all.map {
         case NeedleA => "A"
         case NeedleB => "B"
         case NeedleD => "D"
