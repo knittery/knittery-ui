@@ -11,6 +11,7 @@ case class KnittingState(needles: NeedleStateRow,
     val (settings, _) = carriages.get(carriage).getOrElse(throw new IllegalStateException(s"undefined carriage: $carriage"))
     copy(carriages = carriages + (carriage -> (settings, pos)))
   }
+  def moveNeedles(newNeedles: NeedleStateRow) = copy(needles = newNeedles)
   def knit(row: KnittedRow) = copy(output = output + row)
 }
 
