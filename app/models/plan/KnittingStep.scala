@@ -88,6 +88,11 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends Knittin
   }
 }
 
+case class AddCarriage(carriage: CarriageType, from: Direction = Left) extends KnittingStep {
+  override def apply(state: KnittingState) =
+    state.moveCarriage(carriage, from.reverse).success
+}
+
 trait ManualAction extends KnittingStep {
   def name: String
 
