@@ -59,7 +59,7 @@ object NeedlePattern {
   }
 
   def loadCenter(img: BufferedImage) =
-    load(img, (Needle.needleCount - img.getWidth()) / 2)
+    load(img, (Needle.count - img.getWidth()) / 2)
   def load(img: BufferedImage, xOffset: Int = 0): NeedlePattern = new NeedlePattern {
     def height = img.getHeight
     def width = img.getWidth

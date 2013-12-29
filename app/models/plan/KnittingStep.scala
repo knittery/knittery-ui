@@ -57,7 +57,7 @@ sealed trait ChangeCarriageSettings extends KnittingStep {
   val settings: CarriageSettings
   def carriage: CarriageType = settings.carriage
   override def apply(state: KnittingState) = {
-    state.modifyCarriageSettings(settings).success
+    state.modifyCarriageSettings(settings).success[String]
   }
 }
 case class ChangeKCarriageSettings(settings: KCarriageSettings) extends ChangeCarriageSettings
