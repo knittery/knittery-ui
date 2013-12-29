@@ -32,21 +32,24 @@ case object NoStich extends Stich {
 }
 
 case class PlainStich(yarns: List[Yarn]) extends Stich {
-  override def patternString = "^"
+  require(yarns.nonEmpty, "No yarn on plain stich")
+  override def patternString = yarns.head.consoleColor + "^" + Console.RESET
 }
 object PlainStich {
   def apply(yarn: Yarn): PlainStich = PlainStich(yarn :: Nil)
 }
 
 case class PurlStich(yarns: List[Yarn]) extends Stich {
-  override def patternString = "-"
+  require(yarns.nonEmpty, "No yarn on purl stich")
+  override def patternString = yarns.head.consoleColor + "-" + Console.RESET
 }
 object PurlStich {
   def apply(yarn: Yarn): PurlStich = PurlStich(yarn :: Nil)
 }
 
-case class CastOnStich(yarn: List[Yarn]) extends Stich {
-  override def patternString = "_"
+case class CastOnStich(yarns: List[Yarn]) extends Stich {
+  require(yarns.nonEmpty, "No yarn on case on stich")
+  override def patternString = yarns.head.consoleColor + "_" + Console.RESET
 }
 object CastOnStich {
   def apply(yarn: Yarn): CastOnStich = CastOnStich(yarn :: Nil)
