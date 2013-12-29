@@ -12,6 +12,8 @@ case class KnittingState(needles: NeedleStateRow,
     copy(carriageSettings = carriageSettings + (settings.carriage -> settings))
   def moveCarriage(carriage: CarriageType, pos: CarriagePosition) =
     copy(carriagePosition = carriagePosition + (carriage -> pos))
+  def moveCarriage(carriage: CarriageType, direction: Direction): KnittingState =
+    moveCarriage(carriage, if (direction == Left) CarriageLeft(0) else CarriageRight(0))
   def moveNeedles(newNeedles: NeedleStateRow) = copy(needles = newNeedles)
   def knit(row: KnittedRow) = copy(output = output + row)
 }

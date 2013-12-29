@@ -33,7 +33,7 @@ sealed trait KnitARow extends KnittingStep with TryKnitting {
     val c = knittingCarriage(state, needleActionRow)
     c.flatMap(_(direction)(state.needles)).map {
       case (needles, knitted) => state.
-        moveCarriage(carriage, if (direction == Left) CarriageLeft(0) else CarriageRight(0)).
+        moveCarriage(carriage, direction).
         moveNeedles(needles).
         knit(knitted)
     }
