@@ -5,8 +5,6 @@ import Scalaz._
 import models._
 
 case class KnittingPlan(steps: Seq[KnittingStep]) {
-  def +(other: KnittingPlan) = KnittingPlan(steps ++ other.steps)
-
   /** Run the knitting plan to produce the final knitting state. */
   def run: Validation[KnittingPlanError, KnittingState] =
     run(KnittingState.initial)

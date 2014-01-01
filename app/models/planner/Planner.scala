@@ -20,7 +20,7 @@ trait Planner {
           part1 <- me.partial(state)
           state1 <- part1.run(state).leftMap(_.toString)
           part2 <- f(state1).partial(state1)
-        } yield part1 + part2
+        } yield part1 |+| part2
       }
     }
   }
