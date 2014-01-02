@@ -18,6 +18,7 @@ case class KnittingState(needles: NeedleStateRow,
       else pos.directionTo(workingNeedles.headOption.getOrElse(Needle.middle)).success
     case None => Right.success
   }
+  def yarns: Set[Yarn] = yarnA.toSet ++ yarnB.toSet
 
   def modifyCarriageSettings(settings: CarriageSettings) =
     copy(carriageSettings = carriageSettings + (settings.carriage -> settings))

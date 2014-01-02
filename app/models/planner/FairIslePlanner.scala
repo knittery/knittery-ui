@@ -48,7 +48,7 @@ object FairIslePlanner {
     for {
       yarnA <- Planner.state(_.yarnA)
       yarnB <- Planner.state(_.yarnB)
-      available = yarnA.toSet ++ yarnB.toSet
+      available <- Planner.state(_.yarns)
     } yield {
       if (required.forall(available.contains)) (yarnA, yarnB)
       else required.toList match {
