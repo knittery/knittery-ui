@@ -12,7 +12,7 @@ package object plan {
   }
 
   type Planner = PlannerM[Unit]
-  implicit def planMonoid = KnittingPlan.planMonoid
+  implicit def planMonoid = Plan.planMonoid
   implicit def plannerMonad = PlannerM.plannerMonad
   implicit def plannerMonoid = Planner.plannerMonoid
   implicit def stepToPlanner(s: KnittingStep) = Planner.step(s)

@@ -10,21 +10,21 @@ import utils._
 sealed trait PlannerM[+A] {
   def plan = run(KnittingState.initial).map(_._2)
 
-  protected[PlannerM] def run(state: KnittingState): Validation[String, (A, KnittingPlan)]
+  protected[PlannerM] def run(state: KnittingState): Validation[String, (A, Plan)]
 }
 object PlannerM {
   type Planner = PlannerM[Unit]
 
   def step(step: KnittingStep): Planner = new Planner {
-    override def run(state: KnittingState) = ((), KnittingPlan(step :: Nil)).success
+    override def run(state: KnittingState) = ((), Plan(step :: Nil)).success
   }
   def validate[A](f: KnittingState => Validation[String, A]) = new PlannerM[A] {
-    override def run(state: KnittingState) = f(state).map((_, Monoid[KnittingPlan].zero))
+    override def run(state: KnittingState) = f(state).map((_, Monoid[Plan].zero))
   }
 
   def plannerMonad: Monad[PlannerM] = new Monad[PlannerM] {
     override def point[A](a: => A) = new PlannerM[A] {
-      override def run(state: KnittingState) = (a, Monoid[KnittingPlan].zero).success
+      override def run(state: KnittingState) = (a, Monoid[Plan].zero).success
     }
     override def bind[A, B](pa: PlannerM[A])(fb: A => PlannerM[B]) = {
       new PlannerM[B] {
