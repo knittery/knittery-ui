@@ -7,6 +7,7 @@ import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 import models._
 import models.plan._
+import models.planners._
 import utils._
 
 class FairIslePlannerSpec extends Specification {

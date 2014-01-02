@@ -1,10 +1,9 @@
-package models.planner
+package models.planners
 
 import scalaz._
 import Scalaz._
+import models._
 import models.plan._
-import models.CarriageType
-import models.NeedleActionRow
 
 object Basics {
   /**

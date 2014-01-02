@@ -18,5 +18,12 @@ case class KnittingPlan(steps: Seq[KnittingStep]) {
       }
   }
 }
+object KnittingPlan {
+  def planMonoid: Monoid[KnittingPlan] = new Monoid[KnittingPlan] {
+    override def zero = KnittingPlan(Nil)
+    override def append(a: KnittingPlan, b: => KnittingPlan) = KnittingPlan(a.steps ++ b.steps)
+  }
+
+}
 
 case class KnittingPlanError(atStep: KnittingStep, stepNumber: Int, error: String)

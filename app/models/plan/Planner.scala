@@ -1,10 +1,9 @@
-package models.planner
+package models.plan
 
 import scala.util.Try
 import scalaz._
 import scalaz.syntax._
-import Scalaz._
-import models.plan._
+import scalaz.Scalaz._
 import utils._
 
 /** Monad to create a KnittingPlan. */

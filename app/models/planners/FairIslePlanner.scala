@@ -1,4 +1,4 @@
-package models.planner
+package models.planners
 
 import scalaz._
 import Scalaz._
