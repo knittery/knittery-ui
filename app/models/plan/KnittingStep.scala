@@ -87,6 +87,33 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends Knittin
   }
 }
 
+case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends KnittingStep {
+  override def apply(state: KnittingState) = {
+    for {
+      _ <- {
+        if (state.yarns.contains(withYarn)) ().success
+        else s"Cannot cast off with not threaded yarn $withYarn".fail
+      }
+      state2 = state.
+        knit { n =>
+          if (filter(n)) state.needles(n) match {
+            case NeedleState(_, Nil) => NoStich
+            case NeedleState(_, yarns) => PlainStich(yarns)
+          }
+          else NoStich
+        }.
+        knit { n =>
+          if (filter(n)) state.needles(n) match {
+            case NeedleState(_, Nil) => NoStich
+            case NeedleState(_, yarns) => CastOffStich(withYarn)
+          }
+          else NoStich
+        }.
+        moveNeedles(n => if (filter(n)) NeedleState(NeedleA) else state.needles(n))
+    } yield state2
+  }
+}
+
 case class AddCarriage(carriage: CarriageType, from: Direction = Left) extends KnittingStep {
   override def apply(state: KnittingState) =
     state.moveCarriage(carriage, from.reverse).success

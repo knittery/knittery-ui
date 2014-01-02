@@ -48,9 +48,17 @@ object PurlStich {
 }
 
 case class CastOnStich(yarns: List[Yarn]) extends Stich {
-  require(yarns.nonEmpty, "No yarn on case on stich")
+  require(yarns.nonEmpty, "No yarn for cast-on-stich")
   override def patternString = yarns.head.consoleColor + "_" + Console.RESET
 }
 object CastOnStich {
   def apply(yarn: Yarn): CastOnStich = CastOnStich(yarn :: Nil)
+}
+
+case class CastOffStich(yarns: List[Yarn]) extends Stich {
+  require(yarns.nonEmpty, "No yarn for cast=off-stich")
+  override def patternString = yarns.head.consoleColor + "_" + Console.RESET
+}
+object CastOffStich {
+  def apply(yarn: Yarn): CastOffStich = CastOffStich(yarn :: Nil)
 }
