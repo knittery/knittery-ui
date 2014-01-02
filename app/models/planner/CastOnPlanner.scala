@@ -7,8 +7,7 @@ import models.plan._
 
 object CastOnPlanner {
 
-  def closed(from: Needle, until: Needle, withYarn: Yarn) = Planner.step { _ =>
-    ClosedCastOn(from, until, withYarn).success
-  }
+  def closed(from: Needle, until: Needle, withYarn: Yarn): Planner =
+    ClosedCastOn(from, until, withYarn)
 
 }
