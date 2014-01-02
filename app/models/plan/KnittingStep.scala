@@ -40,9 +40,8 @@ sealed trait KnitARow extends KnittingStep {
   }
 }
 
-case class KnitRow(carriage: CarriageType, direction: Direction, yarnA: Option[Yarn]) extends KnitARow {
+case class KnitRow(carriage: CarriageType, direction: Direction) extends KnitARow {
   override protected def needleActionRow = None
-  def yarnB = None
 }
 
 case class KnitPatternRow(carriage: CarriageType, direction: Direction, pattern: NeedleActionRow) extends KnitARow {
