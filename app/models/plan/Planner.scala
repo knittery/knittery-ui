@@ -15,7 +15,7 @@ sealed trait PlannerM[+A] {
 object PlannerM {
   type Planner = PlannerM[Unit]
 
-  def step(step: KnittingStep): Planner = new Planner {
+  def step(step: Step): Planner = new Planner {
     override def run(state: KnittingState) = ((), Plan(step :: Nil)).success
   }
   def validate[A](f: KnittingState => Validation[String, A]) = new PlannerM[A] {
@@ -41,7 +41,7 @@ object PlannerM {
 
 object Planner {
   /** Add a step to the PlannerM. */
-  implicit def step(step: KnittingStep): Planner = PlannerM.step(step)
+  implicit def step(step: Step): Planner = PlannerM.step(step)
 
   /** Read a value from the state. */
   def state[A](f: KnittingState => A) = PlannerM.validate(f(_).success)
@@ -61,6 +61,6 @@ object Planner {
     override def append(a: Planner, b: => Planner) = a >> b
   }
   //Allows to use steps directly as plans in a for comprehension
-  def stepToPlannerBindOps(s: KnittingStep): BindOps[PlannerM, Unit] = step(s)
-  def stepToPlannerFunctorOps(s: KnittingStep): FunctorOps[PlannerM, Unit] = step(s)
+  def stepToPlannerBindOps(s: Step): BindOps[PlannerM, Unit] = step(s)
+  def stepToPlannerFunctorOps(s: Step): FunctorOps[PlannerM, Unit] = step(s)
 }

@@ -4,7 +4,7 @@ import scalaz._
 import Scalaz._
 import models._
 
-case class Plan(steps: Seq[KnittingStep]) {
+case class Plan(steps: Seq[Step]) {
   /** Run the knitting plan to produce the final knitting state. */
   def run: Validation[PlanError, KnittingState] =
     run(KnittingState.initial)
@@ -26,4 +26,4 @@ object Plan {
 
 }
 
-case class PlanError(atStep: KnittingStep, stepNumber: Int, error: String)
+case class PlanError(atStep: Step, stepNumber: Int, error: String)

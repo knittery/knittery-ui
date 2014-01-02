@@ -7,10 +7,10 @@ import models._
 import utils._
 
 /** Step to perform during knitting. */
-sealed trait KnittingStep extends (KnittingState => Validation[String, KnittingState])
+sealed trait Step extends (KnittingState => Validation[String, KnittingState])
 
 /** Knits a row using a carriage. */
-sealed trait KnitARow extends KnittingStep {
+sealed trait KnitARow extends Step {
   def carriage: CarriageType
   def direction: Direction
   protected def needleActionRow: Option[NeedleActionRow]
@@ -48,7 +48,7 @@ case class KnitPatternRow(carriage: CarriageType, direction: Direction, pattern:
   override protected def needleActionRow = Some(pattern)
 }
 
-sealed trait ChangeCarriageSettings extends KnittingStep {
+sealed trait ChangeCarriageSettings extends Step {
   val settings: CarriageSettings
   def carriage: CarriageType = settings.carriage
   override def apply(state: KnittingState) = {
@@ -59,7 +59,7 @@ case class ChangeKCarriageSettings(settings: KCarriageSettings) extends ChangeCa
 case class ChangeLCarriageSettings(settings: LCarriageSettings) extends ChangeCarriageSettings
 case class ChangeGCarriageSettings(settings: GCarriageSettings) extends ChangeCarriageSettings
 
-case class ThreadYarn(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends KnittingStep {
+case class ThreadYarn(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends Step {
   override def apply(state: KnittingState) = {
     state.copy(yarnA = yarnA, yarnB = yarnB).success[String]
   }
@@ -69,7 +69,7 @@ case class ThreadYarn(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends Knitting
  *  Performs a closed cast on for the needles. The needles are then moved to D position.
  *  All other needles are not touched.
  */
-case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends KnittingStep {
+case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends Step {
   def needles = Needle.interval(from, until)
   override def apply(state: KnittingState) = {
     state.
@@ -87,7 +87,7 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends Knittin
   }
 }
 
-case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends KnittingStep {
+case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step {
   override def apply(state: KnittingState) = {
     for {
       _ <- {
@@ -114,12 +114,12 @@ case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Knit
   }
 }
 
-case class AddCarriage(carriage: CarriageType, from: Direction = Left) extends KnittingStep {
+case class AddCarriage(carriage: CarriageType, from: Direction = Left) extends Step {
   override def apply(state: KnittingState) =
     state.moveCarriage(carriage, from.reverse).success
 }
 
-trait ManualAction extends KnittingStep {
+trait ManualAction extends Step {
   def name: String
 
   /** Description of the action to perform. May use basic HTML syntax. */
