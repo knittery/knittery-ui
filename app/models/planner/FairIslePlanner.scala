@@ -15,11 +15,12 @@ object FairIslePlanner {
    *  Does not change the working position of the needles, at least one needle (or better all for the
    *  pattern) must be in working position.
    */
-  def singleBed(pattern: Matrix[Yarn], startNeedle: Option[Needle] = None) = for {
+  def singleBed(pattern: Matrix[Yarn], backgroundYarn: Yarn, startNeedle: Option[Needle] = None) = for {
     workingNeedles <- Planner.state(_.workingNeedles)
     //Check if valid pattern and state
     _ <- Planner.precondidtions { _ =>
       pattern.validate
+      require(pattern.height > 0, "Empty pattern")
       pattern.rows.map(_.toSet).zipWithIndex.foreach {
         case (yarns, index) =>
           require(yarns.size <= 2,
@@ -28,49 +29,52 @@ object FairIslePlanner {
       require(workingNeedles.nonEmpty, "No working needles")
     }
     needle0 = startNeedle.getOrElse(workingNeedles.head)
-    _ <- setupCarriage
-    _ <- pattern.rows.toVector.map { row =>
-      setupYarn(row.toSet) >> knitPatternRow(needle0)(row)
-    }.sequence
+    //Setup to knit a row with the background yarn to setup the needles
+    _ <- setupCarriage(false)
+    _ <- Basics.oneYarn(backgroundYarn)
+    //Knit the pattern rows
+    _ <- pattern.rows.toVector.traverse(row => for {
+      yarns <- optimizeYarn(row.toSet)
+      _ <- Basics.knitPatternRow(KCarriage, knitActions(row, needle0, yarns))
+      _ <- setupCarriage(true)
+      _ <- (Basics.yarns _).tupled(yarns)
+    } yield ())
+    //Knit a finishing row
+    _ <- Basics.knitPatternRow(KCarriage, _ => NeedleToB)
   } yield ()
 
-  /** Knits a row in the pattern. Requires that the yarn is setup properly. */
-  private def knitPatternRow(startNeedle: Needle)(row: IndexedSeq[Yarn]) = for {
-    yarnA <- Planner.state(_.yarnA)
-    yarnB <- Planner.state(_.yarnB)
-    knitActions = (needle: Needle) => {
-      val index = needle.index - startNeedle.index
-      if (index < 0 || index > row.size) NeedleToB
-      else Some(row(index)) match {
-        case `yarnA` => NeedleToB
-        case `yarnB` => NeedleToD
-        case Some(x) => throw new IllegalStateException(s"want to use yarn $x but that's not on the carriage")
+  //TODO also take into account the next rows to knit
+  private def optimizeYarn(required: Set[Yarn]) = {
+    for {
+      yarnA <- Planner.state(_.yarnA)
+      yarnB <- Planner.state(_.yarnB)
+      available = yarnA.toSet ++ yarnB.toSet
+    } yield {
+      if (required.forall(available.contains)) (yarnA, yarnB)
+      else required.toList match {
+        case one :: two :: Nil => (Some(one), Some(two))
+        case one :: Nil => (Some(one), None)
+        case other => throw new IllegalStateException(s"Invalid yarn configuration: $other")
       }
     }
-    dir <- Planner.validate(_.nextDirection(KCarriage))
-    _ <- KnitPatternRow(KCarriage, dir, knitActions)
-  } yield ()
+  }
 
-  /** Make sure the yarns are available in the carriage, issue a step if not. */
-  private def setupYarn(required: Set[Yarn]) = for {
-    available <- Planner.state(s => s.yarnA.toSet ++ s.yarnB.toSet)
-    (yarnA, yarnB) = required.toList match {
-      case a :: b :: Nil => (Some(a), Some(b))
-      case a :: Nil => (Some(a), None)
-      case other => throw new IllegalStateException(s"Invalid yarn configuration: $other")
+  def knitActions(row: Seq[Yarn], startNeedle: Needle, yarns: (Option[Yarn], Option[Yarn]))(needle: Needle) = {
+    val index = needle.index - startNeedle.index
+    if (index < 0 || index > row.size) NeedleToB
+    else Some(row(index)) match {
+      case yarns._1 => NeedleToB
+      case yarns._2 => NeedleToD
+      case Some(x) => throw new IllegalStateException(s"want to use yarn $x but that's not on the carriage")
     }
-    _ <- {
-      if (!required.forall(available.contains)) Planner.step(ThreadYarn(yarnA, yarnB)) //change yarn
-      else Planner.noop //yarn is ok
-    }
-  } yield ()
+  }
 
   /** Carriage settings and make sure carriage is known. */
-  private def setupCarriage = for {
+  private def setupCarriage(mc: Boolean) = for {
     _ <- ChangeKCarriageSettings(KCarriageSettings(
       holdingCamLever = HoldingCamN,
       knob = KC2,
-      mc = true))
+      mc = mc))
     kCarriageDefined <- Planner.state(_.carriagePosition.isDefinedAt(KCarriage))
     _ <- if (!kCarriageDefined) Planner.step(AddCarriage(KCarriage)) else Planner.noop
   } yield ()
