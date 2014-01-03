@@ -29,6 +29,8 @@ class GuideStep private (val step: Step, processedReversed: List[Step], remainin
     if (isFirst) KnittingState.initial
     else previous.stateAfter
   }
+
+  override def toString = s"GuideStep($step)"
 }
 
 object GuideStep {

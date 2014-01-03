@@ -13,6 +13,9 @@ GET     /display                    controllers.Display.show
 GET     /display/subscribe          controllers.Display.subscribe
 GET     /display/positions          controllers.Display.positions
 
+GET     /guide                      controllers.Guide.start
+GET     /guide/:id                  controllers.Guide.execute(id: java.util.UUID)
+
 # Assets
 GET     /assets/javascripts/routes.js               controllers.Application.javascriptRoutes()
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

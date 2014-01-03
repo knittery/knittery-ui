@@ -1,0 +1,12 @@
+@(step: models.guide.GuideStep)
+
+@main("Guide") {
+  
+  <div>
+    @step.toString
+  </div>
+  <div>
+    @step.step.getClass.getName
+  </div>
+  
+}(List("guide", "needles"))
