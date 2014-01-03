@@ -28,6 +28,8 @@ object Guider {
   /** Unsubscribe from ChangeEvent. Answer: Command[Not]Executed. */
   case object Unsubscribe extends Command
 
+  def props(plan: Plan) = Props(new Guider(plan))
+
   private class Guider(plan: Plan) extends Actor {
     override def preStart = {
       self ! GuideStep(plan)
