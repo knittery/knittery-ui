@@ -46,7 +46,18 @@ object Guide extends Controller {
   def execute(id: UUID) = GuiderAction(id).async { request =>
     for {
       Guider.CurrentStep(step) <- request.guider ? Guider.QueryStep
-    } yield Ok(views.html.guide(step))
+    } yield Ok(views.html.guide(step, id))
+  }
+
+  def next(id: UUID) = GuiderAction(id).async { request =>
+    for {
+      Guider.CommandExecuted(_) <- request.guider ? Guider.Next
+    } yield Redirect(routes.Guide.execute(id))
+  }
+  def previous(id: UUID) = GuiderAction(id).async { request =>
+    for {
+      Guider.CommandExecuted(_) <- request.guider ? Guider.Previous
+    } yield Redirect(routes.Guide.execute(id))
   }
 
   private val plan = {

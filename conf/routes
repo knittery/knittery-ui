@@ -15,6 +15,8 @@ GET     /display/positions          controllers.Display.positions
 
 GET     /guide                      controllers.Guide.start
 GET     /guide/:id                  controllers.Guide.execute(id: java.util.UUID)
+POST    /guide/:id/next             controllers.Guide.next(id: java.util.UUID)
+POST    /guide/:id/previous         controllers.Guide.previous(id: java.util.UUID)
 
 # Assets
 GET     /assets/javascripts/routes.js               controllers.Application.javascriptRoutes()
