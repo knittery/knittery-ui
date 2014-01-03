@@ -39,4 +39,16 @@ object Basics {
     _ <- KnitPatternRow(carriage, dir, pattern)
   } yield ()
 
+  /** Change carriage settings (if necessary). Return the old settings. */
+  def carriageSettings(settings: CarriageSettings) = for {
+    old <- Planner.state(_.carriageSettings.get(settings.carriage))
+    _ <- {
+      if (old == Some(settings)) Planner.noop
+      else settings match {
+        case settings: KCarriageSettings => Planner.step(ChangeKCarriageSettings(settings))
+        case settings: LCarriageSettings => Planner.step(ChangeLCarriageSettings(settings))
+        case settings: GCarriageSettings => Planner.step(ChangeGCarriageSettings(settings))
+      }
+    }
+  } yield old
 }
