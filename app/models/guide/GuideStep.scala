@@ -30,6 +30,15 @@ class GuideStep private (val step: Step, processedReversed: List[Step], remainin
     else previous.stateAfter
   }
 
+  /** List of all steps. */
+  def all = first.allFromHere
+  /** List of all steps that come after this step (including this). */
+  def allFromHere: List[GuideStep] =
+    this :: (if (isLast) Nil else next.allFromHere)
+  /** List of all steps that come before this step (including this). */
+  def allUpToHere: Seq[GuideStep] =
+    if (isFirst) Vector(this) else previous.allUpToHere :+ this
+
   override def toString = s"GuideStep($step)"
 }
 
