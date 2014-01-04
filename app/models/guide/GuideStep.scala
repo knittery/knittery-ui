@@ -3,7 +3,7 @@ package models.guide
 import models._
 import models.plan._
 
-class GuideStep private (val step: Step, processedReversed: List[Step], remaining: List[Step]) {
+class GuideStep private (val step: Step, private val processedReversed: List[Step], private val remaining: List[Step]) {
   def next = {
     require(!isLast, "Already at end")
     val (next :: rest) = remaining
@@ -40,6 +40,13 @@ class GuideStep private (val step: Step, processedReversed: List[Step], remainin
     if (isFirst) Vector(this) else previous.allUpToHere :+ this
 
   override def toString = s"GuideStep($step)"
+  override def hashCode = step.hashCode ^ remaining.hashCode
+  override def equals(o: Any) = o match {
+    case other: GuideStep =>
+      other.step == step && other.processedReversed == processedReversed &&
+        other.remaining == remaining
+    case _ => false
+  }
 }
 
 object GuideStep {
