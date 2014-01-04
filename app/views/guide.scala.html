@@ -1,0 +1,22 @@
+@(step: models.guide.GuideStep, id: java.util.UUID)
+
+@import helper._
+
+@main("Guide") {
+  
+  <div>
+    @step.toString
+  </div>
+  <div>
+    @step.step.getClass.getName
+  </div>
+  <div>
+		@form(routes.Guide.next(id)) {
+		  <input type="submit" value="Next">
+		}
+    @form(routes.Guide.previous(id)) {
+      <input type="submit" value="Previous">
+    }
+  </div>
+  
+}(List("guide", "needles"))

@@ -71,7 +71,7 @@ object FairIslePlanner {
 
   /** Carriage settings and make sure carriage is known. */
   private def setupCarriage(mc: Boolean) = for {
-    _ <- ChangeKCarriageSettings(KCarriageSettings(
+    _ <- Basics.carriageSettings(KCarriageSettings(
       holdingCamLever = HoldingCamN,
       knob = KC2,
       mc = mc))
