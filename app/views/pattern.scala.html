@@ -11,27 +11,39 @@
       <div class="pattern-form">
         @form(action = routes.Pattern.upload, 'enctype -> "multipart/form-data", 'class -> "form-horizontal", 'role -> "form") {
             <div class="form-group">
+            	<label class="col-sm-6 control-label">widthInCmImg</label>
+            	<div class="col-sm-3">
+            		<input type="text" class="form-control" value="0.0" name="widthInCmImg">
+            	</div>
+            </div>
+            <div class="form-group">
+            	<label class="col-sm-6 control-label">heightInCmImg</label>
+            	<div class="col-sm-3">
+            		<input type="text" class="form-control" value="0.0" name="heightInCmImg">
+            	</div>
+            </div>
+            <div class="form-group">
             	<label class="col-sm-6 control-label">widthInCm</label>
             	<div class="col-sm-3">
-            		<input type="text" class="form-control" placeholder="0.0" name="widthInCm">
+            		<input type="text" class="form-control" value="0.0" name="widthInCm">
             	</div>
             </div>
             <div class="form-group">
             	<label class="col-sm-6 control-label">countStitches</label>
             	<div class="col-sm-3">
-            		<input type="text" class="form-control" placeholder="0" name="countStitches">
+            		<input type="text" class="form-control" value="0" name="countStitches">
             	</div>
             </div>
             <div class="form-group">
             	<label class="col-sm-6 control-label">heightInCm</label>
             	<div class="col-sm-3">
-            		<input type="text" class="form-control" placeholder="0.0" name="heightInCm">
+            		<input type="text" class="form-control" value="0.0" name="heightInCm">
             	</div>
             </div>
             <div class="form-group">
             	<label class="col-sm-6 control-label">countRows</label>
             	<div class="col-sm-3">
-            		<input type="text" class="form-control" placeholder="0" name="countRows">
+            		<input type="text" class="form-control" value="0" name="countRows">
             	</div>
             </div>
             <div class="form-group">
