@@ -1,21 +1,22 @@
 package models.plan
 
-case class Knitted(rows: Seq[KnittedRow]) {
-  if (rows.size > 0) require(rows.forall(_.width == rows(0).width), "Non-uniform width")
-
+class Knitted private (val rows: Seq[KnittedRow]) {
   def height = rows.size
   def width = {
-    if (rows.size == 0) throw new IllegalStateException("Unknown width.")
+    if (rows.size == 0) throw new IllegalStateException("unknown width")
     rows(0).width
   }
 
-  def +(row: KnittedRow) = copy(rows :+ row)
+  def +(row: KnittedRow) = {
+    require(row.width == width, "non uniform width")
+    new Knitted(rows :+ row)
+  }
 
   def patternString = rows.reverse.mkString("\n")
   override def toString = patternString
 }
 object Knitted {
-  def empty = Knitted(Seq.empty)
+  def empty = new Knitted(Seq.empty)
 }
 
 case class KnittedRow(stitches: Seq[Stitch]) {
