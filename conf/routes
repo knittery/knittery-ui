@@ -18,6 +18,9 @@ GET     /guide/:id                  controllers.Guide.execute(id: java.util.UUID
 POST    /guide/:id/next             controllers.Guide.next(id: java.util.UUID)
 POST    /guide/:id/previous         controllers.Guide.previous(id: java.util.UUID)
 
+GET     /pattern                    controllers.Pattern.show
+POST    /pattern/upload				controllers.Pattern.upload
+
 # Assets
 GET     /assets/javascripts/routes.js               controllers.Application.javascriptRoutes()
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
