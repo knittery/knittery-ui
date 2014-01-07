@@ -6,19 +6,17 @@
   
 <div class="panel panel-default step-listing pull-left">
   <div class="panel-heading">
-    <h2 class="panel-title text-center">Step @step.stepNumber of @step.all.size</h2>
-		<div class="navigation">
-		@if(!step.isFirst) {
-		  @form(routes.Guide.previous) {
-		    <input type="submit" value="Previous">
-		  }
-		}
-		@if(!step.isLast) {
+    <span class="navigation prev navbar-form navbar-left">
+	    @form(routes.Guide.previous) {
+	      <button type="submit" @if(step.isFirst){disabled}>Back</button>
+	    }
+    </span>
+		<span class="navigation next navbar-form navbar-right">
 		  @form(routes.Guide.next) {
-		    <input type="submit" value="Next">
+         <button type="submit" @if(step.isLast){disabled}>Next</button>
 		  }
-		}
-		</div>
+		</span>
+    <h2 class="panel-title text-center">Step @step.stepNumber of @step.all.size</h2>
   </div>
   <div class="panel-body">
     @step.all.map { s =>
@@ -27,6 +25,10 @@
       <div class="panel-body">@s.description</div>
     </div>
     }
+    <div lass="panel panel-default step">
+      <div class="panel-heading"><h4 class="panel-title text-center">End</h4></div>
+      <div class="panel-body"></div>
+    </div>
   </div>
 </div>
 
