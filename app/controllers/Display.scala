@@ -16,7 +16,7 @@ import utils.JsonSerialization._
 
 object Display extends Controller {
 
-  protected def machine = Akka.system.actorSelection("akka://application/user/machine")
+  protected def machine = Akka.system.actorSelection(Akka.system / "machine")
   protected implicit val timeout: Timeout = 2.seconds
 
   def show = Action {

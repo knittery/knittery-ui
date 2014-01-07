@@ -22,7 +22,7 @@ import java.util.UUID
 object Guide extends Controller {
   private implicit val timeout: Timeout = 100.millis
 
-  protected def guider = Akka.system.actorSelection("akka://application/user/guider")
+  protected def guider = Akka.system.actorSelection(Akka.system / "guider")
 
   def view = Action.async {
     for {

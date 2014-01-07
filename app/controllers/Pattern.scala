@@ -24,7 +24,7 @@ import java.awt.image.BufferedImage
 
 object Pattern extends Controller {
 
-  protected def machine = Akka.system.actorSelection("akka://application/user/machine")
+  protected def machine = Akka.system.actorSelection(Akka.system / "machine")
  
   case class GaugeFormData(widthInCmImg: BigDecimal, heightInCmImg: BigDecimal, widthInCm: BigDecimal, countStitches: Int, heightInCm: BigDecimal, countRows: Int)
   
