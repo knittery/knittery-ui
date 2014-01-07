@@ -83,18 +83,29 @@ body {
 }
 
 .step-listing {
+  position: absolute;
+  overflow: hidden;
+  height: calc(~"100% - 50px - 5.5em");
   width: 30em;
-  float: left;
-
+  
   .total-count {
     margin-bottom: 0.8em;
     text-align: center;
     font-weight: bold;
   }
   .step {
+    margin-bottom: 0.3em;
   }
   .step.active {
-    color: red;
+  }
+  .step.future {
+    margin-bottom: 0.1em;
+    .panel-body {
+      display: none;
+    }
+  }
+  .step.past {
+    display: none;
   }
 }
 

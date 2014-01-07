@@ -2,33 +2,32 @@
 
 @import helper._
 
-@main("Guide") {
+@main("Guide", "wide-container") {
   
-<div class="panel panel-default step-listing">
+<div class="panel panel-default step-listing pull-left">
+  <div class="panel-heading">
+    <h2 class="panel-title text-center">Step @step.stepNumber of @step.all.size</h2>
+		<div class="navigation">
+		@if(!step.isFirst) {
+		  @form(routes.Guide.previous) {
+		    <input type="submit" value="Previous">
+		  }
+		}
+		@if(!step.isLast) {
+		  @form(routes.Guide.next) {
+		    <input type="submit" value="Next">
+		  }
+		}
+		</div>
+  </div>
   <div class="panel-body">
-    <div class="total-count">
-      Step @step.stepNumber of @step.all.size
-    </div>
     @step.all.map { s =>
     <div id="step-@step.stepNumber" class="panel panel-default step @if(s==step) {active}">
-      <div class="panel-heading">@s.name</div>
+      <div class="panel-heading"><h4 class="panel-title">@s.name</h4></div>
       <div class="panel-body">@s.description</div>
     </div>
     }
   </div>
-</div>
-
-<div>
-@if(!step.isFirst) {
-  @form(routes.Guide.previous) {
-    <input type="submit" value="Previous">
-  }
-}
-@if(!step.isLast) {
-  @form(routes.Guide.next) {
-    <input type="submit" value="Next">
-  }
-}
 </div>
 
 }(List("guide", "needles"))
