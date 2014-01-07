@@ -71,11 +71,11 @@ object FairIslePlanner {
 
   /** Carriage settings and make sure carriage is known. */
   private def setupCarriage(mc: Boolean) = for {
+    kCarriageDefined <- Planner.state(_.carriagePosition.isDefinedAt(KCarriage))
+    _ <- if (!kCarriageDefined) Planner.step(AddCarriage(KCarriage)) else Planner.noop
     _ <- Basics.carriageSettings(KCarriageSettings(
       holdingCamLever = HoldingCamN,
       knob = KC2,
       mc = mc))
-    kCarriageDefined <- Planner.state(_.carriagePosition.isDefinedAt(KCarriage))
-    _ <- if (!kCarriageDefined) Planner.step(AddCarriage(KCarriage)) else Planner.noop
   } yield ()
 }
