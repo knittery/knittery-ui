@@ -4,12 +4,20 @@
 
 @main("Guide") {
   
-  <div>
-    @step.toString
+<div class="panel panel-default step-listing">
+  <div class="panel-heading">
+    <h3 class="panel-title">Steps</h3>
   </div>
-  <div>
-    @step.step.getClass.getName
+  <div class="panel-body">
+    @step.all.map { s =>
+    <div id="step-@step.stepNumber" class="panel panel-default step @if(s==step) {active}">
+      <div class="panel-body">
+        @s.step.getClass.getName
+      </div>
+    </div>
+    }
   </div>
+</div>
   <div>
 		@form(routes.Guide.next(id)) {
 		  <input type="submit" value="Next">
