@@ -20,12 +20,16 @@
 </div>
 
 <div>
-	@form(routes.Guide.next) {
-    <input type="submit" value="Next">
-	}
-	@form(routes.Guide.previous) {
+@if(!step.isFirst) {
+  @form(routes.Guide.previous) {
     <input type="submit" value="Previous">
-	}
+  }
+}
+@if(!step.isLast) {
+  @form(routes.Guide.next) {
+    <input type="submit" value="Next">
+  }
+}
 </div>
 
 }(List("guide", "needles"))
