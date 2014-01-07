@@ -1,8 +1,7 @@
 $(() ->
   req = jsRoutes.controllers.Display.positions().ajax({
     success: (data) ->
-      window.machineEvents.publish("positionChange", {carriage: c, position: p}) for c, p of data.positions
-      setRow(data.row)
+      window.machineEvents.publish("positionChange", {carriage: c, position: p, row: data.row}) for c, p of data.positions
       setNeedles(data.patternRow)
   })
 
@@ -17,19 +16,15 @@ $(() ->
   $("#K-position .positions-value").carriagePosition(true, "K")
   $("#L-position .positions-value").carriagePosition(true, "L")
   $("#G-position .positions-value").carriagePosition(true, "G")
+  $(".row-position .positions-value").rowNumber()
 
   window.machineEvents.start(jsRoutes.controllers.Display.subscribe())
 )
 
 updateFrom = (msg) ->
   switch msg.event
-    when "positionChange"
-      setRow(msg.row)
     when "needlePatternUpdate"
       setNeedles(msg.patternRow)
-
-setRow = (row) ->
-  $(".row-position .positions-value").text(row)
 
 setNeedles = (patternRow) ->
   $(".needles").data("needles", patternRow)

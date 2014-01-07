@@ -3,6 +3,7 @@ Event Types:
   - positionChange
       - position
       - carriage
+      - row
 Don't forget to start
 ###
 MachineEvents = {
@@ -66,6 +67,15 @@ jQuery.fn.extend({
             when "needles" then position.needle
             else position.where
         root.text(value)
+    )
+
+  ###
+    Updates the content to a textual representation of the current row.
+  ###
+  rowNumber: () ->
+    root = $(this)
+    window.machineEvents.subscribe("positionChange", (event, msg) ->
+      root.text(msg.row)
     )
 })
 
