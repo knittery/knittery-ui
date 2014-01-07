@@ -114,10 +114,3 @@ case class AddCarriage(carriage: CarriageType, from: Direction = Left) extends S
   override def apply(state: KnittingState) =
     state.moveCarriage(carriage, from.reverse).success
 }
-
-trait ManualAction extends Step {
-  def name: String
-
-  /** Description of the action to perform. May use basic HTML syntax. */
-  def description: String
-}

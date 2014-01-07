@@ -12,7 +12,7 @@
     @step.all.map { s =>
     <div id="step-@step.stepNumber" class="panel panel-default step @if(s==step) {active}">
       <div class="panel-body">
-        @s.step.getClass.getName
+        @s.name
       </div>
     </div>
     }

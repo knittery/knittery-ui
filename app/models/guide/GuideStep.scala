@@ -22,6 +22,16 @@ class GuideStep private (val step: Step, private val processedReversed: List[Ste
   /** Number of this step (1-based). */
   def stepNumber = processedReversed.size + 1
 
+  def name = step match {
+    case ClosedCastOn(_, _, _) => "Cast on"
+    case ClosedCastOff(_, _) => "Cast off"
+    case AddCarriage(_, _) => "Add Carriage"
+    case ThreadYarn(_, _) => "Thread Yarn"
+    case KnitPatternRow(_, _, _) => "Knit Row"
+    case KnitRow(_, _) => "Knit Row"
+    case ChangeCarriageSettings(_) => "Change Settings"
+  }
+
   def stateAfter: KnittingState = {
     step(stateBefore).valueOr(e => throw InvalidPlanException(PlanError(step, stepNumber, e)))
   }
