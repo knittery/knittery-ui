@@ -1,6 +1,7 @@
 package models
 
 sealed trait CarriageType {
+  def name: String
   /** Needles the carriage is over if at the given position. */
   def over(pos: CarriagePosition): Seq[Needle] = pos match {
     case CarriageLeft(overlapCount) => Needle.all.take(overlapCount)
@@ -15,15 +16,18 @@ sealed trait CarriageType {
 
 /** Normal carriage. */
 case object KCarriage extends CarriageType {
+  override def name = "K"
   override protected def width = 66
 }
 
 /** Lace pattern carriage. */
 case object LCarriage extends CarriageType {
+  override def name = "L"
   override protected def width = 46
 }
 
 /** Electronic carriage. */
 case object GCarriage extends CarriageType {
+  override def name = "G"
   override protected def width = 20
 }

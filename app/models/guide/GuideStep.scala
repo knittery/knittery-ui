@@ -22,13 +22,46 @@ class GuideStep private (val step: Step, private val processedReversed: List[Ste
   /** Number of this step (1-based). */
   def stepNumber = processedReversed.size + 1
 
-  def name = step match {
-    case ClosedCastOn(_, _, _) => "Cast on"
-    case ClosedCastOff(_, _) => "Cast off"
-    case AddCarriage(_, _) => "Add Carriage"
-    case ThreadYarn(_, _) => "Thread Yarn"
-    case KnitRow(_, _, _) => "Knit Row"
-    case ChangeCarriageSettings(_) => "Change Settings"
+  def name = info._1
+  def description = info._2
+
+  private def info = step match {
+    case ClosedCastOn(from, to, yarn) =>
+      ("Cast on",
+        s"Perform a closed cast on from needle ${from.number} until ${to.number} with yarn ${yarn.name}")
+    case ClosedCastOff(yarn, filter) =>
+      val from = Needle.all.filter(filter).head
+      val to = Needle.all.filter(filter).last
+      ("Cast off",
+        s"Perform a closed cast off for needles ${from.number} through ${to.number} with ${yarn.name}")
+
+    case ThreadYarn(None, None) =>
+      (s"Unthread Yarn",
+        s"Unthread all yarns")
+    case ThreadYarn(Some(yarn), None) =>
+      (s"Thread Yarn ${yarn.name}",
+        s"Thread the yarn ${yarn.name}")
+    case ThreadYarn(None, Some(yarn)) =>
+      (s"Thread Yarn ${yarn.name}",
+        s"Thread the yarn ${yarn.name} into B")
+    case ThreadYarn(Some(yarnA), Some(yarnB)) =>
+      (s"Thread Yarns ${yarnA.name} and ${yarnB.name}",
+        s"Thread the yarns ${yarnA.name} into A and ${yarnB.name} into B")
+
+    case KnitRow(c, dir, _) =>
+      val from = if (Left != dir) "left" else "right"
+      val to = if (Left == dir) "left" else "right"
+      (s"Knit Row (${c.name})",
+        s"Knit a row from $from to $to with the ${c.name} carriage")
+
+    case AddCarriage(c, at) =>
+      val lr = if (Left == at) "left" else "right"
+      (s"Add Carriage ${c.name}",
+        s"Add the carriage ${c.name} at the $lr side")
+
+    case ChangeCarriageSettings(KCarriageSettings(knob, mc, lever)) =>
+      (s"Change Settings K",
+        s"Change K carriage settings to $knob ${if (mc) "MC" else ""} with lever at ${lever.name}")
   }
 
   def stateAfter: KnittingState = {

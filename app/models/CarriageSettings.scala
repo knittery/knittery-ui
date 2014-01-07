@@ -4,9 +4,15 @@ sealed trait CarriageSettings {
   val carriage: CarriageType
 }
 
-sealed trait HoldingCamLever
-case object HoldingCamN extends HoldingCamLever
-case object HoldingCamH extends HoldingCamLever
+sealed trait HoldingCamLever {
+  def name: String
+}
+case object HoldingCamN extends HoldingCamLever {
+  override def name = "N"
+}
+case object HoldingCamH extends HoldingCamLever {
+  override def name = "H"
+}
 //case object HoldingCamI extends HoldingCamLever  //TODO implement 
 
 sealed trait KKnob

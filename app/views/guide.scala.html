@@ -5,15 +5,11 @@
 @main("Guide") {
   
 <div class="panel panel-default step-listing">
-  <div class="panel-heading">
-    <h3 class="panel-title">Steps</h3>
-  </div>
   <div class="panel-body">
     @step.all.map { s =>
     <div id="step-@step.stepNumber" class="panel panel-default step @if(s==step) {active}">
-      <div class="panel-body">
-        @s.name
-      </div>
+      <div class="panel-heading">@s.name</div>
+      <div class="panel-body">@s.description</div>
     </div>
     }
   </div>
