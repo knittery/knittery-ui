@@ -62,7 +62,8 @@ object KnittingCarriage {
         case NeedleState(NeedleD, yarns) if yarns.nonEmpty => PlainStitch(yarns)
         case NeedleState(NeedleE, yarns) if yarns.nonEmpty && settings.holdingCamLever == HoldingCamN =>
           PlainStitch(yarns)
-        case other => NoStitch
+        case NeedleState(NeedleE, _) => NoStitch
+        case other => EmptyStitch
       }
       (patternState, KnittedRow(knitted))
     }
