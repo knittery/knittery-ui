@@ -38,28 +38,27 @@ class FairIslePlannerSpec extends Specification {
       fold(e => throw new RuntimeException("Could run plan: " + e), identity)
   }
 
-  def knittedRow(stich: Stich*) = {
-    val stiches = stich ++ Stream.fill(Needle.count - stich.size)(NoStich)
-    KnittedRow(stiches)
+  def knittedRow(stitch: Stitch*) = {
+    val stitches = stitch ++ Stream.fill(Needle.count - stitch.size)(NoStitch)
+    KnittedRow(stitches)
   }
 
   "FairIslePlanner.singleBed" should {
     "process 5x4 red/green checkerboard pattern (after cast-on)" in new Patterns {
-
       val planner = Cast.onClosed(needle0, needle4, red) >>
         FairIslePlanner.singleBed(checkerboard(Needle.count, 4), red) >>
         Cast.offClosed(red)
       val state = runPlan(planner)
       val out = state.output
       out.height must_== 8
-      out.rows(0) must_== knittedRow(CastOnStich(red), CastOnStich(red), CastOnStich(red), CastOnStich(red), CastOnStich(red))
-      out.rows(1) must_== knittedRow(PlainStich(red), PlainStich(red), PlainStich(red), PlainStich(red), PlainStich(red))
-      out.rows(2) must_== knittedRow(PlainStich(red), PlainStich(red), PlainStich(red), PlainStich(red), PlainStich(red))
-      out.rows(3) must_== knittedRow(PlainStich(red), PlainStich(green), PlainStich(red), PlainStich(green), PlainStich(red))
-      out.rows(4) must_== knittedRow(PlainStich(green), PlainStich(red), PlainStich(green), PlainStich(red), PlainStich(green))
-      out.rows(5) must_== knittedRow(PlainStich(red), PlainStich(green), PlainStich(red), PlainStich(green), PlainStich(red))
-      out.rows(6) must_== knittedRow(PlainStich(green), PlainStich(red), PlainStich(green), PlainStich(red), PlainStich(green))
-      out.rows(7) must_== knittedRow(CastOffStich(red), CastOffStich(red), CastOffStich(red), CastOffStich(red), CastOffStich(red))
+      out.rows(0) must_== knittedRow(CastOnStitch(red), CastOnStitch(red), CastOnStitch(red), CastOnStitch(red), CastOnStitch(red))
+      out.rows(1) must_== knittedRow(PlainStitch(red), PlainStitch(red), PlainStitch(red), PlainStitch(red), PlainStitch(red))
+      out.rows(2) must_== knittedRow(PlainStitch(red), PlainStitch(red), PlainStitch(red), PlainStitch(red), PlainStitch(red))
+      out.rows(3) must_== knittedRow(PlainStitch(red), PlainStitch(green), PlainStitch(red), PlainStitch(green), PlainStitch(red))
+      out.rows(4) must_== knittedRow(PlainStitch(green), PlainStitch(red), PlainStitch(green), PlainStitch(red), PlainStitch(green))
+      out.rows(5) must_== knittedRow(PlainStitch(red), PlainStitch(green), PlainStitch(red), PlainStitch(green), PlainStitch(red))
+      out.rows(6) must_== knittedRow(PlainStitch(green), PlainStitch(red), PlainStitch(green), PlainStitch(red), PlainStitch(green))
+      out.rows(7) must_== knittedRow(CastOffStitch(red), CastOffStitch(red), CastOffStitch(red), CastOffStitch(red), CastOffStitch(red))
     }
 
   }

@@ -18,47 +18,47 @@ object Knitted {
   def empty = Knitted(Seq.empty)
 }
 
-case class KnittedRow(stiches: Seq[Stich]) {
-  def width = stiches.size
-  def patternString = stiches.map(_.patternString).mkString
+case class KnittedRow(stitches: Seq[Stitch]) {
+  def width = stitches.size
+  def patternString = stitches.map(_.patternString).mkString
   override def toString = patternString
 }
 
-sealed trait Stich {
+sealed trait Stitch {
   def patternString: String
 }
-case object NoStich extends Stich {
+case object NoStitch extends Stitch {
   override def patternString = " "
 }
 
-case class PlainStich(yarns: List[Yarn]) extends Stich {
-  require(yarns.nonEmpty, "No yarn on plain stich")
+case class PlainStitch(yarns: List[Yarn]) extends Stitch {
+  require(yarns.nonEmpty, "No yarn on plain stitch")
   override def patternString = yarns.head.consoleColor + "^" + Console.RESET
 }
-object PlainStich {
-  def apply(yarn: Yarn): PlainStich = PlainStich(yarn :: Nil)
+object PlainStitch {
+  def apply(yarn: Yarn): PlainStitch = PlainStitch(yarn :: Nil)
 }
 
-case class PurlStich(yarns: List[Yarn]) extends Stich {
-  require(yarns.nonEmpty, "No yarn on purl stich")
+case class PurlStitch(yarns: List[Yarn]) extends Stitch {
+  require(yarns.nonEmpty, "No yarn on purl stitch")
   override def patternString = yarns.head.consoleColor + "-" + Console.RESET
 }
-object PurlStich {
-  def apply(yarn: Yarn): PurlStich = PurlStich(yarn :: Nil)
+object PurlStitch {
+  def apply(yarn: Yarn): PurlStitch = PurlStitch(yarn :: Nil)
 }
 
-case class CastOnStich(yarns: List[Yarn]) extends Stich {
-  require(yarns.nonEmpty, "No yarn for cast-on-stich")
+case class CastOnStitch(yarns: List[Yarn]) extends Stitch {
+  require(yarns.nonEmpty, "No yarn for cast-on-stitch")
   override def patternString = yarns.head.consoleColor + "_" + Console.RESET
 }
-object CastOnStich {
-  def apply(yarn: Yarn): CastOnStich = CastOnStich(yarn :: Nil)
+object CastOnStitch {
+  def apply(yarn: Yarn): CastOnStitch = CastOnStitch(yarn :: Nil)
 }
 
-case class CastOffStich(yarns: List[Yarn]) extends Stich {
-  require(yarns.nonEmpty, "No yarn for cast=off-stich")
+case class CastOffStitch(yarns: List[Yarn]) extends Stitch {
+  require(yarns.nonEmpty, "No yarn for cast=off-stitch")
   override def patternString = yarns.head.consoleColor + "_" + Console.RESET
 }
-object CastOffStich {
-  def apply(yarn: Yarn): CastOffStich = CastOffStich(yarn :: Nil)
+object CastOffStitch {
+  def apply(yarn: Yarn): CastOffStitch = CastOffStitch(yarn :: Nil)
 }

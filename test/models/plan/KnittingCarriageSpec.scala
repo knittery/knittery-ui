@@ -39,17 +39,17 @@ class KnittingCarriageSpec extends Specification {
   }
 
   "K-KnittigCarriage on NL" should {
-    "knit plain red stiches with one yarn and needles to B" in new K {
+    "knit plain red stitches with one yarn and needles to B" in new K {
       val (needles, knitted) = carriageNL(Right)(allBWithRed).check
-      knitted.stiches must_== (1 to Needle.count).map(_ => PlainStich(red))
+      knitted.stitches must_== (1 to Needle.count).map(_ => PlainStitch(red))
     }
-    "knit plain red stiches with one yarn and needles to D" in new K {
+    "knit plain red stitches with one yarn and needles to D" in new K {
       val (needles, knitted) = carriageNL(Right)(allDWithRed).check
-      knitted.stiches must_== (1 to Needle.count).map(_ => PlainStich(red))
+      knitted.stitches must_== (1 to Needle.count).map(_ => PlainStitch(red))
     }
-    "knit plain red stiches with one yarn and needles to E" in new K {
+    "knit plain red stitches with one yarn and needles to E" in new K {
       val (needles, knitted) = carriageNL(Right)(allEWithRed).check
-      knitted.stiches must_== (1 to Needle.count).map(_ => PlainStich(red))
+      knitted.stitches must_== (1 to Needle.count).map(_ => PlainStitch(red))
     }
 
     "move all needles to B and put red yarn on them if they were at B" in new K {
@@ -67,9 +67,9 @@ class KnittingCarriageSpec extends Specification {
   }
 
   "K-KnittigCarriage on KC2 with plain" should {
-    "knit plain red stiches with one yarn and needles to B" in new K {
+    "knit plain red stitches with one yarn and needles to B" in new K {
       val (needles, knitted) = carriageKC2plain(evenOddPattern)(Right)(allBWithRed).check
-      knitted.stiches must_== (0 until Needle.count).map(_ => PlainStich(red))
+      knitted.stitches must_== (0 until Needle.count).map(_ => PlainStitch(red))
     }
     "move every second needle to D in the even odd pattern" in new K {
       val (needles, knitted) = carriageKC2plain(evenOddPattern)(Right)(allBWithRed).check
@@ -87,19 +87,19 @@ class KnittingCarriageSpec extends Specification {
       val (needles, knitted) = carriageKC2plain(allDPattern)(Right)(allBDEvenOddWithRedGreen).check
       needles.all must contain(NeedleState(NeedleD, red)).forall
     }
-    "knit plain red/green stich pattern with even odd needles and even odd pattern" in new K {
+    "knit plain red/green stitch pattern with even odd needles and even odd pattern" in new K {
       val (needles, knitted) = carriageKC2plain(evenOddPattern)(Right)(allBDEvenOddWithRedGreen).check
-      knitted.stiches.zipWithIndex.foreach {
-        case (stich, index) if index % 2 == 0 => stich must_== PlainStich(red)
-        case (stich, index) => stich must_== PlainStich(green)
+      knitted.stitches.zipWithIndex.foreach {
+        case (stitch, index) if index % 2 == 0 => stitch must_== PlainStitch(red)
+        case (stitch, index) => stitch must_== PlainStitch(green)
       }
     }
   }
 
   "K-KnittigCarriage on KC2 with MC" should {
-    "knit plain red stiches with one yarn and needles to B" in new K {
+    "knit plain red stitches with one yarn and needles to B" in new K {
       val (needles, knitted) = carriageKC2MC(evenOddPattern)(Right)(allBWithRed).check
-      knitted.stiches must_== (0 until Needle.count).map(_ => PlainStich(red))
+      knitted.stitches must_== (0 until Needle.count).map(_ => PlainStitch(red))
     }
     "move every second needle to D in the even odd pattern" in new K {
       val (needles, knitted) = carriageKC2MC(evenOddPattern)(Right)(allBWithRed).check
@@ -125,11 +125,11 @@ class KnittingCarriageSpec extends Specification {
           yarn must_== (if (index % 2 == 0) List(red) else List(green))
       }
     }
-    "knit plain red/green stich pattern with even odd needles and even odd pattern" in new K {
+    "knit plain red/green stitch pattern with even odd needles and even odd pattern" in new K {
       val (needles, knitted) = carriageKC2MC(evenOddPattern)(Right)(allBDEvenOddWithRedGreen).check
-      knitted.stiches.zipWithIndex.foreach {
-        case (stich, index) if index % 2 == 0 => stich must_== PlainStich(red)
-        case (stich, index) => stich must_== PlainStich(green)
+      knitted.stitches.zipWithIndex.foreach {
+        case (stitch, index) if index % 2 == 0 => stitch must_== PlainStitch(red)
+        case (stitch, index) => stitch must_== PlainStitch(green)
       }
     }
   }

@@ -80,8 +80,8 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends Step {
         } else before
       }.
       knit { n =>
-        if (needles.contains(n)) CastOnStich(yarn)
-        else NoStich
+        if (needles.contains(n)) CastOnStitch(yarn)
+        else NoStitch
       }.
       success[String]
   }
@@ -97,17 +97,17 @@ case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step
       state2 = state.
         knit { n =>
           if (filter(n)) state.needles(n) match {
-            case NeedleState(_, Nil) => NoStich
-            case NeedleState(_, yarns) => PlainStich(yarns)
+            case NeedleState(_, Nil) => NoStitch
+            case NeedleState(_, yarns) => PlainStitch(yarns)
           }
-          else NoStich
+          else NoStitch
         }.
         knit { n =>
           if (filter(n)) state.needles(n) match {
-            case NeedleState(_, Nil) => NoStich
-            case NeedleState(_, yarns) => CastOffStich(withYarn)
+            case NeedleState(_, Nil) => NoStitch
+            case NeedleState(_, yarns) => CastOffStitch(withYarn)
           }
-          else NoStich
+          else NoStitch
         }.
         moveNeedles(n => if (filter(n)) NeedleState(NeedleA) else state.needles(n))
     } yield state2

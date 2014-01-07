@@ -58,11 +58,11 @@ object KnittingCarriage {
       //Knitting performed
       val knitted = needles.all.map {
         //TODO part modes
-        case NeedleState(NeedleB, yarns) if yarns.nonEmpty => PlainStich(yarns)
-        case NeedleState(NeedleD, yarns) if yarns.nonEmpty => PlainStich(yarns)
+        case NeedleState(NeedleB, yarns) if yarns.nonEmpty => PlainStitch(yarns)
+        case NeedleState(NeedleD, yarns) if yarns.nonEmpty => PlainStitch(yarns)
         case NeedleState(NeedleE, yarns) if yarns.nonEmpty && settings.holdingCamLever == HoldingCamN =>
-          PlainStich(yarns)
-        case other => NoStich
+          PlainStitch(yarns)
+        case other => NoStitch
       }
       (patternState, KnittedRow(knitted))
     }
