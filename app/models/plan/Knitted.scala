@@ -7,15 +7,34 @@ class Knitted private (matrix: Matrix[Stitch]) {
   def data = matrix
   def height = matrix.height
   def width = matrix.width
-  
+
   def rows = matrix.rows
 
-  def +(row: Needle => Stitch) = {
-    new Knitted(matrix :+ row.all)
+  def +(row: Needle => Stitch) = new Knitted(matrix :+ row.all)
+
+  private def emptyOrNo(s: Seq[Stitch]) = s.forall(s => s == NoStitch || s == EmptyStitch)
+  def clean = {
+    matrix.rows.
+      filterNot(_.forall(_ == NoStitch)). // Filter all rows containing no stitches
+      transpose.
+      // Remove empty columns at the side
+      dropWhile(emptyOrNo).
+      reverse.dropWhile(emptyOrNo).reverse.
+      map { column =>
+        column
+      }.
+      transpose.
+      //Remove top/bottom empty rows
+      dropWhile(emptyOrNo).
+      reverse.dropWhile(emptyOrNo).reverse
   }
 
-//  def patternString = rows.reverse.mkString("\n")
-//  override def toString = patternString
+  def patternString = {
+    clean.reverse.
+      map(_.map(_.patternString).mkString).
+      mkString("\n")
+  }
+  override def toString = patternString
 }
 object Knitted {
   def empty = new Knitted(IndexedSeq.empty)

@@ -49,6 +49,7 @@ class FairIslePlannerSpec extends Specification {
         Cast.offClosed(red)
       val state = runPlan(planner)
       val out = state.output
+      println(out.patternString)
       out.height must_== 8
       out.rows(0) must_== knittedRow(CastOnStitch(red), CastOnStitch(red), CastOnStitch(red), CastOnStitch(red), CastOnStitch(red))(NoStitch)
       out.rows(1) must_== knittedRow(PlainStitch(red), PlainStitch(red), PlainStitch(red), PlainStitch(red), PlainStitch(red))(EmptyStitch)
