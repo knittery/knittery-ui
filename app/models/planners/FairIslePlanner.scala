@@ -35,12 +35,12 @@ object FairIslePlanner {
     //Knit the pattern rows
     _ <- pattern.rows.toVector.traverse(row => for {
       yarns <- optimizeYarn(row.toSet)
-      _ <- Basics.knitPatternRow(KCarriage, knitActions(row, needle0, yarns))
+      _ <- Basics.knitRow(KCarriage, Some(knitActions(row, needle0, yarns)))
       _ <- setupCarriage(true)
       _ <- (Basics.yarns _).tupled(yarns)
     } yield ())
     //Knit a finishing row
-    _ <- Basics.knitPatternRow(KCarriage, _ => NeedleToB)
+    _ <- Basics.knitRow(KCarriage, Some(_ => NeedleToB))
   } yield ()
 
   //TODO also take into account the next rows to knit

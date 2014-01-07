@@ -10,11 +10,7 @@ import utils._
 sealed trait Step extends (KnittingState => Validation[String, KnittingState])
 
 /** Knits a row using a carriage. */
-sealed trait KnitARow extends Step {
-  def carriage: CarriageType
-  def direction: Direction
-  protected def needleActionRow: Option[NeedleActionRow]
-
+case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow: Option[NeedleActionRow] = None) extends Step {
   override def apply(state: KnittingState) = {
     for {
       kc <- knittingCarriage(state, needleActionRow)
@@ -38,14 +34,6 @@ sealed trait KnitARow extends Step {
       }
     } yield c
   }
-}
-
-case class KnitRow(carriage: CarriageType, direction: Direction) extends KnitARow {
-  override protected def needleActionRow = None
-}
-
-case class KnitPatternRow(carriage: CarriageType, direction: Direction, pattern: NeedleActionRow) extends KnitARow {
-  override protected def needleActionRow = Some(pattern)
 }
 
 case class ChangeCarriageSettings(settings: CarriageSettings) extends Step {

@@ -33,10 +33,10 @@ object Basics {
     } yield (oldA, oldB)
   }
 
-  /** Knit a pattern row. */
-  def knitPatternRow(carriage: CarriageType, pattern: NeedleActionRow) = for {
+  /** Knit a row. */
+  def knitRow(carriage: CarriageType, pattern: Option[NeedleActionRow] = None) = for {
     dir <- Planner.validate(_.nextDirection(carriage))
-    _ <- KnitPatternRow(carriage, dir, pattern)
+    _ <- KnitRow(carriage, dir, pattern)
   } yield ()
 
   /** Change carriage settings (if necessary). Return the old settings. */

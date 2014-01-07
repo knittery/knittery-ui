@@ -27,8 +27,7 @@ class GuideStep private (val step: Step, private val processedReversed: List[Ste
     case ClosedCastOff(_, _) => "Cast off"
     case AddCarriage(_, _) => "Add Carriage"
     case ThreadYarn(_, _) => "Thread Yarn"
-    case KnitPatternRow(_, _, _) => "Knit Row"
-    case KnitRow(_, _) => "Knit Row"
+    case KnitRow(_, _, _) => "Knit Row"
     case ChangeCarriageSettings(_) => "Change Settings"
   }
 
