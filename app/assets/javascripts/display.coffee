@@ -1,7 +1,7 @@
 $(() ->
   req = jsRoutes.controllers.Display.positions().ajax({
     success: (data) ->
-      setPosition(carriage, position) for carriage, position of data.positions
+      window.machineEvents.publish("positionChange", {carriage: c, position: p}) for c, p of data.positions
       setRow(data.row)
       setNeedles(data.patternRow)
   })
@@ -10,12 +10,20 @@ $(() ->
   ws.onmessage = (msg) ->
     parsed = $.parseJSON(msg.data)
     updateFrom(parsed)
+
+  $("#bar .progress-bar").carriageBar()
+  $(".graphical .needle-pos").carriagePosition(false)
+  $(".graphical .carriage-type").currentCarriageType()
+  $("#K-position .positions-value").carriagePosition(true, "K")
+  $("#L-position .positions-value").carriagePosition(true, "L")
+  $("#G-position .positions-value").carriagePosition(true, "G")
+
+  window.machineEvents.start(jsRoutes.controllers.Display.subscribe())
 )
 
 updateFrom = (msg) ->
   switch msg.event
     when "positionChange"
-      setPosition(msg.carriage, msg.position)
       setRow(msg.row)
     when "needlePatternUpdate"
       setNeedles(msg.patternRow)
@@ -27,33 +35,6 @@ setNeedles = (patternRow) ->
   $(".needles").data("needles", patternRow)
   $(".needles").trigger("updated")
   
-setPosition = (carriage, position) ->
-  [needlePercentage, text] = switch position.where
-    when "left"    then [0, "-#{position.overlap} left"]
-    when "right"   then [100, "-#{position.overlap} right"]
-    when "needles" then [(position.index+0.5)*100/200, position.needle]
-    else ""
-
-  $("#"+carriage+"-position .positions-value").text(text)
-
-  $(".graphical .carriage-type").text("Carriage (#{carriage})")
-
-  bar = $("#bar .progress-bar")
-  color = switch carriage
-    when "K" then "info"
-    when "L" then "success"
-    when "G" then "warning"
-  bar.removeClass("progress-bar-#{c}") for c in ["info", "warning", "success"]
-  bar.addClass("progress-bar-#{color}")
-  bar.attr("aria-valuenow", needlePercentage)
-  bar.width(needlePercentage + "%")
-  bar.find("span.sr-only").text(text)
-
-  $(".graphical .needle-pos").text(switch position.where
-    when "needles" then position.needle
-    else position.where
-  )
-
 $(() ->
   $(".needles").needles(200)
 )
