@@ -7,7 +7,7 @@ import models._
 import utils._
 
 trait KnittingCarriage {
-  def apply(direction: Direction)(needles: NeedleStateRow): Validation[String, (NeedleStateRow, KnittedRow)]
+  def apply(direction: Direction)(needles: NeedleStateRow): Validation[String, (NeedleStateRow, Needle => Stitch)]
 }
 
 object KnittingCarriage {
@@ -56,7 +56,7 @@ object KnittingCarriage {
         case None => baseState
       }
       //Knitting performed
-      val knitted = needles.all.map {
+      def knitted(n: Needle) = needles(n) match {
         //TODO part modes
         case NeedleState(NeedleB, yarns) if yarns.nonEmpty => PlainStitch(yarns)
         case NeedleState(NeedleD, yarns) if yarns.nonEmpty => PlainStitch(yarns)
@@ -65,7 +65,7 @@ object KnittingCarriage {
         case NeedleState(NeedleE, _) => NoStitch
         case other => EmptyStitch
       }
-      (patternState, KnittedRow(knitted))
+      (patternState, knitted _)
     }
 
     def modifyNeedles(direction: Direction)(before: NeedlePatternRow) = ???

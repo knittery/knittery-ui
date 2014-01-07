@@ -38,10 +38,9 @@ class FairIslePlannerSpec extends Specification {
       fold(e => throw new RuntimeException("Could run plan: " + e), identity)
   }
 
-  def knittedRow(stitch: Stitch*)(default: Stitch = EmptyStitch) = {
-    val stitches = stitch ++ Stream.fill(Needle.count - stitch.size)(default)
-    KnittedRow(stitches)
-  }
+  def knittedRow(stitch: Stitch*)(default: Stitch = EmptyStitch) = { (n: Needle) =>
+    stitch.lift(n.index).getOrElse(default)
+  }.all
 
   "FairIslePlanner.singleBed" should {
     "process 5x4 red/green checkerboard pattern (after cast-on)" in new Patterns {

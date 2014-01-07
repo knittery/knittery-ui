@@ -1,28 +1,24 @@
 package models.plan
 
-class Knitted private (val rows: Seq[KnittedRow]) {
-  def height = rows.size
-  def width = {
-    if (rows.size == 0) throw new IllegalStateException("unknown width")
-    rows(0).width
+import models._
+import utils._
+
+class Knitted private (matrix: Matrix[Stitch]) {
+  def data = matrix
+  def height = matrix.height
+  def width = matrix.width
+  
+  def rows = matrix.rows
+
+  def +(row: Needle => Stitch) = {
+    new Knitted(matrix :+ row.all)
   }
 
-  def +(row: KnittedRow) = {
-    require(row.width == width, "non uniform width")
-    new Knitted(rows :+ row)
-  }
-
-  def patternString = rows.reverse.mkString("\n")
-  override def toString = patternString
+//  def patternString = rows.reverse.mkString("\n")
+//  override def toString = patternString
 }
 object Knitted {
-  def empty = new Knitted(Seq.empty)
-}
-
-case class KnittedRow(stitches: Seq[Stitch]) {
-  def width = stitches.size
-  def patternString = stitches.map(_.patternString).mkString
-  override def toString = patternString
+  def empty = new Knitted(IndexedSeq.empty)
 }
 
 sealed trait Stitch {
