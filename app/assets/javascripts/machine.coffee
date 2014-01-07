@@ -4,6 +4,8 @@ Event Types:
       - position
       - carriage
       - row
+  - needlePatternUpdate
+      - patternRow
 Don't forget to start
 ###
 MachineEvents = {
@@ -76,6 +78,17 @@ jQuery.fn.extend({
     root = $(this)
     window.machineEvents.subscribe("positionChange", (event, msg) ->
       root.text(msg.row)
+    )
+
+  ###
+    Shows a needle board that is connected to the machine
+  ###
+  machineNeedles: () ->
+    root = $(this)
+    root.needles(200)
+    window.machineEvents.subscribe("needlePatternUpdate", (event, msg) ->
+      root.data("needles", msg.patternRow)
+      root.trigger("updated")
     )
 })
 
