@@ -21,6 +21,6 @@ GET     /pattern                    controllers.Pattern.show
 POST    /pattern/upload				controllers.Pattern.upload
 
 # Assets
-GET     /assets/javascripts/routes.js               controllers.Application.javascriptRoutes()
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
-GET     /libraries/*file              controllers.WebJarAssets.at(file)
+GET     /assets/javascripts/routes.js   controllers.Application.javascriptRoutes()
+GET     /assets/*file                   controllers.Assets.at(path="/public", file)
+GET     /libraries/*file                controllers.WebJarAssets.at(file)
