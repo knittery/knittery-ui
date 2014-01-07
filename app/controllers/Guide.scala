@@ -21,60 +21,24 @@ import java.util.UUID
 
 object Guide extends Controller {
   private implicit val timeout: Timeout = 100.millis
-  private def system = Akka.system
-  private def actorName(id: UUID) = "guider-" + id.toString
 
-  class RequestWithGuider[A](val guider: ActorRef, request: Request[A]) extends WrappedRequest[A](request)
-  case class GuiderAction(id: UUID) extends ActionBuilder[RequestWithGuider] {
-    protected override def invokeBlock[A](request: Request[A], block: (RequestWithGuider[A]) ⇒ Future[SimpleResult]) = {
-      val actor = system.actorSelection(system / actorName(id))
-      actor.resolveOne(100.millis).
-        map(Some(_)).recover { case _ => None }.
-        flatMap {
-          case Some(guider) => block(new RequestWithGuider(guider, request))
-          case None => Future.successful(Redirect(routes.Guide.start))
-        }
-    }
-  }
+  protected def guider = Akka.system.actorSelection("akka://application/user/guider")
 
-  def start = Action {
-    val id = UUID.randomUUID
-    val guider = Akka.system.actorOf(Guider.props(plan), actorName(id))
-    Redirect(routes.Guide.execute(id))
-  }
-
-  def execute(id: UUID) = GuiderAction(id).async { request =>
+  def view = Action.async {
     for {
-      Guider.CurrentStep(step) <- request.guider ? Guider.QueryStep
-    } yield Ok(views.html.guide(step, id))
+      Guider.CurrentStep(step) <- guider ? Guider.QueryStep
+    } yield Ok(views.html.guide(step))
   }
 
-  def next(id: UUID) = GuiderAction(id).async { request =>
+  def next = Action.async { request =>
     for {
-      Guider.CommandExecuted(_) <- request.guider ? Guider.Next
-    } yield Redirect(routes.Guide.execute(id))
+      Guider.CommandExecuted(_) <- guider ? Guider.Next
+    } yield Redirect(routes.Guide.view)
   }
-  def previous(id: UUID) = GuiderAction(id).async { request =>
+  def previous = Action.async { request =>
     for {
-      Guider.CommandExecuted(_) <- request.guider ? Guider.Previous
-    } yield Redirect(routes.Guide.execute(id))
+      Guider.CommandExecuted(_) <- guider ? Guider.Previous
+    } yield Redirect(routes.Guide.view)
   }
 
-  private val plan = {
-    val yarn1 = Yarn("red", Color.red)
-    val yarn2 = Yarn("blue", Color.blue)
-    def checkerboard(w: Int, h: Int): Matrix[Yarn] = {
-      val s = Stream.from(0).map(i => if (i % 2 == 0) yarn1 else yarn2)
-      (0 until h).map { i =>
-        val c = if (i % 2 == 0) s else s.drop(1)
-        c.take(w).toIndexedSeq
-      }
-    }
-    val width = 40
-    val height = 20
-    val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), yarn1) >>
-      FairIslePlanner.singleBed(checkerboard(Needle.count, height), yarn1) >>
-      Cast.offClosed(yarn1)
-    planner.plan.toOption.get
-  }
 }

@@ -13,6 +13,9 @@ object Guider {
   case class CommandExecuted(command: Command) extends Event
   case class CommandNotExecuted(command: Command, reason: String) extends Event
 
+  /** Load a new plan. Answer: Command[Not]Executed. */
+  case class LoadPlan(plan: Plan) extends Command
+
   /** Move to the next step. Answer: Command[Not]Executed. */
   case object Next extends Command
   /** Move to the previous step. Answer: Command[Not]Executed. */
@@ -28,14 +31,14 @@ object Guider {
   /** Unsubscribe from ChangeEvent. Answer: Command[Not]Executed. */
   case object Unsubscribe extends Command
 
-  def props(plan: Plan) = Props(new Guider(plan))
+  def props = Props(new Guider)
 
-  private class Guider(plan: Plan) extends Actor {
-    override def preStart = {
-      self ! GuideStep(plan)
-    }
+  private class Guider extends Actor {
     override def receive = {
-      case step: GuideStep => context become stepping(step)
+      case cmd @ LoadPlan(plan) =>
+        val step = GuideStep(plan)
+        context become (stepping(step))
+        sender ! CommandExecuted(cmd)
     }
 
     var subscribers = Set.empty[ActorRef]
@@ -46,7 +49,7 @@ object Guider {
       context become (stepping(newStep))
     }
 
-    def stepping(step: GuideStep): Receive = {
+    def stepping(step: GuideStep): Receive = receive orElse {
       case QueryStep => sender ! CurrentStep(step)
 
       case cmd @ Next =>
@@ -76,5 +79,4 @@ object Guider {
         subscribers = subscribers - sender
     }
   }
-
 }

@@ -1,4 +1,4 @@
-@(step: models.guide.GuideStep, id: java.util.UUID)
+@(step: models.guide.GuideStep)
 
 @import helper._
 
@@ -19,10 +19,10 @@
   </div>
 </div>
   <div>
-		@form(routes.Guide.next(id)) {
+		@form(routes.Guide.next) {
 		  <input type="submit" value="Next">
 		}
-    @form(routes.Guide.previous(id)) {
+    @form(routes.Guide.previous) {
       <input type="submit" value="Previous">
     }
   </div>
