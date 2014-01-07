@@ -6,6 +6,9 @@
   
 <div class="panel panel-default step-listing">
   <div class="panel-body">
+    <div class="total-count">
+      Step @step.stepNumber of @step.all.size
+    </div>
     @step.all.map { s =>
     <div id="step-@step.stepNumber" class="panel panel-default step @if(s==step) {active}">
       <div class="panel-heading">@s.name</div>
