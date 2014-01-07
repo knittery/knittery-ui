@@ -7,7 +7,8 @@ package object models {
   }
 
   type NeedleActionRow = Needle => NeedleAction
-  implicit class RichNeedleActionRow(val row: NeedleActionRow) extends AnyVal {
-    def all = Needle.all.map(row)
+
+  implicit class RichNeedleFun[A](val f: Needle => A) extends AnyVal {
+    def all = Needle.all.map(f)
   }
 }
