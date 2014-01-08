@@ -47,9 +47,9 @@ class Machine(connectorProps: Props) extends Actor {
       sender ! Positions(positions, row)
 
     case LoadPattern(p) =>
-      row = -1
       pattern = p
-      patternKnitter ! SetNeedlePattern(p, row)
+      rowTracker ! SetRow(-1)
+      patternKnitter ! SetNeedlePattern(p, -1)
 
     case GetNeedlePattern =>
       sender ! NeedlePatternUpdate(pattern.orElse(NeedlePattern.empty)(row), pattern)
