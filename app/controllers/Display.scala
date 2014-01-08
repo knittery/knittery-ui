@@ -5,6 +5,7 @@ import play.api.Play._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.iteratee._
+import Concurrent.Channel
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
 import akka.actor._
@@ -13,10 +14,14 @@ import akka.util.Timeout
 import models._
 import models.machine.Machine._
 import utils.JsonSerialization._
+import utils.SubscriptionActor
+import utils.SubscribeFailed
+import utils.ActorEnumerator
+import models.machine.Machine
 
 object Display extends Controller {
-
-  protected def machine = Akka.system.actorSelection(Akka.system / "machine")
+  protected implicit val system = Akka.system
+  protected def machine = system.actorSelection(system / "machine")
   protected implicit val timeout: Timeout = 2.seconds
 
   def show = Action {
@@ -42,41 +47,20 @@ object Display extends Controller {
     }
   }
 
-  def subscribe = WebSocket.using[JsValue] { req =>
-    (Iteratee.ignore, Subscription.enumerator)
+  def subscribe = WebSocket.async[JsValue] { req =>
+    for {
+      machineRef <- machine.resolveOne
+    } yield (Iteratee.ignore, machineEnumerator(machineRef))
   }
 
-  object Subscription {
-    def enumerator = e
-
-    private val (e, channel) = Concurrent.broadcast[JsValue]
-    Akka.system.actorOf(Props(new SubscriptionActor), "display-subscription")
-
-    class SubscriptionActor extends Actor with ActorLogging {
-      override def preStart = {
-        log.debug("Subscribing to machine")
-        machine ! Subscribe
-      }
-      override def postStop = {
-        machine ! Unsubscribe
-      }
-      override def receive = {
-        case Subscribed =>
-          log.debug("Subscription established")
-          context become subscribed(sender)
-      }
-      def subscribed(to: ActorRef): Receive = {
-        case event: PositionChanged =>
-          channel push Json.toJson(event)
+  def machineEnumerator(machine: ActorRef) = {
+    ActorEnumerator.enumerator(Machine.subscription(machine)) &>
+      Enumeratee.collect {
+        case event: PositionChanged => Json.toJson(event)
         case NeedlePatternUpdate(row, _) =>
-          channel push Json.toJson(Json.obj(
+          Json.toJson(Json.obj(
             "event" -> "needlePatternUpdate",
             "patternRow" -> row))
-        case Terminated if sender == to =>
-          log.debug(s"Resubscribing, $sender has crashed")
-          machine ! Subscribe
-          context become receive
       }
-    }
   }
 }
