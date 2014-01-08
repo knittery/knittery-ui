@@ -1,19 +1,22 @@
-send = (data) ->
+send = (data, succ) ->
   req = jsRoutes.controllers.SerialSimulator.send().ajax({
     data: data
     contentType: "text/plain"
     dataType: "text"
+    success: succ
   })
 
 $("input#send").click(() ->
-  stopAuto
+  stopAuto()
   send($("input#toSend").val())
   $("input#toSend").select()
   false
 )
 
 $(".send-templates a").click(() ->
+  stopAuto()
   send($(this).data("value"))
+  false
 )
 
 
@@ -21,14 +24,13 @@ autoRunning = false
 autoTimer = 0
 autoPos = 0
 autoDirection = 0
-stopAuto = () ->
-  window.clearInterval(autoTimer) if autoRunning
-  autoRunning = false
+autoSpeed = 0
+stopAuto = () -> autoRunning = false
 
 $(".automatic a.start").click(() ->
-  stopAuto
+  stopAuto()
   
-  speed = $(this).data("speed")
+  autoSpeed = $(this).data("speed")
   carriage = $(this).data("carriage")
   min = $(this).data("min")
   max = $(this).data("max")
@@ -41,10 +43,12 @@ $(".automatic a.start").click(() ->
       when autoPos < 0 then ["<", 0]
       when autoPos > 199 then [">", 199]
       else ["_", autoPos]
-    send("@\t#{needle}\t#{autoPos}\t#{dir}\t#{carriage}\t#{cp}")
+    send("@\t#{needle}\t#{autoPos}\t#{dir}\t#{carriage}\t#{cp}", () ->
+      window.setTimeout(handle, autoSpeed) if autoRunning
+    )
 
   autoRunning = true
-  autoTimer = window.setInterval(handle, speed)
+  autoTimer = window.setTimeout(handle, autoSpeed)
   false
 )
 
