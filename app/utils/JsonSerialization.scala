@@ -4,6 +4,7 @@ import play.api.libs.json._
 import models._
 import models.machine.Machine._
 import models.guide._
+import models.plan.KnittingState
 
 object JsonSerialization {
 
@@ -44,11 +45,19 @@ object JsonSerialization {
     }
   }
 
+  implicit object KnittingStateWrite extends Writes[KnittingState] {
+    override def writes(state: KnittingState) = {
+      Json.obj("needles" -> state.needles.pattern)
+    }
+  }
+
   implicit object GuideStepWrite extends Writes[GuideStep] {
     override def writes(step: GuideStep) = {
       Json.obj("name" -> step.name,
         "description" -> step.description,
-        "number" -> step.stepNumber)
+        "number" -> step.stepNumber,
+        "stateBefore" -> step.stateBefore,
+        "stateAfter" -> step.stateAfter)
     }
   }
 }

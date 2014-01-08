@@ -16,8 +16,9 @@ jQuery.fn.extend({
     background = "#FFFFFF"
     
     drawNeedle = (value) ->
-      ctx.fillStyle = "#222222"
-      switch value
+      if (value.toUpperCase() == value) then ctx.fillStyle = "#222222"
+      else ctx.fillStyle = "#CC2222"
+      switch value.toUpperCase()
         when "A" then ctx.fillRect(1, 0, needleWidth-1, 1)
         when "B" then ctx.fillRect(1, 0, needleWidth-1, 4)
         when "D" then ctx.fillRect(1, 0, needleWidth-1, 7)
