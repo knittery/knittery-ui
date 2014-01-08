@@ -25,48 +25,46 @@ import java.awt.image.BufferedImage
 object Pattern extends Controller {
 
   protected def machine = Akka.system.actorSelection(Akka.system / "machine")
- 
+
   case class GaugeFormData(widthInCmImg: BigDecimal, heightInCmImg: BigDecimal, widthInCm: BigDecimal, countStitches: Int, heightInCm: BigDecimal, countRows: Int)
-  
+
   val uploadForm = Form(
-         mapping(
-        		 "widthInCmImg" -> bigDecimal,
-        		 "heightInCmImg" -> bigDecimal,
-        		 "widthInCm" -> bigDecimal,
-        		 "countStitches" -> number,
-        		 "heightInCm" -> bigDecimal,
-        		 "countRows" -> number
-         )(GaugeFormData.apply)(GaugeFormData.unapply)
-   )
-   
+    mapping(
+      "widthInCmImg" -> bigDecimal,
+      "heightInCmImg" -> bigDecimal,
+      "widthInCm" -> bigDecimal,
+      "countStitches" -> number,
+      "heightInCm" -> bigDecimal,
+      "countRows" -> number)(GaugeFormData.apply)(GaugeFormData.unapply))
+
   def show = Action {
-    val img = ImageIO.read(new File("public/images/pattern.png"))
-    val pattern = NeedlePattern.loadCenter(img)
-    machine ! Machine.LoadPattern(pattern)
     Ok(views.html.pattern())
   }
 
   def upload = Action(parse.multipartFormData) { implicit request =>
-  	val gaugeFormData = uploadForm.bindFromRequest().get
+    val gaugeFormData = uploadForm.bindFromRequest().get
     val gauge = new Gauge(gaugeFormData.widthInCm.doubleValue, gaugeFormData.countStitches, gaugeFormData.heightInCm.doubleValue, gaugeFormData.countRows)
 
-   	request.body.file("pattern").map { pattern =>
-	    val filename = pattern.filename 
-	    val contentType = pattern.contentType
-	      
-	    pattern.ref.moveTo(new File("public/images/pattern.png"), true)
-	      
-	    //Pattern-Image will be converted, if a gauge is provided
-	    if(gauge.getStitchesPerCm()>0){
-	    	val bufferedImage = PatternConverter.convertToPattern(ImageIO.read(new File("public/images/pattern.png")), gaugeFormData.widthInCmImg.doubleValue, gaugeFormData.heightInCmImg.doubleValue, gauge)
-	        ImageIO.write(bufferedImage, "png", new File("public/images/pattern.png"));
-	    }
-      
-	    Redirect(routes.Pattern.show()) 
+    request.body.file("pattern").map { patternFile =>
+      val image = {
+        //Pattern-Image will be converted, if a gauge is provided
+        if (gauge.getStitchesPerCm() > 0) {
+          PatternConverter.convertToPattern(ImageIO.read(patternFile.ref.file),
+            gaugeFormData.widthInCmImg.doubleValue, gaugeFormData.heightInCmImg.doubleValue, gauge)
+        } else {
+          ImageIO.read(patternFile.ref.file)
+        }
+      }
+
+      ImageIO.write(image, "png", new File("public/images/pattern.png"))
+
+      val pattern = NeedlePattern.loadCenter(image)
+      machine ! Machine.LoadPattern(pattern)
+
+      Redirect(routes.Pattern.show())
     }.getOrElse {
-    	Redirect(routes.Pattern.show).flashing(
-    		"error" -> "Upload failed"
-    	)
+      Redirect(routes.Pattern.show).flashing(
+        "error" -> "Upload failed")
     }
   }
 }
