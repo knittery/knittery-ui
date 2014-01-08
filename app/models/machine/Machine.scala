@@ -68,14 +68,14 @@ class Machine(connectorProps: Props) extends Actor {
     case NeedlePatternRowChanged(rp, _, pattern) =>
       notify(NeedlePatternUpdate(rp, pattern))
 
-    case Terminated if sender == patternKnitter => //Pattern knitter crashed
+    case Terminated(`patternKnitter`) => //Pattern knitter crashed
       patternKnitter ! SetNeedlePattern(pattern, row)
-    case Terminated if sender == connector => //Connector crashed
+    case Terminated(`connector`) => //Connector crashed
       //TODO handle the crash
       //TODO reset the positions and requery somehow?
       ()
-    case Terminated => // subscriber terminates
-      subscribers -= sender
+    case Terminated(subscriber) =>
+      subscribers -= subscriber
   }
 }
 
