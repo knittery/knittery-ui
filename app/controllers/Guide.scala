@@ -5,11 +5,12 @@ import scala.concurrent.duration._
 import java.awt.Color
 import scalaz._
 import Scalaz._
-import akka.actor._
 import akka.util._
 import akka.pattern.ask
 import play.api.Play._
 import play.api.mvc._
+import play.api.libs.json._
+import play.api.libs.iteratee._
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
 import models._
@@ -17,12 +18,12 @@ import models.plan._
 import models.planners._
 import models.guide._
 import utils._
-import java.util.UUID
+import JsonSerialization._
 
 object Guide extends Controller {
   private implicit val timeout: Timeout = 100.millis
-
-  protected def guider = Akka.system.actorSelection(Akka.system / "guider")
+  private implicit def system = Akka.system
+  protected def guider = system.actorSelection(Akka.system / "guider")
 
   def view = Action.async {
     for {
@@ -41,4 +42,14 @@ object Guide extends Controller {
     } yield Redirect(routes.Guide.view)
   }
 
+  def subscribe = WebSocket.async[JsValue] { request =>
+    for {
+      actor <- guider.resolveOne()
+      e = ActorEnumerator.enumerator(Guider.subscription(actor)) &>
+        Enumeratee.collect {
+          case Guider.ChangeEvent(step) =>
+            Json.obj("event" -> "change", "step" -> step): JsValue
+        }
+    } yield (Iteratee.ignore, e)
+  }
 }

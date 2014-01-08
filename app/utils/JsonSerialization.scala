@@ -3,6 +3,7 @@ package utils
 import play.api.libs.json._
 import models._
 import models.machine.Machine._
+import models.guide._
 
 object JsonSerialization {
 
@@ -40,6 +41,14 @@ object JsonSerialization {
         case NeedleE => "E"
       }.mkString
       JsString(values)
+    }
+  }
+
+  implicit object GuideStepWrite extends Writes[GuideStep] {
+    override def writes(step: GuideStep) = {
+      Json.obj("name" -> step.name,
+        "description" -> step.description,
+        "number" -> step.stepNumber)
     }
   }
 }

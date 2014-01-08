@@ -5,6 +5,7 @@ import Scalaz._
 import akka.actor._
 import models._
 import models.plan._
+import utils.SubscriptionActor
 
 /** An instance of a plan execution. Keeps track of the current step. */
 object Guider {
@@ -32,6 +33,16 @@ object Guider {
   case object Unsubscribe extends Command
 
   def props = Props(new Guider)
+
+  def subscription(machine: ActorRef) = Props(new SubscriptionActor {
+    val to = machine
+    def subscribe = Subscribe
+    def subscribed = {
+      case CommandExecuted(Subscribe) => true
+      case CommandNotExecuted(Subscribe, _) => false
+    }
+    def unsubscribe = Unsubscribe
+  })
 
   private class Guider extends Actor {
     override def receive = {

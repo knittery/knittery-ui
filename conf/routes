@@ -16,6 +16,7 @@ GET     /display/positions          controllers.Display.positions
 GET     /guide                      controllers.Guide.view
 POST    /guide/next                 controllers.Guide.next
 POST    /guide/previous             controllers.Guide.previous
+GET     /guide/subscribe            controllers.Guide.subscribe
 
 GET     /pattern                    controllers.Pattern.show
 POST    /pattern/upload				controllers.Pattern.upload

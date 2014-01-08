@@ -17,4 +17,6 @@ $(() ->
       window.machineEvents.publish("needlePatternUpdate", {patternRow: data.patternRow})
   })
   window.machineEvents.start(jsRoutes.controllers.Display.subscribe())
+
+  window.guideEvents.start(jsRoutes.controllers.Guide.subscribe())
 )
