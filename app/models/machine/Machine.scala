@@ -6,6 +6,7 @@ import models.connector.Connector._
 import NeedlePatternKnitter.NeedlePatternRowChanged
 import NeedlePatternKnitter.SetNeedlePattern
 import RowTracker.RowChanged
+import utils.SubscriptionActor
 
 /**
  * Actor representing the knitting machine.
@@ -81,6 +82,15 @@ class Machine(connectorProps: Props) extends Actor {
 
 object Machine {
   def props(connector: Props) = Props(new Machine(connector))
+
+  def subscription(machine: ActorRef) = Props(new SubscriptionActor {
+    val to = machine
+    def subscribe = Subscribe
+    def subscribed = {
+      case Subscribed => true
+    }
+    def unsubscribe = Unsubscribe
+  })
 
   sealed trait Command
   sealed trait Event
