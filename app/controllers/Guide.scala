@@ -45,11 +45,13 @@ object Guide extends Controller {
   def subscribe = WebSocket.async[JsValue] { request =>
     for {
       actor <- guider.resolveOne()
-      e = ActorEnumerator.enumerator(Guider.subscription(actor)) &>
-        Enumeratee.collect {
-          case Guider.ChangeEvent(step) =>
-            Json.obj("event" -> "change", "step" -> step): JsValue
-        }
-    } yield (Iteratee.ignore, e)
+      Guider.CurrentStep(step) <- actor ? Guider.QueryStep
+      e = ActorEnumerator.enumerator(Guider.subscription(actor))
+      fst = Enumerator[Any](Guider.ChangeEvent(step))
+      json = (fst >>> e) &> Enumeratee.collect {
+        case Guider.ChangeEvent(step) =>
+          Json.obj("event" -> "change", "step" -> step): JsValue
+      }
+    } yield (Iteratee.ignore, json)
   }
 }
