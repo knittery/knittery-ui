@@ -18,7 +18,7 @@ GuideEvents = {
   started: false
   start: (route) -> if (!started)
     me = this
-    ws = new WebSocket(route.webSocketURL())
+    ws = new ReconnectingWebSocket(route.webSocketURL())
     ws.onmessage = (msg) ->
       parsed = $.parseJSON(msg.data)
       me.publish(parsed.event, parsed)

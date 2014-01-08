@@ -60,7 +60,7 @@ $(".automatic a.stop").click(() ->
 
 $(() ->
   log = $("#log")
-  ws = new WebSocket(jsRoutes.controllers.SerialSimulator.subscribe().webSocketURL())
+  ws = new ReconnectingWebSocket(jsRoutes.controllers.SerialSimulator.subscribe().webSocketURL())
   ws.onmessage = (msg) ->
     value = htmlEncode(msg.data)
     log.html(value + "<br/>" + log.html())
