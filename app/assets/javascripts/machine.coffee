@@ -1,3 +1,23 @@
+machine = $().model("positions", "carriage", "row", "needles")
+window.machine = machine
+machine.positions = {}
+
+machine.start = (route) ->
+  return if this.started
+  me = this
+  ws = new ReconnectingWebSocket(route.webSocketURL())
+  ws.onmessage = (data) ->
+    msg = $.parseJSON(data.data)
+    switch msg.event
+      when "positionChange"
+        me.carriage = msg.carriage
+        me.row = msg.row
+        me.positions[msg.carriage] = msg.position
+      when "needlePatternUpdate"
+        me.needles = msg.patternRow
+  @started = true
+  machine
+
 ###
 Event Types:
   - positionChange
