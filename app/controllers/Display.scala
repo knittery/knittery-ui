@@ -48,19 +48,23 @@ object Display extends Controller {
   }
 
   def subscribe = WebSocket.async[JsValue] { req =>
+    val r = machine.resolveOne
+    val pos = machine ? GetPositions
+    val pat = machine ? GetNeedlePattern
     for {
-      machineRef <- machine.resolveOne
-    } yield (Iteratee.ignore, machineEnumerator(machineRef))
-  }
-
-  def machineEnumerator(machine: ActorRef) = {
-    ActorEnumerator.enumerator(Machine.subscription(machine)) &>
-      Enumeratee.collect {
+      machineRef <- r
+      Positions(data, row) <- pos
+      needlePattern @ NeedlePatternUpdate(_, _) <- pat
+      e = ActorEnumerator.enumerator(Machine.subscription(machineRef))
+      fst = Enumerator.enumerate[Any](data.map(d => PositionChanged(d._1, d._2, row))) >>>
+        Enumerator[Any](needlePattern)
+      json = Enumeratee.collect[Any] {
         case event: PositionChanged => Json.toJson(event)
         case NeedlePatternUpdate(row, _) =>
           Json.toJson(Json.obj(
             "event" -> "needlePatternUpdate",
             "patternRow" -> row))
       }
+    } yield (Iteratee.ignore, fst >>> e &> json)
   }
 }
