@@ -1,11 +1,14 @@
 jQuery.fn.extend({
   ###
     Model that triggers jQuery events when changed.
-    Usage example: $().model("name", "age", "country")
+    Usage example:
+      m = $().model("firstName", "lastName", "age", "country")
+      m.derived("name", ["firstName", "lastName"], (first, last) ->first + " " + last)
   ###
   model: (properties...) ->
     model = $({})
     addProperties(model, properties)
+    model.derived = addDerived(model)
     model
 
   ###
@@ -13,7 +16,7 @@ jQuery.fn.extend({
     Usage examples:
      - $("h1").link().text(model, "title")
      - $("h1").link().attr("class")(model, "something")
-     - $("h1").link().triggerClass("highlight")(model, "something", (v) -> v > 10)
+     - $("h1").link().switchClass("highlight")(model, "something", (v) -> v > 10)
   ###
   link: ->
     me = this
@@ -47,6 +50,19 @@ addProperty = (obj, name) ->
     enumerable: true
     configurable: true
   )
+
+addDerived = (obj) -> (name, dependsOn, fun) ->
+  me = this
+  Object.defineProperty(obj, name,
+    get: ->
+      args = (obj[p] for p in dependsOn)
+      fun.apply(me, args)
+    enumerable: true
+    configurable: true
+  )
+  for p in dependsOn
+    obj.bind(p+":change", -> obj.trigger(name+":change", [obj[name], name]))
+  obj
 
 linkFun = (to, property, f) ->
   to.bind(property+":change", (e, newValue) ->
