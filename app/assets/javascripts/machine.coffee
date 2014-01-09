@@ -65,15 +65,6 @@ jQuery.fn.extend({
     )
 
   ###
-    Updates the content to the name of the current carriage.
-  ###
-  currentCarriageType: () ->
-    root = $(this)
-    window.machineEvents.subscribe("positionChange", (event, msg) ->
-      root.text("Carriage #{msg.carriage}")
-    )
-
-  ###
     Updates the content to a textual representation of the carriage.
   ###
   carriagePosition: (detailed, carriage) ->
@@ -89,15 +80,6 @@ jQuery.fn.extend({
             when "needles" then position.needle
             else position.where
         root.text(value)
-    )
-
-  ###
-    Updates the content to a textual representation of the current row.
-  ###
-  rowNumber: () ->
-    root = $(this)
-    window.machineEvents.subscribe("positionChange", (event, msg) ->
-      root.text(msg.row)
     )
 
   ###
