@@ -23,6 +23,8 @@ jQuery.fn.extend({
         linkFun(to, property, (v) -> me.text(transform(v)))
       attr: (attr) -> (to, property, transform = undefinedToEmpty) ->
         linkFun(to, property, (v) -> me.attr(attr, transform(v)))
+      data: (data) -> (to, property, transform = undefinedToEmpty) ->
+        linkFun(to, property, (v) -> me.data(data, transform(v)); me.trigger(data+":data"))
       triggerClass: (className) -> (to, property, f = (v) -> v) ->
         linkFun(to, property, (v) ->
           if (f(v)) then me.addClass(className)
