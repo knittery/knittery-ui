@@ -2,7 +2,7 @@ jQuery.fn.extend({
   ###
   Shows a needle board using 2d-canvas.
   ###
-  needles: (needleCount) ->
+  needles: (needleCount, dataName = "needles") ->
     root = $(this)
     canvasJ = $("<canvas style='width: 100%; height: 100%'></canvas>")
     canvasJ.appendTo(root)
@@ -25,7 +25,7 @@ jQuery.fn.extend({
         when "E" then ctx.fillRect(1, 0, needleWidth-1, 10)
           
     draw = () ->
-      values = root.data("needles")
+      values = root.data(dataName)
       if not typeIsArray(values)
         av = []
         av.push(v) for v in values
@@ -39,8 +39,11 @@ jQuery.fn.extend({
         ctx.translate(needleWidth, 0)
       ctx.restore()
 
+    root.bind("changed", () -> draw())
     root.bind("updated", () -> draw())
-    draw()  	
+    root.bind(dataName+":data", () -> draw())
+    draw()
+    root
 })
 
 typeIsArray = Array.isArray || ( value ) -> return {}.toString.call( value ) is '[object Array]'
