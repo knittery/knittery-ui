@@ -35,6 +35,9 @@ jQuery.fn.extend({
           if (f(v)) then me.addClass(className)
           else me.removeClass(className)
         )
+      disabled: (to, property, transform = (v) -> v) ->
+        f = (v) -> if (transform(v)) then me.attr("disabled", "disabled") else me.removeAttr("disabled")
+        linkFun(to, property, f)
     }
 })
 
