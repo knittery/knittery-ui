@@ -25,6 +25,11 @@ class GuideStep private (val step: Step, private val processedReversed: List[Ste
   def name = info._1
   def description = info._2
 
+  def isKnitting = step match {
+    case KnitRow(_, _, _) => true
+    case other => false
+  }
+
   private def info = step match {
     case ClosedCastOn(from, to, yarn) =>
       ("Cast on",

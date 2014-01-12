@@ -55,6 +55,7 @@ object JsonSerialization {
     override def writes(step: GuideStep) = {
       Json.obj("name" -> step.name,
         "description" -> step.description,
+        "isKnitting" -> step.isKnitting,
         "number" -> step.stepNumber,
         "stateBefore" -> step.stateBefore,
         "stateAfter" -> step.stateAfter)

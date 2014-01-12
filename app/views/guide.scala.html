@@ -22,7 +22,7 @@
   </div>
   <div class="panel-body">
     @step.all.map { s =>
-    <div id="step-@s.stepNumber" class="panel panel-default step @if(s==step) {active}">
+    <div id="step-@s.stepNumber" class="panel panel-default step @if(s==step) {active} @if(s.isKnitting) {knitting} else {non-knitting}">
       <div class="panel-heading"><h4 class="panel-title">@s.name</h4></div>
       <div class="panel-body">@s.description</div>
     </div>
