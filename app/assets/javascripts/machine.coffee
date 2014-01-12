@@ -10,8 +10,8 @@ machine.derived("positionPercentage", "position", (p) ->
 )
 machine.derived("positionText", "position", (p) ->
   if p? then switch p.where
-    when "left" then "-#{p.overlap} left"
-    when "right" then "-#{p.overlap} right"
+    when "left" then "left"
+    when "right" then "right"
     when "needles" then p.needle
   else undefined
 )
@@ -78,41 +78,4 @@ jQuery.fn.extend({
     bar.link().attr("aria-valuenow")(machine, "positionPercentage")
     bar.link().width(machine, "positionPercentage", "%")
     bar.find("span.sr-only").link().text(machine, "positionText")
-
-  ###
-    Updates the content to a textual representation of the carriage.
-  ###
-  carriagePosition: (detailed, carriage) ->
-    root = $(this)
-    window.machineEvents.subscribe("positionChange", (event, msg) ->
-      if not carriage? or carriage == msg.carriage 
-        position = msg.position
-        value = if detailed
-          [x, text] = interpretPosition(position)
-          text
-        else
-          switch position.where
-            when "needles" then position.needle
-            else position.where
-        root.text(value)
-    )
-
-  ###
-    Shows a needle board that is connected to the machine
-  ###
-  machineNeedles: () ->
-    root = $(this)
-    root.needles(200)
-    window.machineEvents.subscribe("needlePatternUpdate", (event, msg) ->
-      root.data("needles", msg.patternRow)
-      root.trigger("updated")
-    )
 })
-
-interpretPosition = (position) ->
-  if not position? then return undefined
-  switch position.where
-    when "left"    then [0, "-#{position.overlap} left"]
-    when "right"   then [100, "-#{position.overlap} right"]
-    when "needles" then [(position.index+0.5)*100/200, position.needle]
-    else ""
