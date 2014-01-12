@@ -1,28 +1,14 @@
-###
-Event Types:
-  - change
-      -step: Step
+# Step { name, description, number }
 
-Types: 
-  - Step
-      - name
-      - description
-      - number
-Don't forget to start
-###
-GuideEvents = {
-  subscribe: (event, fn) -> $(this).bind(event, fn)
-  unsubscribe: (event, fn) -> $(this).unbind(event, fn)
-  publish: (event, data) -> $(this).trigger(event, data)
+guide = $().model("currentStep")
 
-  started: false
-  start: (route) -> if (!started)
-    me = this
-    ws = new ReconnectingWebSocket(route.webSocketURL())
-    ws.onmessage = (msg) ->
-      parsed = $.parseJSON(msg.data)
-      me.publish(parsed.event, parsed)
-    started = true
-}
+guide.start = (route) -> if (!started)
+  me = this
+  ws = new ReconnectingWebSocket(route.webSocketURL())
+  ws.onmessage = (msg) ->
+    parsed = $.parseJSON(msg.data)
+    me.step = parsed.step
+  started = true
 
-window.guideEvents = GuideEvents
+window.guide = guide
+window.guide.start(jsRoutes.controllers.Guide.subscribe())
