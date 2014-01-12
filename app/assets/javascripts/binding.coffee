@@ -24,6 +24,8 @@ jQuery.fn.extend({
       fun: linkFun
       text: (to, property, transform = undefinedToEmpty) ->
         linkFun(to, property, (v) -> me.text(transform(v)))
+      width: (to, property, unit = "", transform = undefinedToEmpty) ->
+        linkFun(to, property, (v) -> me.width(transform(v) + unit))
       attr: (attr) -> (to, property, transform = undefinedToEmpty) ->
         linkFun(to, property, (v) -> me.attr(attr, transform(v)))
       data: (data) -> (to, property, transform = undefinedToEmpty) ->
