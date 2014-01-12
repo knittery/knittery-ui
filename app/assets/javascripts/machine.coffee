@@ -1,6 +1,20 @@
 machine = $().model("positions", "carriage", "row", "needles")
-window.machine = machine
 machine.positions = {}
+machine.derived("position", ["positions", "carriage"], (p, c) -> p[c])
+machine.derived("positionPercentage", "position", (p) ->
+  if p? then switch p.where
+    when "left" then 0
+    when "right" then 100
+    when "needles" then (p.index+0.5)*100/200
+  else undefined
+)
+machine.derived("positionText", "position", (p) ->
+  if p? then switch p.where
+    when "left" then "-#{p.overlap} left"
+    when "right" then "-#{p.overlap} right"
+    when "needles" then p.needle
+  else undefined
+)
 
 machine.start = (route) ->
   return if this.started
@@ -17,6 +31,8 @@ machine.start = (route) ->
         me.needles = msg.patternRow
   @started = true
   machine
+
+window.machine = machine
 
 ###
 Event Types:
@@ -51,18 +67,17 @@ jQuery.fn.extend({
   ###
   carriageBar: () ->
     bar = $(this)
-    window.machineEvents.subscribe("positionChange", (event, msg) ->
-      [needlePercentage, text] = interpretPosition(msg.position)
-      color = switch msg.carriage
-        when "K" then "info"
-        when "L" then "success"
-        when "G" then "warning"
-      bar.removeClass("progress-bar-#{c}") for c in ["info", "warning", "success"]
-      bar.addClass("progress-bar-#{color}")
-      bar.attr("aria-valuenow", needlePercentage)
-      bar.width(needlePercentage + "%")
-      bar.find("span.sr-only").text(text)
-    )
+    # Color of the bar
+    carriageClasses =
+      K: "info"
+      L: "success"
+      G: "warning"
+    for crg, clz of carriageClasses
+      bar.link().switchClass(clz)(machine, "carriage", (c) -> c == crg)
+    # Position
+    bar.link().attr("aria-valuenow")(machine, "positionPercentage")
+    bar.link().width(machine, "positionPercentage", "%")
+    bar.find("span.sr-only").link().text(machine, "positionText")
 
   ###
     Updates the content to a textual representation of the carriage.
@@ -94,9 +109,10 @@ jQuery.fn.extend({
     )
 })
 
-
-interpretPosition = (position) -> switch position.where
-  when "left"    then [0, "-#{position.overlap} left"]
-  when "right"   then [100, "-#{position.overlap} right"]
-  when "needles" then [(position.index+0.5)*100/200, position.needle]
-  else ""
+interpretPosition = (position) ->
+  if not position? then return undefined
+  switch position.where
+    when "left"    then [0, "-#{position.overlap} left"]
+    when "right"   then [100, "-#{position.overlap} right"]
+    when "needles" then [(position.index+0.5)*100/200, position.needle]
+    else ""
