@@ -1,10 +1,11 @@
 package utils
 
+import java.awt.Color
 import play.api.libs.json._
 import models._
 import models.machine.Machine._
 import models.guide._
-import models.plan.KnittingState
+import models.plan._
 
 object JsonSerialization {
 
@@ -45,9 +46,36 @@ object JsonSerialization {
     }
   }
 
+  implicit object ColorWrite extends Writes[Color] {
+    override def writes(color: Color) = {
+      val value = color.getRGB | 0xff000000
+      JsString("#" + value.toHexString.drop(2))
+    }
+  }
+
+  implicit object YarnWrite extends Writes[Yarn] {
+    override def writes(yarn: Yarn) = Json.obj("name" -> yarn.name, "color" -> yarn.color)
+  }
+
+  implicit object StitchWrite extends Writes[Stitch] {
+    override def writes(stitch: Stitch) = stitch match {
+      case NoStitch => Json.obj("type" -> "no")
+      case EmptyStitch => Json.obj("type" -> "empty")
+      case PlainStitch(yarns) => Json.obj("type" -> "plain", "yarns" -> yarns)
+      case PurlStitch(yarns) => Json.obj("type" -> "purl", "yarns" -> yarns)
+      case CastOnStitch(yarns) => Json.obj("type" -> "castOn", "yarns" -> yarns)
+      case CastOffStitch(yarns) => Json.obj("type" -> "castOff", "yarns" -> yarns)
+    }
+  }
+
+  implicit object KnittedWrite extends Writes[Knitted] {
+    override def writes(knitted: Knitted) = Json.toJson(knitted.rows)
+  }
+
   implicit object KnittingStateWrite extends Writes[KnittingState] {
     override def writes(state: KnittingState) = {
-      Json.obj("needles" -> state.needles.pattern)
+      Json.obj("needles" -> state.needles.pattern,
+        "output" -> state.output)
     }
   }
 
