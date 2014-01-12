@@ -28,25 +28,6 @@ object Display extends Controller {
     Ok(views.html.display())
   }
 
-  def positions = Action.async {
-    val pos = machine ? GetPositions
-    val pat = machine ? GetNeedlePattern
-    for {
-      position <- pos
-      pattern <- pat
-    } yield (position, pattern) match {
-      case (Positions(data, row), NeedlePatternUpdate(patternRow, _)) =>
-        val positions = JsObject(data.map {
-          case (c, p) => Json.toJson(c).as[String] -> Json.toJson(p)
-        }.toSeq)
-        Ok(Json.obj(
-          "positions" -> positions,
-          "row" -> row,
-          "patternRow" -> patternRow))
-      case _ => InternalServerError("Machine actor did not respond.")
-    }
-  }
-
   def subscribe = WebSocket.async[JsValue] { req =>
     val r = machine.resolveOne
     val pos = machine ? GetPositions

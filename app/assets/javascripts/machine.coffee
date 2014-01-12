@@ -26,40 +26,16 @@ machine.start = (route) ->
       when "positionChange"
         me.carriage = msg.carriage
         me.row = msg.row
-        me.positions[msg.carriage] = msg.position
+        pos = me.positions
+        pos[msg.carriage] = msg.position
+        me.positions = pos
       when "needlePatternUpdate"
         me.needles = msg.patternRow
   @started = true
   machine
 
 window.machine = machine
-
-###
-Event Types:
-  - positionChange
-      - position
-      - carriage
-      - row
-  - needlePatternUpdate
-      - patternRow
-Don't forget to start
-###
-MachineEvents = {
-  subscribe: (event, fn) -> $(this).bind(event, fn)
-  unsubscribe: (event, fn) -> $(this).unbind(event, fn)
-  publish: (event, data) -> $(this).trigger(event, data)
-
-  started: false
-  start: (route) -> if (!started)
-    me = this
-    ws = new ReconnectingWebSocket(route.webSocketURL())
-    ws.onmessage = (msg) ->
-      parsed = $.parseJSON(msg.data)
-      me.publish(parsed.event, parsed)
-    started = true
-}
-
-window.machineEvents = MachineEvents
+window.machine.start(jsRoutes.controllers.Display.subscribe())
 
 jQuery.fn.extend({
   ###
