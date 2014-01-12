@@ -8,51 +8,31 @@ $(() ->
     false
   )
 
-  $(".graphical .carriage-type").currentCarriageType()
+  $(".graphical .carriage-type").link().text(machine, "carriage", (c) -> if c? then "Carriage #{c}" else "Carriage")
   $("#bar .progress-bar").carriageBar()
   $(".needles").needles(200)
 
-  jsRoutes.controllers.Display.positions().ajax({
-    success: (data) ->
-      window.machineEvents.publish("positionChange", {carriage: c, position: p, row: data.row}) for c, p of data.positions
-      window.machineEvents.publish("needlePatternUpdate", {patternRow: data.patternRow})
-  })
-  window.machineEvents.start(jsRoutes.controllers.Display.subscribe())
+  totalSteps = -> +$(".step-number-total").text()
 
-  window.guideEvents.start(jsRoutes.controllers.Guide.subscribe())
-  window.guideEvents.subscribe("change", (_, msg) ->
-    nr = msg.step.number
-    first = nr == 1
-    last = nr == +$(".step-number-total").text()
-    
+  guide.bind("currentStep:change", (_, step) ->
     $(".step.active").removeClass("active")
-    $("#step-#{nr}").addClass("active").removeClass("future").removeClass("past")
-    $(".current-step-number").text(nr)
-    updateButtonState(first, last)
-    updateSteps()
-    updateNeedles(msg.step.stateBefore.needles, msg.step.stateAfter.needles, true)
+    active = $("#step-#{step.number}")
+    active.addClass("active").removeClass("future").removeClass("past")
+    active.prevAll(".step").
+      removeClass("future").
+      addClass("past")
+    active.nextAll(".step").
+      removeClass("past").
+      addClass("future")
   )
-  updateSteps()
+  $(".current-step-number").link().text(guide, "currentStep", (s) -> if s? then s.number else "")
+
+  $("#next").link().disabled(guide, "currentStep", (s) -> s? && s.number == totalSteps())
+  $("#prev").link().disabled(guide, "currentStep", (s) -> s? && s.number == 1)
+
+  $(".needles").link().data("needles")(guide, "currentStep", (s) ->
+    if not s? then return ""
+    for c, i in s.stateAfter.needles
+      if c == s.stateBefore.needles[i] then c.toUpperCase() else c.toLowerCase()
+  )
 )
-
-updateSteps = () ->
-  active = $(".step.active") 
-  active.prevAll(".step").
-    removeClass("future").
-    addClass("past")
-  active.nextAll(".step").
-    removeClass("past").
-    addClass("future")
-
-updateButtonState = (first, last) ->
-  if (last) then $("#next").attr("disabled", "disabled")
-  else $("#next").removeAttr("disabled")
-  if (first) then $("#prev").attr("disabled", "disabled")
-  else $("#prev").removeAttr("disabled")
-
-updateNeedles = (before, after, color) ->
-  state = if color
-    for c, i in after
-      if c == before[i] then c.toUpperCase() else c.toLowerCase()
-  else after
-  $(".needles").data("needles", state).trigger("updated")
