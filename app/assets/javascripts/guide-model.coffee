@@ -7,7 +7,7 @@ guide.start = (route) -> if (!started)
   ws = new ReconnectingWebSocket(route.webSocketURL())
   ws.onmessage = (msg) ->
     parsed = $.parseJSON(msg.data)
-    me.step = parsed.step
+    me.currentStep = parsed.step
   started = true
 
 window.guide = guide
