@@ -33,6 +33,6 @@ $(() ->
   $(".needles").link().data("needles")(guide, "currentStep", (s) ->
     if not s? then return ""
     for c, i in s.stateAfter.needles
-      if c == s.stateBefore.needles[i] then c.toUpperCase() else c.toLowerCase()
+      if s.manualNeedles.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
 )

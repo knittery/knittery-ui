@@ -30,6 +30,13 @@ class GuideStep private (val step: Step, private val processedReversed: List[Ste
     case other => false
   }
 
+  /** Needles that have to be manually processed. */
+  def manualNeedles: Set[Needle] = step match {
+    case c @ ClosedCastOn(_, _, _) => c.needles.toSet
+    case ClosedCastOff(_, f) => Needle.all.filter(f).toSet
+    case other => Set.empty
+  }
+
   private def info = step match {
     case ClosedCastOn(from, to, yarn) =>
       ("Cast on",
