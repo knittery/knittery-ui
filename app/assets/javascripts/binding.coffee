@@ -55,6 +55,7 @@ addProperty = (obj, name) ->
 
 addDerived = (obj) -> (name, dependsOn, fun) ->
   me = this
+  if (!typeIsArray(dependsOn)) then dependsOn = [dependsOn]
   Object.defineProperty(obj, name,
     get: ->
       args = (obj[p] for p in dependsOn)
@@ -72,5 +73,5 @@ linkFun = (to, property, f) ->
   )
   f.apply(this, [to[property]])
 
+typeIsArray = Array.isArray || ( value ) -> return {}.toString.call( value ) is '[object Array]'
 undefinedToEmpty = (v) -> if v? then v else ""
-  
