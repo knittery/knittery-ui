@@ -3,7 +3,7 @@ package models.plan
 import models._
 import utils._
 
-class Knitted private (matrix: Matrix[Stitch]) {
+case class Knitted private (matrix: Matrix[Stitch]) {
   def data = matrix
   def height = matrix.height
   def width = matrix.width
