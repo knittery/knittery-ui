@@ -105,7 +105,7 @@ class GuideStep private (val step: Step, private val processedReversed: List[Ste
 
 object GuideStep {
   def apply(plan: Plan) = {
-    val (first :: rest) = plan.steps
+    val (first :: rest) = plan.steps.toList
     new GuideStep(first, Nil, rest)
   }
 }
