@@ -7,7 +7,9 @@ import models._
 import utils._
 
 /** Step to perform during knitting. */
-sealed trait Step extends (KnittingState => Validation[String, KnittingState])
+sealed trait Step {
+  def apply(on: KnittingState): Validation[String, KnittingState]
+}
 
 /** Knits a row using a carriage. */
 case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow: Option[NeedleActionRow] = None) extends Step {
