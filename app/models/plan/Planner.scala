@@ -10,13 +10,7 @@ import utils._
 sealed trait PlannerM[+A] {
   def plan(optimizer: PlanOptimizer = Optimizers.all) = {
     run(KnittingState.initial).map {
-      case (_, plan) =>
-        val optimized = Plan(optimizer(plan.steps))
-        val optimizedOut = optimized.run.map(_.output)
-        val unoptimizedOut = plan.run.map(_.output)
-        assert(optimizedOut == unoptimizedOut,
-          s"Illegal optimization, different result:\n$optimizedOut\n instead of\n$unoptimizedOut")
-        optimized
+      case (_, plan) => Plan(optimizer(plan.steps))
     }
   }
 
