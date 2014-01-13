@@ -102,5 +102,5 @@ case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step
 
 case class AddCarriage(carriage: CarriageType, from: Direction = Left) extends Step {
   override def apply(state: KnittingState) =
-    state.moveCarriage(carriage, from.reverse).success
+    state.moveCarriage(carriage, from).success
 }
