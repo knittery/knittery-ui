@@ -63,7 +63,7 @@ object Global extends GlobalSettings {
     val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), yarn1) >>
       FairIslePlanner.singleBed(checkerboard(Needle.count, height), yarn1) >>
       Cast.offClosed(yarn1)
-    planner.plan().toOption.get
+    planner.plan().valueOr(e => throw new RuntimeException(e))
   }
 
 }
