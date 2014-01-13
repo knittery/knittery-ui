@@ -40,7 +40,7 @@ object FairIslePlanner {
       _ <- (Basics.yarns _).tupled(yarns)
     } yield ())
     //Knit a finishing row
-    _ <- Basics.knitRow(KCarriage, Some(_ => NeedleToB))
+    _ <- Basics.knitRow(KCarriage, Some(AllNeedlesToB))
   } yield ()
 
   //TODO also take into account the next rows to knit

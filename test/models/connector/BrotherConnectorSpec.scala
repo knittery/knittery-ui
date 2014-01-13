@@ -95,17 +95,14 @@ class BrotherConnectorSpec extends Specification {
     }
 
     "parse 50 times f to all B" in {
-      def pattern(n: Needle) = NeedleToB
-      NeedleEncoder.fromString("f" * 50) must matchPattern(pattern)
+      NeedleEncoder.fromString("f" * 50) must matchPattern(AllNeedlesToB)
     }
     "parse 50 times F to all B" in {
-      def pattern(n: Needle) = NeedleToB
-      NeedleEncoder.fromString("F" * 50) must matchPattern(pattern)
+      NeedleEncoder.fromString("F" * 50) must matchPattern(AllNeedlesToB)
     }
 
     "parse 50 times 0 to all D" in {
-      def pattern(n: Needle) = NeedleToD
-      NeedleEncoder.fromString("0" * 50) must matchPattern(pattern)
+      NeedleEncoder.fromString("0" * 50) must matchPattern(AllNeedlesToD)
     }
 
     "serialize needle 0 B all other D to 80000..." in {
