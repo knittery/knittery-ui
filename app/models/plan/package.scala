@@ -17,4 +17,10 @@ package object plan {
   implicit def stepToPlanner(s: Step) = Planner.step(s)
   implicit def stepToPlannerBindOps(s: Step) = Planner.stepToPlannerBindOps(s)
   implicit def stepToPlannerFunctorOps(s: Step) = Planner.stepToPlannerFunctorOps(s)
+
+  type PlanOptimizer = Seq[Step] => Seq[Step]
+  implicit object planOptimizerMonoid extends Monoid[PlanOptimizer] {
+    override val zero = (steps: Seq[Step]) => steps
+    override def append(a: PlanOptimizer, b: => PlanOptimizer) = a.andThen(b)
+  }
 }

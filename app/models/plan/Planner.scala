@@ -8,7 +8,17 @@ import utils._
 
 /** Monad to create a KnittingPlan. */
 sealed trait PlannerM[+A] {
-  def plan = run(KnittingState.initial).map(_._2)
+  def plan(optimizer: PlanOptimizer = Optimizers.all) = {
+    run(KnittingState.initial).map {
+      case (_, plan) =>
+        val optimized = Plan(optimizer(plan.steps))
+        val optimizedOut = optimized.run.map(_.output)
+        val unoptimizedOut = plan.run.map(_.output)
+        assert(optimizedOut == unoptimizedOut,
+          s"Illegal optimization, different result:\n$optimizedOut\n instead of\n$unoptimizedOut")
+        optimized
+    }
+  }
 
   protected[PlannerM] def run(state: KnittingState): Validation[String, (A, Plan)]
 }
