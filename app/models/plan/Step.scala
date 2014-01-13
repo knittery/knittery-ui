@@ -20,7 +20,7 @@ case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow
     } yield {
       state.
         moveCarriage(carriage, direction).
-        moveNeedles(needles).
+        modifyNeedles(needles).
         knit(knitted)
     }
   }
@@ -59,7 +59,7 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends Step {
   def needles = Needle.interval(from, until)
   override def apply(state: KnittingState) = {
     state.
-      moveNeedles { n =>
+      modifyNeedles { n =>
         val before = state.needles(n)
         if (needles.contains(n)) {
           NeedleState(NeedleD, yarn :: before.yarn)
@@ -95,7 +95,7 @@ case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step
           }
           else NoStitch
         }.
-        moveNeedles(n => if (filter(n)) NeedleState(NeedleA) else state.needles(n))
+        modifyNeedles(n => if (filter(n)) NeedleState(NeedleA) else state.needles(n))
     } yield state2
   }
 }
