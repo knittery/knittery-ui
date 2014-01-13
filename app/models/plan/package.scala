@@ -6,7 +6,8 @@ import Scalaz._
 package object plan {
   type NeedleStateRow = Needle => NeedleState
   implicit class RichNeedleStateRow(val row: NeedleStateRow) extends AnyVal {
-    def pattern = row.andThen(_.position)
+    def positions = row.andThen(_.position)
+    def pattern = positions
     def yarn = row.andThen(_.yarn)
   }
 

@@ -36,8 +36,12 @@ sealed trait GuideStep {
 
   /** Needles that have to be manually processed. */
   def manualNeedles: Set[Needle] = step match {
-    case c @ ClosedCastOn(_, _, _) => c.needles.toSet
-    case ClosedCastOff(_, f) => Needle.all.filter(f).toSet
+    case c @ ClosedCastOn(_, _, _) =>
+      c.needles.toSet
+    case ClosedCastOff(_, f) =>
+      Needle.all.filter(f).toSet
+    case ModifyNeedlePositions(to) =>
+      Needle.all.filter(n => stateBefore.needles(n).position != to(n)).toSet
     case other => Set.empty
   }
 
@@ -63,6 +67,12 @@ sealed trait GuideStep {
     case ThreadYarn(Some(yarnA), Some(yarnB)) =>
       (s"Thread Yarns ${yarnA.name} and ${yarnB.name}",
         s"Thread the yarns ${yarnA.name} into A and ${yarnB.name} into B")
+
+    case ModifyNeedlePositions(to) =>
+      val affected = Needle.all.filter(n => stateBefore.needles(n).position != to(n))
+      val movement = affected.map(n => s"${n.number} to ${to(n).toString}")
+      (s"Move ${affected.size} needles by hand",
+        s"Move to following needles: ${movement.mkString(", ")}")
 
     case KnitRow(c, dir, _) =>
       val from = if (Left != dir) "left" else "right"

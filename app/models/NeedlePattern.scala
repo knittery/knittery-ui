@@ -6,6 +6,7 @@ import java.awt.Color
 /** Knitting position of a needle. */
 sealed trait NeedlePosition {
   def isWorking: Boolean
+  def nonWorking = !isWorking
 }
 /** Needle in A position. */
 case object NeedleA extends NeedlePosition {
