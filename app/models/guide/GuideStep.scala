@@ -3,24 +3,28 @@ package models.guide
 import models._
 import models.plan._
 
-class GuideStep private (val step: Step, private val processedReversed: List[Step], private val remaining: List[Step]) {
-  def next = {
+sealed trait GuideStep {
+  val step: Step
+  protected def remaining: List[Step]
+
+  lazy val next = {
     require(!isLast, "Already at end")
-    val (next :: rest) = remaining
-    new GuideStep(next, step :: processedReversed, rest)
+    val prev = this
+    val (n :: rest) = remaining
+    new GuideStep {
+      override def previous = prev
+      override val step = n
+      override val remaining = rest
+    }
   }
-  def previous = {
-    require(!isFirst, "Already at start")
-    val (prev :: before) = processedReversed
-    new GuideStep(prev, before, step :: remaining)
-  }
+  def previous: GuideStep
   def first: GuideStep = if (isFirst) this else previous.first
-  def isFirst = processedReversed.isEmpty
+  def isFirst = false
   def last: GuideStep = if (isLast) this else next.last
   def isLast = remaining.isEmpty
 
   /** Number of this step (1-based). */
-  def stepNumber = processedReversed.size + 1
+  def stepNumber: Int = previous.stepNumber + 1
 
   def name = info._1
   def description = info._2
@@ -76,13 +80,10 @@ class GuideStep private (val step: Step, private val processedReversed: List[Ste
         s"Change K carriage settings to $knob ${if (mc) "MC" else ""} with lever at ${lever.name}")
   }
 
-  def stateAfter: KnittingState = {
+  lazy val stateAfter: KnittingState = {
     step(stateBefore).valueOr(e => throw InvalidPlanException(PlanError(step, stepNumber, e)))
   }
-  def stateBefore: KnittingState = {
-    if (isFirst) KnittingState.initial
-    else previous.stateAfter
-  }
+  def stateBefore: KnittingState =     previous.stateAfter
 
   /** List of all steps. */
   def all = first.allFromHere
@@ -97,16 +98,23 @@ class GuideStep private (val step: Step, private val processedReversed: List[Ste
   override def hashCode = step.hashCode ^ remaining.hashCode
   override def equals(o: Any) = o match {
     case other: GuideStep =>
-      other.step == step && other.processedReversed == processedReversed &&
+      other.step == step && (isFirst || other.previous == previous) &&
         other.remaining == remaining
     case _ => false
   }
 }
 
 object GuideStep {
-  def apply(plan: Plan) = {
-    val (first :: rest) = plan.steps.toList
-    new GuideStep(first, Nil, rest)
+  def apply(plan: Plan): GuideStep = {
+    val (fst :: rest) = plan.steps.toList
+    new GuideStep {
+      override val step = fst
+      override val remaining = rest
+      override def previous = throw new IllegalArgumentException("already at start")
+      override def isFirst = true
+      override def stepNumber = 1
+      override def stateBefore = KnittingState.initial
+    }
   }
 }
 
