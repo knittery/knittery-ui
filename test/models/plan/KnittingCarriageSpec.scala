@@ -8,10 +8,6 @@ import models._
 import java.awt.Color
 
 class KnittingCarriageSpec extends Specification {
-  trait Yarns extends Scope {
-    val red = Yarn("red", Color.red)
-    val green = Yarn("green", Color.green)
-  }
   trait K extends Yarns {
     val carriageNL = KnittingCarriage(KCarriage, KCarriageSettings(NL), Some(red), None, None)
     def carriageKC2plain(pattern: NeedleActionRow) = KnittingCarriage(KCarriage, KCarriageSettings(KC2), Some(red), Some(green), Some(pattern))

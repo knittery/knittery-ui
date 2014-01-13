@@ -11,10 +11,6 @@ import models.planners._
 import utils._
 
 class FairIslePlannerSpec extends Specification {
-  trait Yarns extends Scope {
-    val red = Yarn("red", Color.red)
-    val green = Yarn("green", Color.green)
-  }
   trait Patterns extends Yarns {
     def checkerboard(w: Int, h: Int): Matrix[Yarn] = {
       val s = Stream.from(0).map(i => if (i % 2 == 0) red else green)
@@ -30,12 +26,10 @@ class FairIslePlannerSpec extends Specification {
   }
 
   def planFor(planner: Planner) = {
-    planner.plan.
-      fold(e => throw new RuntimeException("Could not build plan: " + e), identity)
+    planner.plan().valueOr(e => throw new RuntimeException("Could not build plan: " + e))
   }
   def runPlan(planner: Planner) = {
-    planFor(planner).run.
-      fold(e => throw new RuntimeException("Could run plan: " + e), identity)
+    planFor(planner).run.valueOr(e => throw new RuntimeException("Could run plan: " + e))
   }
 
   def knittedRow(stitch: Stitch*)(default: Stitch = EmptyStitch) = { (n: Needle) =>
