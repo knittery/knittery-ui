@@ -40,7 +40,7 @@ sealed trait GuideStep {
       c.needles.toSet
     case ClosedCastOff(_, f) =>
       Needle.all.filter(f).toSet
-    case ModifyNeedlePositions(to) =>
+    case MoveNeedles(to) =>
       Needle.all.filter(n => stateBefore.needles(n).position != to(n)).toSet
     case other => Set.empty
   }
@@ -68,7 +68,7 @@ sealed trait GuideStep {
       (s"Thread Yarns ${yarnA.name} and ${yarnB.name}",
         s"Thread the yarns ${yarnA.name} into A and ${yarnB.name} into B")
 
-    case ModifyNeedlePositions(to) =>
+    case MoveNeedles(to) =>
       val affected = Needle.all.filter(n => stateBefore.needles(n).position != to(n))
       val movement = affected.map(n => s"${n.number} to ${to(n).toString}")
       (s"Move ${affected.size} needles by hand",
@@ -93,7 +93,7 @@ sealed trait GuideStep {
   lazy val stateAfter: KnittingState = {
     step(stateBefore).valueOr(e => throw InvalidPlanException(PlanError(step, stepNumber, e)))
   }
-  def stateBefore: KnittingState =     previous.stateAfter
+  def stateBefore: KnittingState = previous.stateAfter
 
   /** List of all steps. */
   def all = first.allFromHere

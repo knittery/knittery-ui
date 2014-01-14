@@ -39,12 +39,18 @@ case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow
 }
 
 /** Manual movement of needles. */
-case class ModifyNeedlePositions(to: Needle => NeedlePosition) extends Step {
+case class MoveNeedles(to: NeedlePatternRow) extends Step {
   override def apply(state: KnittingState) = {
     val toAButYarn = Needle.all.filter(n => to(n).nonWorking && state.needles(n).yarn.nonEmpty)
     if (toAButYarn.nonEmpty) s"Needles ${toAButYarn.mkString(", ")} have yarn and cannot be moved to A".fail
     else state.moveNeedles(to).success
   }
+}
+object MoveNeedles {
+  /** Changes working needles to the values in the pattern. Non working are not touched. */
+  def apply(before: NeedlePatternRow, pattern: NeedleActionRow) = new MoveNeedles(n =>
+    if (before(n).isWorking) pattern(n).toPosition
+    else before(n))
 }
 
 case class ChangeCarriageSettings(settings: CarriageSettings) extends Step {
