@@ -83,7 +83,7 @@ object OptimizePatternKnitting extends PlanOptimizer {
       case ((processed, (knit @ KnitRow(carriage, direction, _)) +: window), MoveNeedles(pattern)) =>
         //try to optimize
         def patternActions(n: Needle) = if (pattern(n) == NeedleD) NeedleToD else NeedleToB
-        val modKnit = KnitRow(carriage, direction, Some(patternActions))
+        val modKnit = KnitRow(carriage, direction, patternActions)
         modKnit(processed.state).map { stateAfter =>
           if (stateAfter.needles.positions.all == pattern.all) {
             //Yay, we optimized all work away, drop the MoveNeedles

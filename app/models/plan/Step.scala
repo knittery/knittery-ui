@@ -12,10 +12,10 @@ sealed trait Step {
 }
 
 /** Knits a row using a carriage. */
-case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow: Option[NeedleActionRow] = None) extends Step {
+case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow: NeedleActionRow = AllNeedlesToB) extends Step {
   override def apply(state: KnittingState) = {
     for {
-      kc <- knittingCarriage(state, needleActionRow)
+      kc <- knittingCarriage(state, Some(needleActionRow))
       (needles, knitted) <- kc(direction)(state.needles)
     } yield {
       state.
@@ -36,14 +36,14 @@ case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow
       }
     } yield c
   }
-  override def hashCode = carriage.hashCode ^ direction.hashCode ^ needleActionRow.map(_.all).hashCode
+  override def hashCode = carriage.hashCode ^ direction.hashCode ^ needleActionRow.all.hashCode
   override def equals(o: Any) = o match {
     case o: KnitRow => o.carriage == carriage && o.direction == direction &&
-      o.needleActionRow.map(_.all) == needleActionRow.map(_.all)
+      o.needleActionRow.all == needleActionRow.all
     case _ => false
   }
   override def toString = {
-    val row = needleActionRow.map(_.all.map(_.toPosition.toString).mkString)
+    val row = needleActionRow.all.map(_.toPosition.toString).mkString
     s"KnitRow($carriage,$direction,${row})"
   }
 }
