@@ -42,6 +42,10 @@ case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow
       o.needleActionRow.map(_.all) == needleActionRow.map(_.all)
     case _ => false
   }
+  override def toString = {
+    val row = needleActionRow.map(_.all.map(_.toPosition.toString).mkString)
+    s"KnitRow($carriage,$direction,${row})"
+  }
 }
 
 /** Manual movement of needles. */
