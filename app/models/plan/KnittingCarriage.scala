@@ -47,11 +47,9 @@ object KnittingCarriage {
       val patternState = pattern match {
         case Some(pattern) => (needle: Needle) => {
           val s @ NeedleState(pos, yarn) = baseState(needle)
-          (pos, pattern(needle)) match {
-            case (NeedleB, NeedleToD) => s.copy(position = NeedleD)
-            case (NeedleD, NeedleToB) => s.copy(position = NeedleB)
-            case other => s
-          }
+          if (pos == NeedleB || pos == NeedleD)
+            s.copy(position = pattern(needle).toPosition)
+          else s
         }
         case None => baseState
       }
