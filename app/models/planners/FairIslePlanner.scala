@@ -29,21 +29,17 @@ object FairIslePlanner {
       require(workingNeedles.nonEmpty, "No working needles")
     }
     needle0 = startNeedle.getOrElse(workingNeedles.head)
-    //Setup to knit a row with the background yarn to setup the needles
-    _ <- setupCarriage(false)
-    _ <- Basics.oneYarn(backgroundYarn)
+    settings = KCarriageSettings(holdingCamLever = HoldingCamN, knob = KC2, mc = true)
+    _ <- Basics.needCarriage(KCarriage)
     //Knit the pattern rows
     _ <- pattern.rows.toVector.traverse(row => for {
       yarns <- optimizeYarn(row.toSet)
-      _ <- Basics.knitRow(KCarriage, Some(knitActions(row, needle0, yarns)))
-      _ <- setupCarriage(true)
-      _ <- (Basics.yarns _).tupled(yarns)
+      actionRow = knitActions(row, needle0, yarns) _
+      _ <- Basics.knitPatternRow(settings, actionRow, yarns._1, yarns._2)
     } yield ())
-    //Knit a finishing row
-    _ <- Basics.knitRow(KCarriage, Some(AllNeedlesToB))
   } yield ()
 
-  //TODO also take into account the next rows to knit
+  //TODO also take into account the next rows to knit => make it a general optimization?
   private def optimizeYarn(required: Set[Yarn]) = {
     for {
       yarnA <- Planner.state(_.yarnA)
@@ -68,14 +64,4 @@ object FairIslePlanner {
       case Some(x) => throw new IllegalStateException(s"want to use yarn $x but that's not on the carriage")
     }
   }
-
-  /** Carriage settings and make sure carriage is known. */
-  private def setupCarriage(mc: Boolean) = for {
-    kCarriageDefined <- Planner.state(_.carriagePosition.isDefinedAt(KCarriage))
-    _ <- if (!kCarriageDefined) Planner.step(AddCarriage(KCarriage)) else Planner.noop
-    _ <- Basics.carriageSettings(KCarriageSettings(
-      holdingCamLever = HoldingCamN,
-      knob = KC2,
-      mc = mc))
-  } yield ()
 }
