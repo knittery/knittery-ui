@@ -36,6 +36,12 @@ case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow
       }
     } yield c
   }
+  override def hashCode = carriage.hashCode ^ direction.hashCode ^ needleActionRow.map(_.all).hashCode
+  override def equals(o: Any) = o match {
+    case o: KnitRow => o.carriage == carriage && o.direction == direction &&
+      o.needleActionRow.map(_.all) == needleActionRow.map(_.all)
+    case _ => false
+  }
 }
 
 /** Manual movement of needles. */
@@ -44,6 +50,11 @@ case class MoveNeedles(to: NeedlePatternRow) extends Step {
     val toAButYarn = Needle.all.filter(n => to(n).nonWorking && state.needles(n).yarn.nonEmpty)
     if (toAButYarn.nonEmpty) s"Needles ${toAButYarn.mkString(", ")} have yarn and cannot be moved to A".fail
     else state.moveNeedles(to).success
+  }
+  override def hashCode = to.all.hashCode
+  override def equals(o: Any) = o match {
+    case MoveNeedles(to2) => to.all == to2.all
+    case _ => false
   }
 }
 object MoveNeedles {
@@ -112,6 +123,11 @@ case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step
         }.
         modifyNeedles(n => if (filter(n)) NeedleState(NeedleA) else state.needles(n))
     } yield state2
+  }
+  override def hashCode = withYarn.hashCode ^ filter.all.hashCode
+  override def equals(o: Any) = o match {
+    case ClosedCastOff(y, f) => withYarn == y && filter.all == f.all
+    case _ => false
   }
 }
 
