@@ -8,6 +8,7 @@ import models.planners._
 class OptimizersSpec extends Specification {
   trait plans extends Yarns {
     val allNeedles = (n: Needle) => true
+
     val simpleLines = Plan(List(
       ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
       AddCarriage(KCarriage, Left),
@@ -81,16 +82,65 @@ class OptimizersSpec extends Specification {
       ChangeCarriageSettings(KCarriageSettings(KC2)),
       ClosedCastOff(red, allNeedles)))
 
+    def evenOddPattern(n: Needle) = if (n.index % 2 == 0 || n.index >= 1 || n.index <= 40) NeedleToB else NeedleToD
+    def oddEvenPattern(n: Needle) = if (n.index % 2 == 1 || n.index >= 1 || n.index <= 40) NeedleToB else NeedleToD
+
+    val patternLines = Plan(List(
+      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
+      AddCarriage(KCarriage, Left),
+      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ThreadYarn(Some(red), None),
+      KnitRow(KCarriage, Right, Some(evenOddPattern)),
+      ChangeCarriageSettings(KCarriageSettings(KC2, mc = true)),
+      KnitRow(KCarriage, Left, Some(oddEvenPattern)),
+      KnitRow(KCarriage, Right, Some(evenOddPattern)),
+      KnitRow(KCarriage, Left, Some(oddEvenPattern)),
+      KnitRow(KCarriage, Right, Some(evenOddPattern)),
+      KnitRow(KCarriage, Left, Some(oddEvenPattern)),
+      KnitRow(KCarriage, Right, Some(evenOddPattern)),
+      KnitRow(KCarriage, Left, Some(AllNeedlesToB)),
+      ClosedCastOff(red, allNeedles)))
+
+    val patternLinesWithManualNeedleSettings = {
+      def line(n: Needle) = if (n.index >= 1 && n.index <= 40) NeedleB else NeedleA
+      Plan(List(
+        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
+        AddCarriage(KCarriage, Left),
+        ChangeCarriageSettings(KCarriageSettings(KC2)),
+        ThreadYarn(Some(red), None),
+        KnitRow(KCarriage, Right, Some(evenOddPattern)),
+        ChangeCarriageSettings(KCarriageSettings(KC2, mc = true)),
+        MoveNeedles(line, oddEvenPattern),
+        KnitRow(KCarriage, Left, Some(AllNeedlesToB)),
+        MoveNeedles(line, oddEvenPattern),
+        KnitRow(KCarriage, Right, Some(AllNeedlesToB)),
+        MoveNeedles(line, oddEvenPattern),
+        KnitRow(KCarriage, Left, Some(AllNeedlesToB)),
+        MoveNeedles(line, oddEvenPattern),
+        KnitRow(KCarriage, Right, Some(AllNeedlesToB)),
+        MoveNeedles(line, oddEvenPattern),
+        KnitRow(KCarriage, Left, Some(AllNeedlesToB)),
+        MoveNeedles(line, oddEvenPattern),
+        KnitRow(KCarriage, Right, Some(AllNeedlesToB)),
+        MoveNeedles(line, oddEvenPattern),
+        KnitRow(KCarriage, Left, Some(AllNeedlesToB)),
+        ClosedCastOff(red, allNeedles)))
+    }
+
     val plans = simpleLines ::
       simpleLinesWithUnknittedSettings ::
-      simpleLinesWithDuplicateSettings :: Nil
+      simpleLinesWithDuplicateSettings ::
+      patternLines ::
+      patternLinesWithManualNeedleSettings ::
+      Nil
   }
 
   "optimizers" should {
     def sameOutput(p: Plan) = {
       val unopt = p.run
       val opt = Plan(Optimizers.all(p.steps)).run
-      unopt.isSuccess must beTrue
+      ("Plan fails: " + unopt) <==> (unopt.isSuccess must beTrue)
+      opt.isSuccess must beTrue
       unopt.map(_.output) must_== opt.map(_.output)
     }
 
@@ -125,6 +175,16 @@ class OptimizersSpec extends Specification {
       DuplicateSettingsOptimizer(
         UnknittedSettingsOptimizer(simpleLinesWithDuplicateSettings.steps)) must
         containTheSameElementsAs(simpleLines.steps)
+    }
+  }
+
+  "pattern knitting optimizer" should {
+    "not change already optimal" in new plans {
+      OptimizePatternKnitting(patternLines.steps) must_== patternLines.steps
+    }
+    "prevent manual needle movement" in new plans {
+      OptimizePatternKnitting(patternLinesWithManualNeedleSettings.steps) must
+        containTheSameElementsAs(patternLines.steps)
     }
   }
 }
