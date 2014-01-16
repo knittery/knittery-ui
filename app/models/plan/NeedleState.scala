@@ -1,6 +1,7 @@
 package models.plan
 
 import models.NeedlePosition
+import models.Yarn
 
 case class NeedleState(position: NeedlePosition, yarn: List[Yarn]) {
   if (yarn.nonEmpty) require(position.isWorking, "Cannot have yarn on non working needle.")

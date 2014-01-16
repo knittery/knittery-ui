@@ -1,4 +1,4 @@
-package models.plan
+package models
 
 import java.awt.Color
 import utils.ConsoleColors

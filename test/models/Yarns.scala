@@ -1,4 +1,4 @@
-package models.plan
+package models
 
 import org.specs2.specification.Scope
 import java.awt.Color
