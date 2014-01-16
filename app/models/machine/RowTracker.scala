@@ -28,7 +28,7 @@ private object RowTracker {
 
     def verifyDirection(candidate: Direction, startAt: Needle): Receive = general orElse {
       case PositionUpdate(CarriageOverNeedles(needle), `candidate`, _) =>
-        val distance = (needle.index - startAt.index) * (if (candidate == Left) -1 else 1)
+        val distance = (needle.index - startAt.index) * (if (candidate == ToLeft) -1 else 1)
         if (distance < 0 || distance > 30) context.unbecome
         else if (distance > 5) {
           context.unbecome // so we don't leak memory

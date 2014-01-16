@@ -16,7 +16,7 @@ case class KnittingState(needles: NeedleStateRow,
       val overlappedWorking = carriage.over(pos).filter(needles(_).position.isWorking)
       if (overlappedWorking.nonEmpty) s"carriage still over working needeles ${overlappedWorking.mkString(",")}".fail
       else pos.directionTo(workingNeedles.headOption.getOrElse(Needle.middle)).success
-    case None => Right.success
+    case None => ToRight.success
   }
   def yarns: Set[Yarn] = yarnA.toSet ++ yarnB.toSet
 
@@ -25,7 +25,11 @@ case class KnittingState(needles: NeedleStateRow,
   def moveCarriage(carriage: CarriageType, pos: CarriagePosition) =
     copy(carriagePosition = carriagePosition + (carriage -> pos))
   def moveCarriage(carriage: CarriageType, direction: Direction): KnittingState =
-    moveCarriage(carriage, if (direction == Left) CarriageLeft(0) else CarriageRight(0))
+    moveCarriage(carriage, if (direction == ToLeft) CarriageLeft(0) else CarriageRight(0))
+  def moveCarriage(carriage: CarriageType, to: LeftRight): KnittingState = to match {
+    case Left => moveCarriage(carriage, ToLeft)
+    case Right => moveCarriage(carriage, ToRight)
+  }
   def moveNeedles(positions: Needle => NeedlePosition) =
     modifyNeedles(Needle.all.map(n => n -> needles(n).copy(position = positions(n))).toMap)
   def modifyNeedles(newNeedles: NeedleStateRow) = copy(needles = newNeedles)

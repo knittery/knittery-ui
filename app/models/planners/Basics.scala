@@ -34,7 +34,7 @@ object Basics {
   }
 
   /** Add carriage if missing. */
-  def needCarriage(carriage: CarriageType, at: Direction = Left) = for {
+  def needCarriage(carriage: CarriageType, at: LeftRight = Left) = for {
     p <- Planner.state(_.carriagePosition.get(carriage))
     _ <- if (p.isEmpty) Planner.step(AddCarriage(carriage, at)) else Planner.noop
   } yield ()

@@ -75,13 +75,13 @@ sealed trait GuideStep {
         s"Move to following needles: ${movement.mkString(", ")}")
 
     case KnitRow(c, dir, _) =>
-      val from = if (Left != dir) "left" else "right"
-      val to = if (Left == dir) "left" else "right"
+      val from = if (ToLeft != dir) "left" else "right"
+      val to = if (ToLeft == dir) "left" else "right"
       (s"Knit Row (${c.name})",
         s"Knit a row from $from to $to with the ${c.name} carriage")
 
     case AddCarriage(c, at) =>
-      val lr = if (Left == at) "left" else "right"
+      val lr = if (ToLeft == at) "left" else "right"
       (s"Add Carriage ${c.name}",
         s"Add the carriage ${c.name} at the $lr side")
 

@@ -9,7 +9,7 @@ case class CarriageOverNeedles(
   currentNeedle: Needle)
   extends CarriagePosition {
 
-  override def directionTo(needle: Needle) = if (needle < currentNeedle) Left else Right
+  override def directionTo(needle: Needle) = if (needle < currentNeedle) ToLeft else ToRight
 }
 
 case class CarriageLeft(
@@ -17,7 +17,7 @@ case class CarriageLeft(
   overlappedNeedles: Int)
   extends CarriagePosition {
 
-  override def directionTo(needle: Needle) = Right
+  override def directionTo(needle: Needle) = ToRight
 }
 
 case class CarriageRight(
@@ -25,17 +25,27 @@ case class CarriageRight(
   overlappedNeedles: Int)
   extends CarriagePosition {
 
-  override def directionTo(needle: Needle) = Left
+  override def directionTo(needle: Needle) = ToLeft
 }
 
 /** Direction of movement */
 sealed trait Direction {
   def reverse: Direction
 }
-case object Left extends Direction {
-  override def reverse = Right
+case object ToLeft extends Direction {
+  override def reverse = ToRight
 }
-case object Right extends Direction {
-  override def reverse = Left
+case object ToRight extends Direction {
+  override def reverse = ToLeft
 }
 
+/** Left or right. */
+sealed trait LeftRight {
+  def reverse: LeftRight
+}
+case object Left extends LeftRight {
+  override def reverse = Right
+}
+case object Right extends LeftRight {
+  override def reverse = Left
+}

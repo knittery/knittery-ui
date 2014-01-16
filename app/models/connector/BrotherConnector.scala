@@ -189,8 +189,8 @@ object BrotherConnector {
             case other => throw new IllegalArgumentException(s"Unknown needle position: $other")
           })
           d <- Try(direction match {
-            case "<-" => Left
-            case "->" => Right
+            case "<-" => ToLeft
+            case "->" => ToRight
             case other => throw new IllegalArgumentException(s"Unknown direction: $other")
           })
           c <- Try(carriage match {
