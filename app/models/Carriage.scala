@@ -28,7 +28,13 @@ case object KCarriage extends Carriage {
 
   case class State(assembly: Assembly = KCarriage.SinkerPlate(),
     settings: Settings = Settings(),
-    position: CarriagePosition = CarriageRemoved) extends CarriageState
+    position: CarriagePosition = CarriageRemoved) extends CarriageState {
+    def yarnA = yarns._1
+    def yarnB = yarns._2
+    def yarns = assembly match {
+      case SinkerPlate(yarnA, yarnB, _, _) => (yarnA, yarnB)
+    }
+  }
   def initialState = State()
 
   sealed trait Assembly

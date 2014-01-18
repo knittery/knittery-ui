@@ -6,35 +6,34 @@ import Scalaz._
 import models._
 import utils._
 
-trait KnittingCarriage {
-  def apply(direction: Direction)(needles: NeedleStateRow): Validation[String, (NeedleStateRow, Needle => Stitch)]
+private trait KnittingCarriage {
+  def apply(direction: Direction, needles: NeedleStateRow): Validation[String, (NeedleStateRow, Needle => Stitch)]
 }
 
-object KnittingCarriage {
-  def apply(carriage: Carriage, settings: CarriageSettings, yarnA: Option[Yarn], yarnB: Option[Yarn],
-    pattern: Option[NeedleActionRow]) = {
-    require(carriage == settings.carriage, "Setting does not match carriage")
-    settings match {
-      case s: KCarriageSettings => new KKnittingCarriage(s, yarnA, yarnB, pattern)
-      case s: LCarriageSettings => new LKnittingCarriage(s, pattern)
-      case s: GCarriageSettings => new GKnittingCarriage(s, yarnA, pattern)
-    }
+private object KnittingCarriage {
+  def apply(carriageState: CarriageState,
+    pattern: NeedleActionRow) = carriageState match {
+    case state: KCarriage.State =>
+      new KKnittingCarriage(state.settings, state.yarnA, state.yarnB, pattern)
+    case state: LCarriage.State =>
+      new LKnittingCarriage(state.settings, pattern)
+    case state: GCarriage.State =>
+      new GKnittingCarriage(state.settings, state.yarn, pattern)
   }
 
-  private class KKnittingCarriage(settings: KCarriageSettings,
+  private class KKnittingCarriage(settings: KCarriage.Settings,
     yarnA: Option[Yarn], yarnB: Option[Yarn],
-    pattern: Option[NeedleActionRow])
+    pattern: NeedleActionRow)
     extends KnittingCarriage {
+    import KCarriage._
 
-    if (settings.knob == KC2) require(pattern.isDefined, "Need pattern for KC knitting")
-    else require(pattern.isEmpty, s"No pattern supported for ${settings.knob}")
-
-    override def apply(direction: Direction)(needles: NeedleStateRow) = Try {
-      if (settings.knob == CR) throw new IllegalStateException("Not knitting in CR setting")
-
+    override def apply(direction: Direction, needles: NeedleStateRow) = Try {
       //Basic movement of needles and putting yarn on needles
       val baseState = (needle: Needle) => {
         //TODO part modes
+        //TODO tuck modes
+        //TODO l mode
+        //TODO holdingCamI
         needles(needle).position match {
           case NeedleA => NeedleState(NeedleA)
           case NeedleB => NeedleState(NeedleB, yarnA)
@@ -44,18 +43,17 @@ object KnittingCarriage {
         }
       }
       //Apply the pattern (moves Needles between B and D). 
-      val patternState = pattern match {
-        case Some(pattern) => (needle: Needle) => {
-          val s @ NeedleState(pos, yarn) = baseState(needle)
-          if (pos == NeedleB || pos == NeedleD)
-            s.copy(position = pattern(needle).toPosition)
-          else s
-        }
-        case None => baseState
+      val patternState = (needle: Needle) => {
+        val s @ NeedleState(pos, yarn) = baseState(needle)
+        if (pos == NeedleB || pos == NeedleD)
+          s.copy(position = pattern(needle).toPosition)
+        else s
       }
       //Knitting performed
       def knitted(n: Needle) = needles(n) match {
         //TODO part modes
+        //TODO tuck modes
+        //TODO l mode
         case NeedleState(NeedleB, yarns) if yarns.nonEmpty => PlainStitch(yarns)
         case NeedleState(NeedleD, yarns) if yarns.nonEmpty => PlainStitch(yarns)
         case NeedleState(NeedleE, yarns) if yarns.nonEmpty && settings.holdingCamLever == HoldingCamN =>
@@ -65,15 +63,12 @@ object KnittingCarriage {
       }
       (patternState, knitted _)
     }
-
-    def modifyNeedles(direction: Direction)(before: NeedlePatternRow) = ???
-    def knit(row: NeedlePatternRow, next: NeedlePatternRow) = ???
   }
 
-  private class LKnittingCarriage(settings: LCarriageSettings, pattern: Option[NeedleActionRow])
+  private class LKnittingCarriage(settings: LCarriage.Settings, pattern: NeedleActionRow)
     extends KnittingCarriage {
 
-    def apply(direction: Direction)(needles: NeedleStateRow) = Try {
+    def apply(direction: Direction, needles: NeedleStateRow) = Try {
       if (needles.pattern.all.exists(_ == NeedleE))
         throw new IllegalStateException("LCarriage does not work with needles at E")
 
@@ -82,15 +77,16 @@ object KnittingCarriage {
     }
   }
 
-  private class GKnittingCarriage(settings: GCarriageSettings, yarnA: Option[Yarn], pattern: Option[NeedleActionRow])
+  private class GKnittingCarriage(settings: GCarriage.Settings, yarnA: Option[Yarn], pattern: NeedleActionRow)
     extends KnittingCarriage {
 
-    def apply(direction: Direction)(needles: NeedleStateRow) = Try {
+    def apply(direction: Direction, needles: NeedleStateRow) = Try {
       if (needles.pattern.all.exists(_ == NeedleE))
-        throw new IllegalStateException("LCarriage does not work with needles at E")
+        throw new IllegalStateException("GCarriage does not work with needles at E")
       if (needles.pattern.all.exists(_ == NeedleD))
-        throw new IllegalStateException("LCarriage does not work with needles at D")
+        throw new IllegalStateException("GCarriage does not work with needles at D")
 
+      //TODO implement G knitting
       ???
     }
   }
