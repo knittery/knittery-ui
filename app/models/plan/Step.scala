@@ -162,6 +162,14 @@ case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step
 }
 
 case class AddCarriage(carriage: Carriage, at: LeftRight = Left) extends Step {
-  override def apply(state: KnittingState) =
-    state.moveCarriage(carriage, at).success
+  override def apply(state: KnittingState) = Try {
+    require(state.carriageState(carriage).position == CarriageRemoved,
+      s"Can only add removed $carriage-carriage")
+    val pos = if (at == Left) CarriageLeft(0) else CarriageRight(0)
+    state.modifyCarriage(carriage match {
+      case KCarriage => state.carriageState(KCarriage).copy(position = pos)
+      case LCarriage => state.carriageState(LCarriage).copy(position = pos)
+      case GCarriage => state.carriageState(GCarriage).copy(position = pos)
+    })
+  }.toSuccess
 }
