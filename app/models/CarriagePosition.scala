@@ -28,6 +28,9 @@ case class CarriageRight(
   override def directionTo(needle: Needle) = ToLeft
 }
 
+/** The carriage is not in use. */
+case object CarriageRemoved extends CarriagePosition
+
 /** Direction of movement */
 sealed trait Direction {
   def reverse: Direction

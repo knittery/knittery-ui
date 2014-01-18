@@ -6,6 +6,7 @@ machine.derived("positionPercentage", "position", (p) ->
     when "left" then 0
     when "right" then 100
     when "needles" then (p.index+0.5)*100/200
+    when "removed" then 0
   else undefined
 )
 machine.derived("positionText", "position", (p) ->
@@ -13,6 +14,7 @@ machine.derived("positionText", "position", (p) ->
     when "left" then "left"
     when "right" then "right"
     when "needles" then p.needle
+    when "removed" then "-"
   else undefined
 )
 
