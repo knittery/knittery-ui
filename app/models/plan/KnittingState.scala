@@ -9,13 +9,16 @@ case class KnittingState(needles: NeedleStateRow,
   output: Knitted) {
 
   def workingNeedles = Needle.all.filter(needles(_).position.isWorking)
-  def nextDirection(carriage: Carriage) = carriageState.get(carriage).map(_.position) match {
-    case Some(pos) =>
+  def nextDirection(carriage: Carriage) = carriageState(carriage).position match {
+    case CarriageRemoved => "Cannot find direction for removed carriage".fail
+    case pos =>
       val overlappedWorking = carriage.over(pos).filter(needles(_).position.isWorking)
       if (overlappedWorking.nonEmpty) s"carriage still over working needeles ${overlappedWorking.mkString(",")}".fail
       else pos.directionTo(workingNeedles.headOption.getOrElse(Needle.middle)).success
-    case None => ToRight.success
   }
+
+  def modifyCarriage(state: CarriageState) =
+    copy(carriageState = carriageState + state)
 
   def moveNeedles(positions: Needle => NeedlePosition) =
     modifyNeedles(Needle.all.map(n => n -> needles(n).copy(position = positions(n))).toMap)

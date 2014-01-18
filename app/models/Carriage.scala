@@ -8,6 +8,7 @@ sealed trait Carriage {
     case CarriageOverNeedles(needle) => Needle.all.span(_ == needle) match {
       case (a, b) => a.reverse.take(width / 2).reverse ++ b.take(width / 2)
     }
+    case CarriageRemoved => Seq.empty
   }
   /** Width of the carriage in needles. */
   protected def width: Int
