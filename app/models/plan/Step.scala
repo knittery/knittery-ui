@@ -94,10 +94,25 @@ case class ChangeGCarriageSettings(settings: GCarriage.Settings) extends ChangeC
   }.toSuccess
 }
 
-case class ThreadYarn(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends Step {
-  override def apply(state: KnittingState) = {
-    state.copy(yarnA = yarnA, yarnB = yarnB).success[String]
-  }
+sealed trait ThreadYarn extends Step
+case class ThreadYarnK(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends ThreadYarn {
+  import KCarriage._
+  override def apply(state: KnittingState) = Try {
+    val cs = state.carriageState(KCarriage)
+    require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active K-carriage")
+    val newAssembly = cs.assembly match {
+      case a: SinkerPlate => a.copy(yarnA = yarnA, yarnB = yarnB)
+    }
+    state.modifyCarriage(cs.copy(assembly = newAssembly))
+  }.toSuccess
+}
+case class ThreadYarnG(yarn: Option[Yarn]) extends ThreadYarn {
+  import KCarriage._
+  override def apply(state: KnittingState) = Try {
+    val cs = state.carriageState(GCarriage)
+    require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active G-carriage")
+    state.modifyCarriage(cs.copy(yarn = yarn))
+  }.toSuccess
 }
 
 /**

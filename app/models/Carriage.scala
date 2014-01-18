@@ -77,6 +77,7 @@ case object GCarriage extends Carriage {
 
   case class State(
     settings: Settings = Settings(),
+    yarn: Option[Yarn] = None,
     position: CarriagePosition = CarriageRemoved) extends CarriageState
   def initialState = State()
 
