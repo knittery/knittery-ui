@@ -30,8 +30,8 @@ class Machine(connectorProps: Props) extends Actor {
   def notify(msg: Event) =
     subscribers.foreach(_ ! msg)
 
-  var positions = Map.empty[CarriageType, CarriagePosition]
-  var lastCarriage: CarriageType = KCarriage
+  var positions = Map.empty[Carriage, CarriagePosition]
+  var lastCarriage: Carriage = KCarriage
   var row: Int = -1
   var pattern = NeedlePattern.empty
 
@@ -99,11 +99,11 @@ object Machine {
   case object Unsubscribe extends Command
 
   case object Subscribed extends Event
-  case class PositionChanged(carriage: CarriageType, position: CarriagePosition, row: Int) extends Event
+  case class PositionChanged(carriage: Carriage, position: CarriagePosition, row: Int) extends Event
   case class NeedlePatternUpdate(currentRow: NeedlePatternRow, pattern: NeedlePattern) extends Event
 
   case object GetPositions extends Command
-  case class Positions(positions: Map[CarriageType, CarriagePosition], row: Int) extends Event
+  case class Positions(positions: Map[Carriage, CarriagePosition], row: Int) extends Event
 
   case class LoadPattern(pattern: NeedlePattern) extends Command
   case class PatternLoaded(pattern: NeedlePattern) extends Event

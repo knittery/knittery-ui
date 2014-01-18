@@ -10,7 +10,7 @@ object Connector {
   case class PositionUpdate(
     position: CarriagePosition,
     direction: Direction,
-    carriage: Option[CarriageType])
+    carriage: Option[Carriage])
     extends Event {
 
     def currentNeedle: Option[Needle] = position match {

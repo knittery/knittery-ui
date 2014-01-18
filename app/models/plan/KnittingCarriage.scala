@@ -11,7 +11,7 @@ trait KnittingCarriage {
 }
 
 object KnittingCarriage {
-  def apply(carriage: CarriageType, settings: CarriageSettings, yarnA: Option[Yarn], yarnB: Option[Yarn],
+  def apply(carriage: Carriage, settings: CarriageSettings, yarnA: Option[Yarn], yarnB: Option[Yarn],
     pattern: Option[NeedleActionRow]) = {
     require(carriage == settings.carriage, "Setting does not match carriage")
     settings match {

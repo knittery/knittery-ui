@@ -60,7 +60,7 @@ object UnknittedSettingsOptimizer extends PlanOptimizer {
 /** Optimizes away duplicate ChangeCarriageSetting steps. */
 object DuplicateSettingsOptimizer extends PlanOptimizer {
   override def apply(steps: Seq[Step]) = {
-    steps.foldLeft((Vector.empty[Step], Map.empty[CarriageType, CarriageSettings])) {
+    steps.foldLeft((Vector.empty[Step], Map.empty[Carriage, CarriageSettings])) {
       case (v @ (_, settings), ChangeCarriageSettings(s)) if settings.get(s.carriage) == Some(s) =>
         //drop it, it sets to the same settings
         v

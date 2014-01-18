@@ -1,7 +1,7 @@
 package models
 
 sealed trait CarriageSettings {
-  val carriage: CarriageType
+  val carriage: Carriage
 }
 
 sealed trait HoldingCamLever {

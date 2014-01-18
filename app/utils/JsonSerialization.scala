@@ -9,8 +9,8 @@ import models.plan._
 
 object JsonSerialization {
 
-  implicit object CarriageTypeWrite extends Writes[CarriageType] {
-    override def writes(carriage: CarriageType) = JsString(carriage match {
+  implicit object CarriageTypeWrite extends Writes[Carriage] {
+    override def writes(carriage: Carriage) = JsString(carriage match {
       case KCarriage => "K"
       case LCarriage => "L"
       case GCarriage => "G"

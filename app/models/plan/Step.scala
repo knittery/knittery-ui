@@ -12,7 +12,7 @@ sealed trait Step {
 }
 
 /** Knits a row using a carriage. */
-case class KnitRow(carriage: CarriageType, direction: Direction, needleActionRow: NeedleActionRow = AllNeedlesToB) extends Step {
+case class KnitRow(carriage: Carriage, direction: Direction, needleActionRow: NeedleActionRow = AllNeedlesToB) extends Step {
   override def apply(state: KnittingState) = {
     for {
       kc <- knittingCarriage(state, Some(needleActionRow))
@@ -69,7 +69,7 @@ object MoveNeedles {
 }
 
 case class ChangeCarriageSettings(settings: CarriageSettings) extends Step {
-  def carriage: CarriageType = settings.carriage
+  def carriage: Carriage = settings.carriage
   override def apply(state: KnittingState) = {
     state.modifyCarriageSettings(settings).success[String]
   }
@@ -135,7 +135,7 @@ case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step
   }
 }
 
-case class AddCarriage(carriage: CarriageType, at: LeftRight = Left) extends Step {
+case class AddCarriage(carriage: Carriage, at: LeftRight = Left) extends Step {
   override def apply(state: KnittingState) =
     state.moveCarriage(carriage, at).success
 }

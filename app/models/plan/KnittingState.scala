@@ -6,12 +6,12 @@ import models._
 
 case class KnittingState(needles: NeedleStateRow,
   yarnA: Option[Yarn], yarnB: Option[Yarn],
-  carriageSettings: Map[CarriageType, CarriageSettings],
-  carriagePosition: Map[CarriageType, CarriagePosition],
+  carriageSettings: Map[Carriage, CarriageSettings],
+  carriagePosition: Map[Carriage, CarriagePosition],
   output: Knitted) {
 
   def workingNeedles = Needle.all.filter(needles(_).position.isWorking)
-  def nextDirection(carriage: CarriageType) = carriagePosition.get(carriage) match {
+  def nextDirection(carriage: Carriage) = carriagePosition.get(carriage) match {
     case Some(pos) =>
       val overlappedWorking = carriage.over(pos).filter(needles(_).position.isWorking)
       if (overlappedWorking.nonEmpty) s"carriage still over working needeles ${overlappedWorking.mkString(",")}".fail
@@ -22,11 +22,11 @@ case class KnittingState(needles: NeedleStateRow,
 
   def modifyCarriageSettings(settings: CarriageSettings) =
     copy(carriageSettings = carriageSettings + (settings.carriage -> settings))
-  def moveCarriage(carriage: CarriageType, pos: CarriagePosition) =
+  def moveCarriage(carriage: Carriage, pos: CarriagePosition) =
     copy(carriagePosition = carriagePosition + (carriage -> pos))
-  def moveCarriage(carriage: CarriageType, direction: Direction): KnittingState =
+  def moveCarriage(carriage: Carriage, direction: Direction): KnittingState =
     moveCarriage(carriage, if (direction == ToLeft) CarriageLeft(0) else CarriageRight(0))
-  def moveCarriage(carriage: CarriageType, to: LeftRight): KnittingState = to match {
+  def moveCarriage(carriage: Carriage, to: LeftRight): KnittingState = to match {
     case Left => moveCarriage(carriage, ToLeft)
     case Right => moveCarriage(carriage, ToRight)
   }

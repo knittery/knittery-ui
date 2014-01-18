@@ -34,7 +34,7 @@ object Basics {
   }
 
   /** Add carriage if missing. */
-  def needCarriage(carriage: CarriageType, at: LeftRight = Left) = for {
+  def needCarriage(carriage: Carriage, at: LeftRight = Left) = for {
     p <- Planner.state(_.carriagePosition.get(carriage))
     _ <- if (p.isEmpty) Planner.step(AddCarriage(carriage, at)) else Planner.noop
   } yield ()
@@ -47,7 +47,7 @@ object Basics {
   } yield current
 
   /** Next direction for the carriage. */
-  def nextDirection(carriage: CarriageType) = Planner.validate(_.nextDirection(carriage))
+  def nextDirection(carriage: Carriage) = Planner.validate(_.nextDirection(carriage))
 
   /** Knit a row. */
   def knitRow(settings: CarriageSettings, yarn: Option[Yarn]) = for {
