@@ -15,8 +15,8 @@ sealed trait Step {
 case class KnitRow(carriage: Carriage, direction: Direction, needleActionRow: NeedleActionRow = AllNeedlesToB) extends Step {
   override def apply(state: KnittingState) = {
     for {
-      kc <- knittingCarriage(state, Some(needleActionRow))
-      (needles, knitted) <- kc(direction)(state.needles)
+      kc <- knittingCarriage(state, (needleActionRow))
+      (needles, knitted) <- kc(direction, state.needles)
     } yield {
       state.
         moveCarriage(carriage, direction).
@@ -24,18 +24,15 @@ case class KnitRow(carriage: Carriage, direction: Direction, needleActionRow: Ne
         knit(knitted)
     }
   }
-  protected def knittingCarriage(state: KnittingState, pattern: Option[NeedleActionRow]) = {
-    for {
-      pos <- state.carriagePosition.get(carriage).toSuccess(s"Undefined position for $carriage")
-      settings <- state.carriageSettings.get(carriage).toSuccess(s"Undefined settings for $carriage")
-      c = KnittingCarriage(carriage, settings, state.yarnA, state.yarnB, pattern)
-      nextDir <- state.nextDirection(carriage)
-      _ <- {
-        if (nextDir != direction) s"Cannot move carriage from $direction to $direction".fail[KnittingCarriage]
-        else ().success
-      }
-    } yield c
-  }
+  private def knittingCarriage(state: KnittingState, pattern: NeedleActionRow) = for {
+    nextDir <- state.nextDirection(carriage)
+    _ <- {
+      if (nextDir != direction) s"Cannot move carriage from $direction to $direction".fail[KnittingCarriage]
+      else ().success
+    }
+    c = KnittingCarriage(state.carriageState(carriage), pattern)
+  } yield c
+
   override def hashCode = carriage.hashCode ^ direction.hashCode ^ needleActionRow.all.hashCode
   override def equals(o: Any) = o match {
     case o: KnitRow => o.carriage == carriage && o.direction == direction &&
@@ -165,11 +162,6 @@ case class AddCarriage(carriage: Carriage, at: LeftRight = Left) extends Step {
   override def apply(state: KnittingState) = Try {
     require(state.carriageState(carriage).position == CarriageRemoved,
       s"Can only add removed $carriage-carriage")
-    val pos = if (at == Left) CarriageLeft(0) else CarriageRight(0)
-    state.modifyCarriage(carriage match {
-      case KCarriage => state.carriageState(KCarriage).copy(position = pos)
-      case LCarriage => state.carriageState(LCarriage).copy(position = pos)
-      case GCarriage => state.carriageState(GCarriage).copy(position = pos)
-    })
+    state.moveCarriage(carriage, at)
   }.toSuccess
 }
