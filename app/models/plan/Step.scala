@@ -71,26 +71,23 @@ object MoveNeedles {
 sealed trait ChangeCarriageSettings extends Step
 case class ChangeKCarriageSettings(settings: KCarriage.Settings) extends ChangeCarriageSettings {
   override def apply(state: KnittingState) = Try {
-    val before = state.carriageState(KCarriage)
-    require(before.position != CarriageRemoved, "Cannot set settings on non-active carriage")
-    val after = before.copy(settings = settings)
-    state.modifyCarriage(after)
+    val cs = state.carriageState(KCarriage)
+    require(cs.position != CarriageRemoved, "Cannot set settings on non-active K-carriage")
+    state.modifyCarriage(cs.copy(settings = settings))
   }.toSuccess
 }
 case class ChangeLCarriageSettings(settings: LCarriage.Settings) extends ChangeCarriageSettings {
   override def apply(state: KnittingState) = Try {
-    val before = state.carriageState(LCarriage)
-    require(before.position != CarriageRemoved, "Cannot set settings on non-active carriage")
-    val after = before.copy(settings = settings)
-    state.modifyCarriage(after)
+    val cs = state.carriageState(LCarriage)
+    require(cs.position != CarriageRemoved, "Cannot set settings on non-active L-carriage")
+    state.modifyCarriage(cs.copy(settings = settings))
   }.toSuccess
 }
 case class ChangeGCarriageSettings(settings: GCarriage.Settings) extends ChangeCarriageSettings {
   override def apply(state: KnittingState) = Try {
-    val before = state.carriageState(GCarriage)
-    require(before.position != CarriageRemoved, "Cannot set settings on non-active carriage")
-    val after = before.copy(settings = settings)
-    state.modifyCarriage(after)
+    val cs = state.carriageState(GCarriage)
+    require(cs.position != CarriageRemoved, "Cannot set settings on non-active G-carriage")
+    state.modifyCarriage(cs.copy(settings = settings))
   }.toSuccess
 }
 
