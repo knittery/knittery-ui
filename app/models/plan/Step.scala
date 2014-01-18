@@ -68,11 +68,30 @@ object MoveNeedles {
     else before(n))
 }
 
-case class ChangeCarriageSettings(settings: CarriageSettings) extends Step {
-  def carriage: Carriage = settings.carriage
-  override def apply(state: KnittingState) = {
-    state.modifyCarriageSettings(settings).success[String]
-  }
+sealed trait ChangeCarriageSettings extends Step
+case class ChangeKCarriageSettings(settings: KCarriage.Settings) extends ChangeCarriageSettings {
+  override def apply(state: KnittingState) = Try {
+    val before = state.carriageState(KCarriage)
+    require(before.position != CarriageRemoved, "Cannot set settings on non-active carriage")
+    val after = before.copy(settings = settings)
+    state.modifyCarriage(after)
+  }.toSuccess
+}
+case class ChangeLCarriageSettings(settings: LCarriage.Settings) extends ChangeCarriageSettings {
+  override def apply(state: KnittingState) = Try {
+    val before = state.carriageState(LCarriage)
+    require(before.position != CarriageRemoved, "Cannot set settings on non-active carriage")
+    val after = before.copy(settings = settings)
+    state.modifyCarriage(after)
+  }.toSuccess
+}
+case class ChangeGCarriageSettings(settings: GCarriage.Settings) extends ChangeCarriageSettings {
+  override def apply(state: KnittingState) = Try {
+    val before = state.carriageState(GCarriage)
+    require(before.position != CarriageRemoved, "Cannot set settings on non-active carriage")
+    val after = before.copy(settings = settings)
+    state.modifyCarriage(after)
+  }.toSuccess
 }
 
 case class ThreadYarn(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends Step {
