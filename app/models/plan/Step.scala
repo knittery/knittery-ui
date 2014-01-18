@@ -136,28 +136,23 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends Step {
 
 case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step {
   override def apply(state: KnittingState) = {
-    for {
-      _ <- {
-        if (state.yarns.contains(withYarn)) ().success
-        else s"Cannot cast off with not threaded yarn $withYarn".fail
-      }
-      state2 = state.
-        knit { n =>
-          if (filter(n)) state.needles(n) match {
-            case NeedleState(_, Nil) => NoStitch
-            case NeedleState(_, yarns) => PlainStitch(yarns)
-          }
-          else NoStitch
-        }.
-        knit { n =>
-          if (filter(n)) state.needles(n) match {
-            case NeedleState(_, Nil) => NoStitch
-            case NeedleState(_, yarns) => CastOffStitch(withYarn)
-          }
-          else NoStitch
-        }.
-        modifyNeedles(n => if (filter(n)) NeedleState(NeedleA) else state.needles(n))
-    } yield state2
+    state.
+      knit { n =>
+        if (filter(n)) state.needles(n) match {
+          case NeedleState(_, Nil) => NoStitch
+          case NeedleState(_, yarns) => PlainStitch(yarns)
+        }
+        else NoStitch
+      }.
+      knit { n =>
+        if (filter(n)) state.needles(n) match {
+          case NeedleState(_, Nil) => NoStitch
+          case NeedleState(_, yarns) => CastOffStitch(withYarn)
+        }
+        else NoStitch
+      }.
+      modifyNeedles(n => if (filter(n)) NeedleState(NeedleA) else state.needles(n)).
+      success
   }
   override def hashCode = withYarn.hashCode ^ filter.all.hashCode
   override def equals(o: Any) = o match {
