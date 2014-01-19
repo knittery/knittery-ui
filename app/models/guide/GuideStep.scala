@@ -55,18 +55,24 @@ sealed trait GuideStep {
       ("Cast off",
         s"Perform a closed cast off for needles ${from.number} through ${to.number} with ${yarn.name}")
 
-    case ThreadYarn(None, None) =>
-      (s"Unthread Yarn",
-        s"Unthread all yarns")
-    case ThreadYarn(Some(yarn), None) =>
-      (s"Thread Yarn ${yarn.name}",
-        s"Thread the yarn ${yarn.name}")
-    case ThreadYarn(None, Some(yarn)) =>
-      (s"Thread Yarn ${yarn.name}",
-        s"Thread the yarn ${yarn.name} into B")
-    case ThreadYarn(Some(yarnA), Some(yarnB)) =>
-      (s"Thread Yarns ${yarnA.name} and ${yarnB.name}",
-        s"Thread the yarns ${yarnA.name} into A and ${yarnB.name} into B")
+    case ThreadYarnK(None, None) =>
+      (s"Unthread Yarn from K",
+        s"Unthread all yarns from the K carriage")
+    case ThreadYarnK(Some(yarn), None) =>
+      (s"Thread Yarn ${yarn.name} to K",
+        s"Thread the yarn ${yarn.name} into A on the K carriage")
+    case ThreadYarnK(None, Some(yarn)) =>
+      (s"Thread Yarn ${yarn.name} to K",
+        s"Thread the yarn ${yarn.name} into B on the K carriage")
+    case ThreadYarnK(Some(yarnA), Some(yarnB)) =>
+      (s"Thread Yarns ${yarnA.name} and ${yarnB.name} to K",
+        s"Thread the yarns ${yarnA.name} into A and ${yarnB.name} into B on the K carriage")
+    case ThreadYarnG(None) =>
+      (s"Unthread Yarn from G",
+        s"Unthread the yarn from the G carriage")
+    case ThreadYarnG(Some(yarn)) =>
+      (s"Thread Yarn ${yarn.name} to G",
+        s"Thread the yarn ${yarn.name} to the G carriage")
 
     case MoveNeedles(to) =>
       val affected = Needle.all.filter(n => stateBefore.needles(n).position != to(n))
@@ -85,9 +91,18 @@ sealed trait GuideStep {
       (s"Add Carriage ${c.name}",
         s"Add the carriage ${c.name} at the $lr side")
 
-    case ChangeCarriageSettings(KCarriageSettings(knob, mc, lever)) =>
+    case ChangeKCarriageSettings(s) =>
+      def button(name: String, value: Boolean) =
+        name + "=" + (if (value) "on" else "off")
+      val settings = button("mc", s.mc) ::
+        button("L", s.l) ::
+        button("left part", s.partLeft) ::
+        button("right part", s.partRight) ::
+        button("left tuck", s.tuckLeft) ::
+        button("right tuck", s.tuckRight) ::
+        Nil
       (s"Change Settings K",
-        s"Change K carriage settings to $knob ${if (mc) "MC" else ""} with lever at ${lever.name}")
+        s"Change K carriage settings Knob to ${s.knob} with lever at ${s.holdingCamLever.name} and ${settings.mkString(" and ")}")
   }
 
   lazy val stateAfter: KnittingState = {
