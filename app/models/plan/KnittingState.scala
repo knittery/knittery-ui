@@ -4,7 +4,7 @@ import scalaz._
 import Scalaz._
 import models._
 
-case class KnittingState(needles: NeedleStateRow,
+case class KnittingState(needles: Map[Needle, NeedleState],
   carriageState: CarriageStates,
   output: Knitted) {
 
@@ -31,12 +31,13 @@ case class KnittingState(needles: NeedleStateRow,
 
   def moveNeedles(positions: Needle => NeedlePosition) =
     modifyNeedles(Needle.all.map(n => n -> needles(n).copy(position = positions(n))).toMap)
-  def modifyNeedles(newNeedles: NeedleStateRow) = copy(needles = newNeedles)
+  def modifyNeedles(newNeedles: NeedleStateRow) = copy(needles = newNeedles.toMap)
 
   def knit(f: Needle => Stitch) = copy(output = output + f)
 }
 object KnittingState {
-  val initial = KnittingState(_ => NeedleState(NeedleA), CarriageStates.empty, Knitted.empty)
+  val initial = KnittingState((allNeedlesA _).toMap, CarriageStates.empty, Knitted.empty)
+  private def allNeedlesA(n: Needle) = NeedleState(NeedleA, Nil)
 }
 
 sealed trait CarriageStates {
