@@ -12,8 +12,7 @@ class OptimizersSpec extends Specification {
     val simpleLines = Plan(List(
       ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
       AddCarriage(KCarriage, Left),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
-      ThreadYarn(Some(red), None),
+      ThreadYarnK(Some(red), None),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
       KnitRow(KCarriage, ToRight),
@@ -25,61 +24,59 @@ class OptimizersSpec extends Specification {
     val simpleLinesWithUnknittedSettings = Plan(List(
       ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
       AddCarriage(KCarriage, Left),
-      ChangeCarriageSettings(LCarriageSettings()),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
-      ThreadYarn(Some(red), None),
+      ThreadYarnK(Some(red), None),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       ClosedCastOff(red, allNeedles)))
 
     val simpleLinesWithDuplicateSettings = Plan(List(
       ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
       AddCarriage(KCarriage, Left),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
-      ThreadYarn(Some(red), None),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
+      ThreadYarnK(Some(red), None),
+      ChangeKCarriageSettings(KCarriage.Settings()),
+      ChangeKCarriageSettings(KCarriage.Settings()),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToRight),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToLeft),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToRight),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToLeft),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToRight),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToLeft),
       ClosedCastOff(red, allNeedles)))
 
     val simpleLinesWitUselessSettings = Plan(List(
       ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       AddCarriage(KCarriage, Left),
-      ChangeCarriageSettings(LCarriageSettings()),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
-      ThreadYarn(Some(red), None),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeLCarriageSettings(LCarriage.Settings()),
+      ChangeKCarriageSettings(KCarriage.Settings()),
+      ThreadYarnK(Some(red), None),
+      ChangeKCarriageSettings(KCarriage.Settings()),
+      ChangeKCarriageSettings(KCarriage.Settings()),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToRight),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToLeft),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToRight),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToLeft),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToRight),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToLeft),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
+      ChangeKCarriageSettings(KCarriage.Settings()),
       ClosedCastOff(red, allNeedles)))
 
     def evenOddPattern(n: Needle) = if (n.index % 2 == 0 || n.index >= 1 || n.index <= 40) NeedleToB else NeedleToD
@@ -88,10 +85,10 @@ class OptimizersSpec extends Specification {
     val patternLines = Plan(List(
       ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
       AddCarriage(KCarriage, Left),
-      ChangeCarriageSettings(KCarriageSettings(KC2)),
-      ThreadYarn(Some(red), None),
+      ChangeKCarriageSettings(KCarriage.Settings()),
+      ThreadYarnK(Some(red), None),
       KnitRow(KCarriage, ToRight, evenOddPattern),
-      ChangeCarriageSettings(KCarriageSettings(KC2, mc = true)),
+      ChangeKCarriageSettings(KCarriage.Settings(mc = true)),
       KnitRow(KCarriage, ToLeft, oddEvenPattern),
       KnitRow(KCarriage, ToRight, evenOddPattern),
       KnitRow(KCarriage, ToLeft, oddEvenPattern),
@@ -106,10 +103,10 @@ class OptimizersSpec extends Specification {
       Plan(List(
         ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
         AddCarriage(KCarriage, Left),
-        ChangeCarriageSettings(KCarriageSettings(KC2)),
-        ThreadYarn(Some(red), None),
+        ChangeKCarriageSettings(KCarriage.Settings()),
+        ThreadYarnK(Some(red), None),
         KnitRow(KCarriage, ToRight, evenOddPattern),
-        ChangeCarriageSettings(KCarriageSettings(KC2, mc = true)),
+        ChangeKCarriageSettings(KCarriage.Settings(mc = true)),
         MoveNeedles(line, oddEvenPattern),
         KnitRow(KCarriage, ToLeft),
         MoveNeedles(line, oddEvenPattern),
@@ -158,21 +155,21 @@ class OptimizersSpec extends Specification {
         containTheSameElementsAs(simpleLines.steps)
     }
   }
-  "duplicate settings optimizer" should {
+  "no effect step optimizer" should {
     "not change already optimal" in new plans {
-      DuplicateSettingsOptimizer(simpleLines.steps) must_== simpleLines.steps
+      NoEffectStepOptimizer(simpleLines.steps) must_== simpleLines.steps
     }
     "remove duplicate change settings" in new plans {
-      DuplicateSettingsOptimizer(simpleLinesWithDuplicateSettings.steps) must
+      NoEffectStepOptimizer(simpleLinesWithDuplicateSettings.steps) must
         containTheSameElementsAs(simpleLines.steps)
     }
   }
   "settings optimizers" should {
     "not change already optimal" in new plans {
-      DuplicateSettingsOptimizer(simpleLines.steps) must_== simpleLines.steps
+      NoEffectStepOptimizer(simpleLines.steps) must_== simpleLines.steps
     }
     "remove useless change settings" in new plans {
-      DuplicateSettingsOptimizer(
+      NoEffectStepOptimizer(
         UnknittedSettingsOptimizer(simpleLinesWithDuplicateSettings.steps)) must
         containTheSameElementsAs(simpleLines.steps)
     }
