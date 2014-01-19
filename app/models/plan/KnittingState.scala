@@ -60,6 +60,6 @@ sealed trait CarriageStates {
 }
 object CarriageStates {
   def empty = new CarriageStates {
-    override val data = Map.empty
+    override val data = Map.empty[Carriage, CarriageState]
   }
 }

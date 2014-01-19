@@ -29,7 +29,10 @@ case class CarriageRight(
 }
 
 /** The carriage is not in use. */
-case object CarriageRemoved extends CarriagePosition
+case object CarriageRemoved extends CarriagePosition {
+  override def directionTo(needle: Needle) =
+    throw new IllegalStateException(s"Removed carriage has no direction to $needle")
+}
 
 /** Direction of movement */
 sealed trait Direction {
