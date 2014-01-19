@@ -9,6 +9,7 @@ package object plan {
     def positions = row.andThen(_.position)
     def pattern = positions
     def yarn = row.andThen(_.yarn)
+    def toMap = Needle.all.map(n => (n, row(n))).toMap
   }
 
   type Planner = PlannerM[Unit]
