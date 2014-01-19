@@ -58,6 +58,12 @@ sealed trait CarriageStates {
     case _: LCarriage.State => LCarriage
     case _: GCarriage.State => GCarriage
   }
+
+  override def hashCode = data.hashCode
+  override def equals(o: Any) = o match {
+    case o: CarriageStates => data == o.data
+    case _ => false
+  }
 }
 object CarriageStates {
   def empty = new CarriageStates {
