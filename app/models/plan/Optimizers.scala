@@ -9,6 +9,7 @@ object Optimizers {
   val list =
     UnknittedSettingsOptimizer ::
       NoEffectStepOptimizer ::
+      OptimizeUselessMoveNeedles ::
       OptimizePatternKnitting ::
       Nil
   implicit val all = list.foldLeft(Monoid[PlanOptimizer].zero)(_ |+| _)
@@ -115,5 +116,48 @@ object OptimizePatternKnitting extends PlanOptimizer {
       case step: ClosedCastOff => Some(step)
       case _ => None
     }
+  }
+}
+
+/** Optimizes away a manual MoveNeedles steps if B or D does not matter to the next knitting. */
+object OptimizeUselessMoveNeedles extends PlanOptimizer {
+  override def apply(steps: Seq[Step]) = {
+    steps.
+      foldLeft((Vector.empty[(Step, KnittingState)], KnittingState.initial)) {
+        case ((out, state), step) =>
+          val state2 = step(state).valueOr(e => throw new RuntimeException("Plan is not valid: " + e))
+          (out :+ (step, state2), state2)
+      }._1.foldRight(List.empty[(Step, KnittingState)]) {
+        case ((step @ MoveNeedles(to), stateBefore), processed) =>
+          val posBefore = stateBefore.needles.positions
+          val onlyBToD = Needle.all.filter(n => (posBefore(n), to(n)) match {
+            case (a, b) if a == b => false
+            case (NeedleB, NeedleD) => false
+            case (NeedleD, NeedleB) => false
+            case _ => true
+          }).isEmpty
+          if (onlyBToD) {
+            processed.find {
+              case (k: KnitRow, state) => true
+              case _ => false
+            } match { //next knitting
+              case Some((KnitRow(KCarriage, dir, _), state)) =>
+                val s = state.carriageState(KCarriage).settings
+                val bOrDimportant = s.mc || s.l ||
+                  (dir == ToLeft && (s.partLeft || s.tuckLeft)) ||
+                  (dir == ToRight && (s.partRight || s.tuckRight))
+                if (bOrDimportant) (step, stateBefore) :: processed
+                else processed //got rid of it
+              case Some(_) =>
+                //cannot optimize it away
+                (step, stateBefore) :: processed
+              case None =>
+                //drop it because it's not used for knitting
+                processed
+            }
+          } else (step, stateBefore) :: processed
+        case (x, processed) =>
+          x :: processed
+      }.map(_._1)
   }
 }

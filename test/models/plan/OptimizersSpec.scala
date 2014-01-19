@@ -124,11 +124,43 @@ class OptimizersSpec extends Specification {
         ClosedCastOff(red, allNeedles)))
     }
 
+    val plainKnittingK = {
+      Plan(List(
+        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
+        AddCarriage(KCarriage, Left),
+        KnitRow(KCarriage, ToRight, AllNeedlesToD),
+        KnitRow(KCarriage, ToLeft),
+        KnitRow(KCarriage, ToRight, AllNeedlesToD),
+        KnitRow(KCarriage, ToLeft),
+        KnitRow(KCarriage, ToRight, AllNeedlesToD),
+        KnitRow(KCarriage, ToLeft)))
+    }
+    val plainKnittingKManualMovements = {
+      def line(n: Needle) = if (n.index >= 1 && n.index <= 40) NeedleB else NeedleA
+      Plan(List(
+        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), red),
+        AddCarriage(KCarriage, Left),
+        MoveNeedles(line),
+        KnitRow(KCarriage, ToRight, AllNeedlesToD),
+        MoveNeedles(line),
+        KnitRow(KCarriage, ToLeft),
+        MoveNeedles(line),
+        KnitRow(KCarriage, ToRight, AllNeedlesToD),
+        MoveNeedles(line),
+        KnitRow(KCarriage, ToLeft),
+        MoveNeedles(line),
+        KnitRow(KCarriage, ToRight, AllNeedlesToD),
+        MoveNeedles(line),
+        KnitRow(KCarriage, ToLeft)))
+    }
+
     val plans = simpleLines ::
       simpleLinesWithUnknittedSettings ::
       simpleLinesWithDuplicateSettings ::
       patternLines ::
       patternLinesWithManualNeedleSettings ::
+      plainKnittingK ::
+      plainKnittingKManualMovements ::
       Nil
   }
 
@@ -182,6 +214,15 @@ class OptimizersSpec extends Specification {
     "prevent manual needle movement" in new plans {
       OptimizePatternKnitting(patternLinesWithManualNeedleSettings.steps) must
         containTheSameElementsAs(patternLines.steps)
+    }
+  }
+  "useless move needles optimizer" should {
+    "not change already optimal" in new plans {
+      OptimizeUselessMoveNeedles(plainKnittingK.steps) must_== plainKnittingK.steps
+    }
+    "remove useless move needles" in new plans {
+      OptimizeUselessMoveNeedles(plainKnittingKManualMovements.steps) must
+        containTheSameElementsAs(plainKnittingK.steps)
     }
   }
 }
