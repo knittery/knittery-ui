@@ -29,23 +29,23 @@ object FairIslePlanner {
       require(workingNeedles.nonEmpty, "No working needles")
     }
     needle0 = startNeedle.getOrElse(workingNeedles.head)
-    settings = KCarriageSettings(holdingCamLever = HoldingCamN, knob = KC2, mc = true)
+    settings = KCarriage.Settings(mc = true)
     _ <- Basics.needCarriage(KCarriage)
     //Knit the pattern rows
     _ <- pattern.rows.toVector.traverse(row => for {
       yarns <- optimizeYarn(row.toSet)
       actionRow = knitActions(row, needle0, yarns) _
-      _ <- Basics.knitPatternRow(settings, actionRow, yarns._1, yarns._2)
+      _ <- Basics.knitRowWithK(settings, yarns._1, yarns._2, actionRow)
     } yield ())
   } yield ()
 
   //TODO also take into account the next rows to knit => make it a general optimization?
   private def optimizeYarn(required: Set[Yarn]) = {
     for {
-      yarnA <- Planner.state(_.yarnA)
-      yarnB <- Planner.state(_.yarnB)
-      available <- Planner.state(_.yarns)
+      yarnA <- Planner.state(_.carriageState(KCarriage).yarnA)
+      yarnB <- Planner.state(_.carriageState(KCarriage).yarnB)
     } yield {
+      val available = yarnA.toSet ++ yarnB.toSet
       if (required.forall(available.contains)) (yarnA, yarnB)
       else required.toList match {
         case one :: two :: Nil => (Some(one), Some(two))

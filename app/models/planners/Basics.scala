@@ -6,64 +6,73 @@ import models._
 import models.plan._
 
 object Basics {
-  /**
-   *  Threads the yarn in A and leaves B empty if not already so.
-   *  Returns the yarn configuration before this.
-   */
-  def oneYarn(yarn: Yarn) = yarns(Some(yarn))
-
-  /**
-   *  Threads the yarn in A and B if not already so.
-   *  Returns the yarn configuration before this.
-   */
-  def twoYarns(y: (Yarn, Yarn)) = yarns(Some(y._1), Some(y._2))
-
-  /**
-   *  Threads the yarn in A and B if not already so.
-   *  Returns the yarn configuration before this.
-   */
-  def yarns(yarnA: Option[Yarn], yarnB: Option[Yarn] = None) = {
-    for {
-      oldA <- Planner.state(_.yarnA)
-      oldB <- Planner.state(_.yarnB)
-      _ <- {
-        if ((oldA, oldB) == (yarnA, yarnB)) Planner.noop
-        else Planner.step(ThreadYarn(yarnA, yarnB))
-      }
-    } yield (oldA, oldB)
-  }
-
   /** Add carriage if missing. */
   def needCarriage(carriage: Carriage, at: LeftRight = Left) = for {
-    p <- Planner.state(_.carriagePosition.get(carriage))
-    _ <- if (p.isEmpty) Planner.step(AddCarriage(carriage, at)) else Planner.noop
+    position <- Planner.state(_.carriageState(carriage).position)
+    _ <- {
+      if (position == CarriageRemoved) Planner.step(AddCarriage(KCarriage, at))
+      else Planner.noop
+    }
   } yield ()
 
-  /** Change carriage settings. */
-  def carriageSettings(settings: CarriageSettings) = for {
-    _ <- needCarriage(settings.carriage)
-    current <- Planner.state(_.carriageSettings.get(settings.carriage))
-    _ <- if (current == Some(settings)) Planner.noop else Planner.step(ChangeCarriageSettings(settings))
+  /** Change K-carriage settings. */
+  def carriageSettings(settings: KCarriage.Settings) = for {
+    _ <- needCarriage(KCarriage)
+    current <- Planner.state(_.carriageState(KCarriage).settings)
+    _ <- {
+      if (current == settings) Planner.noop
+      else Planner.step(ChangeKCarriageSettings(settings))
+    }
+  } yield current
+
+  /** Change L-carriage settings. */
+  def carriageSettings(settings: LCarriage.Settings) = for {
+    _ <- needCarriage(KCarriage)
+    current <- Planner.state(_.carriageState(LCarriage).settings)
+    _ <- {
+      if (current == settings) Planner.noop
+      else Planner.step(ChangeLCarriageSettings(settings))
+    }
+  } yield current
+
+  /** Change G-carriage settings. */
+  def carriageSettings(settings: GCarriage.Settings) = for {
+    _ <- needCarriage(KCarriage)
+    current <- Planner.state(_.carriageState(GCarriage).settings)
+    _ <- {
+      if (current == settings) Planner.noop
+      else Planner.step(ChangeGCarriageSettings(settings))
+    }
   } yield current
 
   /** Next direction for the carriage. */
   def nextDirection(carriage: Carriage) = Planner.validate(_.nextDirection(carriage))
 
-  /** Knit a row. */
-  def knitRow(settings: CarriageSettings, yarn: Option[Yarn]) = for {
+  /** Knit a row with the K-Carriage. */
+  def knitRowWithK(settings: KCarriage.Settings, yarnA: Option[Yarn] = None, yarnB: Option[Yarn] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
-    _ <- yarns(yarn)
-    dir <- Planner.validate(_.nextDirection(settings.carriage))
-    _ <- KnitRow(settings.carriage, dir)
+    needlesBefore <- Planner.state(_.needles.positions)
+    _ <- MoveNeedles(needlesBefore, pattern)
+    _ <- ThreadYarnK(yarnA, yarnB)
+    dir <- nextDirection(KCarriage)
+    _ <- KnitRow(KCarriage, dir)
   } yield ()
 
-  /** Knit a row with a pattern. */
-  def knitPatternRow(settings: CarriageSettings, pattern: NeedleActionRow, yarnA: Option[Yarn], yarnB: Option[Yarn]) = for {
+  /** Knit a row with the L-Carriage. */
+  def knitRowWithL(settings: LCarriage.Settings, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
-    before <- Planner.state(_.needles.positions)
-    _ <- MoveNeedles(before, pattern)
-    _ <- yarns(yarnA, yarnB)
-    dir <- nextDirection(settings.carriage)
-    _ <- KnitRow(settings.carriage, dir)
+    needlesBefore <- Planner.state(_.needles.positions)
+    _ <- MoveNeedles(needlesBefore, pattern)
+    dir <- nextDirection(LCarriage)
+    _ <- KnitRow(LCarriage, dir)
+  } yield ()
+
+  /** Knit a row with the G-Carriage. */
+  def knitRowWithG(settings: GCarriage.Settings, yarnA: Option[Yarn] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+    _ <- carriageSettings(settings)
+    needlesBefore <- Planner.state(_.needles.positions)
+    _ <- ThreadYarnG(yarnA)
+    dir <- nextDirection(GCarriage)
+    _ <- KnitRow(LCarriage, dir, pattern)
   } yield ()
 }
