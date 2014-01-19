@@ -61,10 +61,10 @@ object Global extends GlobalSettings {
     val width = 40
     val height = 20
     val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), yarn1) >>
-      Basics.knitRow(KCarriageSettings(KC2), Some(yarn1)) >>
+      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
       FairIslePlanner.singleBed(checkerboard(Needle.count, height), yarn1) >>
-      Basics.knitRow(KCarriageSettings(KC2), Some(yarn1)) >>
-      Basics.knitRow(KCarriageSettings(KC2), Some(yarn1)) >>
+      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
+      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
       Cast.offClosed(yarn1)
     planner.plan().valueOr(e => throw new RuntimeException(e))
   }
