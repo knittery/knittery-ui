@@ -67,27 +67,7 @@ object Global extends GlobalSettings {
 
   private val imagePlan = {
     val img = ImageIO.read(new File("example.png"))
-    val w = img.getWidth.min(200)
-    val rgbs = (0 until img.getHeight).map { y =>
-      (0 until w).map { x =>
-        new Color(img.getRGB(x, y))
-      }
-    }
-    val yarns = rgbs.flatten.toSet.zipWithIndex.map {
-      case (c @ Color.white, i) => (c -> Yarn(s"White", new Color(0xf4f4f4)))
-      case (c @ Color.black, i) => (c -> Yarn(s"Black", c))
-      case (color, i) => (color -> Yarn(s"Yarn $i", color))
-    }.toMap
-    val pattern = rgbs.matrixMap(yarns).reverseBoth
-
-    val yarn1 = pattern(0)(0)
-    val zero = 100 - w / 2
-    val planner = Cast.onClosed(Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
-      FairIslePlanner.singleBed(pattern, yarn1) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
-      Cast.offClosed(yarn1)
+    val planner = Examples.imageRag(img)
     planner.plan().valueOr(e => throw new RuntimeException(e))
   }
 
