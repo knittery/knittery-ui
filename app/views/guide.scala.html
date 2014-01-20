@@ -3,38 +3,41 @@
 @import helper._
 
 @main("Guide", "wide-container guide") {
-  
-<div class="panel panel-default step-listing pull-left">
-  <div class="panel-heading">
-    <span class="navigation prev navbar-form navbar-left">
-	    @form(routes.Guide.previous) {
-	      <button type="submit" @if(step.isFirst){disabled} id="prev">Back</button>
+
+<div class="row">
+<div class="col-sm-3">  
+	<div class="panel panel-default step-listing">
+	  <div class="panel-heading">
+	    <span class="navigation prev navbar-form">
+		    @form(routes.Guide.previous) {
+		      <button type="submit" @if(step.isFirst){disabled} id="prev">Back</button>
+		    }
+	    </span>
+      <span class="navigation next navbar-form">
+        @form(routes.Guide.next) {
+           <button type="submit" @if(step.isLast){disabled} id="next">Next</button>
+        }
+      </span>
+      <h2 class="panel-title text-center">
+        Step <span class="current-step-number">@step.stepNumber</span> of <span class="step-number-total">@step.all.size</span>
+      </h2>
+	  </div>
+	  <div class="panel-body">
+	    @step.all.map { s =>
+	    <div id="step-@s.stepNumber" class="panel panel-default step @if(s==step) {active} @if(s.isKnitting) {knitting} else {non-knitting}">
+	      <div class="panel-heading"><h4 class="panel-title">@s.name</h4></div>
+	      <div class="panel-body">@s.description</div>
+	    </div>
 	    }
-    </span>
-		<span class="navigation next navbar-form navbar-right">
-		  @form(routes.Guide.next) {
-         <button type="submit" @if(step.isLast){disabled} id="next">Next</button>
-		  }
-		</span>
-    <h2 class="panel-title text-center">
-      Step <span class="current-step-number">@step.stepNumber</span> of <span class="step-number-total">@step.all.size</span>
-    </h2>
-  </div>
-  <div class="panel-body">
-    @step.all.map { s =>
-    <div id="step-@s.stepNumber" class="panel panel-default step @if(s==step) {active} @if(s.isKnitting) {knitting} else {non-knitting}">
-      <div class="panel-heading"><h4 class="panel-title">@s.name</h4></div>
-      <div class="panel-body">@s.description</div>
-    </div>
-    }
-    <div lass="panel panel-default step">
-      <div class="panel-heading"><h4 class="panel-title text-center">End</h4></div>
-      <div class="panel-body"></div>
-    </div>
-  </div>
+	    <div lass="panel panel-default step">
+	      <div class="panel-heading"><h4 class="panel-title text-center">End</h4></div>
+	      <div class="panel-body"></div>
+	    </div>
+	  </div>
+	</div>
 </div>
 
-<div class="right-side">
+<div class="col-sm-9">
 	<div class="panel panel-default graphical">
 	  <div class="panel-heading">
 	    <h3 class="panel-title carriage-type">Carriage</h3>
@@ -58,5 +61,6 @@
       <div class="output"></div>
     </div>
   </div>
+</div>
 </div>
 }(List("guide", "needles", "machine", "guide-model"))
