@@ -39,7 +39,7 @@ object Global extends GlobalSettings {
     val pattern = NeedlePattern.loadCenter(img)
     machine ! Machine.LoadPattern(pattern)
 
-    guider ! Guider.LoadPlan(examplePlan)
+    guider ! Guider.LoadPlan(imagePlan)
   }
 
   @volatile private var _machine: Option[ActorRef] = None
@@ -63,6 +63,30 @@ object Global extends GlobalSettings {
     val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), yarn1) >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
       FairIslePlanner.singleBed(checkerboard(Needle.count, height), yarn1) >>
+      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
+      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
+      Cast.offClosed(yarn1)
+    planner.plan().valueOr(e => throw new RuntimeException(e))
+  }
+
+  private val imagePlan = {
+    val img = ImageIO.read(new File("example.png"))
+    val w = img.getWidth.min(200)
+    val rgbs = (0 until img.getHeight).map { y =>
+      (0 until w).map { x =>
+        new Color(img.getRGB(x, y))
+      }
+    }
+    val yarns = rgbs.flatten.toSet.zipWithIndex.map {
+      case (color, i) => (color -> Yarn(s"Yarn $i", color))
+    }.toMap
+    val pattern = rgbs.matrixMap(yarns).reverseBoth
+
+    val yarn1 = pattern(0)(0)
+    val zero = 100 - w / 2
+    val planner = Cast.onClosed(Needle.atIndex(zero), Needle.atIndex(zero + w-1), yarn1) >>
+      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
+      FairIslePlanner.singleBed(pattern, yarn1) >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
       Cast.offClosed(yarn1)
