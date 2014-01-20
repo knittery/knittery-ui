@@ -28,5 +28,45 @@ object Needle {
     override def compare(other: Needle) = index - other.index
     override def toString = s"Needle($index)"
   }
-
 }
+
+/** Knitting position of a needle. */
+sealed trait NeedlePosition {
+  def isWorking: Boolean
+  def nonWorking = !isWorking
+}
+/** Needle in A position. */
+case object NeedleA extends NeedlePosition {
+  override def isWorking = false
+  override def toString = "A"
+}
+/** Needle in B position. */
+case object NeedleB extends NeedlePosition {
+  override def isWorking = true
+  override def toString = "B"
+}
+/** Needle in D position. */
+case object NeedleD extends NeedlePosition {
+  override def isWorking = true
+  override def toString = "D"
+}
+/** Needle in E position. */
+case object NeedleE extends NeedlePosition {
+  override def isWorking = true
+  override def toString = "E"
+}
+
+/** Action to perform with a needle (by the carriage). */
+sealed trait NeedleAction {
+  def toPosition: NeedlePosition
+}
+/** Needle is moved to B position. */
+case object NeedleToB extends NeedleAction {
+  override def toPosition = NeedleB
+}
+/** Needle is moved to D position. */
+case object NeedleToD extends NeedleAction {
+  override def toPosition = NeedleD
+}
+
+

@@ -58,8 +58,9 @@ object Pattern extends Controller {
 
       ImageIO.write(image, "png", new File("public/images/pattern.png"))
 
-      val pattern = NeedlePattern.loadCenter(image)
-      machine ! Machine.LoadPattern(pattern)
+      // TODO send the pattern to the guide..
+      //      val pattern = NeedlePattern.loadCenter(image)
+      //      machine ! Machine.LoadPattern(pattern)
 
       Redirect(routes.Pattern.show())
     }.getOrElse {

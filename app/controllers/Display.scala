@@ -35,16 +35,16 @@ object Display extends Controller {
     for {
       machineRef <- r
       Positions(data, row) <- pos
-      needlePattern @ NeedlePatternUpdate(_, _) <- pat
+      needlePattern @ NeedlePatternUpdate(_) <- pat
       e = ActorEnumerator.enumerator(Machine.subscription(machineRef))
       fst = Enumerator.enumerate[Any](data.map(d => PositionChanged(d._1, d._2, row))) >>>
         Enumerator[Any](needlePattern)
       json = Enumeratee.collect[Any] {
         case event: PositionChanged => Json.toJson(event)
-        case NeedlePatternUpdate(row, _) =>
+        case NeedlePatternUpdate(row) =>
           Json.toJson(Json.obj(
             "event" -> "needlePatternUpdate",
-            "patternRow" -> row))
+            "patternRow" -> row.andThen(_.toPosition)))
       }
     } yield (Iteratee.ignore, fst >>> e &> json)
   }

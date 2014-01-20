@@ -3,8 +3,6 @@ package models.machine
 import akka.actor._
 import models._
 import models.connector.Connector._
-import NeedlePatternKnitter.NeedlePatternRowChanged
-import NeedlePatternKnitter.SetNeedlePattern
 import RowTracker.RowChanged
 import utils.SubscriptionActor
 
@@ -16,7 +14,6 @@ import utils.SubscriptionActor
 class Machine(connectorProps: Props) extends Actor {
   import Machine._
   import RowTracker._
-  import NeedlePatternKnitter._
 
   override def supervisorStrategy = OneForOneStrategy() {
     case _ => SupervisorStrategy.Restart
@@ -24,7 +21,6 @@ class Machine(connectorProps: Props) extends Actor {
 
   val connector = context.actorOf(connectorProps, "connector")
   val rowTracker = context.actorOf(RowTracker.props(self))
-  val patternKnitter = context.actorOf(NeedlePatternKnitter.props(self, connector))
 
   var subscribers = Set.empty[ActorRef]
   def notify(msg: Event) =
@@ -33,7 +29,7 @@ class Machine(connectorProps: Props) extends Actor {
   var positions = Map.empty[Carriage, CarriagePosition]
   var lastCarriage: Carriage = KCarriage
   var row: Int = -1
-  var pattern = NeedlePattern.empty
+  var pattern = AllNeedlesToB
 
   override def receive = {
     case Subscribe =>
@@ -46,13 +42,12 @@ class Machine(connectorProps: Props) extends Actor {
     case GetPositions =>
       sender ! Positions(positions, row)
 
-    case LoadPattern(p) =>
-      pattern = p
-      rowTracker ! SetRow(-1)
-      patternKnitter ! SetNeedlePattern(p, -1)
+    case LoadNeedlePattern(patternRow) =>
+      connector ! LoadPatternRow(patternRow)
+      notify(NeedlePatternUpdate(patternRow))
 
     case GetNeedlePattern =>
-      sender ! NeedlePatternUpdate(pattern.orElse(NeedlePattern.empty)(row), pattern)
+      sender ! NeedlePatternUpdate(pattern)
 
     //MachineEvents
     case pu @ PositionUpdate(pos, direction, Some(carriage)) =>
@@ -65,12 +60,7 @@ class Machine(connectorProps: Props) extends Actor {
       row = r
       notify(PositionChanged(lastCarriage, positions.get(lastCarriage).getOrElse(CarriageLeft(0)),
         row))
-      patternKnitter ! event
-    case NeedlePatternRowChanged(rp, _, pattern) =>
-      notify(NeedlePatternUpdate(rp, pattern))
 
-    case Terminated(`patternKnitter`) => //Pattern knitter crashed
-      patternKnitter ! SetNeedlePattern(pattern, row)
     case Terminated(`connector`) => //Connector crashed
       //TODO handle the crash
       //TODO reset the positions and requery somehow?
@@ -100,13 +90,13 @@ object Machine {
 
   case object Subscribed extends Event
   case class PositionChanged(carriage: Carriage, position: CarriagePosition, row: Int) extends Event
-  case class NeedlePatternUpdate(currentRow: NeedlePatternRow, pattern: NeedlePattern) extends Event
+  case class NeedlePatternUpdate(currentRow: NeedleActionRow) extends Event
 
   case object GetPositions extends Command
   case class Positions(positions: Map[Carriage, CarriagePosition], row: Int) extends Event
 
-  case class LoadPattern(pattern: NeedlePattern) extends Command
-  case class PatternLoaded(pattern: NeedlePattern) extends Event
+  case class LoadNeedlePattern(pattern: NeedleActionRow) extends Command
+  case class NeeldePatternLoaded(pattern: NeedleActionRow) extends Event
 
   /** Will be answered by a NeedlePatternUpdate. */
   case object GetNeedlePattern extends Command

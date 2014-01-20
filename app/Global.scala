@@ -33,11 +33,7 @@ object Global extends GlobalSettings {
 
     val connector = BrotherConnector.props(port, serialManager)
     _machine = Some(system.actorOf(Machine.props(connector), "machine"))
-    _guider = Some(system.actorOf(Guider.props, "guider"))
-
-    val img = ImageIO.read(new File("example.png"))
-    val pattern = NeedlePattern.loadCenter(img)
-    machine ! Machine.LoadPattern(pattern)
+    _guider = Some(system.actorOf(Guider.props(machine), "guider"))
 
     guider ! Guider.LoadPlan(imagePlan)
   }
