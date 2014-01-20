@@ -103,6 +103,8 @@ sealed trait GuideStep {
         Nil
       (s"Change Settings K",
         s"Change K carriage settings Knob to ${s.knob} with lever at ${s.holdingCamLever.name} and ${settings.mkString(" and ")}")
+
+    case Information(title, desc) => (title, desc)
   }
 
   lazy val stateAfter: KnittingState = {
@@ -134,13 +136,14 @@ object GuideStep {
     val (fst :: rest) = plan.steps.toList
     new GuideStep {
       override val step = fst
-      override val remaining = rest
+      override val remaining = rest :+ finalStep
       override def previous = throw new IllegalArgumentException("already at start")
       override def isFirst = true
       override def stepNumber = 1
       override def stateBefore = KnittingState.initial
     }
   }
+  private val finalStep = Information("Done", "Knitting is done")
 }
 
 case class InvalidPlanException(error: PlanError) extends RuntimeException(s"Plan is invalid: $error")

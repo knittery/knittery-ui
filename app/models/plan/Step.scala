@@ -170,3 +170,7 @@ case class AddCarriage(carriage: Carriage, at: LeftRight = Left) extends Step {
     state.moveCarriage(carriage, at)
   }.toSuccess
 }
+
+case class Information(title: String, description: String) extends Step {
+  override def apply(state: KnittingState) = state.success
+}
