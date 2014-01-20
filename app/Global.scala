@@ -78,13 +78,15 @@ object Global extends GlobalSettings {
       }
     }
     val yarns = rgbs.flatten.toSet.zipWithIndex.map {
+      case (c @ Color.white, i) => (c -> Yarn(s"White", new Color(0xf4f4f4)))
+      case (c @ Color.black, i) => (c -> Yarn(s"Black", c))
       case (color, i) => (color -> Yarn(s"Yarn $i", color))
     }.toMap
     val pattern = rgbs.matrixMap(yarns).reverseBoth
 
     val yarn1 = pattern(0)(0)
     val zero = 100 - w / 2
-    val planner = Cast.onClosed(Needle.atIndex(zero), Needle.atIndex(zero + w-1), yarn1) >>
+    val planner = Cast.onClosed(Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
       FairIslePlanner.singleBed(pattern, yarn1) >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
