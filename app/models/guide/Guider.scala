@@ -5,6 +5,7 @@ import Scalaz._
 import akka.actor._
 import models._
 import models.plan._
+import models.machine._
 import utils.SubscriptionActor
 
 /** An instance of a plan execution. Keeps track of the current step. */
@@ -32,10 +33,10 @@ object Guider {
   /** Unsubscribe from ChangeEvent. Answer: Command[Not]Executed. */
   case object Unsubscribe extends Command
 
-  def props = Props(new Guider)
+  def props(machine: ActorRef) = Props(new Guider(machine))
 
-  def subscription(machine: ActorRef) = Props(new SubscriptionActor {
-    val to = machine
+  def subscription(guider: ActorRef) = Props(new SubscriptionActor {
+    val to = guider
     def subscribe = Subscribe
     def subscribed = {
       case CommandExecuted(Subscribe) => true
@@ -44,7 +45,9 @@ object Guider {
     def unsubscribe = Unsubscribe
   })
 
-  private class Guider extends Actor {
+  private class Guider(machine: ActorRef) extends Actor {
+    context.actorOf(Machine.subscription(machine))
+
     override def receive = {
       case cmd @ LoadPlan(plan) =>
         val step = GuideStep(plan)
@@ -57,11 +60,28 @@ object Guider {
 
     def changeStep(newStep: GuideStep) = {
       notify(ChangeEvent(newStep))
+      newStep.step match {
+        case KnitRow(_, _, pattern) =>
+          machine ! Machine.LoadNeedlePattern(pattern)
+        case _ => ()
+      }
       context become (stepping(newStep))
     }
 
+    private var row = 0
+
     def stepping(step: GuideStep): Receive = receive orElse {
       case QueryStep => sender ! CurrentStep(step)
+
+      case Machine.PositionChanged(_, _, old) if old == row =>
+        ()
+      case Machine.PositionChanged(_, _, r) =>
+        row = r
+        if (!step.isLast) {
+          val newStep = step.allFromHere.tail.
+            find(_.isKnitting).getOrElse(step.last)
+          changeStep(newStep)
+        }
 
       case cmd @ Next =>
         if (!step.isLast) {

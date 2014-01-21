@@ -33,13 +33,9 @@ object Global extends GlobalSettings {
 
     val connector = BrotherConnector.props(port, serialManager)
     _machine = Some(system.actorOf(Machine.props(connector), "machine"))
-    _guider = Some(system.actorOf(Guider.props, "guider"))
+    _guider = Some(system.actorOf(Guider.props(machine), "guider"))
 
-    val img = ImageIO.read(new File("example.png"))
-    val pattern = NeedlePattern.loadCenter(img)
-    machine ! Machine.LoadPattern(pattern)
-
-    guider ! Guider.LoadPlan(examplePlan)
+    guider ! Guider.LoadPlan(imagePlan)
   }
 
   @volatile private var _machine: Option[ActorRef] = None
@@ -66,6 +62,12 @@ object Global extends GlobalSettings {
       Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
       Cast.offClosed(yarn1)
+    planner.plan().valueOr(e => throw new RuntimeException(e))
+  }
+
+  private val imagePlan = {
+    val img = ImageIO.read(new File("example.png"))
+    val planner = Examples.imageRag(img)
     planner.plan().valueOr(e => throw new RuntimeException(e))
   }
 

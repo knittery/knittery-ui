@@ -21,10 +21,12 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.data.format.Formats._
 import java.awt.image.BufferedImage
+import models.guide._
+import models.planners._
 
 object Pattern extends Controller {
 
-  protected def machine = Akka.system.actorSelection(Akka.system / "machine")
+  protected def guider = Akka.system.actorSelection(Akka.system / "guider")
 
   case class GaugeFormData(widthInCmImg: BigDecimal, heightInCmImg: BigDecimal, widthInCm: BigDecimal, countStitches: Int, heightInCm: BigDecimal, countRows: Int)
 
@@ -58,8 +60,9 @@ object Pattern extends Controller {
 
       ImageIO.write(image, "png", new File("public/images/pattern.png"))
 
-      val pattern = NeedlePattern.loadCenter(image)
-      machine ! Machine.LoadPattern(pattern)
+      val planner = Examples.imageRag(image)
+      val plan = planner.plan().valueOr(e => throw new RuntimeException(e))
+      guider ! Guider.LoadPlan(plan)
 
       Redirect(routes.Pattern.show())
     }.getOrElse {
