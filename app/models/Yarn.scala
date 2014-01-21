@@ -8,14 +8,20 @@ case class Yarn(name: String, color: Color) {
   override def toString = name
 }
 
-sealed trait YarnD {
+sealed trait YarnFlow {
   def yarn: Yarn
-  def next = YarnPoint(yarn, this)
-  def previous: Option[YarnD]
+  def next(distance: Int) = YarnPoint(yarn, YarnFlow.this, distance)
+  def previous: Stream[YarnFlow]
+  def stream = this #:: previous
+  def start: YarnStart
 }
-case class YarnPoint(yarn: Yarn, prev: YarnD) extends YarnD {
-  override def previous = Some(prev)
+case class YarnPoint(yarn: Yarn, prev: YarnFlow, distance: Int) extends YarnFlow {
+  override def previous = prev.stream
+  override def start = prev.start
 }
-case class YarnStart(yarn: Yarn) extends YarnD {
-  override def previous = None
+class YarnStart(val yarn: Yarn) extends YarnFlow {
+  override def previous = Stream.empty
+  override def start = this
+  //equals must be for object identity
+  override def toString = s"YarnStart($yarn)"
 }
