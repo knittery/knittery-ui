@@ -54,10 +54,10 @@ private object KnittingCarriage {
         //TODO part modes
         //TODO tuck modes
         //TODO l mode
-        case NeedleState(NeedleB, yarns) if yarns.nonEmpty => PlainStitch(yarns)
-        case NeedleState(NeedleD, yarns) if yarns.nonEmpty => PlainStitch(yarns)
+        case NeedleState(NeedleB, yarns) if yarns.nonEmpty => PlainStitch(yarns.map(_.yarn))
+        case NeedleState(NeedleD, yarns) if yarns.nonEmpty => PlainStitch(yarns.map(_.yarn))
         case NeedleState(NeedleE, yarns) if yarns.nonEmpty && settings.holdingCamLever == HoldingCamN =>
-          PlainStitch(yarns)
+          PlainStitch(yarns.map(_.yarn))
         case NeedleState(NeedleE, _) => NoStitch
         case other => EmptyStitch
       }
