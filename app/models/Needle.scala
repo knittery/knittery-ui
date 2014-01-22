@@ -12,7 +12,10 @@ object Needle {
   val all = (0 until count).map(atIndex)
   val middle = atIndex(count / 2)
 
-  def interval(from: Needle, to: Needle) = (from.index to to.index).map(atIndex)
+  def interval(from: Needle, to: Needle) = {
+    if (from < to) (from.index to to.index).map(atIndex)
+    else (from.index to to.index by -1).map(atIndex)
+  }
 
   def atIndex(index: Int): Needle = {
     require(index >= 0)
