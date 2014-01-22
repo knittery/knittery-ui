@@ -38,7 +38,7 @@ case object KCarriage extends Carriage {
   def initialState = State()
 
   sealed trait Assembly
-  case class SinkerPlate(yarnA: Option[Yarn] = None, yarnB: Option[Yarn] = None,
+  case class SinkerPlate(yarnA: Option[YarnFlow] = None, yarnB: Option[YarnFlow] = None,
     weavingPatternLeft: Boolean = false, weavingPatternRight: Boolean = false)
     extends Assembly
 
@@ -83,7 +83,7 @@ case object GCarriage extends Carriage {
 
   case class State(
     settings: Settings = Settings(),
-    yarn: Option[Yarn] = None,
+    yarn: Option[YarnFlow] = None,
     position: CarriagePosition = CarriageRemoved) extends CarriageState
   def initialState = State()
 

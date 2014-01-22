@@ -42,8 +42,8 @@ object FairIslePlanner {
   //TODO also take into account the next rows to knit => make it a general optimization?
   private def optimizeYarn(required: Set[Yarn]) = {
     for {
-      yarnA <- Planner.state(_.carriageState(KCarriage).yarnA)
-      yarnB <- Planner.state(_.carriageState(KCarriage).yarnB)
+      yarnA <- Planner.state(_.carriageState(KCarriage).yarnA.map(_.yarn))
+      yarnB <- Planner.state(_.carriageState(KCarriage).yarnB.map(_.yarn))
     } yield {
       val available = yarnA.toSet ++ yarnB.toSet
       if (required.forall(available.contains)) (yarnA, yarnB)

@@ -22,7 +22,7 @@ private object KnittingCarriage {
   }
 
   private class KKnittingCarriage(settings: KCarriage.Settings,
-    yarnA: Option[Yarn], yarnB: Option[Yarn],
+    yarnA: Option[YarnFlow], yarnB: Option[YarnFlow],
     pattern: NeedleActionRow)
     extends KnittingCarriage {
     import KCarriage._
@@ -77,7 +77,7 @@ private object KnittingCarriage {
     }
   }
 
-  private class GKnittingCarriage(settings: GCarriage.Settings, yarnA: Option[Yarn], pattern: NeedleActionRow)
+  private class GKnittingCarriage(settings: GCarriage.Settings, yarnA: Option[YarnFlow], pattern: NeedleActionRow)
     extends KnittingCarriage {
 
     def apply(direction: Direction, needles: NeedleStateRow) = Try {

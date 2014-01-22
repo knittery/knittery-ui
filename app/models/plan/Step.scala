@@ -100,7 +100,7 @@ case class ThreadYarnK(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends ThreadY
     val cs = state.carriageState(KCarriage)
     require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active K-carriage")
     val newAssembly = cs.assembly match {
-      case a: SinkerPlate => a.copy(yarnA = yarnA, yarnB = yarnB)
+      case a: SinkerPlate => a.copy(yarnA = yarnA.map(YarnStart(_)), yarnB = yarnB.map(YarnStart(_)))
     }
     state.modifyCarriage(cs.copy(assembly = newAssembly))
   }.toSuccess
@@ -110,7 +110,7 @@ case class ThreadYarnG(yarn: Option[Yarn]) extends ThreadYarn {
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(GCarriage)
     require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active G-carriage")
-    state.modifyCarriage(cs.copy(yarn = yarn))
+    state.modifyCarriage(cs.copy(yarn = yarn.map(YarnStart.apply)))
   }.toSuccess
 }
 
@@ -142,7 +142,7 @@ case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step
       knit { n =>
         if (filter(n)) state.needles(n) match {
           case NeedleState(_, Nil) => NoStitch
-          case NeedleState(_, yarns) => PlainStitch(yarns)
+          case NeedleState(_, yarns) => PlainStitch(yarns.map(_.yarn))
         }
         else NoStitch
       }.
