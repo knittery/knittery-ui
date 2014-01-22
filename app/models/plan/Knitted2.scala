@@ -4,7 +4,7 @@ import models._
 
 sealed trait Knitted2 {
   val flows: Map[YarnStart, YarnFlow]
-  val connections: Set[YarnConnection]
+  val stitches: Set[Stitch2]
 
   def +(flow: YarnFlow) = {
     val start = flow.start
@@ -18,53 +18,48 @@ sealed trait Knitted2 {
     })
   }
 
-  def connect(flow1: YarnFlow, flow2: YarnFlow) = {
-    require(contains(flow1), s"does not contains $flow1")
-    require(contains(flow2), s"does not contains $flow2")
-    val connection = YarnConnection(flow1, flow2)
-    copy(connections = connections + connection)
+  def +(stitch: Stitch2) = {
+    require(stitch.points.forall(contains), s"missing yarn flows in stitch $stitch")
+    copy(stitches = stitches + stitch)
   }
 
   def contains(flow: YarnFlow) =
     flows.get(flow.start).map(_.stream.contains(flow)).getOrElse(false)
 
-  def connectedTo(flow: YarnFlow) =
-    connections.flatMap(_.connected(flow))
-
-  private def copy(flows: Map[YarnStart, YarnFlow] = flows, connections: Set[YarnConnection] = connections): Knitted2 = {
+  private def copy(flows: Map[YarnStart, YarnFlow] = flows, stitches: Set[Stitch2] = stitches): Knitted2 = {
     val f2 = flows
-    val c2 = connections
+    val s2 = stitches
     new Knitted2 {
       override val flows = f2
-      override val connections = c2
+      override val stitches = s2
     }
   }
 
-  override def hashCode = flows.hashCode ^ connections.hashCode
+  override def hashCode = flows.hashCode ^ stitches.hashCode
   override def equals(o: Any) = o match {
-    case o: Knitted2 => flows == o.flows && connections == o.connections
+    case o: Knitted2 => flows == o.flows && stitches == o.stitches
     case _ => false
   }
   override def toString = s"Knitted2(${flows.values.mkString(", ")})"
 }
 
-case class YarnConnection(a: YarnFlow, b: YarnFlow) {
-  def affects(o: YarnFlow) = a == o || b == o
-  def connected(o: YarnFlow): Set[YarnFlow] = {
-    if (a == o) Set(b)
-    else if (b == o) Set(a)
-    else Set.empty
-  }
-  override def hashCode = a.hashCode ^ b.hashCode
-  override def equals(o: Any) = o match {
-    case YarnConnection(a2, b2) => (a == a2 && b == b2) || (a == b2 && b == a2)
-    case _ => false
-  }
+/**
+ * A Stitch connects three YarnPoints - left, right and noose.
+ * Left and right belong to the same yarn and form a new noose. The noose is abstracted
+ * to a single YarnPoint.
+ * If looked at it from the front (so left+right are properly named) then the noose lies
+ * BEHIND the new noose (left thread first goes behind and then in front of the noose yarn).
+ * So it forms the popular knitted V's in the front and the lying-S in the back.
+ * See a schematic picture of a knitted garment to understand this stuff better :).
+ */
+case class Stitch2(left: YarnPoint, right: YarnPoint, noose: YarnPoint) {
+  def points = left :: right :: noose :: Nil
+  def affects(p: YarnPoint) = points.contains(p)
 }
 
 object Knitted2 {
   object empty extends Knitted2 {
     override val flows = Map.empty[YarnStart, YarnFlow]
-    override val connections = Set.empty[YarnConnection]
+    override val stitches = Set.empty[Stitch2]
   }
 }
