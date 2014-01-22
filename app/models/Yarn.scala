@@ -25,3 +25,6 @@ class YarnStart(val yarn: Yarn) extends YarnFlow {
   //equals must be for object identity
   override def toString = s"YarnStart($yarn)"
 }
+object YarnStart {
+  def apply(yarn: Yarn) = new YarnStart(yarn)
+}
