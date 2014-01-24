@@ -42,6 +42,11 @@ class KnittingCarriageSpec extends Specification {
       a
     }
   }
+  implicit class RichNSR(val nsr: NeedleStateRow) {
+    def ignoreFlow = {
+      nsr.andThen(v => v.copy(yarn = v.yarn.map(_.start)))
+    }
+  }
 
   "K-KnittigCarriage without pattern" should {
     "knit plain red stitches with one yarn and needles to B" in new K {
@@ -56,21 +61,19 @@ class KnittingCarriageSpec extends Specification {
       val KnittingCarriageResult(needles, _, knitted) = carriageK(ToRight, allEWithRed).check
       knitted.all must_== (1 to Needle.count).map(_ => PlainStitch(red))
     }
-
     "move all needles to B and put red yarn on them if they were at B" in new K {
       val KnittingCarriageResult(needles, _, knitted) = carriageK(ToRight, allBWithRed).check
-      needles.all must contain(NeedleState(NeedleB, Some(redFlow))).forall
+      needles.ignoreFlow.all must contain(NeedleState(NeedleB, Some(redFlow))).forall
     }
     "move all needles to B and put red yarn on them if they were at D" in new K {
       val KnittingCarriageResult(needles, _, knitted) = carriageK(ToRight, allBWithRed).check
-      needles.all must contain(NeedleState(NeedleB, Some(redFlow))).forall
+      needles.ignoreFlow.all must contain(NeedleState(NeedleB, Some(redFlow))).forall
     }
     "move all needles to B and put red yarn on them if they were at E" in new K {
       val KnittingCarriageResult(needles, _, knitted) = carriageK(ToRight, allBWithRed).check
-      needles.all must contain(NeedleState(NeedleB, Some(redFlow))).forall
+      needles.ignoreFlow.all must contain(NeedleState(NeedleB, Some(redFlow))).forall
     }
   }
-
   "K-KnittigCarriage on KC2 with plain" should {
     "knit plain red stitches with one yarn and needles to B" in new K {
       val KnittingCarriageResult(needles, _, knitted) = carriageKPlain(evenOddPattern)(ToRight, allBWithRed).check
@@ -81,16 +84,16 @@ class KnittingCarriageSpec extends Specification {
       needles.all.zipWithIndex.forall {
         case (NeedleState(pos, yarn), index) =>
           pos must_== (if (index % 2 == 0) NeedleB else NeedleD)
-          yarn must_== List(red)
+          yarn.map(_.start) must_== List(redFlow)
       }
     }
     "move every needle to B and have red on the needles in the all B-pattern after even/odd" in new K {
       val KnittingCarriageResult(needles, _, knitted) = carriageKPlain(allBPattern)(ToRight, allBDEvenOddWithRedGreen).check
-      needles.all must contain(NeedleState(NeedleB, redFlow)).forall
+      needles.ignoreFlow.all must contain(NeedleState(NeedleB, redFlow)).forall
     }
     "move every needle to D and have red/green on the needles in the all D-pattern after even/odd" in new K {
       val KnittingCarriageResult(needles, _, knitted) = carriageKPlain(allDPattern)(ToRight, allBDEvenOddWithRedGreen).check
-      needles.all must contain(NeedleState(NeedleD, redFlow)).forall
+      needles.ignoreFlow.all must contain(NeedleState(NeedleD, redFlow)).forall
     }
     "knit plain red/green stitch pattern with even odd needles and even odd pattern" in new K {
       val KnittingCarriageResult(needles, _, knitted) = carriageKPlain(evenOddPattern)(ToRight, allBDEvenOddWithRedGreen).check
