@@ -76,31 +76,35 @@ private object KnittingCarriage {
         stitches.withDefaultValue(EmptyStitch))
     }
 
-    private def knitPlain(direction: Direction, needles: NeedleStateRow, yarn: YarnFlow) = {
+    private def loopNeedles(direction: Direction, needles: NeedleStateRow, yarn: YarnFlow)(f: (ResultBuilder, (Needle, NeedlePosition, List[YarnFlow])) => ResultBuilder) = {
       val work = workInterval(direction, needles)
       if (work.nonEmpty) {
         val yarn0 = yarn.next(distanceTo(work.head, yarn))
         val result = work.map {
           case n => (n, needles(n).position, needles(n).yarn)
-        }.foldLeft(ResultBuilder(yarn0)) {
-          case (x, (_, NeedleA, _)) =>
-            //don't knit A needles (but will still use a yarn point, opposed to those out of the knitting area)
-            x.knitFlat
-          case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
-            //don't knit E needles if no needle pull back from E
-            x.needle(n, NeedleE, ys).
-              knitFlat.knit(n, NoStitch)
-          case (x, (n, _, ys)) =>
-            //knit normally
-            val (l, noose, r, x2) = x.noose
-            x2.knit(Stitch2(Set(l), ys.toSet, Set(r))).
-              knit(n, PlainStitch(ys.map(_.yarn))).
-              needle(n, pattern(n).toPosition, List(noose))
-        }
+        }.foldLeft(ResultBuilder(yarn0))(f)
         result.toResult
       } else {
         // No knitting, because no active needles
         KnittingCarriageResult(needles, identity, _ => NoStitch)
+      }
+    }
+
+    private def knitPlain(direction: Direction, needles: NeedleStateRow, yarn: YarnFlow) = {
+      loopNeedles(direction, needles, yarn) {
+        case (x, (_, NeedleA, _)) =>
+          //don't knit A needles (but will still use a yarn point, opposed to those out of the knitting area)
+          x.knitFlat
+        case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
+          //don't knit E needles if no needle pull back from E
+          x.needle(n, NeedleE, ys).
+            knitFlat.knit(n, NoStitch)
+        case (x, (n, _, ys)) =>
+          //knit normally
+          val (l, noose, r, x2) = x.noose
+          x2.knit(Stitch2(Set(l), ys.toSet, Set(r))).
+            knit(n, PlainStitch(ys.map(_.yarn))).
+            needle(n, pattern(n).toPosition, List(noose))
       }
     }
 
