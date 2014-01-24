@@ -56,6 +56,12 @@ object Basics {
   def yarnAttachment(yarn: YarnFlow) = Planner.state(_.yarnAttachments.get(yarn.start))
   def yarnAttachment(yarn: Option[YarnFlow]) =
     Planner.state(s => yarn.flatMap(y => s.yarnAttachments.get(y.start)))
+  def nearestYarn(yarn: Yarn) = {
+    Planner.state(_.yarnAttachments).map { yas =>
+      yas.filterKeys(_.yarn == yarn).toSeq.sortBy(_._2.rowDistance).
+        map(_._2.yarn).headOption
+    }
+  }
 
   /** Knit a row with the K-Carriage. */
   def knitRowWithK(settings: KCarriage.Settings, yarnA: Option[YarnFlow] = None, yarnB: Option[YarnFlow] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {

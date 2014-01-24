@@ -31,16 +31,10 @@ object FairIslePlanner {
     needle0 = startNeedle.getOrElse(workingNeedles.head)
     settings = KCarriage.Settings(mc = true)
     _ <- Basics.needCarriage(KCarriage)
-    yarnFlows <- pattern.flatten.toSet.toVector.traverse(yarn =>
-      Planner.state(_.yarnAttachments).flatMap { yas =>
-        yas.filterKeys(_.yarn == yarn).toSeq.sortBy(_._2.rowDistance).
-          headOption.map(y => (yarn, y._1)).map(Monad[PlannerM].point(_)).
-          getOrElse {
-            val y = YarnStart(yarn)
-            Basics.yarnAttachment(y).
-              map(_ => (yarn, y))
-          }
-      })
+    yarnFlows <- pattern.flatten.toSet.toVector.traverse { yarn =>
+      Basics.nearestYarn(yarn).map(_.getOrElse(YarnStart(yarn))).
+        map(f => (yarn, f.start))
+    }
     yarnFlowMap = yarnFlows.toMap
     pattern2 = pattern.matrixMap(y => yarnFlowMap(y))
     //Knit the pattern rows
