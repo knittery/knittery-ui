@@ -6,7 +6,9 @@ import models._
 
 case class KnittingState(needles: Map[Needle, NeedleState],
   carriageState: CarriageStates,
-  output: Knitted) {
+  output: Knitted,
+  output2: Knitted2,
+  yarnAttachments: Map[YarnStart, YarnAttachment]) {
 
   def workingNeedles = Needle.all.filter(needles(_).position.isWorking)
   def nextDirection(carriage: Carriage) = carriageState(carriage).position match {
@@ -34,9 +36,21 @@ case class KnittingState(needles: Map[Needle, NeedleState],
   def modifyNeedles(newNeedles: NeedleStateRow) = copy(needles = newNeedles.toMap)
 
   def knit(f: Needle => Stitch) = copy(output = output + f)
+
+  def pushRow(forNeedles: Needle => Boolean) = {
+    val changed = yarnAttachments.collect {
+      case (yarn, YarnAttachment(y, needle, rd)) if forNeedles(needle) =>
+        (yarn, YarnAttachment(y, needle, rd + 1))
+    }
+    copy(yarnAttachments = yarnAttachments ++ changed)
+  }
+  def attachYarn(ya: YarnAttachment) = copy(yarnAttachments = yarnAttachments + (ya.yarn.start -> ya))
+  def detachYarn(yarn: YarnFlow) = copy(yarnAttachments = yarnAttachments - yarn.start)
+
+  def knit2(f: Knitted2 => Knitted2) = copy(output2 = f(output2))
 }
 object KnittingState {
-  val initial = KnittingState((allNeedlesA _).toMap, CarriageStates.empty, Knitted.empty)
+  val initial = KnittingState((allNeedlesA _).toMap, CarriageStates.empty, Knitted.empty, Knitted2.empty, Map.empty)
   private def allNeedlesA(n: Needle) = NeedleState(NeedleA, Nil)
 }
 
@@ -70,3 +84,5 @@ object CarriageStates {
     override val data = Map.empty[Carriage, CarriageState]
   }
 }
+
+case class YarnAttachment(yarn: YarnFlow, needle: Needle, rowDistance: Int = 0)

@@ -94,23 +94,23 @@ case class ChangeGCarriageSettings(settings: GCarriage.Settings) extends ChangeC
 }
 
 sealed trait ThreadYarn extends Step
-case class ThreadYarnK(yarnA: Option[Yarn], yarnB: Option[Yarn]) extends ThreadYarn {
+case class ThreadYarnK(yarnA: Option[YarnFlow], yarnB: Option[YarnFlow]) extends ThreadYarn {
   import KCarriage._
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(KCarriage)
     require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active K-carriage")
     val newAssembly = cs.assembly match {
-      case a: SinkerPlate => a.copy(yarnA = yarnA.map(YarnStart(_)), yarnB = yarnB.map(YarnStart(_)))
+      case a: SinkerPlate => a.copy(yarnA = yarnA, yarnB = yarnB)
     }
     state.modifyCarriage(cs.copy(assembly = newAssembly))
   }.toSuccess
 }
-case class ThreadYarnG(yarn: Option[Yarn]) extends ThreadYarn {
+case class ThreadYarnG(yarn: Option[YarnFlow]) extends ThreadYarn {
   import KCarriage._
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(GCarriage)
     require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active G-carriage")
-    state.modifyCarriage(cs.copy(yarn = yarn.map(YarnStart.apply)))
+    state.modifyCarriage(cs.copy(yarn = yarn))
   }.toSuccess
 }
 
@@ -118,25 +118,33 @@ case class ThreadYarnG(yarn: Option[Yarn]) extends ThreadYarn {
  *  Performs a closed cast on for the needles. The needles are then moved to D position.
  *  All other needles are not touched.
  */
-case class ClosedCastOn(from: Needle, until: Needle, yarn: Yarn) extends Step {
+case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnFlow) extends Step {
   def needles = Needle.interval(from, until)
+  def direction: Direction = if (from < until) ToLeft else ToRight
+  val width = 1
   override def apply(state: KnittingState) = {
+    val yarnFlow = yarn.nextStream(width)
+    val needleYarn = needles.zip(yarnFlow).toMap
     state.
       modifyNeedles { n =>
         val before = state.needles(n)
-        if (needles.contains(n)) {
+        needleYarn.get(n).map { yarn =>
           NeedleState(NeedleD, yarn :: before.yarn)
-        } else before
+        }.getOrElse(before)
       }.
       knit { n =>
-        if (needles.contains(n)) CastOnStitch(yarn)
+        if (needles.contains(n)) CastOnStitch(yarn.yarn)
         else NoStitch
       }.
+      knit2 { k =>
+        k ++ needleYarn.values
+      }.
+      attachYarn(YarnAttachment(needleYarn(until), until)).
       success[String]
   }
 }
 
-case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step {
+case class ClosedCastOff(withYarn: YarnFlow, filter: Needle => Boolean) extends Step {
   override def apply(state: KnittingState) = {
     state.
       knit { n =>
@@ -149,11 +157,14 @@ case class ClosedCastOff(withYarn: Yarn, filter: Needle => Boolean) extends Step
       knit { n =>
         if (filter(n)) state.needles(n) match {
           case NeedleState(_, Nil) => NoStitch
-          case NeedleState(_, yarns) => CastOffStitch(withYarn)
+          case NeedleState(_, yarns) => CastOffStitch(withYarn.yarn)
         }
         else NoStitch
       }.
+      //TODO implement .knit2
       modifyNeedles(n => if (filter(n)) NeedleState(NeedleA) else state.needles(n)).
+      pushRow(filter).
+      detachYarn(withYarn).
       success
   }
   override def hashCode = withYarn.hashCode ^ filter.all.hashCode

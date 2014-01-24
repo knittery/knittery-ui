@@ -48,31 +48,31 @@ sealed trait GuideStep {
   private def info = step match {
     case ClosedCastOn(from, to, yarn) =>
       ("Cast on",
-        s"Perform a closed cast on from needle ${from.number} until ${to.number} with yarn ${yarn.name}")
+        s"Perform a closed cast on from needle ${from.number} until ${to.number} with yarn ${yarn.yarn.name}")
     case ClosedCastOff(yarn, filter) =>
       val from = Needle.all.filter(filter).head
       val to = Needle.all.filter(filter).last
       ("Cast off",
-        s"Perform a closed cast off for needles ${from.number} through ${to.number} with ${yarn.name}")
+        s"Perform a closed cast off for needles ${from.number} through ${to.number} with ${yarn.yarn.name}")
 
     case ThreadYarnK(None, None) =>
       (s"Unthread Yarn from K",
         s"Unthread all yarns from the K carriage")
     case ThreadYarnK(Some(yarn), None) =>
-      (s"Thread Yarn ${yarn.name} to K",
-        s"Thread the yarn ${yarn.name} into A on the K carriage")
+      (s"Thread Yarn ${yarn.yarn.name} to K",
+        s"Thread the yarn ${yarn.yarn.name} into A on the K carriage")
     case ThreadYarnK(None, Some(yarn)) =>
-      (s"Thread Yarn ${yarn.name} to K",
-        s"Thread the yarn ${yarn.name} into B on the K carriage")
+      (s"Thread Yarn ${yarn.yarn.name} to K",
+        s"Thread the yarn ${yarn.yarn.name} into B on the K carriage")
     case ThreadYarnK(Some(yarnA), Some(yarnB)) =>
-      (s"Thread Yarns ${yarnA.name} and ${yarnB.name} to K",
-        s"Thread the yarns ${yarnA.name} into A and ${yarnB.name} into B on the K carriage")
+      (s"Thread Yarns ${yarnA.yarn.name} and ${yarnB.yarn.name} to K",
+        s"Thread the yarns ${yarnA.yarn.name} into A and ${yarnB.yarn.name} into B on the K carriage")
     case ThreadYarnG(None) =>
       (s"Unthread Yarn from G",
         s"Unthread the yarn from the G carriage")
     case ThreadYarnG(Some(yarn)) =>
-      (s"Thread Yarn ${yarn.name} to G",
-        s"Thread the yarn ${yarn.name} to the G carriage")
+      (s"Thread Yarn ${yarn.yarn.name} to G",
+        s"Thread the yarn ${yarn.yarn.name} to the G carriage")
 
     case MoveNeedles(to) =>
       val affected = Needle.all.filter(n => stateBefore.needles(n).position != to(n))

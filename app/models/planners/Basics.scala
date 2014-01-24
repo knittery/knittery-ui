@@ -48,15 +48,28 @@ object Basics {
   /** Next direction for the carriage. */
   def nextDirection(carriage: Carriage) = Planner.validate(_.nextDirection(carriage))
 
+  def yarn(flow: YarnFlow) = flow match {
+    case start: YarnStart => yarnAttachment(start).map(_.map(_.yarn).getOrElse(start))
+    case flow => yarnAttachment(flow.start).
+      flatMap(ya => Planner.validate(_ => ya.map(_.yarn).toSuccess(s"yarn $flow not attached")))
+  }
+  def yarnAttachment(yarn: YarnFlow) = Planner.state(_.yarnAttachments.get(yarn.start))
+  def yarnAttachment(yarn: Option[YarnFlow]) =
+    Planner.state(s => yarn.flatMap(y => s.yarnAttachments.get(y.start)))
+
   /** Knit a row with the K-Carriage. */
-  def knitRowWithK(settings: KCarriage.Settings, yarnA: Option[Yarn] = None, yarnB: Option[Yarn] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+  def knitRowWithK(settings: KCarriage.Settings, yarnA: Option[YarnFlow] = None, yarnB: Option[YarnFlow] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
     needlesBefore <- Planner.state(_.needles.positions)
     _ <- MoveNeedles(needlesBefore, pattern)
-    _ <- ThreadYarnK(yarnA, yarnB)
+    a <- yarnA.traverse(yarn)
+    b <- yarnB.traverse(yarn)
+    _ <- ThreadYarnK(a, b)
     dir <- nextDirection(KCarriage)
     _ <- KnitRow(KCarriage, dir)
-  } yield ()
+    yarnA2 <- yarnAttachment(yarnA)
+    yarnB2 <- yarnAttachment(yarnB)
+  } yield (yarnA2, yarnB2)
 
   /** Knit a row with the L-Carriage. */
   def knitRowWithL(settings: LCarriage.Settings, pattern: NeedleActionRow = AllNeedlesToB) = for {
@@ -68,11 +81,13 @@ object Basics {
   } yield ()
 
   /** Knit a row with the G-Carriage. */
-  def knitRowWithG(settings: GCarriage.Settings, yarnA: Option[Yarn] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+  def knitRowWithG(settings: GCarriage.Settings, yarn: Option[YarnFlow] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
     needlesBefore <- Planner.state(_.needles.positions)
-    _ <- ThreadYarnG(yarnA)
+    y <- yarn.traverse(Basics.yarn)
+    _ <- ThreadYarnG(y)
     dir <- nextDirection(GCarriage)
     _ <- KnitRow(LCarriage, dir, pattern)
-  } yield ()
+    yarn2 <- yarnAttachment(yarn)
+  } yield yarn2
 }

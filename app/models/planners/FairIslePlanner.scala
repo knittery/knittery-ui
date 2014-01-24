@@ -15,7 +15,7 @@ object FairIslePlanner {
    *  Does not change the working position of the needles, at least one needle (or better all for the
    *  pattern) must be in working position.
    */
-  def singleBed(pattern: Matrix[Yarn], backgroundYarn: Yarn, startNeedle: Option[Needle] = None) = for {
+  def singleBed(pattern: Matrix[Yarn], startNeedle: Option[Needle] = None) = for {
     workingNeedles <- Planner.state(_.workingNeedles)
     //Check if valid pattern and state
     _ <- Planner.precondidtions { _ =>
@@ -31,8 +31,20 @@ object FairIslePlanner {
     needle0 = startNeedle.getOrElse(workingNeedles.head)
     settings = KCarriage.Settings(mc = true)
     _ <- Basics.needCarriage(KCarriage)
+    yarnFlows <- pattern.flatten.toSet.toVector.traverse(yarn =>
+      Planner.state(_.yarnAttachments).flatMap { yas =>
+        yas.filterKeys(_.yarn == yarn).toSeq.sortBy(_._2.rowDistance).
+          headOption.map(y => (yarn, y._1)).map(Monad[PlannerM].point(_)).
+          getOrElse {
+            val y = YarnStart(yarn)
+            Basics.yarnAttachment(y).
+              map(_ => (yarn, y))
+          }
+      })
+    yarnFlowMap = yarnFlows.toMap
+    pattern2 = pattern.matrixMap(y => yarnFlowMap(y))
     //Knit the pattern rows
-    _ <- pattern.rows.toVector.traverse(row => for {
+    _ <- pattern2.rows.toVector.traverse(row => for {
       yarns <- optimizeYarn(row.toSet)
       actionRow = knitActions(row, needle0, yarns) _
       _ <- Basics.knitRowWithK(settings, yarns._1, yarns._2, actionRow)
@@ -40,12 +52,12 @@ object FairIslePlanner {
   } yield ()
 
   //TODO also take into account the next rows to knit => make it a general optimization?
-  private def optimizeYarn(required: Set[Yarn]) = {
+  private def optimizeYarn(required: Set[YarnStart]) = {
     for {
-      yarnA <- Planner.state(_.carriageState(KCarriage).yarnA.map(_.yarn))
-      yarnB <- Planner.state(_.carriageState(KCarriage).yarnB.map(_.yarn))
+      yarnA <- Planner.state(_.carriageState(KCarriage).yarnA)
+      yarnB <- Planner.state(_.carriageState(KCarriage).yarnB)
+      available = (yarnA.toSet ++ yarnB.toSet)
     } yield {
-      val available = yarnA.toSet ++ yarnB.toSet
       if (required.forall(available.contains)) (yarnA, yarnB)
       else required.toList match {
         case one :: two :: Nil => (Some(one), Some(two))
@@ -55,13 +67,17 @@ object FairIslePlanner {
     }
   }
 
-  def knitActions(row: Seq[Yarn], startNeedle: Needle, yarns: (Option[Yarn], Option[Yarn]))(needle: Needle) = {
+  def knitActions(row: Seq[YarnStart], startNeedle: Needle, yarns: (Option[YarnFlow], Option[YarnFlow]))(needle: Needle) = {
     val index = needle.index - startNeedle.index
     if (index < 0 || index > row.size) NeedleToB
-    else Some(row(index)) match {
-      case yarns._1 => NeedleToB
-      case yarns._2 => NeedleToD
-      case Some(x) => throw new IllegalStateException(s"want to use yarn $x but that's not on the carriage")
+    else {
+      val yarnA = yarns._1.map(_.start)
+      val yarnB = yarns._2.map(_.start)
+      Some(row(index)) match {
+        case `yarnA` => NeedleToB
+        case `yarnB` => NeedleToD
+        case Some(x) => throw new IllegalStateException(s"want to use yarn ${x.yarn} but that's not on the carriage")
+      }
     }
   }
 }
