@@ -17,6 +17,7 @@ sealed trait Knitted2 {
         flows + (start -> flow)
     })
   }
+  def ++(flows: Traversable[YarnFlow]) = flows.foldLeft(this)(_ + _)
 
   def +(stitch: Stitch2) = {
     require(stitch.points.forall(contains), s"missing yarn flows in stitch $stitch")
@@ -52,8 +53,8 @@ sealed trait Knitted2 {
  * So it forms the popular knitted V's in the front and the lying-S in the back.
  * See a schematic picture of a knitted garment to understand this stuff better :).
  */
-case class Stitch2(left: YarnPoint, right: YarnPoint, noose: YarnPoint) {
-  def points = left :: right :: noose :: Nil
+case class Stitch2(left: Set[YarnFlow], right: Set[YarnFlow], noose: Set[YarnFlow]) {
+  def points = left ++ right ++ noose
   def affects(p: YarnPoint) = points.contains(p)
 }
 

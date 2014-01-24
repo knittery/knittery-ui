@@ -16,12 +16,13 @@ case class KnitRow(carriage: Carriage, direction: Direction, needleActionRow: Ne
   override def apply(state: KnittingState) = {
     for {
       kc <- knittingCarriage(state, (needleActionRow))
-      (needles, knitted) <- kc(direction, state.needles)
+      res <- kc(direction, state.needles)
     } yield {
       state.
         moveCarriage(carriage, direction).
-        modifyNeedles(needles).
-        knit(knitted)
+        modifyNeedles(res.needles).
+        knit(res.stitches).
+        knit2(res.knitted2)
     }
   }
   private def knittingCarriage(state: KnittingState, pattern: NeedleActionRow) = for {
@@ -30,7 +31,7 @@ case class KnitRow(carriage: Carriage, direction: Direction, needleActionRow: Ne
       if (nextDir != direction) s"Cannot move carriage from $direction to $direction".fail[KnittingCarriage]
       else ().success
     }
-    c = KnittingCarriage(state.carriageState(carriage), pattern)
+    c = KnittingCarriage(state.carriageState(carriage), state.yarnAttachments, pattern)
   } yield c
 
   override def hashCode = carriage.hashCode ^ direction.hashCode ^ needleActionRow.all.hashCode
