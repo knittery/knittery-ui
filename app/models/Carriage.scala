@@ -47,6 +47,8 @@ case object KCarriage extends Carriage {
     tuckLeft: Boolean = false, tuckRight: Boolean = false,
     holdingCamLever: HoldingCamLever = HoldingCamN) {
     def knob = "KCII" //always use KC2 for assisted knitting
+    def part(direction: Direction) = if (direction == ToLeft) partLeft else partRight
+    def tuck(direction: Direction) = if (direction == ToLeft) tuckLeft else tuckRight
   }
   sealed trait HoldingCamLever {
     def name: String
