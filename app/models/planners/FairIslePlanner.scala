@@ -31,6 +31,7 @@ object FairIslePlanner {
     needle0 = startNeedle.getOrElse(workingNeedles.head)
     settings = KCarriage.Settings(mc = true)
     _ <- Basics.needCarriage(KCarriage)
+    //Convert pattern from Yarn to YarnStart
     yarnFlows <- pattern.flatten.toSet.toVector.traverse { yarn =>
       Basics.nearestYarn(yarn).map(_.getOrElse(YarnStart(yarn))).
         map(f => (yarn, f.start))
