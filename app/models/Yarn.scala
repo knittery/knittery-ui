@@ -11,9 +11,9 @@ case class Yarn(name: String, color: Color) {
 sealed trait YarnFlow {
   def yarn: Yarn
   def next(distance: Int) = YarnPoint(yarn, YarnFlow.this, distance)
-  def nextStream(distance: Int): Stream[YarnPoint] = {
+  def nexts(distance: Int): Stream[YarnPoint] = {
     val n = next(distance)
-    n #:: n.nextStream(distance)
+    n #:: n.nexts(distance)
   }
   def previous: Stream[YarnFlow]
   /** This element and all the previous elements. */

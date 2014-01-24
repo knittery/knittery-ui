@@ -123,7 +123,7 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnFlow) extends Ste
   def direction: Direction = if (from < until) ToLeft else ToRight
   val width = 1
   override def apply(state: KnittingState) = {
-    val yarnFlow = yarn.nextStream(width)
+    val yarnFlow = yarn.nexts(width)
     val needleYarn = needles.zip(yarnFlow).toMap
     state.
       modifyNeedles { n =>
