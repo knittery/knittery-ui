@@ -56,12 +56,13 @@ object Global extends GlobalSettings {
     }
     val width = 40
     val height = 20
+    val bg = YarnStart(yarn1)
     val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), yarn1) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
-      FairIslePlanner.singleBed(checkerboard(Needle.count, height), yarn1) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
-      Cast.offClosed(yarn1)
+      Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
+      FairIslePlanner.singleBed(checkerboard(Needle.count, height)) >>
+      Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
+      Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
+      Cast.offClosed(bg)
     planner.plan().valueOr(e => throw new RuntimeException(e))
   }
 
