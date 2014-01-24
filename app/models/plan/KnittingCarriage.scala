@@ -95,7 +95,7 @@ private object KnittingCarriage {
             val (l, noose, r, x2) = x.noose
             x2.knit(Stitch2(Set(l), ys.toSet, Set(r))).
               knit(n, PlainStitch(ys.map(_.yarn))).
-              needle(n, NeedleB, List(noose))
+              needle(n, pattern(n).toPosition, List(noose))
         }
         result.toResult
       } else {
