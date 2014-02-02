@@ -18,7 +18,7 @@ case class KnitRow(carriage: Carriage, direction: Direction, needleActionRow: Ne
       kc <- knittingCarriage(state, (needleActionRow))
       res <- kc(direction, state.needles)
     } yield {
-      state.
+      res.yarn.values.foldLeft(state)(_.attachYarn(_)).
         moveCarriage(carriage, direction).
         modifyNeedles(res.needles).
         knit(res.stitches).

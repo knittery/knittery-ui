@@ -12,6 +12,7 @@ private trait KnittingCarriage {
 
 private case class KnittingCarriageResult(
   needles: NeedleStateRow,
+  yarn: Map[YarnStart, YarnAttachment],
   knitted2: Knitted2 => Knitted2,
   stitches: Needle => Stitch)
 
@@ -40,6 +41,10 @@ private object KnittingCarriage {
       /** Make a noose at the current position. */
       def noose: (YarnFeeder, (YarnFlow, YarnFlow, YarnFlow)) = {
         (YarnFeeder(stream(2)), (pos, stream(1), stream(2)))
+      }
+      def attachment = {
+        val a = attached.map(YarnAttachment(pos, _)).orElse(yarnAttachments.get(pos.start))
+        a.map((pos.start, _))
       }
       private def stream = pos.nexts(1)
       private def distanceTo(needle: Needle): Int = attached match {
@@ -79,8 +84,11 @@ private object KnittingCarriage {
       def knit(s: Stitch2): ResultBuilder = copy(outputs = outputs :+ s)
       def knit(n: Needle, s: Stitch) = copy(stitches = stitches + (n -> s))
 
+      val yarnMap = (yarnA.flatMap(_.attachment).toList ++
+        yarnB.flatMap(_.attachment).toList).toMap
       def toResult = KnittingCarriageResult(
         needles.withDefaultValue(NeedleState(NeedleA)),
+        yarnMap,
         o => outputs.foldLeft(o)(_ + _),
         stitches.withDefaultValue(EmptyStitch))
     }
