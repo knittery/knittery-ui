@@ -69,16 +69,20 @@ private object KnittingCarriage {
 
     private case class ResultBuilder(
       yarnA: Option[YarnFeeder] = None,
+      yarnB: Option[YarnFeeder] = None,
       needles: Map[Needle, NeedleState] = Map.empty,
       outputs: Seq[Stitch2] = Seq.empty,
       stitches: Map[Needle, Stitch] = Map.empty) {
 
-      def useYarnA(f: YarnFeeder => (YarnFeeder, Any)) =
-        if (yarnA.isEmpty) this else withYarnA(f)._1
       def withYarnA[X](f: YarnFeeder => (YarnFeeder, X)): (ResultBuilder, X) = {
         require(yarnA.isDefined, "No yarn A")
         val (y, r) = f(yarnA.get)
         (copy(yarnA = Some(y)), r)
+      }
+      def withYarnB[X](f: YarnFeeder => (YarnFeeder, X)): (ResultBuilder, X) = {
+        require(yarnB.isDefined, "No yarn B")
+        val (y, r) = f(yarnB.get)
+        (copy(yarnB = Some(y)), r)
       }
 
       def needle(needle: Needle, state: NeedleState) =
@@ -95,7 +99,10 @@ private object KnittingCarriage {
         stitches.withDefaultValue(EmptyStitch))
     }
     private object ResultBuilder {
-      def apply(yarn: YarnFlow): ResultBuilder = ResultBuilder(yarnA = Some(YarnFeeder(yarn)))
+      def apply(yarn: YarnFlow): ResultBuilder =
+        ResultBuilder(yarnA = Some(YarnFeeder(yarn)))
+      def apply(a: YarnFlow, b: YarnFlow): ResultBuilder =
+        ResultBuilder(yarnA = Some(YarnFeeder(a)), yarnB = Some(YarnFeeder(b)))
     }
 
     private type LoopFun = (ResultBuilder, (Needle, NeedlePosition, Set[YarnFlow])) => ResultBuilder
@@ -119,15 +126,34 @@ private object KnittingCarriage {
         case (x, (n, _, ys)) =>
           //knit normally
           val (x2, noose) = x.withYarnA(_.to(n).noose)
-          val stitch = Stitch2(noose._1, noose._3, ys)
-          x2.knit(stitch)
+          x2.knit(Stitch2(noose._1, noose._3, ys))
             .knit(n, PlainStitch(ys.map(_.yarn).toList)).
             needle(n, pattern(n).toPosition, noose._2)
       }
     }
 
     private def knitMC(direction: Direction, needles: NeedleStateRow, a: YarnFlow, b: YarnFlow) = {
-      ???
+      loopNeedles(direction, needles, ResultBuilder(a, b)) {
+        case (x, (_, NeedleA, _)) =>
+          //don't knit A needles
+          x
+        case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
+          //don't knit E needles if no needle pull back from E
+          //TODO do we need to "prevent" falling down of yarn in the yarn feeder
+          x.needle(n, NeedleE, ys)
+        case (x, (n, NeedleB, ys)) =>
+          //knit yarnA
+          val (x2, noose) = x.withYarnA(_.to(n).noose)
+          x2.knit(Stitch2(noose._1, noose._3, ys))
+            .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+            needle(n, pattern(n).toPosition, noose._2)
+        case (x, (n, _, ys)) =>
+          //knit yarnB
+          val (x2, noose) = x.withYarnB(_.to(n).noose)
+          x2.knit(Stitch2(noose._1, noose._3, ys))
+            .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+            needle(n, pattern(n).toPosition, noose._2)
+      }
     }
 
     override def apply(direction: Direction, needles: NeedleStateRow) = Try {
@@ -137,7 +163,8 @@ private object KnittingCarriage {
         case (false, false, false, false, _, Some(_)) =>
           throw new IllegalArgumentException(s"Settings are illegal: Plain with yarn B threaded")
         case (false, false, false, false, None, _) => ??? //TODO remove the knitting from the board
-        case (false, false, true, false, Some(a), Some(b)) => knitMC(direction, needles, a, b)
+        case (false, false, true, false, Some(a), Some(b)) =>
+          knitMC(direction, needles, a, b)
         case (true, false, false, false, _, _) => ??? //TODO part
         case (false, true, false, false, _, _) => ??? //TODO tuck
         case (false, false, _, true, _, _) => ??? //TODO l-mode
