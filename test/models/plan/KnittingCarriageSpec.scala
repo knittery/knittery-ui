@@ -114,7 +114,7 @@ class KnittingCarriageSpec extends Specification {
       needles.all.zipWithIndex.forall {
         case (NeedleState(pos, yarn), index) =>
           pos must_== (if (index % 2 == 0) NeedleB else NeedleD)
-          yarn.map(_.yarn) must_== List(red)
+          yarn.map(_.yarn) must_== Set(red)
       }
     }
     "move every needle to B and have red/green on the needles in the all B-pattern after even/odd" in new K {
@@ -122,7 +122,7 @@ class KnittingCarriageSpec extends Specification {
       needles.all.zipWithIndex.forall {
         case (NeedleState(pos, yarn), index) =>
           pos must_== NeedleB
-          yarn.map(_.yarn) must_== (if (index % 2 == 0) List(red) else List(green))
+          yarn.map(_.yarn) must_== (if (index % 2 == 0) Set(red) else Set(green))
       }
     }
     "move every needle to D and have red/green on the needles in the all D-pattern after even/odd" in new K {
@@ -130,7 +130,7 @@ class KnittingCarriageSpec extends Specification {
       needles.all.zipWithIndex.forall {
         case (NeedleState(pos, yarn), index) =>
           pos must_== NeedleD
-          yarn.map(_.yarn) must_== (if (index % 2 == 0) List(red) else List(green))
+          yarn.map(_.yarn) must_== (if (index % 2 == 0) Set(red) else Set(green))
       }
     }
     "knit plain red/green stitch pattern with even odd needles and even odd pattern" in new K {
