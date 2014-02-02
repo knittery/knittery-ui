@@ -26,26 +26,12 @@ private object KnittingCarriage {
       new GKnittingCarriage(state.settings, state.yarn, pattern)
   }
 
-  private def workInterval(direction: Direction, needles: NeedleStateRow) = {
-    val ns = if (direction == ToRight) Needle.all else Needle.all.reverse
-    val working = ns.filter(needles(_).position.isWorking)
-    if (working.isEmpty) Seq.empty
-    else Needle.interval(working.head, working.last)
-  }
-
   private class KKnittingCarriage(settings: KCarriage.Settings,
     yarnA: Option[YarnFlow], yarnB: Option[YarnFlow],
     yarnAttachments: Map[YarnStart, YarnAttachment],
     pattern: NeedleActionRow)
     extends KnittingCarriage {
     import KCarriage._
-
-    private def distanceTo(needle: Needle, yarn: YarnFlow): Int = {
-      yarnAttachments.get(yarn.start).map { ya =>
-        ya.rowDistance / 2 +
-          (needle.index - ya.needle.index).abs
-      }.getOrElse(0)
-    }
 
     case class YarnFeeder(pos: YarnFlow, attached: Option[Needle] = None) {
       /** Straight yarn towards the needle. */
@@ -67,7 +53,7 @@ private object KnittingCarriage {
       }
     }
 
-    private case class ResultBuilder(
+    case class ResultBuilder(
       yarnA: Option[YarnFeeder] = None,
       yarnB: Option[YarnFeeder] = None,
       needles: Map[Needle, NeedleState] = Map.empty,
@@ -98,23 +84,22 @@ private object KnittingCarriage {
         o => outputs.foldLeft(o)(_ + _),
         stitches.withDefaultValue(EmptyStitch))
     }
-    private object ResultBuilder {
+    object ResultBuilder {
       def apply(yarn: YarnFlow): ResultBuilder =
         ResultBuilder(yarnA = Some(YarnFeeder(yarn)))
       def apply(a: YarnFlow, b: YarnFlow): ResultBuilder =
         ResultBuilder(yarnA = Some(YarnFeeder(a)), yarnB = Some(YarnFeeder(b)))
     }
 
-    private type LoopFun = (ResultBuilder, (Needle, NeedlePosition, Set[YarnFlow])) => ResultBuilder
-    private def loopNeedles(direction: Direction, needles: NeedleStateRow, initial: ResultBuilder)(f: LoopFun) = {
+    type LoopFun = (ResultBuilder, (Needle, NeedlePosition, Set[YarnFlow])) => ResultBuilder
+    def loopNeedles(direction: Direction, needles: NeedleStateRow, initial: ResultBuilder)(f: LoopFun) = {
       val ns = if (direction == ToRight) Needle.all else Needle.all.reverse
       val r = ns.map(n => (n, needles(n).position, needles(n).yarn)).foldLeft(initial)(f)
       r.toResult
     }
+    private implicit def toSet[A](a: A): Set[A] = Set(a)
 
-    implicit def toSet[A](a: A): Set[A] = Set(a)
-
-    private def knitPlain(direction: Direction, needles: NeedleStateRow, yarn: YarnFlow) = {
+    def knitPlain(direction: Direction, needles: NeedleStateRow, yarn: YarnFlow) = {
       loopNeedles(direction, needles, ResultBuilder(yarn)) {
         case (x, (_, NeedleA, _)) =>
           //don't knit A needles
@@ -132,7 +117,7 @@ private object KnittingCarriage {
       }
     }
 
-    private def knitMC(direction: Direction, needles: NeedleStateRow, a: YarnFlow, b: YarnFlow) = {
+    def knitMC(direction: Direction, needles: NeedleStateRow, a: YarnFlow, b: YarnFlow) = {
       loopNeedles(direction, needles, ResultBuilder(a, b)) {
         case (x, (_, NeedleA, _)) =>
           //don't knit A needles
