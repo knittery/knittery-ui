@@ -51,7 +51,7 @@ case class KnittingState(needles: Map[Needle, NeedleState],
 }
 object KnittingState {
   val initial = KnittingState((allNeedlesA _).toMap, CarriageStates.empty, Knitted.empty, Knitted2.empty, Map.empty)
-  private def allNeedlesA(n: Needle) = NeedleState(NeedleA, Nil)
+  private def allNeedlesA(n: Needle) = NeedleState(NeedleA)
 }
 
 sealed trait CarriageStates {

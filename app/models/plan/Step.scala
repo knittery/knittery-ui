@@ -130,7 +130,7 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnFlow) extends Ste
       modifyNeedles { n =>
         val before = state.needles(n)
         needleYarn.get(n).map { yarn =>
-          NeedleState(NeedleD, yarn :: before.yarn)
+          NeedleState(NeedleD, before.yarn + yarn)
         }.getOrElse(before)
       }.
       knit { n =>
@@ -150,14 +150,14 @@ case class ClosedCastOff(withYarn: YarnFlow, filter: Needle => Boolean) extends 
     state.
       knit { n =>
         if (filter(n)) state.needles(n) match {
-          case NeedleState(_, Nil) => NoStitch
-          case NeedleState(_, yarns) => PlainStitch(yarns.map(_.yarn))
+          case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
+          case NeedleState(_, yarns) => PlainStitch(yarns.map(_.yarn).toList)
         }
         else NoStitch
       }.
       knit { n =>
         if (filter(n)) state.needles(n) match {
-          case NeedleState(_, Nil) => NoStitch
+          case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
           case NeedleState(_, yarns) => CastOffStitch(withYarn.yarn)
         }
         else NoStitch
