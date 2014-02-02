@@ -11,7 +11,7 @@ sealed trait Knitted2 {
     ends.get(start).map { old =>
       if (flow.stream.contains(old)) ends + (start -> flow)
       else if (old.stream.contains(flow)) ends
-      else throw new IllegalArgumentException(s"Yarn cannot fork, cannot add $flow, we already contain a different end for $start")
+      else throw new IllegalArgumentException(s"Yarn cannot fork, cannot add $flow, we already contain the different end $old")
     }.getOrElse {
       ends + (start -> flow)
     }
