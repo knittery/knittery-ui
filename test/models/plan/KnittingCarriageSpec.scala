@@ -13,7 +13,7 @@ class KnittingCarriageSpec extends Specification {
     val greenFlow = YarnStart(green)
     def carriageK = carriageKPlain(AllNeedlesToB)
     def carriageKPlain(pattern: NeedleActionRow) = {
-      val state = KCarriage.State(KCarriage.SinkerPlate(Some(redFlow), Some(greenFlow)))
+      val state = KCarriage.State(KCarriage.SinkerPlate(Some(redFlow), None))
       KnittingCarriage(state, Map.empty, pattern)
     }
     def carriageKMC(pattern: NeedleActionRow) = {
@@ -84,7 +84,7 @@ class KnittingCarriageSpec extends Specification {
       needles.all.zipWithIndex.forall {
         case (NeedleState(pos, yarn), index) =>
           pos must_== (if (index % 2 == 0) NeedleB else NeedleD)
-          yarn.map(_.start) must_== List(redFlow)
+          yarn.map(_.start) must_== Set(redFlow)
       }
     }
     "move every needle to B and have red on the needles in the all B-pattern after even/odd" in new K {
