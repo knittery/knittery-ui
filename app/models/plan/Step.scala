@@ -137,9 +137,7 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnFlow) extends Ste
         if (needles.contains(n)) CastOnStitch(yarn.yarn)
         else NoStitch
       }.
-      knit2 { k =>
-        k ++ needleYarn.values
-      }.
+      //TODO Knit2? we don't really have stitches..
       attachYarn(YarnAttachment(needleYarn(until), until)).
       success[String]
   }

@@ -3,45 +3,43 @@ package models.plan
 import models._
 
 sealed trait Knitted2 {
-  val flows: Map[YarnStart, YarnFlow]
+  val ends: Map[YarnStart, YarnFlow]
   val stitches: Set[Stitch2]
 
-  def +(flow: YarnFlow) = {
+  private def addFlow(ends: Map[YarnStart, YarnFlow], flow: YarnFlow) = {
     val start = flow.start
-    copy(flows = flows.get(start) match {
-      case None =>
-        flows + (start -> flow)
-      case Some(old) if flow.stream.contains(old) =>
-        throw new IllegalArgumentException(s"Yarn cannot fork, cannot add $flow, we already contain a different end for $start")
-      case Some(_) =>
-        flows + (start -> flow)
-    })
+    ends.get(start).map { old =>
+      if (flow.stream.contains(old)) ends + (start -> flow)
+      else if (old.stream.contains(flow)) ends
+      else throw new IllegalArgumentException(s"Yarn cannot fork, cannot add $flow, we already contain a different end for $start")
+    }.getOrElse {
+      ends + (start -> flow)
+    }
   }
-  def ++(flows: Traversable[YarnFlow]) = flows.foldLeft(this)(_ + _)
 
   def +(stitch: Stitch2) = {
-    require(stitch.points.forall(contains), s"missing yarn flows in stitch $stitch")
-    copy(stitches = stitches + stitch)
+    val ends2 = stitch.points.foldLeft(ends)(addFlow)
+    copy(stitches = stitches + stitch, ends = ends2)
   }
 
   def contains(flow: YarnFlow) =
-    flows.get(flow.start).map(_.stream.contains(flow)).getOrElse(false)
+    ends.get(flow.start).map(_.stream.contains(flow)).getOrElse(false)
 
-  private def copy(flows: Map[YarnStart, YarnFlow] = flows, stitches: Set[Stitch2] = stitches): Knitted2 = {
-    val f2 = flows
+  private def copy(ends: Map[YarnStart, YarnFlow] = ends, stitches: Set[Stitch2] = stitches): Knitted2 = {
+    val e2 = ends
     val s2 = stitches
     new Knitted2 {
-      override val flows = f2
+      override val ends = e2
       override val stitches = s2
     }
   }
 
-  override def hashCode = flows.hashCode ^ stitches.hashCode
+  override def hashCode = ends.hashCode ^ stitches.hashCode
   override def equals(o: Any) = o match {
-    case o: Knitted2 => flows == o.flows && stitches == o.stitches
+    case o: Knitted2 => ends == o.ends && stitches == o.stitches
     case _ => false
   }
-  override def toString = s"Knitted2(${flows.values.mkString(", ")})"
+  override def toString = s"Knitted2(${ends.values.mkString(", ")})"
 }
 
 /**
@@ -60,7 +58,7 @@ case class Stitch2(left: Set[YarnFlow], right: Set[YarnFlow], noose: Set[YarnFlo
 
 object Knitted2 {
   object empty extends Knitted2 {
-    override val flows = Map.empty[YarnStart, YarnFlow]
+    override val ends = Map.empty[YarnStart, YarnFlow]
     override val stitches = Set.empty[Stitch2]
   }
 }
