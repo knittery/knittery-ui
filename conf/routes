@@ -20,6 +20,8 @@ GET     /guide/subscribe            controllers.Guide.subscribe
 GET     /pattern                    controllers.Pattern.show
 POST    /pattern/upload				controllers.Pattern.upload
 
+GET     /preview                    controllers.Preview.show
+
 # Assets
 GET     /assets/javascripts/routes.js   controllers.Application.javascriptRoutes()
 GET     /assets/*file                   controllers.Assets.at(path="/public", file)
