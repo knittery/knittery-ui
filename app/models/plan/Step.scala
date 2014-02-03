@@ -100,6 +100,7 @@ case class ThreadYarnK(yarnA: Option[YarnPiece], yarnB: Option[YarnPiece]) exten
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(KCarriage)
     require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active K-carriage")
+    require(yarnA.isEmpty || yarnA != yarnB, "Cannot thread same piece of yarn to A and B")
     val newAssembly = cs.assembly match {
       case a: SinkerPlate => a.copy(yarnA = yarnA, yarnB = yarnB)
     }
