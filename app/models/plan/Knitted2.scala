@@ -9,8 +9,8 @@ sealed trait Knitted2 {
   private def addFlow(ends: Map[YarnStart, YarnFlow], flow: YarnFlow) = {
     val start = flow.start
     ends.get(start).map { old =>
-      if (flow.stream.contains(old)) ends + (start -> flow)
-      else if (old.stream.contains(flow)) ends
+      if (flow.contains(old)) ends + (start -> flow)
+      else if (old.contains(flow)) ends
       else throw new IllegalArgumentException(s"Yarn cannot fork, cannot add $flow, we already contain the different end $old")
     }.getOrElse {
       ends + (start -> flow)
