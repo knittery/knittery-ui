@@ -48,11 +48,6 @@ object Basics {
   /** Next direction for the carriage. */
   def nextDirection(carriage: Carriage) = Planner.validate(_.nextDirection(carriage))
 
-  def yarn(flow: YarnFlow) = flow match {
-    case start: YarnStart => yarnAttachment(start).map(_.map(_.yarn).getOrElse(start))
-    case flow => yarnAttachment(flow.start).
-      flatMap(ya => Planner.validate(_ => ya.map(_.yarn).toSuccess(s"yarn $flow not attached")))
-  }
   def yarnAttachment(yarn: YarnFlow) = Planner.state(_.yarnAttachments.get(yarn.start))
   def yarnAttachment(yarn: Option[YarnFlow]) =
     Planner.state(s => yarn.flatMap(y => s.yarnAttachments.get(y.start)))
@@ -64,13 +59,11 @@ object Basics {
   }
 
   /** Knit a row with the K-Carriage. */
-  def knitRowWithK(settings: KCarriage.Settings, yarnA: Option[YarnFlow] = None, yarnB: Option[YarnFlow] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+  def knitRowWithK(settings: KCarriage.Settings, yarnA: Option[YarnStart] = None, yarnB: Option[YarnStart] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
     needlesBefore <- Planner.state(_.needles.positions)
     _ <- MoveNeedles(needlesBefore, pattern)
-    a <- yarnA.traverse(yarn)
-    b <- yarnB.traverse(yarn)
-    _ <- ThreadYarnK(a, b)
+    _ <- ThreadYarnK(yarnA, yarnB)
     dir <- nextDirection(KCarriage)
     _ <- KnitRow(KCarriage, dir)
     yarnA2 <- yarnAttachment(yarnA)
@@ -87,11 +80,10 @@ object Basics {
   } yield ()
 
   /** Knit a row with the G-Carriage. */
-  def knitRowWithG(settings: GCarriage.Settings, yarn: Option[YarnFlow] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+  def knitRowWithG(settings: GCarriage.Settings, yarn: Option[YarnStart] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
     needlesBefore <- Planner.state(_.needles.positions)
-    y <- yarn.traverse(Basics.yarn)
-    _ <- ThreadYarnG(y)
+    _ <- ThreadYarnG(yarn)
     dir <- nextDirection(GCarriage)
     _ <- KnitRow(LCarriage, dir, pattern)
     yarn2 <- yarnAttachment(yarn)

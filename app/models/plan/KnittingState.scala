@@ -45,7 +45,7 @@ case class KnittingState(needles: Map[Needle, NeedleState],
     copy(yarnAttachments = yarnAttachments ++ changed)
   }
   def attachYarn(ya: YarnAttachment) = copy(yarnAttachments = yarnAttachments + (ya.yarn.start -> ya))
-  def detachYarn(yarn: YarnFlow) = copy(yarnAttachments = yarnAttachments - yarn.start)
+  def detachYarn(yarn: YarnStart) = copy(yarnAttachments = yarnAttachments - yarn)
 
   def knit2(f: Knitted2 => Knitted2) = copy(output2 = f(output2))
 }

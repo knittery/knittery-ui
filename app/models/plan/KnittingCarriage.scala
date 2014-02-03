@@ -28,34 +28,33 @@ private object KnittingCarriage {
   }
 
   private class KKnittingCarriage(settings: KCarriage.Settings,
-    yarnA: Option[YarnFlow], yarnB: Option[YarnFlow],
+    yarnA: Option[YarnStart], yarnB: Option[YarnStart],
     yarnAttachments: Map[YarnStart, YarnAttachment],
     pattern: NeedleActionRow)
     extends KnittingCarriage {
     import KCarriage._
 
-    case class YarnFeeder(pos: YarnFlow, attached: Option[Needle] = None) {
+    case class YarnFeeder(pos: YarnFlow, attachedTo: Option[(Needle, Int)]) {
       /** Straight yarn towards the needle. */
       def to(needle: Needle) =
-        YarnFeeder(pos.next(distanceTo(needle)), Some(needle))
+        YarnFeeder(pos.next(distanceTo(needle)), Some(needle, 0))
       /** Make a noose at the current position. */
       def noose: (YarnFeeder, (YarnFlow, YarnFlow, YarnFlow)) = {
-        (YarnFeeder(stream(2)), (pos, stream(1), stream(2)))
+        val stream = pos.nexts(1)
+        (copy(pos = stream(2)), (pos, stream(1), stream(2)))
       }
-      def attachment = {
-        val a = attached.map(YarnAttachment(pos, _)).orElse(yarnAttachments.get(pos.start))
-        a.map((pos.start, _))
+      def attachment = attachedTo.map(v => (pos.start, YarnAttachment(pos, v._1, v._2)))
+      private def distanceTo(needle: Needle): Int = {
+        attachedTo.map {
+          case (n, rowDistance) => (n.index - needle.index).abs * 2 + rowDistance
+        }.getOrElse(0)
       }
-      private def stream = pos.nexts(1)
-      private def distanceTo(needle: Needle): Int = attached match {
-        case Some(attach) =>
-          (attach.index - needle.index).abs * 2
-        case None =>
-          yarnAttachments.get(pos.start).map { ya =>
-            ya.rowDistance +
-              (needle.index - ya.needle.index).abs * 2
-          }.getOrElse(0)
-      }
+    }
+    object YarnFeeder {
+      def apply(ya: YarnAttachment): YarnFeeder =
+        YarnFeeder(ya.yarn, Some(ya.needle, ya.rowDistance))
+      def apply(yarn: YarnStart): YarnFeeder =
+        YarnFeeder(yarn, None)
     }
 
     case class ResultBuilder(
@@ -93,10 +92,15 @@ private object KnittingCarriage {
         stitches.withDefaultValue(EmptyStitch))
     }
     object ResultBuilder {
-      def apply(yarn: YarnFlow): ResultBuilder =
-        ResultBuilder(yarnA = Some(YarnFeeder(yarn)))
-      def apply(a: YarnFlow, b: YarnFlow): ResultBuilder =
-        ResultBuilder(yarnA = Some(YarnFeeder(a)), yarnB = Some(YarnFeeder(b)))
+      def apply(yarn: YarnStart): ResultBuilder =
+        ResultBuilder(yarnA = Some(yarnFeeder(yarn)))
+      def apply(a: YarnStart, b: YarnStart): ResultBuilder =
+        ResultBuilder(yarnA = Some(yarnFeeder(a)), yarnB = Some(yarnFeeder(b)))
+
+      private def yarnFeeder(yarn: YarnStart) = {
+        yarnAttachments.get(yarn).map(YarnFeeder.apply).
+          getOrElse(YarnFeeder(yarn))
+      }
     }
 
     type LoopFun = (ResultBuilder, (Needle, NeedlePosition, Set[YarnFlow])) => ResultBuilder
@@ -107,7 +111,7 @@ private object KnittingCarriage {
     }
     private implicit def toSet[A](a: A): Set[A] = Set(a)
 
-    def knitPlain(direction: Direction, needles: NeedleStateRow, yarn: YarnFlow) = {
+    def knitPlain(direction: Direction, needles: NeedleStateRow, yarn: YarnStart) = {
       loopNeedles(direction, needles, ResultBuilder(yarn)) {
         case (x, (_, NeedleA, _)) =>
           //don't knit A needles
@@ -125,7 +129,7 @@ private object KnittingCarriage {
       }
     }
 
-    def knitMC(direction: Direction, needles: NeedleStateRow, a: YarnFlow, b: YarnFlow) = {
+    def knitMC(direction: Direction, needles: NeedleStateRow, a: YarnStart, b: YarnStart) = {
       loopNeedles(direction, needles, ResultBuilder(a, b)) {
         case (x, (_, NeedleA, _)) =>
           //don't knit A needles
