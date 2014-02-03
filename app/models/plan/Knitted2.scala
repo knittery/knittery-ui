@@ -1,6 +1,11 @@
 package models.plan
 
 import models._
+import scalax.collection.Graph
+import scalax.collection.GraphPredef._
+import scalax.collection.GraphEdge._
+import scalax.collection.edge._
+import scalax.collection.edge.Implicits._
 
 sealed trait Knitted2 {
   val ends: Map[YarnPiece, YarnFlow]
@@ -32,6 +37,26 @@ sealed trait Knitted2 {
       override val ends = e2
       override val stitches = s2
     }
+  }
+
+  def asGraph = {
+    val stitchToYarn = stitches.foldLeft(Map.empty[YarnFlow, Stitch2]) { (map, stitch) =>
+      map ++ stitch.points.map(_ -> stitch)
+    }
+
+    val edges = ends.values.flatMap { yarn =>
+      //reverse through the points of the yarn piece and find the stitches that are
+      // connected by this yarn along with their position on the yarn
+      val stitches = yarn.stream.map(p => (p, p.length)).flatMap({
+        case (point, pos) => stitchToYarn.get(point).map(_ -> pos)
+      })
+      stitches.sliding(2, 1).collect {
+        case (stitchA, posA) #:: (stitchB, posB) #:: _ =>
+          stitchA ~ stitchB % (posA - posB).abs
+      }.toTraversable
+    }
+
+    Graph.fromStream(edges = edges)
   }
 
   override def hashCode = ends.hashCode ^ stitches.hashCode

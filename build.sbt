@@ -10,7 +10,9 @@ libraryDependencies ++= Seq(
   "ch.inventsoft.akka" %% "rxtx-akka-io" % "1.0.2-SNAPSHOT",
   "org.webjars" %% "webjars-play" % "2.2.1",
   "org.webjars" % "jquery" % "2.0.3-1",
-  "org.webjars" % "bootstrap" % "3.0.3"
+  "org.webjars" % "bootstrap" % "3.0.3",
+  "com.assembla.scala-incubator" %% "graph-core" % "1.7.2",
+  "com.assembla.scala-incubator" %% "graph-dot" % "1.7.0"
 )
 
 resolvers +=
