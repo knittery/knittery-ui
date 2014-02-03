@@ -19,7 +19,7 @@ sealed trait YarnFlow {
   def previous: Stream[YarnFlow]
   /** This element and all the previous elements. */
   def stream = this #:: previous
-  def start: YarnStart
+  def start: YarnPiece
   /** length of the yarn (sum of all distances). */
   def length: Int
   def contains(other: YarnFlow): Boolean
@@ -43,14 +43,14 @@ sealed abstract class YarnPoint(val prev: YarnFlow, val distance: Int) extends Y
   //equals is object identity
   override def toString = s"$prev=>$distance"
 }
-class YarnStart(val yarn: Yarn) extends YarnFlow {
+class YarnPiece(val yarn: Yarn) extends YarnFlow {
   override def previous = Stream.empty
-  override def start = this
+  override def start = YarnPiece.this
   override def length = 0
-  override def contains(other: YarnFlow) = this == other
+  override def contains(other: YarnFlow) = YarnPiece.this == other
   //equals must be for object identity
   override def toString = s"$yarn"
 }
-object YarnStart {
-  def apply(yarn: Yarn) = new YarnStart(yarn)
+object YarnPiece {
+  def apply(yarn: Yarn) = new YarnPiece(yarn)
 }

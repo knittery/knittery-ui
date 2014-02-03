@@ -95,7 +95,7 @@ case class ChangeGCarriageSettings(settings: GCarriage.Settings) extends ChangeC
 }
 
 sealed trait ThreadYarn extends Step
-case class ThreadYarnK(yarnA: Option[YarnStart], yarnB: Option[YarnStart]) extends ThreadYarn {
+case class ThreadYarnK(yarnA: Option[YarnPiece], yarnB: Option[YarnPiece]) extends ThreadYarn {
   import KCarriage._
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(KCarriage)
@@ -106,7 +106,7 @@ case class ThreadYarnK(yarnA: Option[YarnStart], yarnB: Option[YarnStart]) exten
     state.modifyCarriage(cs.copy(assembly = newAssembly))
   }.toSuccess
 }
-case class ThreadYarnG(yarn: Option[YarnStart]) extends ThreadYarn {
+case class ThreadYarnG(yarn: Option[YarnPiece]) extends ThreadYarn {
   import KCarriage._
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(GCarriage)
@@ -119,7 +119,7 @@ case class ThreadYarnG(yarn: Option[YarnStart]) extends ThreadYarn {
  *  Performs a closed cast on for the needles. The needles are then moved to D position.
  *  All other needles are not touched.
  */
-case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnStart) extends Step {
+case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnPiece) extends Step {
   def needles = Needle.interval(from, until)
   def direction: Direction = if (from < until) ToLeft else ToRight
   val width = 1
@@ -143,7 +143,7 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnStart) extends St
   }
 }
 
-case class ClosedCastOff(withYarn: YarnStart, filter: Needle => Boolean) extends Step {
+case class ClosedCastOff(withYarn: YarnPiece, filter: Needle => Boolean) extends Step {
   override def apply(state: KnittingState) = {
     state.
       knit { n =>

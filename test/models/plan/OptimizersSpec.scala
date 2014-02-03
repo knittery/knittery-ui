@@ -10,21 +10,21 @@ class OptimizersSpec extends Specification {
     val allNeedles = (n: Needle) => true
 
     val simpleLines = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnStart(red)),
+      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnPiece(red)),
       AddCarriage(KCarriage, Left),
-      ThreadYarnK(Some(YarnStart(red)), None),
+      ThreadYarnK(Some(YarnPiece(red)), None),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
-      ClosedCastOff(YarnStart(red), allNeedles)))
+      ClosedCastOff(YarnPiece(red), allNeedles)))
 
     val simpleLinesWithUnknittedSettings = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnStart(red)),
+      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnPiece(red)),
       AddCarriage(KCarriage, Left),
-      ThreadYarnK(Some(YarnStart(red)), None),
+      ThreadYarnK(Some(YarnPiece(red)), None),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
       KnitRow(KCarriage, ToRight),
@@ -32,13 +32,13 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
       ChangeKCarriageSettings(KCarriage.Settings()),
-      ClosedCastOff(YarnStart(red), allNeedles)))
+      ClosedCastOff(YarnPiece(red), allNeedles)))
 
     val simpleLinesWithDuplicateSettings = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnStart(red)),
+      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnPiece(red)),
       AddCarriage(KCarriage, Left),
       ChangeKCarriageSettings(KCarriage.Settings()),
-      ThreadYarnK(Some(YarnStart(red)), None),
+      ThreadYarnK(Some(YarnPiece(red)), None),
       ChangeKCarriageSettings(KCarriage.Settings()),
       ChangeKCarriageSettings(KCarriage.Settings()),
       ChangeKCarriageSettings(KCarriage.Settings()),
@@ -53,15 +53,15 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToRight),
       ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToLeft),
-      ClosedCastOff(YarnStart(red), allNeedles)))
+      ClosedCastOff(YarnPiece(red), allNeedles)))
 
     val simpleLinesWitUselessSettings = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnStart(red)),
+      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnPiece(red)),
       ChangeKCarriageSettings(KCarriage.Settings()),
       AddCarriage(KCarriage, Left),
       ChangeLCarriageSettings(LCarriage.Settings()),
       ChangeKCarriageSettings(KCarriage.Settings()),
-      ThreadYarnK(Some(YarnStart(red)), None),
+      ThreadYarnK(Some(YarnPiece(red)), None),
       ChangeKCarriageSettings(KCarriage.Settings()),
       ChangeKCarriageSettings(KCarriage.Settings()),
       ChangeKCarriageSettings(KCarriage.Settings()),
@@ -77,16 +77,16 @@ class OptimizersSpec extends Specification {
       ChangeKCarriageSettings(KCarriage.Settings()),
       KnitRow(KCarriage, ToLeft),
       ChangeKCarriageSettings(KCarriage.Settings()),
-      ClosedCastOff(YarnStart(red), allNeedles)))
+      ClosedCastOff(YarnPiece(red), allNeedles)))
 
     def evenOddPattern(n: Needle) = if (n.index % 2 == 0 || n.index >= 1 || n.index <= 40) NeedleToB else NeedleToD
     def oddEvenPattern(n: Needle) = if (n.index % 2 == 1 || n.index >= 1 || n.index <= 40) NeedleToB else NeedleToD
 
     val patternLines = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnStart(red)),
+      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnPiece(red)),
       AddCarriage(KCarriage, Left),
       ChangeKCarriageSettings(KCarriage.Settings()),
-      ThreadYarnK(Some(YarnStart(red)), None),
+      ThreadYarnK(Some(YarnPiece(red)), None),
       KnitRow(KCarriage, ToRight, evenOddPattern),
       ChangeKCarriageSettings(KCarriage.Settings(mc = true)),
       KnitRow(KCarriage, ToLeft, oddEvenPattern),
@@ -96,15 +96,15 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToLeft, oddEvenPattern),
       KnitRow(KCarriage, ToRight, evenOddPattern),
       KnitRow(KCarriage, ToLeft),
-      ClosedCastOff(YarnStart(red), allNeedles)))
+      ClosedCastOff(YarnPiece(red), allNeedles)))
 
     val patternLinesWithManualNeedleSettings = {
       def line(n: Needle) = if (n.index >= 1 && n.index <= 40) NeedleB else NeedleA
       Plan(List(
-        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnStart(red)),
+        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnPiece(red)),
         AddCarriage(KCarriage, Left),
         ChangeKCarriageSettings(KCarriage.Settings()),
-        ThreadYarnK(Some(YarnStart(red)), None),
+        ThreadYarnK(Some(YarnPiece(red)), None),
         KnitRow(KCarriage, ToRight, evenOddPattern),
         ChangeKCarriageSettings(KCarriage.Settings(mc = true)),
         MoveNeedles(line, oddEvenPattern),
@@ -121,12 +121,12 @@ class OptimizersSpec extends Specification {
         KnitRow(KCarriage, ToRight),
         MoveNeedles(line, oddEvenPattern),
         KnitRow(KCarriage, ToLeft),
-        ClosedCastOff(YarnStart(red), allNeedles)))
+        ClosedCastOff(YarnPiece(red), allNeedles)))
     }
 
     val plainKnittingK = {
       Plan(List(
-        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnStart(red)),
+        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnPiece(red)),
         AddCarriage(KCarriage, Left),
         KnitRow(KCarriage, ToRight, AllNeedlesToD),
         KnitRow(KCarriage, ToLeft),
@@ -138,7 +138,7 @@ class OptimizersSpec extends Specification {
     val plainKnittingKManualMovements = {
       def line(n: Needle) = if (n.index >= 1 && n.index <= 40) NeedleB else NeedleA
       Plan(List(
-        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnStart(red)),
+        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), YarnPiece(red)),
         AddCarriage(KCarriage, Left),
         MoveNeedles(line),
         KnitRow(KCarriage, ToRight, AllNeedlesToD),

@@ -59,7 +59,7 @@ object Basics {
   }
 
   /** Knit a row with the K-Carriage. */
-  def knitRowWithK(settings: KCarriage.Settings, yarnA: Option[YarnStart] = None, yarnB: Option[YarnStart] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+  def knitRowWithK(settings: KCarriage.Settings, yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
     needlesBefore <- Planner.state(_.needles.positions)
     _ <- MoveNeedles(needlesBefore, pattern)
@@ -80,7 +80,7 @@ object Basics {
   } yield ()
 
   /** Knit a row with the G-Carriage. */
-  def knitRowWithG(settings: GCarriage.Settings, yarn: Option[YarnStart] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+  def knitRowWithG(settings: GCarriage.Settings, yarn: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
     needlesBefore <- Planner.state(_.needles.positions)
     _ <- ThreadYarnG(yarn)

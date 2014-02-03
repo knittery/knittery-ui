@@ -31,9 +31,9 @@ object FairIslePlanner {
     needle0 = startNeedle.getOrElse(workingNeedles.head)
     settings = KCarriage.Settings(mc = true)
     _ <- Basics.needCarriage(KCarriage)
-    //Convert pattern from Yarn to YarnStart
+    //Convert pattern from Yarn to YarnPiece
     yarnFlows <- pattern.flatten.toSet.toVector.traverse { yarn =>
-      Basics.nearestYarn(yarn).map(_.getOrElse(YarnStart(yarn))).
+      Basics.nearestYarn(yarn).map(_.getOrElse(YarnPiece(yarn))).
         map(f => (yarn, f.start))
     }
     yarnFlowMap = yarnFlows.toMap
@@ -47,7 +47,7 @@ object FairIslePlanner {
   } yield ()
 
   //TODO also take into account the next rows to knit => make it a general optimization?
-  private def optimizeYarn(required: Set[YarnStart]) = {
+  private def optimizeYarn(required: Set[YarnPiece]) = {
     for {
       yarnA <- Planner.state(_.carriageState(KCarriage).yarnA)
       yarnB <- Planner.state(_.carriageState(KCarriage).yarnB)
@@ -62,7 +62,7 @@ object FairIslePlanner {
     }
   }
 
-  def knitActions(row: Seq[YarnStart], startNeedle: Needle, yarns: (Option[YarnFlow], Option[YarnFlow]))(needle: Needle) = {
+  def knitActions(row: Seq[YarnPiece], startNeedle: Needle, yarns: (Option[YarnFlow], Option[YarnFlow]))(needle: Needle) = {
     val index = needle.index - startNeedle.index
     if (index < 0 || index > row.size) NeedleToB
     else {

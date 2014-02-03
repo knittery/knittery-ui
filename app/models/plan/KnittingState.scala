@@ -8,7 +8,7 @@ case class KnittingState(needles: Map[Needle, NeedleState],
   carriageState: CarriageStates,
   output: Knitted,
   output2: Knitted2,
-  yarnAttachments: Map[YarnStart, YarnAttachment]) {
+  yarnAttachments: Map[YarnPiece, YarnAttachment]) {
 
   def workingNeedles = Needle.all.filter(needles(_).position.isWorking)
   def nextDirection(carriage: Carriage) = carriageState(carriage).position match {
@@ -45,7 +45,7 @@ case class KnittingState(needles: Map[Needle, NeedleState],
     copy(yarnAttachments = yarnAttachments ++ changed)
   }
   def attachYarn(ya: YarnAttachment) = copy(yarnAttachments = yarnAttachments + (ya.yarn.start -> ya))
-  def detachYarn(yarn: YarnStart) = copy(yarnAttachments = yarnAttachments - yarn)
+  def detachYarn(yarn: YarnPiece) = copy(yarnAttachments = yarnAttachments - yarn)
 
   def knit2(f: Knitted2 => Knitted2) = copy(output2 = f(output2))
 }

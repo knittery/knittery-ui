@@ -9,8 +9,8 @@ import java.awt.Color
 
 class KnittingCarriageSpec extends Specification {
   private trait K extends Yarns {
-    val redFlow = YarnStart(red)
-    val greenFlow = YarnStart(green)
+    val redFlow = YarnPiece(red)
+    val greenFlow = YarnPiece(green)
     def carriageK = carriageKPlain(AllNeedlesToB)
     def carriageKPlain(pattern: NeedleActionRow) = {
       val state = KCarriage.State(KCarriage.SinkerPlate(Some(redFlow), None))

@@ -3,10 +3,10 @@ package models.plan
 import models._
 
 sealed trait Knitted2 {
-  val ends: Map[YarnStart, YarnFlow]
+  val ends: Map[YarnPiece, YarnFlow]
   val stitches: Set[Stitch2]
 
-  private def addFlow(ends: Map[YarnStart, YarnFlow], flow: YarnFlow) = {
+  private def addFlow(ends: Map[YarnPiece, YarnFlow], flow: YarnFlow) = {
     val start = flow.start
     ends.get(start).map { old =>
       if (flow.contains(old)) ends + (start -> flow)
@@ -25,7 +25,7 @@ sealed trait Knitted2 {
   def contains(flow: YarnFlow) =
     ends.get(flow.start).map(_.stream.contains(flow)).getOrElse(false)
 
-  private def copy(ends: Map[YarnStart, YarnFlow] = ends, stitches: Set[Stitch2] = stitches): Knitted2 = {
+  private def copy(ends: Map[YarnPiece, YarnFlow] = ends, stitches: Set[Stitch2] = stitches): Knitted2 = {
     val e2 = ends
     val s2 = stitches
     new Knitted2 {
@@ -58,7 +58,7 @@ case class Stitch2(left: Set[YarnFlow], right: Set[YarnFlow], noose: Set[YarnFlo
 
 object Knitted2 {
   object empty extends Knitted2 {
-    override val ends = Map.empty[YarnStart, YarnFlow]
+    override val ends = Map.empty[YarnPiece, YarnFlow]
     override val stitches = Set.empty[Stitch2]
   }
 }

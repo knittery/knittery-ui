@@ -19,7 +19,7 @@ object Examples {
     val yarns = colorsToYarns(rgbs.flatten.toSet)
     val pattern = rgbs.matrixMap(yarns).reverseBoth
 
-    val yarn1 = YarnStart(bg.getOrElse(pattern(0)(0)))
+    val yarn1 = YarnPiece(bg.getOrElse(pattern(0)(0)))
     val zero = 100 - w / 2
 
     Cast.onClosed(Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>

@@ -12,12 +12,12 @@ private trait KnittingCarriage {
 
 private case class KnittingCarriageResult(
   needles: NeedleStateRow,
-  yarn: Map[YarnStart, YarnAttachment],
+  yarn: Map[YarnPiece, YarnAttachment],
   knitted2: Knitted2 => Knitted2,
   stitches: Needle => Stitch)
 
 private object KnittingCarriage {
-  def apply(carriageState: CarriageState, yarnAttachments: Map[YarnStart, YarnAttachment],
+  def apply(carriageState: CarriageState, yarnAttachments: Map[YarnPiece, YarnAttachment],
     pattern: NeedleActionRow): KnittingCarriage = carriageState match {
     case state: KCarriage.State =>
       new KKnittingCarriage(state.settings, state.yarnA, state.yarnB, yarnAttachments, pattern)
@@ -28,8 +28,8 @@ private object KnittingCarriage {
   }
 
   private class KKnittingCarriage(settings: KCarriage.Settings,
-    yarnA: Option[YarnStart], yarnB: Option[YarnStart],
-    yarnAttachments: Map[YarnStart, YarnAttachment],
+    yarnA: Option[YarnPiece], yarnB: Option[YarnPiece],
+    yarnAttachments: Map[YarnPiece, YarnAttachment],
     pattern: NeedleActionRow)
     extends KnittingCarriage {
     import KCarriage._
@@ -53,7 +53,7 @@ private object KnittingCarriage {
     object YarnFeeder {
       def apply(ya: YarnAttachment): YarnFeeder =
         YarnFeeder(ya.yarn, Some(ya.needle, ya.rowDistance))
-      def apply(yarn: YarnStart): YarnFeeder =
+      def apply(yarn: YarnPiece): YarnFeeder =
         YarnFeeder(yarn, None)
     }
 
@@ -92,12 +92,12 @@ private object KnittingCarriage {
         stitches.withDefaultValue(EmptyStitch))
     }
     object ResultBuilder {
-      def apply(yarn: YarnStart): ResultBuilder =
+      def apply(yarn: YarnPiece): ResultBuilder =
         ResultBuilder(yarnA = Some(yarnFeeder(yarn)))
-      def apply(a: YarnStart, b: YarnStart): ResultBuilder =
+      def apply(a: YarnPiece, b: YarnPiece): ResultBuilder =
         ResultBuilder(yarnA = Some(yarnFeeder(a)), yarnB = Some(yarnFeeder(b)))
 
-      private def yarnFeeder(yarn: YarnStart) = {
+      private def yarnFeeder(yarn: YarnPiece) = {
         yarnAttachments.get(yarn).map(YarnFeeder.apply).
           getOrElse(YarnFeeder(yarn))
       }
@@ -111,7 +111,7 @@ private object KnittingCarriage {
     }
     private implicit def toSet[A](a: A): Set[A] = Set(a)
 
-    def knitPlain(direction: Direction, needles: NeedleStateRow, yarn: YarnStart) = {
+    def knitPlain(direction: Direction, needles: NeedleStateRow, yarn: YarnPiece) = {
       loopNeedles(direction, needles, ResultBuilder(yarn)) {
         case (x, (_, NeedleA, _)) =>
           //don't knit A needles
@@ -129,7 +129,7 @@ private object KnittingCarriage {
       }
     }
 
-    def knitMC(direction: Direction, needles: NeedleStateRow, a: YarnStart, b: YarnStart) = {
+    def knitMC(direction: Direction, needles: NeedleStateRow, a: YarnPiece, b: YarnPiece) = {
       loopNeedles(direction, needles, ResultBuilder(a, b)) {
         case (x, (_, NeedleA, _)) =>
           //don't knit A needles
