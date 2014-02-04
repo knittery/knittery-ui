@@ -16,7 +16,8 @@ import akka.util._
 import models.guide._
 import models.plan._
 import scala.concurrent.Future
-import net.liftweb.json.JString
+import net.liftweb.json._
+import java.awt.Color
 
 object Preview extends Controller {
   private implicit val timeout: Timeout = 100.millis
@@ -25,6 +26,11 @@ object Preview extends Controller {
 
   def show = Action {
     Ok(views.html.preview())
+  }
+
+  private def colorRgb(color: Color) = {
+    val value = color.getRGB | 0xff000000
+    "#" + value.toHexString.drop(2)
   }
 
   def json = GuiderAction { req =>
@@ -37,7 +43,11 @@ object Preview extends Controller {
         case s: Stitch2 => alias(s)
       }
       override def decompose(node: Any) = node match {
-        case s: Stitch2 => JString(alias(s))
+        case s: Stitch2 =>
+          val colors = s.points.map(_.yarn.color).toSet.toList
+          JObject(JField("id", JString(alias(s))) ::
+            JField("colors", JArray(colors.map(colorRgb).map(JString(_)))) ::
+            Nil)
       }
     }
     val json = graph.toJson(new Descriptor(

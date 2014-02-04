@@ -34,9 +34,9 @@ $(() ->
     success: (data) ->
       loadGraph(data, graph)
       graph.layout = new Layout.ForceDirected(graph, {
-        width: 2000
-        height: 2000
-        iterations: 100000
+        width: 1000
+        height: 1000
+        iterations: 100000000
         layout: "3d"
       })
       graph.layout.init()
@@ -53,28 +53,31 @@ $(() ->
 
 loadGraph = (data, graph) ->
   nodes = {}
-  (nodes[id] = new Node(id)) for id in data.nodes
-
+  for nodeData in data.nodes
+    node = new Node(nodeData.id)
+    node.data.colors = nodeData.colors
+    nodes[node.id] = node 
   graph.addNode(node) for id, node of nodes
   graph.addEdge(nodes[e.n1], nodes[e.n2]) for e in data.edges
   graph
   
 
 nodeDrawObject = (node) ->
-  material = new THREE.MeshBasicMaterial({ color: Math.random() * 0xffffff })
+  color = node.data.colors[0]
+  material = new THREE.MeshBasicMaterial({ color: color })
   geometry = new THREE.SphereGeometry(25, 25, 25)
   mesh = new THREE.Mesh(geometry, material)
   area = 5000
   mesh.position.x = Math.floor(Math.random() * (area + area + 1) - area)
   mesh.position.y = Math.floor(Math.random() * (area + area + 1) - area)
-  mesh.position.z = 0 # Math.floor(Math.random() * (area + area + 1) - area)
+  mesh.position.z = Math.floor(Math.random() * (area + area + 1) - area)
   mesh.id = node.id
   node.data.drawObject = mesh
   node.position = mesh.position
   mesh
 
 edgeDrawObject = (from, to) ->
-  material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 0.5 })
+  material = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 0.5 })
   geo = new THREE.Geometry()
   geo.vertices.push(from.data.drawObject.position)
   geo.vertices.push(to.data.drawObject.position)
