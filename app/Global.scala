@@ -68,7 +68,7 @@ object Global extends GlobalSettings {
 
   private val imagePlan = {
     val img = ImageIO.read(new File("example.png"))
-    val planner = Examples.imageRag(img)
+    val planner = Examples.imageRagDoubleBed(img)
     planner.plan().valueOr(e => throw new RuntimeException(e))
   }
 

@@ -30,11 +30,27 @@ object Preview extends Controller {
         case (node, index) => node.value -> s"n-$index"
       }.toMap
       val root = DotRootGraph(directed = false, id = None)
-      def trans(e: Graph[Stitch2,WUnDiEdge]#EdgeT): Option[(DotGraph,DotEdgeStmt)] = {
+      def trans(e: Graph[Stitch2, WUnDiEdge]#EdgeT): Option[(DotGraph, DotEdgeStmt)] = {
         Some((root, DotEdgeStmt(alias(e.edge._1.value), alias(e.edge._2.value), Nil)))
       }
       val dot = graph.toDot(root, trans _)
-      Ok(views.html.preview(dot))
+      //      Ok(views.html.preview(dot))
+
+      val nodeIds = graph.nodes.map(_.value).zipWithIndex.toMap.mapValues(_.toString)
+      val xmlNodes = graph.nodes.map { node =>
+        val id = nodeIds(node.value)
+        <node id={ id }>
+          <title>{ id }</title>
+          {
+            node.edges.map { edge =>
+              val refId = nodeIds(edge.to.value)
+              <ref id={ refId }/>
+            }
+          }
+        </node>
+      }
+      val xml = <root>{ xmlNodes }</root>
+      Ok(views.html.preview(xml.toString))
     }
   }
 
