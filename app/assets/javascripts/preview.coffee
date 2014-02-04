@@ -76,8 +76,13 @@ nodeDrawObject = (node) ->
   node.position = mesh.position
   mesh
 
+intersection = (a, b) ->
+  [a, b] = [b, a] if a.length > b.length
+  value for value in a when value in b
+
 edgeDrawObject = (from, to) ->
-  material = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 0.5 })
+  color = intersection(from.data.colors, to.data.colors)[0]
+  material = new THREE.LineBasicMaterial({ color: color, linewidth: 0.5 })
   geo = new THREE.Geometry()
   geo.vertices.push(from.data.drawObject.position)
   geo.vertices.push(to.data.drawObject.position)
