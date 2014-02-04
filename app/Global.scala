@@ -35,7 +35,8 @@ object Global extends GlobalSettings {
     _machine = Some(system.actorOf(Machine.props(connector), "machine"))
     _guider = Some(system.actorOf(Guider.props(machine), "guider"))
 
-    guider ! Guider.LoadPlan(imagePlan)
+    //    guider ! Guider.LoadPlan(imagePlan)
+    guider ! Guider.LoadPlan(examplePlan)
   }
 
   @volatile private var _machine: Option[ActorRef] = None
@@ -54,15 +55,18 @@ object Global extends GlobalSettings {
         c.take(w).toIndexedSeq
       }
     }
-    val width = 40
-    val height = 20
+    val width = 20
+    val height = 10
     val bg = YarnPiece(yarn1)
     val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), yarn1) >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
-      FairIslePlanner.singleBed(checkerboard(Needle.count, height)) >>
+      //      FairIslePlanner.singleBed(checkerboard(Needle.count, height)) >>
+      (0 to height).toVector.traverse { _ =>
+        Basics.knitRowWithK(KCarriage.Settings(), Some(bg))
+      } >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
-      Cast.offClosed(bg)
+      Basics.knitRowWithK(KCarriage.Settings(), Some(bg))
+    Cast.offClosed(bg)
     planner.plan().valueOr(e => throw new RuntimeException(e))
   }
 
