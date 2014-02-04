@@ -21,6 +21,8 @@ GET     /pattern                    controllers.Pattern.show
 POST    /pattern/upload				controllers.Pattern.upload
 
 GET     /preview                    controllers.Preview.show
+GET     /preview/dot                controllers.Preview.dot
+GET     /preview/json               controllers.Preview.json
 
 # Assets
 GET     /assets/javascripts/routes.js   controllers.Application.javascriptRoutes()

@@ -1,9 +1,15 @@
-@(dot: String)
+@()
 
 @main("Preview") {
 
 	Preview of the knitting result.
 	
-	<pre>@dot</pre>
+	<ul>
+	 <li><a href="@routes.Preview.dot()">Graphviz Graph (.dot)</a></li>
+	 <li><a href="@routes.Preview.json()">JSON Graph</a></li>
+	</ul>
+	
+	
+	
 
 }

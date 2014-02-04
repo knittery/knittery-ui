@@ -12,7 +12,8 @@ libraryDependencies ++= Seq(
   "org.webjars" % "jquery" % "2.0.3-1",
   "org.webjars" % "bootstrap" % "3.0.3",
   "com.assembla.scala-incubator" %% "graph-core" % "1.7.2",
-  "com.assembla.scala-incubator" %% "graph-dot" % "1.7.0"
+  "com.assembla.scala-incubator" %% "graph-dot" % "1.7.0",
+  "com.assembla.scala-incubator" %% "graph-json" % "1.7.0"
 )
 
 resolvers +=
