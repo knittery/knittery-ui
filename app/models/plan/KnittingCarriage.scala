@@ -153,6 +153,27 @@ private object KnittingCarriage {
       }
     }
 
+    def knitPart(direction: Direction, needles: NeedleStateRow, yarn: YarnPiece) = {
+      loopNeedles(direction, needles, ResultBuilder(yarn)) {
+        case (x, (_, NeedleA, _)) =>
+          //don't knit A needles
+          x
+        case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
+          //don't knit E needles if no needle pull back from E
+          //TODO do we need to "prevent" falling down of yarn in the yarn feeder
+          x.needle(n, NeedleE, ys)
+        case (x, (n, NeedleB, ys)) =>
+          // don't knit B needles with part
+          x.needle(n, pattern(n).toPosition, ys)
+        case (x, (n, _, ys)) =>
+          //knit normally
+          val (x2, noose) = x.withYarnA(_.to(n).noose)
+          x2.knit(Stitch2(noose._1, noose._3, ys))
+            .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+            needle(n, pattern(n).toPosition, noose._2)
+      }
+    }
+
     override def apply(direction: Direction, needles: NeedleStateRow) = Try {
       (settings.part(direction), settings.tuck(direction), settings.mc, settings.l, yarnA, yarnB) match {
         case (false, false, false, false, Some(yarn), None) =>
@@ -162,7 +183,10 @@ private object KnittingCarriage {
         case (false, false, false, false, None, _) => ??? //TODO remove the knitting from the board
         case (false, false, true, false, Some(a), Some(b)) =>
           knitMC(direction, needles, a, b)
-        case (true, false, false, false, _, _) => ??? //TODO part
+        case (true, false, false, false, Some(yarn), _) =>
+          knitPart(direction, needles, yarn)
+        case (true, false, false, false, None, _) =>
+          ??? // TODO
         case (false, true, false, false, _, _) => ??? //TODO tuck
         case (false, false, _, true, _, _) => ??? //TODO l-mode
         case _ => throw new IllegalArgumentException(s"Settings are illegal: $settings")
