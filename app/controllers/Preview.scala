@@ -16,6 +16,7 @@ import akka.util._
 import models.guide._
 import models.plan._
 import scala.concurrent.Future
+import net.liftweb.json.JString
 
 object Preview extends Controller {
   private implicit val timeout: Timeout = 100.millis
@@ -34,6 +35,9 @@ object Preview extends Controller {
     val stitchDescriptor = new NodeDescriptor[Stitch2](typeId = "stitch") {
       def id(node: Any) = node match {
         case s: Stitch2 => alias(s)
+      }
+      override def decompose(node: Any) = node match {
+        case s: Stitch2 => JString(alias(s))
       }
     }
     val json = graph.toJson(new Descriptor(
