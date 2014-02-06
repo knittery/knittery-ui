@@ -1,23 +1,22 @@
 package controllers
 
+import java.awt.Color
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalax.collection.Graph
-import scalax.collection.edge.WUnDiEdge
+import scalax.collection.edge.WLUnDiEdge
 import scalax.collection.GraphPredef._
 import scalax.collection.io.dot._
-import scalax.collection.io.json._
-import scalax.collection.io.json.descriptor.predefined._
 import play.api.Play._
 import play.api.mvc._
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.json._
 import akka.pattern.ask
 import akka.util._
+import models.Yarn
 import models.guide._
 import models.plan._
-import scala.concurrent.Future
-import net.liftweb.json._
-import java.awt.Color
 
 object Preview extends Controller {
   private implicit val timeout: Timeout = 100.millis
@@ -38,22 +37,24 @@ object Preview extends Controller {
     val alias = graph.nodes.zipWithIndex.map {
       case (node, index) => node.value -> s"s$index"
     }.toMap
-    val stitchDescriptor = new NodeDescriptor[Stitch2](typeId = "stitch") {
-      def id(node: Any) = node match {
-        case s: Stitch2 => alias(s)
-      }
-      override def decompose(node: Any) = node match {
-        case s: Stitch2 =>
-          val colors = s.points.map(_.yarn.color).toSet.toList
-          JObject(JField("id", JString(alias(s))) ::
-            JField("colors", JArray(colors.map(colorRgb).map(JString(_)))) ::
-            Nil)
-      }
+    val nodeJson = graph.nodes.map { node =>
+      val yarns = node.value.points.map(_.yarn).toSet
+      Json.obj(
+        "id" -> alias(node),
+        "colors" -> yarns.map(_.color).map(colorRgb))
     }
-    val json = graph.toJson(new Descriptor(
-      defaultNodeDescriptor = stitchDescriptor,
-      defaultEdgeDescriptor = WUnDi.descriptor()))
-    Ok(json).as("application/json")
+    val edgeJson = graph.edges.map { edge =>
+      val color = edge.label match { case Yarn(_, color) => color }
+      Json.obj(
+        "n1" -> alias(edge._1),
+        "n2" -> alias(edge._2),
+        "weight" -> edge.weight,
+        "color" -> colorRgb(color))
+    }
+    val json = Json.obj(
+      "nodes" -> nodeJson,
+      "edges" -> edgeJson)
+    Ok(json)
   }
 
   def dot = GuiderAction { req =>
@@ -62,7 +63,7 @@ object Preview extends Controller {
       case (node, index) => node.value -> s"n-$index"
     }.toMap
     val root = DotRootGraph(directed = false, id = None)
-    def trans(e: Graph[Stitch2, WUnDiEdge]#EdgeT): Option[(DotGraph, DotEdgeStmt)] = {
+    def trans(e: Graph[Stitch2, WLUnDiEdge]#EdgeT): Option[(DotGraph, DotEdgeStmt)] = {
       Some((root, DotEdgeStmt(alias(e.edge._1.value), alias(e.edge._2.value), Nil)))
     }
     val dot = graph.toDot(root, trans _)

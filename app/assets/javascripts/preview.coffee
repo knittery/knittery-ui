@@ -50,7 +50,7 @@ loadGraph = (data, graph) ->
   for n in data.nodes
     graph.addNode(n.id, {colors: n.colors})
   for e in data.edges
-    graph.addEdge(graph.node(e.n1), graph.node(e.n2), e.weight)
+    graph.addEdge(graph.node(e.n1), graph.node(e.n2), e.weight, {color: e.color})
   
 
 nodeDrawObject = (node) ->
@@ -71,13 +71,10 @@ intersection = (a, b) ->
   value for value in a when value in b
 
 edgeDrawObject = (edge) ->
-  from = edge.node1
-  to = edge.node2
-  color = intersection(from.data.colors, to.data.colors)[0]
-  material = new THREE.LineBasicMaterial({ color: color, linewidth: 0.5 })
+  material = new THREE.LineBasicMaterial({ color: edge.data.color, linewidth: 0.5 })
   geo = new THREE.Geometry()
-  geo.vertices.push(from.data.drawObject.position)
-  geo.vertices.push(to.data.drawObject.position)
+  geo.vertices.push(edge.node1.data.drawObject.position)
+  geo.vertices.push(edge.node2.data.drawObject.position)
   line = new THREE.Line(geo, material, THREE.LinePieces)
   line.scale.x = line.scale.y = line.scale.z = 1
   line.originalScale = 1

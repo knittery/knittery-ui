@@ -15,7 +15,7 @@ class Node
 
 
 class Edge
-  constructor: (@node1, @node2, @weight) ->
+  constructor: (@node1, @node2, @weight, @data) ->
   other: (node) ->
     if @node1 == node then @node2
     else if @node2 == node then @node1
@@ -40,10 +40,10 @@ class Graph
     if not r? then throw "node #{id} not in graph"
     r
 
-  addEdge: (from, to, weight) ->
+  addEdge: (from, to, weight, data = {}) ->
     if not @nodeSet[from.id] then throw "node #{from.id} not in graph"
     if not @nodeSet[to.id] then throw "node #{to.id} not in graph"
-    edge = new Edge(from, to, weight)
+    edge = new Edge(from, to, weight, data)
     @edges.push(edge)
     from.addEdge(edge)
     to.addEdge(edge)
