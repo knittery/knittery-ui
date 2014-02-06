@@ -34,7 +34,7 @@ $(() ->
   jsRoutes.controllers.Preview.json().ajax {
     success: (data) ->
       loadGraph(data, graph)
-      graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 20)
+      graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
       
       scene.add(nodeDrawObject(node)) for node in graph.nodes
       for edge in graph.edges

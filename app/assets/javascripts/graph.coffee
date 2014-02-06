@@ -56,11 +56,12 @@ epsilonSq = epsilon * epsilon
 epsilonVector = new Vector(0.000001, 0, 0)
 
 class SpringLayout
-  constructor: (@graph, @size, repulsion = 1, spring = 2) ->
+  constructor: (@graph, @size, repulsion = 1, spring = 1/6) ->
     density = Math.pow(@size.x*@size.y*@size.z / @graph.nodes.length, 1/3)
     repulsionConstant = Math.pow(repulsion * density, 2)
     node.layout = new NodeLayout(node, repulsionConstant) for node in @graph.nodes
-    springValue = spring / @graph.nodes.length
+    maxWeight = Math.max((e.weight for e in @graph.edges)...)
+    springValue = spring / maxWeight
     edge.layout = new EdgeLayout(edge, springValue) for edge in @graph.edges
 
   class NodeLayout
