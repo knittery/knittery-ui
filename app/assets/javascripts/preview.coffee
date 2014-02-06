@@ -1,6 +1,6 @@
 $(() ->
   graph = new Graph()
-  nodeSize = 25
+  nodeSize = 20
 
   elem = $("#preview-canvas")
   renderer = initRenderer(elem)
