@@ -160,10 +160,10 @@ Layout.ForceDirected = function(graph, options) {
       // calculate attraction
       for(var i=0; i < edges_length; i++) {
         var edge = graph.edges[i];
-        var delta_x = edge.source.layout.tmp_pos_x - edge.target.layout.tmp_pos_x;
-        var delta_y = edge.source.layout.tmp_pos_y - edge.target.layout.tmp_pos_y;
+        var delta_x = edge.node1.layout.tmp_pos_x - edge.node2.layout.tmp_pos_x;
+        var delta_y = edge.node1.layout.tmp_pos_y - edge.node2.layout.tmp_pos_y;
         if(this.layout === "3d") {
-          var delta_z = edge.source.layout.tmp_pos_z - edge.target.layout.tmp_pos_z;
+          var delta_z = edge.node1.layout.tmp_pos_z - edge.node2.layout.tmp_pos_z;
         }  
 
         var delta_length = Math.max(EPSILON, Math.sqrt((delta_x * delta_x) + (delta_y * delta_y)));
@@ -175,19 +175,19 @@ Layout.ForceDirected = function(graph, options) {
           var force_z = (delta_length_z * delta_length_z) / attraction_constant;
         }
 
-        edge.source.layout.force -= force;
-        edge.target.layout.force += force;
+        edge.node1.layout.force -= force;
+        edge.node2.layout.force += force;
 
-        edge.source.layout.offset_x -= (delta_x / delta_length) * force;
-        edge.source.layout.offset_y -= (delta_y / delta_length) * force;
+        edge.node1.layout.offset_x -= (delta_x / delta_length) * force;
+        edge.node1.layout.offset_y -= (delta_y / delta_length) * force;
         if(this.layout === "3d") {    
-          edge.source.layout.offset_z -= (delta_z / delta_length_z) * force_z;
+          edge.node1.layout.offset_z -= (delta_z / delta_length_z) * force_z;
         }
 
-        edge.target.layout.offset_x += (delta_x / delta_length) * force;
-        edge.target.layout.offset_y += (delta_y / delta_length) * force;
+        edge.node2.layout.offset_x += (delta_x / delta_length) * force;
+        edge.node2.layout.offset_y += (delta_y / delta_length) * force;
         if(this.layout === "3d") {    
-          edge.target.layout.offset_z += (delta_z / delta_length_z) * force_z;
+          edge.node2.layout.offset_z += (delta_z / delta_length_z) * force_z;
         }        
       }
       

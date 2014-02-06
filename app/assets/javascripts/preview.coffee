@@ -43,7 +43,7 @@ $(() ->
       
       scene.add(nodeDrawObject(node)) for node in graph.nodes
       for edge in graph.edges
-        e = edgeDrawObject(edge.source, edge.target)
+        e = edgeDrawObject(edge)
         lines.push(e)
         scene.add(e)
       render()
@@ -52,14 +52,8 @@ $(() ->
 
 
 loadGraph = (data, graph) ->
-  nodes = {}
-  for nodeData in data.nodes
-    node = new Node(nodeData.id)
-    node.data.colors = nodeData.colors
-    nodes[node.id] = node 
-  graph.addNode(node) for id, node of nodes
-  graph.addEdge(nodes[e.n1], nodes[e.n2]) for e in data.edges
-  graph
+  graph.addNode(n.id, {colors: n.colors})           for n in data.nodes
+  graph.addEdge(graph.node(e.n1), graph.node(e.n2)) for e in data.edges
   
 
 nodeDrawObject = (node) ->
@@ -80,7 +74,9 @@ intersection = (a, b) ->
   [a, b] = [b, a] if a.length > b.length
   value for value in a when value in b
 
-edgeDrawObject = (from, to) ->
+edgeDrawObject = (edge) ->
+  from = edge.node1
+  to = edge.node2
   color = intersection(from.data.colors, to.data.colors)[0]
   material = new THREE.LineBasicMaterial({ color: color, linewidth: 0.5 })
   geo = new THREE.Geometry()
