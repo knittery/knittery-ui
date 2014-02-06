@@ -1,7 +1,6 @@
-area = 2000
-
 $(() ->
   graph = new Graph()
+  nodeSize = 25
 
   elem = $("#preview-canvas")
   renderer = initRenderer(elem)
@@ -34,9 +33,16 @@ $(() ->
   jsRoutes.controllers.Preview.json().ajax {
     success: (data) ->
       loadGraph(data, graph)
-      graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
       
-      scene.add(nodeDrawObject(node)) for node in graph.nodes
+      area = 2000
+      for node in graph.nodes
+        node.position.x = Math.floor(Math.random() * area - area/2)
+        node.position.y = Math.floor(Math.random() * area - area/2)
+        node.position.z = Math.floor(Math.random() * area - area/2)
+      graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
+
+      if nodeSize > 0
+        scene.add(nodeDrawObject(node, nodeSize)) for node in graph.nodes
       for edge in graph.edges
         e = edgeDrawObject(edge)
         lines.push(e)
@@ -53,17 +59,14 @@ loadGraph = (data, graph) ->
     graph.addEdge(graph.node(e.n1), graph.node(e.n2), e.weight, {color: e.color})
   
 
-nodeDrawObject = (node) ->
+nodeDrawObject = (node, size) ->
   color = node.data.colors[0]
   material = new THREE.MeshBasicMaterial({ color: color })
-  geometry = new THREE.SphereGeometry(25, 25, 25)
+  geometry = new THREE.SphereGeometry(size, size, size)
   mesh = new THREE.Mesh(geometry, material)
-  mesh.position.x = Math.floor(Math.random() * area - area/2)
-  mesh.position.y = Math.floor(Math.random() * area - area/2)
-  mesh.position.z = Math.floor(Math.random() * area - area/2)
+  mesh.position = node.position
   mesh.id = node.id
   node.data.drawObject = mesh
-  node.position = mesh.position
   mesh
 
 intersection = (a, b) ->
@@ -73,8 +76,8 @@ intersection = (a, b) ->
 edgeDrawObject = (edge) ->
   material = new THREE.LineBasicMaterial({ color: edge.data.color, linewidth: 0.5 })
   geo = new THREE.Geometry()
-  geo.vertices.push(edge.node1.data.drawObject.position)
-  geo.vertices.push(edge.node2.data.drawObject.position)
+  geo.vertices.push(edge.node1.position)
+  geo.vertices.push(edge.node2.position)
   line = new THREE.Line(geo, material, THREE.LinePieces)
   line.scale.x = line.scale.y = line.scale.z = 1
   line.originalScale = 1

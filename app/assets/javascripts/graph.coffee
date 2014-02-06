@@ -2,15 +2,10 @@ Vector = THREE.Vector3
 
 class Node
   constructor: (@id, @data) ->
-
-  position: new Vector()
-  neighbors: {}
+    @position = new Vector()
   edges: []
-
   addEdge: (edge) ->
     @edges.push(edge)
-    n = edge.other(this)
-    @neighbors[n.id] = n
 
 
 
