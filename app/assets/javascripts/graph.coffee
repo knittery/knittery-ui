@@ -15,7 +15,7 @@ class Node
 
 
 class Edge
-  constructor: (@node1, @node2) ->
+  constructor: (@node1, @node2, @weight) ->
   other: (node) ->
     if @node1 == node then @node2
     else if @node2 == node then @node1
@@ -40,10 +40,10 @@ class Graph
     if not r? then throw "node #{id} not in graph"
     r
 
-  addEdge: (from, to) ->
+  addEdge: (from, to, weight) ->
     if not @nodeSet[from.id] then throw "node #{from.id} not in graph"
     if not @nodeSet[to.id] then throw "node #{to.id} not in graph"
-    edge = new Edge(from, to)
+    edge = new Edge(from, to, weight)
     @edges.push(edge)
     from.addEdge(edge)
     to.addEdge(edge)
@@ -53,15 +53,15 @@ window.Graph = Graph
 
 epsilon = 0.000001
 epsilonSq = epsilon * epsilon
-epsilon = new Vector(0.000001, 0, 0)
+epsilonVector = new Vector(0.000001, 0, 0)
 
 class SpringLayout
-  constructor: (@graph, @size, repulsion = 1, spring = 1, @temperature = 1) ->
+  constructor: (@graph, @size, repulsion = 1, spring = 2) ->
     density = Math.pow(@size.x*@size.y*@size.z / @graph.nodes.length, 1/3)
     repulsionConstant = Math.pow(repulsion * density, 2)
-    attractionConstant = spring / density
     node.layout = new NodeLayout(node, repulsionConstant) for node in @graph.nodes
-    edge.layout = new EdgeLayout(edge, attractionConstant) for edge in @graph.edges
+    springValue = spring / @graph.nodes.length
+    edge.layout = new EdgeLayout(edge, springValue) for edge in @graph.edges
 
   class NodeLayout
     constructor: (@node, @repulsionConstant) ->
@@ -79,20 +79,19 @@ class SpringLayout
         f.normalize().multiplyScalar(@repulsionConstant / distanceSq)
         other.layout.applyForce(f)
       this
-    moveAccordingToForce: (factor) ->
-      @node.position.add(@force.multiplyScalar(factor))
+    moveAccordingToForce: ->
+      @node.position.add(@force)
       @force.set(0,0,0)
       this
 
 
 
   class EdgeLayout
-    constructor: (@edge, @attractionConstant) ->
+    constructor: (@edge, spring) ->
+      @spring = Math.max(epsilon, Math.min(0.95, @edge.weight * spring))
     # Hooke's law, edges act like springs
     attract: ->
-      f = @edge.vector().clone()
-      length = f.length()
-      f.normalize().multiplyScalar(length * @attractionConstant)
+      f = @edge.vector().clone().multiplyScalar(@spring)
       @edge.node2.layout.applyForce(f)
       @edge.node1.layout.applyForce(f.negate())
       f
@@ -101,7 +100,7 @@ class SpringLayout
   step: ->
     node.layout.repulse(@graph.nodes)  for node in @graph.nodes
     edge.layout.attract()              for edge in @graph.edges
-    node.layout.moveAccordingToForce(@temperature) for node in @graph.nodes
+    node.layout.moveAccordingToForce() for node in @graph.nodes
     this
 
 window.SpringLayout = SpringLayout

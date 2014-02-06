@@ -16,7 +16,7 @@ $(() ->
   lines = []
   render = () ->
     if graph.layout?
-      graph.layout.step()
+      graph.layout.step() for i in [1..5]
       (l.geometry.verticesNeedUpdate = true) for l in lines
     renderer.render(scene, camera)
   
@@ -34,7 +34,7 @@ $(() ->
   jsRoutes.controllers.Preview.json().ajax {
     success: (data) ->
       loadGraph(data, graph)
-      graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 0.3, 5, 10)
+      graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 20)
       
       scene.add(nodeDrawObject(node)) for node in graph.nodes
       for edge in graph.edges
@@ -47,8 +47,10 @@ $(() ->
 
 
 loadGraph = (data, graph) ->
-  graph.addNode(n.id, {colors: n.colors})           for n in data.nodes
-  graph.addEdge(graph.node(e.n1), graph.node(e.n2)) for e in data.edges
+  for n in data.nodes
+    graph.addNode(n.id, {colors: n.colors})
+  for e in data.edges
+    graph.addEdge(graph.node(e.n1), graph.node(e.n2), e.weight)
   
 
 nodeDrawObject = (node) ->
