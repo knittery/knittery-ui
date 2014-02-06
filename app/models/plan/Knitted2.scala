@@ -52,7 +52,8 @@ sealed trait Knitted2 {
       })
       stitches.sliding(2, 1).collect {
         case (stitchA, posA) #:: (stitchB, posB) #:: _ =>
-          (stitchA ~%+ stitchB)((posA - posB).abs, yarn.yarn)
+          val weight = 100 / ((posA - posB).abs + 0.00001d)
+          (stitchA ~%+ stitchB)(weight.round.min(1000), yarn.yarn)
       }.toTraversable
     }
 
