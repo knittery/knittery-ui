@@ -1,8 +1,9 @@
 class Node
   constructor: (@id, @data) ->
-    @position = {}
-    @neighbors = {}
-    @edges = []
+
+  position: {}
+  neighbors: {}
+  edges: []
 
   addEdge: (edge) ->
     @edges.push(edge)
@@ -21,10 +22,9 @@ class Edge
 
 
 class Graph
-  constructor: ->
-    @nodeSet = {}
-    @nodes = []
-    @edges = []
+  nodeSet: {}
+  nodes: []
+  edges: []
 
   addNode: (id, data = {}) ->
     if @nodeSet[id]? then throw "node #{id} already in graph"
