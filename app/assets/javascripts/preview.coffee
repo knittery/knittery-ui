@@ -1,3 +1,5 @@
+area = 2000
+
 $(() ->
   graph = new Graph()
 
@@ -14,9 +16,8 @@ $(() ->
   lines = []
   render = () ->
     if graph.layout?
-      graph.layout.generate()
-      for l in lines
-        l.geometry.verticesNeedUpdate = true
+      graph.layout.step()
+      (l.geometry.verticesNeedUpdate = true) for l in lines
     renderer.render(scene, camera)
   
   controls.addEventListener("change", render)
@@ -33,13 +34,7 @@ $(() ->
   jsRoutes.controllers.Preview.json().ajax {
     success: (data) ->
       loadGraph(data, graph)
-      graph.layout = new Layout.ForceDirected(graph, {
-        width: 1000
-        height: 1000
-        iterations: 100000000
-        layout: "3d"
-      })
-      graph.layout.init()
+      graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 0.3, 5, 10)
       
       scene.add(nodeDrawObject(node)) for node in graph.nodes
       for edge in graph.edges
@@ -61,10 +56,9 @@ nodeDrawObject = (node) ->
   material = new THREE.MeshBasicMaterial({ color: color })
   geometry = new THREE.SphereGeometry(25, 25, 25)
   mesh = new THREE.Mesh(geometry, material)
-  area = 5000
-  mesh.position.x = Math.floor(Math.random() * (area + area + 1) - area)
-  mesh.position.y = Math.floor(Math.random() * (area + area + 1) - area)
-  mesh.position.z = Math.floor(Math.random() * (area + area + 1) - area)
+  mesh.position.x = Math.floor(Math.random() * area - area/2)
+  mesh.position.y = Math.floor(Math.random() * area - area/2)
+  mesh.position.z = Math.floor(Math.random() * area - area/2)
   mesh.id = node.id
   node.data.drawObject = mesh
   node.position = mesh.position
