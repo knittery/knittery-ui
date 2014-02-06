@@ -55,18 +55,25 @@ object Global extends GlobalSettings {
         c.take(w).toIndexedSeq
       }
     }
-    val width = 20
-    val height = 10
+    val firstYarn = Yarn("green", Color.green)
+    val first = YarnPiece(firstYarn)
     val bg = YarnPiece(yarn1)
-    val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), yarn1) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
-      //      FairIslePlanner.singleBed(checkerboard(Needle.count, height)) >>
-      (0 to height).toVector.traverse { _ =>
+    val last = YarnPiece(Yarn("yellow", Color.yellow))
+
+    val width = 20
+    val height = 5
+    val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), firstYarn) >>
+      Basics.knitRowWithK(KCarriage.Settings(), Some(first)) >>
+      (0 to height / 2).toVector.traverse { _ =>
+        Basics.knitRowWithK(KCarriage.Settings(), Some(bg))
+      } >>
+      FairIslePlanner.singleBed(checkerboard(Needle.count, height)) >>
+      (0 to height / 2).toVector.traverse { _ =>
         Basics.knitRowWithK(KCarriage.Settings(), Some(bg))
       } >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(bg))
-    Cast.offClosed(bg)
+      Basics.knitRowWithK(KCarriage.Settings(), Some(last)) >>
+      Cast.offClosed(last)
     planner.plan().valueOr(e => throw new RuntimeException(e))
   }
 
