@@ -1,7 +1,8 @@
 $(() ->
   graph = new Graph()
   nodeSize = 20
-  temperatureLimit = 0.05
+  temperatureLimit = 5
+  layoutStepTime = 33   #in ms
 
   elem = $("#preview-canvas")
   renderer = initRenderer(elem)
@@ -11,16 +12,24 @@ $(() ->
   
   doneLayouting = false
   lastTemperature = 0
+  lastTime = 0
+  lastSteps = 0
   animate = () ->
     if graph.layout? and not doneLayouting
-      graph.layout.step() if graph.layout.temperature > temperatureLimit
-      t = graph.layout.temperature
-      if t<=temperatureLimit
-        console.debug("done layouting")
-        doneLayouting = true 
-      if Math.abs(t-lastTemperature)/t > 0.1
-        console.debug("current temperature: #{t}")
-        lastTemperature = t
+      time = new Date().getTime()
+      while new Date().getTime() - time < layoutStepTime and not doneLayouting
+        t = graph.layout.step()
+        lastSteps++
+        if t<=temperatureLimit
+          console.debug("done layouting")
+          doneLayouting = true
+        if lastTime == 0 or Math.abs(t-lastTemperature)/t > 0.1
+          time = new Date().getTime()
+          d = time - lastTime
+          console.debug("current temperature: #{Math.round(t)} (#{d}ms for #{lastSteps} iterations #{d/ lastSteps} ms/i)")
+          lastTemperature = t
+          lastTime = time
+          lastSteps = 0
       updateScene()
     requestAnimationFrame(animate)
     controls.update()
