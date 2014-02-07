@@ -82,8 +82,6 @@ class SpringLayout
       @force.set(0,0,0)
       t
 
-
-
   class EdgeLayout
     constructor: (@edge, spring) ->
       @spring = Math.max(epsilon, Math.min(0.95, @edge.weight * spring))
@@ -93,7 +91,6 @@ class SpringLayout
       @edge.node2.layout.applyForce(f)
       @edge.node1.layout.applyForce(f.negate())
       f
-
 
   step: ->
     node.layout.repulse(@graph.nodes) for node in @graph.nodes
