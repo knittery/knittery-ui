@@ -100,7 +100,7 @@ class SpringLayout
     edge.layout.attract()              for edge in @graph.edges
     ts = (node.layout.moveAccordingToForce() for node in @graph.nodes)
     movements = ts.reduce (a, b) -> a + b
-    @temperature = 1000 * movements / @graph.nodes.length / @size.length()
+    @temperature = 1000000 * movements / Math.pow(@graph.nodes.length, 2)
     @temperature
 
 window.SpringLayout = SpringLayout
