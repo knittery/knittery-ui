@@ -12,11 +12,11 @@ $(() ->
     controls.update()
     render()
 
-  lines = []
+  updateScene = ->
   render = () ->
     if graph.layout?
       graph.layout.step() for i in [1..5]
-      (l.geometry.verticesNeedUpdate = true) for l in lines
+      updateScene()
     renderer.render(scene, camera)
   
   controls.addEventListener("change", render)
@@ -41,12 +41,7 @@ $(() ->
         node.position.z = Math.floor(Math.random() * area - area/2)
       graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
 
-      if nodeSize > 0
-        scene.add(nodeDrawObject(node, nodeSize)) for node in graph.nodes
-      for edge in graph.edges
-        e = edgeDrawObject(edge)
-        lines.push(e)
-        scene.add(e)
+      updateScene = drawNodeEdge(graph, scene, nodeSize)
       render()
   }
 )
@@ -57,32 +52,38 @@ loadGraph = (data, graph) ->
     graph.addNode(n.id, {colors: n.colors})
   for e in data.edges
     graph.addEdge(graph.node(e.n1), graph.node(e.n2), e.weight, {color: e.color})
-  
 
-nodeDrawObject = (node, size) ->
-  color = node.data.colors[0]
-  material = new THREE.MeshBasicMaterial({ color: color })
-  geometry = new THREE.SphereGeometry(size, size, size)
-  mesh = new THREE.Mesh(geometry, material)
-  mesh.position = node.position
-  mesh.id = node.id
-  node.data.drawObject = mesh
-  mesh
 
-intersection = (a, b) ->
-  [a, b] = [b, a] if a.length > b.length
-  value for value in a when value in b
+drawNodeEdge = (graph, scene, nodeSize) ->
+  nodeDrawObject = (node, size) ->
+    color = node.data.colors[0]
+    material = new THREE.MeshBasicMaterial({ color: color })
+    geometry = new THREE.SphereGeometry(size, size, size)
+    mesh = new THREE.Mesh(geometry, material)
+    mesh.position = node.position
+    mesh.id = node.id
+    node.data.drawObject = mesh
+    mesh
+  edgeDrawObject = (edge) ->
+    material = new THREE.LineBasicMaterial({ color: edge.data.color, linewidth: 0.5 })
+    geo = new THREE.Geometry()
+    geo.vertices.push(edge.node1.position)
+    geo.vertices.push(edge.node2.position)
+    line = new THREE.Line(geo, material, THREE.LinePieces)
+    line.scale.x = line.scale.y = line.scale.z = 1
+    line.originalScale = 1
+    line
 
-edgeDrawObject = (edge) ->
-  material = new THREE.LineBasicMaterial({ color: edge.data.color, linewidth: 0.5 })
-  geo = new THREE.Geometry()
-  geo.vertices.push(edge.node1.position)
-  geo.vertices.push(edge.node2.position)
-  line = new THREE.Line(geo, material, THREE.LinePieces)
-  line.scale.x = line.scale.y = line.scale.z = 1
-  line.originalScale = 1
-  line
-   
+  if nodeSize > 0
+    scene.add(nodeDrawObject(node, nodeSize)) for node in graph.nodes
+  lines = []
+  for edge in graph.edges
+    e = edgeDrawObject(edge)
+    lines.push(e)
+    scene.add(e)
+  -> (l.geometry.verticesNeedUpdate = true) for l in lines
+
+
 initRenderer = (inElement) ->
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setSize(inElement.width(), inElement.height())
