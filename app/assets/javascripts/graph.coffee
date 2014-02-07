@@ -58,6 +58,7 @@ class SpringLayout
     maxWeight = Math.max((e.weight for e in @graph.edges)...)
     springValue = spring / maxWeight
     edge.layout = new EdgeLayout(edge, springValue) for edge in @graph.edges
+    @temperature = 1000000
 
   class NodeLayout
     constructor: (@node, @repulsionConstant) ->
@@ -76,9 +77,10 @@ class SpringLayout
         other.layout.applyForce(f)
       this
     moveAccordingToForce: ->
+      t = @force.length()
       @node.position.add(@force)
       @force.set(0,0,0)
-      this
+      t
 
 
 
@@ -96,7 +98,9 @@ class SpringLayout
   step: ->
     node.layout.repulse(@graph.nodes)  for node in @graph.nodes
     edge.layout.attract()              for edge in @graph.edges
-    node.layout.moveAccordingToForce() for node in @graph.nodes
-    this
+    ts = (node.layout.moveAccordingToForce() for node in @graph.nodes)
+    movements = ts.reduce (a, b) -> a + b
+    @temperature = 1000 * movements / @graph.nodes.length / @size.length()
+    @temperature
 
 window.SpringLayout = SpringLayout

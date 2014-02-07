@@ -1,22 +1,32 @@
 $(() ->
   graph = new Graph()
   nodeSize = 20
+  temperatureLimit = 0.05
 
   elem = $("#preview-canvas")
   renderer = initRenderer(elem)
   [camera, controls] = initCamera(renderer.domElement)
   scene = new THREE.Scene()
+  updateScene = ->
   
+  doneLayouting = false
+  lastTemperature = 0
   animate = () ->
+    if graph.layout? and not doneLayouting
+      graph.layout.step() if graph.layout.temperature > temperatureLimit
+      t = graph.layout.temperature
+      if t<=temperatureLimit
+        console.debug("done layouting")
+        doneLayouting = true 
+      if Math.abs(t-lastTemperature)/t > 0.1
+        console.debug("current temperature: #{t}")
+        lastTemperature = t
+      updateScene()
     requestAnimationFrame(animate)
     controls.update()
     render()
 
-  updateScene = ->
   render = () ->
-    if graph.layout?
-      graph.layout.step() for i in [1..5]
-      updateScene()
     renderer.render(scene, camera)
   
   controls.addEventListener("change", render)
@@ -28,7 +38,7 @@ $(() ->
     render()
   window.addEventListener("resize", onWindowResize, false)
   
-  animate()
+  render()
 
   jsRoutes.controllers.Preview.json().ajax {
     success: (data) ->
@@ -42,7 +52,7 @@ $(() ->
       graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
 
       updateScene = drawNodeEdge(graph, scene, nodeSize)
-      render()
+      animate()
   }
 )
 
