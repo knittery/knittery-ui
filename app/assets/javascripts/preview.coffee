@@ -7,7 +7,7 @@ $(() ->
   elem = $("#preview-canvas")
   renderer = initRenderer(elem)
   [camera, controls] = initCamera(renderer.domElement)
-  scene = new THREE.Scene()
+  scene = setupScene()
   updateScene = ->
   
   doneLayouting = false
@@ -69,10 +69,23 @@ $(() ->
 loadGraph = (data, graph) ->
   for n in data.nodes
     graph.addNode(n.id, {colors: n.colors})
-  for e in data.edges
+  for e in data.edges when e.n1 != e.n2
     graph.addEdge(graph.node(e.n1), graph.node(e.n2), e.weight, {color: e.color})
 
 
+setupScene = ->
+  scene = new THREE.Scene()
+  light = new THREE.DirectionalLight(0xffffff)
+  light.position.set(0, 0, 5000)
+  scene.add(light)
+  light2 = new THREE.DirectionalLight(0xffffff)
+  light2.position.set(0, 0, -5000)
+  scene.add(light2)
+  scene.add(new THREE.AmbientLight(0x404040))
+  scene
+
+
+# Draws the graph as spheres (nodes) and lines between the spheres (edges).
 drawNodeEdge = (graph, scene, nodeSize) ->
   nodeDrawObject = (node, size) ->
     color = node.data.colors[0]
