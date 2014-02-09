@@ -60,7 +60,11 @@ $(() ->
         node.position.z = Math.floor(Math.random() * area - area/2)
       graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
 
-      updateScene = drawNodeEdge(graph, scene, nodeSize)
+      updateScene1 = drawNodeEdge(graph, scene, nodeSize)
+      updateScene2 = drawMesh(graph, scene)
+      updateScene = ->
+        updateScene1()
+        updateScene2()
       animate()
   }
 )
@@ -114,6 +118,48 @@ drawNodeEdge = (graph, scene, nodeSize) ->
     lines.push(e)
     scene.add(e)
   -> (l.geometry.verticesNeedUpdate = true) for l in lines
+
+# Draws the graph as a mesh, based on squares between stitches.
+drawMesh = (graph, scene) ->
+  geo = new THREE.Geometry()
+  for node,i in graph.nodes
+    node.data.vertice = i
+    geo.vertices.push(node.position)
+
+  quads = []
+  for n1 in graph.nodes
+    for n2 in n1.neighbors when n1.data.vertice < n2.data.vertice
+      for n3 in n1.neighbors when n2.data.vertice < n3.data.vertice and n1.data.vertice < n3.data.vertice
+        for n4 in n2.neighbors when n3 != n4 and n3 in n4.neighbors and n1.data.vertice < n4.data.vertice
+          quad = [n1.data.vertice, n2.data.vertice, n3.data.vertice, n4.data.vertice]
+          quads.push(quad)
+
+  updateFaces = ->
+    geo.faces = []
+    for quad in quads
+      t = new THREE.Triangle(geo.vertices[quad[0]], geo.vertices[quad[1]], geo.vertices[quad[2]])
+      if t.normal().z > 0
+        geo.faces.push(new THREE.Face3(quad[0], quad[1], quad[2]))
+        geo.faces.push(new THREE.Face3(quad[3], quad[2], quad[1]))
+      else
+        geo.faces.push(new THREE.Face3(quad[0], quad[2], quad[1]))
+        geo.faces.push(new THREE.Face3(quad[3], quad[1], quad[2]))
+
+  updateFaces()
+
+  material = new THREE.MeshLambertMaterial {
+    color: 0x0000ff
+    side: THREE.DoubleSide
+  }
+  mesh = new THREE.Mesh(geo, material)
+  scene.add(mesh)
+  ->
+    updateFaces()
+    geo.elementsNeedUpdate = true
+    geo.verticesNeedUpdate = true
+    geo.computeFaceNormals()
+    geo.computeCentroids()
+    geo.computeVertexNormals()
 
 
 initRenderer = (inElement) ->
