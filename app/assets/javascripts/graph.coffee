@@ -3,14 +3,15 @@ Vector = THREE.Vector3
 class Node
   constructor: (@id, @data) ->
     @position = new Vector()
-  edges: []
+    @neighbors = []
+    @edges = []
   addEdge: (edge) ->
     @edges.push(edge)
-
-
+    @neighbors.push(edge.other(this))
 
 class Edge
   constructor: (@node1, @node2, @weight, @data) ->
+    if @node1 == @node2 then throw "Edge on only one node"
   other: (node) ->
     if @node1 == node then @node2
     else if @node2 == node then @node1
