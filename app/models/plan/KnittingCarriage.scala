@@ -7,7 +7,7 @@ import models._
 import utils._
 
 private trait KnittingCarriage {
-  def apply(direction: Direction, needles: NeedleStateRow): Validation[String, KnittingCarriageResult]
+  def apply(direction: Direction, needles: NeedleStateRow, doubleBedNeedles: NeedleStateRow): Validation[String, KnittingCarriageResult]
 }
 
 private case class KnittingCarriageResult(
@@ -20,14 +20,15 @@ private object KnittingCarriage {
   def apply(carriageState: CarriageState, yarnAttachments: Map[YarnPiece, YarnAttachment],
     pattern: NeedleActionRow): KnittingCarriage = carriageState match {
     case state: KCarriage.State =>
-      new KKnittingCarriage(state.settings, state.yarnA, state.yarnB, yarnAttachments, pattern)
+      new KKnittingCarriage(state.assembly, state.settings, state.yarnA, state.yarnB, yarnAttachments, pattern)
     case state: LCarriage.State =>
       new LKnittingCarriage(state.settings, pattern)
     case state: GCarriage.State =>
       new GKnittingCarriage(state.settings, state.yarn, pattern)
   }
 
-  private class KKnittingCarriage(settings: KCarriage.Settings,
+  private class KKnittingCarriage(assembly: KCarriage.Assembly,
+    settings: KCarriage.Settings,
     yarnA: Option[YarnPiece], yarnB: Option[YarnPiece],
     yarnAttachments: Map[YarnPiece, YarnAttachment],
     pattern: NeedleActionRow)
@@ -111,85 +112,157 @@ private object KnittingCarriage {
     }
     private implicit def toSet[A](a: A): Set[A] = Set(a)
 
+    private def allNeedles(direction: Direction) =
+      if (direction == ToRight) Needle.all else Needle.all.reverse
+
     def knitPlain(direction: Direction, needles: NeedleStateRow, yarn: YarnPiece) = {
-      loopNeedles(direction, needles, ResultBuilder(yarn)) {
-        case (x, (_, NeedleA, _)) =>
-          //don't knit A needles
-          x
-        case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
-          //don't knit E needles if no needle pull back from E
-          //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-          x.needle(n, NeedleE, ys)
-        case (x, (n, _, ys)) =>
-          //knit normally
-          val (x2, noose) = x.withYarnA(_.to(n).noose)
-          x2.knit(Stitch2(noose._1, noose._3, ys))
-            .knit(n, PlainStitch(ys.map(_.yarn).toList)).
-            needle(n, pattern(n).toPosition, noose._2)
-      }
+      allNeedles(direction).foldLeft(ResultBuilder(yarn))(mainBedPlain(needles)).
+        toResult
     }
 
     def knitMC(direction: Direction, needles: NeedleStateRow, a: YarnPiece, b: YarnPiece) = {
-      loopNeedles(direction, needles, ResultBuilder(a, b)) {
-        case (x, (_, NeedleA, _)) =>
-          //don't knit A needles
-          x
-        case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
-          //don't knit E needles if no needle pull back from E
-          //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-          x.needle(n, NeedleE, ys)
-        case (x, (n, NeedleB, ys)) =>
-          //knit yarnA
-          val (x2, noose) = x.withYarnA(_.to(n).noose)
-          x2.knit(Stitch2(noose._1, noose._3, ys))
-            .knit(n, PlainStitch(ys.map(_.yarn).toList)).
-            needle(n, pattern(n).toPosition, noose._2)
-        case (x, (n, _, ys)) =>
-          //knit yarnB
-          val (x2, noose) = x.withYarnB(_.to(n).noose)
-          x2.knit(Stitch2(noose._1, noose._3, ys))
-            .knit(n, PlainStitch(ys.map(_.yarn).toList)).
-            needle(n, pattern(n).toPosition, noose._2)
-      }
+      allNeedles(direction).foldLeft(ResultBuilder(a, b))(mainBedMC(needles)).
+        toResult
     }
 
     def knitPart(direction: Direction, needles: NeedleStateRow, yarn: YarnPiece) = {
-      loopNeedles(direction, needles, ResultBuilder(yarn)) {
-        case (x, (_, NeedleA, _)) =>
-          //don't knit A needles
-          x
-        case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
-          //don't knit E needles if no needle pull back from E
-          //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-          x.needle(n, NeedleE, ys)
-        case (x, (n, NeedleB, ys)) =>
-          // don't knit B needles with part
-          x.needle(n, pattern(n).toPosition, ys)
-        case (x, (n, _, ys)) =>
-          //knit normally
-          val (x2, noose) = x.withYarnA(_.to(n).noose)
-          x2.knit(Stitch2(noose._1, noose._3, ys))
-            .knit(n, PlainStitch(ys.map(_.yarn).toList)).
-            needle(n, pattern(n).toPosition, noose._2)
+      allNeedles(direction).foldLeft(ResultBuilder(yarn))(mainBedPart(needles)).
+        toResult
+    }
+
+    def mainBedPlain(needles: NeedleStateRow)(x: ResultBuilder, n: Needle): ResultBuilder = (x, (n, needles(n).position, needles(n).yarn)) match {
+      case (x, (_, NeedleA, _)) =>
+        //don't knit A needles
+        x
+      case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
+        //don't knit E needles if no needle pull back from E
+        //TODO do we need to "prevent" falling down of yarn in the yarn feeder
+        x.needle(n, NeedleE, ys)
+      case (x, (n, _, ys)) =>
+        //knit normally
+        val (x2, noose) = x.withYarnA(_.to(n).noose)
+        x2.knit(Stitch2(noose._1, noose._3, ys))
+          .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+          needle(n, pattern(n).toPosition, noose._2)
+    }
+
+    def mainBedPart(needles: NeedleStateRow)(x: ResultBuilder, n: Needle): ResultBuilder = (x, (n, needles(n).position, needles(n).yarn)) match {
+      case (x, (_, NeedleA, _)) =>
+        //don't knit A needles
+        x
+      case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
+        //don't knit E needles if no needle pull back from E
+        //TODO do we need to "prevent" falling down of yarn in the yarn feeder
+        x.needle(n, NeedleE, ys)
+      case (x, (n, NeedleB, ys)) =>
+        // don't knit B needles with part
+        x.needle(n, pattern(n).toPosition, ys)
+      case (x, (n, _, ys)) =>
+        //knit normally
+        val (x2, noose) = x.withYarnA(_.to(n).noose)
+        x2.knit(Stitch2(noose._1, noose._3, ys))
+          .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+          needle(n, pattern(n).toPosition, noose._2)
+    }
+
+    def mainBedMC(needles: NeedleStateRow)(x: ResultBuilder, n: Needle): ResultBuilder = (x, (n, needles(n).position, needles(n).yarn)) match {
+      case (x, (_, NeedleA, _)) =>
+        //don't knit A needles
+        x
+      case (x, (n, NeedleE, ys)) if settings.holdingCamLever != HoldingCamN =>
+        //don't knit E needles if no needle pull back from E
+        //TODO do we need to "prevent" falling down of yarn in the yarn feeder
+        x.needle(n, NeedleE, ys)
+      case (x, (n, NeedleB, ys)) =>
+        //knit yarnA
+        val (x2, noose) = x.withYarnA(_.to(n).noose)
+        x2.knit(Stitch2(noose._1, noose._3, ys))
+          .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+          needle(n, pattern(n).toPosition, noose._2)
+      case (x, (n, _, ys)) =>
+        //knit yarnB
+        val (x2, noose) = x.withYarnB(_.to(n).noose)
+        x2.knit(Stitch2(noose._1, noose._3, ys))
+          .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+          needle(n, pattern(n).toPosition, noose._2)
+    }
+
+    def doubleBedPlain(takeback: Boolean, needles: NeedleStateRow)(x: ResultBuilder, n: Needle): ResultBuilder = (x, (n, needles(n).position, needles(n).yarn)) match {
+      case (x, (_, NeedleA, _)) =>
+        //don't knit A needles
+        x
+      case (x, (n, NeedleE, ys)) if !takeback =>
+        //don't knit E needles if no needle pull back from E
+        //TODO do we need to "prevent" falling down of yarn in the yarn feeder
+        x.needle(n, NeedleE, ys)
+      case (x, (n, _, ys)) =>
+        //knit normally
+        val (x2, noose) = x.withYarnA(_.to(n).noose)
+        x2.knit(Stitch2(noose._1, noose._3, ys))
+          .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+          needle(n, pattern(n).toPosition, noose._2)
+    }
+
+    def knitDoubleBedPlain(direction: Direction, dbTakeback: Boolean, mainNeedles: NeedleStateRow, dbNeedles: NeedleStateRow, yarn: YarnPiece) = {
+      val ns = if (direction == ToRight) Needle.all else Needle.all.reverse
+      ns.foldLeft(ResultBuilder(yarn)) { (x, n) =>
+        //TODO model the needle shift..
+        if (direction == ToRight) {
+          //Knit main first
+          val x2 = mainBedPlain(mainNeedles)(x, n)
+          doubleBedPlain(dbTakeback, mainNeedles)(x2, n)
+        } else {
+          //Knit double-bed first
+          val x2 = doubleBedPlain(dbTakeback, mainNeedles)(x, n)
+          mainBedPlain(mainNeedles)(x2, n)
+        }
       }
     }
 
-    override def apply(direction: Direction, needles: NeedleStateRow) = Try {
+    override def apply(direction: Direction, needles: NeedleStateRow, doubleBedNeedles: NeedleStateRow) = assembly match {
+      case dbc: DoubleBedCarriage => doubleBed(direction, needles, doubleBedNeedles, dbc)
+      case sp: SinkerPlate => singleBed(direction, needles)
+    }
+    private def singleBed(direction: Direction, needles: NeedleStateRow) = Try {
       (settings.part(direction), settings.tuck(direction), settings.mc, settings.l, yarnA, yarnB) match {
         case (false, false, false, false, Some(yarn), None) =>
           knitPlain(direction, needles, yarn)
         case (false, false, false, false, _, Some(_)) =>
           throw new IllegalArgumentException(s"Settings are illegal: Plain with yarn B threaded")
-        case (false, false, false, false, None, _) => ??? //TODO remove the knitting from the board
+        case (false, false, false, false, None, _) =>
+          ??? //TODO remove the knitting from the board
         case (false, false, true, false, Some(a), Some(b)) =>
           knitMC(direction, needles, a, b)
         case (true, false, false, false, Some(yarn), _) =>
           knitPart(direction, needles, yarn)
         case (true, false, false, false, None, _) =>
           ??? // TODO
-        case (false, true, false, false, _, _) => ??? //TODO tuck
-        case (false, false, _, true, _, _) => ??? //TODO l-mode
+        case (false, true, false, false, _, _) =>
+          ??? //TODO tuck
+        case (false, false, _, true, _, _) =>
+          ??? //TODO l-mode
         case _ => throw new IllegalArgumentException(s"Settings are illegal: $settings")
+      }
+    }
+    private def doubleBed(direction: Direction, needles: NeedleStateRow, doubleBedNeedles: NeedleStateRow, dbc: DoubleBedCarriage) = Try {
+      require(!settings.mc, "MC not supported with double bed assembly.")
+      require(!settings.l, "L not supported with double bed assembly.")
+      (settings.part(direction), settings.tuck(direction), dbc.part(direction), yarnA) match {
+        case (false, false, false, Some(yarn)) =>
+          ??? // TODO knit both beds
+        case (true, false, false, Some(yarn)) =>
+          knitDoubleBedPlain(direction, dbc.needleTakeback(direction), needles, doubleBedNeedles, yarn)
+          ??? //TODO Knit only double bed
+        case (false, false, true, Some(yarn)) =>
+          //knit only main bed
+          knitPlain(direction, needles, yarn)
+        case (true, false, true, Some(yarn)) =>
+          ??? //TODO don't knit
+        case (_, true, _, _) =>
+          ??? //TODO tuck
+        case (_, _, _, None) =>
+          ??? //TODO
+        case _ => throw new IllegalArgumentException(s"Settings are illegal: $settings, $dbc")
       }
     }
   }
@@ -197,7 +270,7 @@ private object KnittingCarriage {
   private class LKnittingCarriage(settings: LCarriage.Settings, pattern: NeedleActionRow)
     extends KnittingCarriage {
 
-    def apply(direction: Direction, needles: NeedleStateRow) = Try {
+    def apply(direction: Direction, needles: NeedleStateRow, doubleBedNeedles: NeedleStateRow) = Try {
       if (needles.pattern.all.exists(_ == NeedleE))
         throw new IllegalStateException("LCarriage does not work with needles at E")
 
@@ -209,7 +282,7 @@ private object KnittingCarriage {
   private class GKnittingCarriage(settings: GCarriage.Settings, yarnA: Option[YarnFlow], pattern: NeedleActionRow)
     extends KnittingCarriage {
 
-    def apply(direction: Direction, needles: NeedleStateRow) = Try {
+    def apply(direction: Direction, needles: NeedleStateRow, doubleBedNeedles: NeedleStateRow) = Try {
       if (needles.pattern.all.exists(_ == NeedleE))
         throw new IllegalStateException("GCarriage does not work with needles at E")
       if (needles.pattern.all.exists(_ == NeedleD))

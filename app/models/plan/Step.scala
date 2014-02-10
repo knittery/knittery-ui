@@ -16,7 +16,7 @@ case class KnitRow(carriage: Carriage, direction: Direction, needleActionRow: Ne
   override def apply(state: KnittingState) = {
     for {
       kc <- knittingCarriage(state, (needleActionRow))
-      res <- kc(direction, state.needles)
+      res <- kc(direction, state.needles, state.doubleBedNeedles)
     } yield {
       res.yarn.values.foldLeft(state)(_.attachYarn(_)).
         moveCarriage(carriage, direction).
