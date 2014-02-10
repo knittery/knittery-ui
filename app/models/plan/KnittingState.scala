@@ -4,7 +4,9 @@ import scalaz._
 import Scalaz._
 import models._
 
-case class KnittingState(needles: Map[Needle, NeedleState],
+case class KnittingState(
+  needles: Map[Needle, NeedleState],
+  doubleBedNeedles: Map[Needle, NeedleState],
   carriageState: CarriageStates,
   output: Knitted,
   output2: Knitted2,
@@ -50,7 +52,7 @@ case class KnittingState(needles: Map[Needle, NeedleState],
   def knit2(f: Knitted2 => Knitted2) = copy(output2 = f(output2))
 }
 object KnittingState {
-  val initial = KnittingState((allNeedlesA _).toMap, CarriageStates.empty, Knitted.empty, Knitted2.empty, Map.empty)
+  val initial = KnittingState((allNeedlesA _).toMap, (allNeedlesA _).toMap, CarriageStates.empty, Knitted.empty, Knitted2.empty, Map.empty)
   private def allNeedlesA(n: Needle) = NeedleState(NeedleA)
 }
 
