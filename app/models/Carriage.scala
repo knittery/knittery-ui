@@ -33,6 +33,7 @@ case object KCarriage extends Carriage {
     def yarnB = yarns._2
     def yarns = assembly match {
       case SinkerPlate(yarnA, yarnB, _, _) => (yarnA, yarnB)
+      case c: DoubleBedCarriage => (c.yarn, None)
     }
   }
   def initialState = State()
@@ -41,6 +42,11 @@ case object KCarriage extends Carriage {
   case class SinkerPlate(yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None,
     weavingPatternLeft: Boolean = false, weavingPatternRight: Boolean = false)
     extends Assembly
+  case class DoubleBedCarriage(yarn: Option[YarnPiece] = None,
+    partLeft: Boolean = false, partRight: Boolean = false)
+    extends Assembly {
+    def part(direction: Direction) = if (direction == ToLeft) partLeft else partRight
+  }
 
   case class Settings(mc: Boolean = false, l: Boolean = false,
     partLeft: Boolean = false, partRight: Boolean = false,
