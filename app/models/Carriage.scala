@@ -43,9 +43,11 @@ case object KCarriage extends Carriage {
     weavingPatternLeft: Boolean = false, weavingPatternRight: Boolean = false)
     extends Assembly
   case class DoubleBedCarriage(yarn: Option[YarnPiece] = None,
-    partLeft: Boolean = false, partRight: Boolean = false)
+    partLeft: Boolean = false, partRight: Boolean = false,
+    needleTakebackLeft: Boolean = false, needleTakebackRight: Boolean = false)
     extends Assembly {
     def part(direction: Direction) = if (direction == ToLeft) partLeft else partRight
+    def needleTakeback(direction: Direction) = if (direction == ToLeft) needleTakebackLeft else needleTakebackRight
   }
 
   case class Settings(mc: Boolean = false, l: Boolean = false,
