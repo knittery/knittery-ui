@@ -79,13 +79,12 @@ loadGraph = (data, graph) ->
 
 setupScene = ->
   scene = new THREE.Scene()
-  light = new THREE.DirectionalLight(0xffffff)
+  light = new THREE.DirectionalLight(0xffffff, 0.5)
   light.position.set(0, 0, 5000)
   scene.add(light)
-  light2 = new THREE.DirectionalLight(0xffffff)
+  light2 = new THREE.DirectionalLight(0xffffff, 0.5)
   light2.position.set(0, 0, -5000)
   scene.add(light2)
-  scene.add(new THREE.AmbientLight(0x404040))
   scene
 
 
@@ -138,8 +137,8 @@ drawMesh = (graph, scene) ->
   geo.computeVertexNormals()
 
   material = new THREE.MeshLambertMaterial {
-    color: 0xee7070
-    emissive: 0x202020
+    color: 0x003090
+    emissive: 0x404090
     side: THREE.DoubleSide
   }
   mesh = new THREE.Mesh(geo, material)
