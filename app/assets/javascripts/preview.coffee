@@ -8,7 +8,7 @@ $(() ->
   scene = setupScene()
   updateScene = ->
   
-  layouter = new Layouter(graph, 5)
+  layouter = new Layouter(graph, 100)
   animate = () ->
     if graph.layout? and layouter.step(33) # 33 ms per layouting step => ~33 fps
       updateScene()
@@ -39,7 +39,12 @@ $(() ->
         node.position.x = Math.floor(Math.random() * area - area/2)
         node.position.y = Math.floor(Math.random() * area - area/2)
         node.position.z = Math.floor(Math.random() * area - area/2)
-      graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
+      if graph.nodes.length < 500
+        console.debug("Using spring layout")
+        graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
+      else
+        console.debug("Using clustered spring layout")
+        graph.layout = new ClusterSpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
 
       updateScene1 = drawNodeEdge(graph, scene, nodeSize)
       updateScene2 = drawMesh(graph, scene)

@@ -105,7 +105,7 @@ class window.SpringLayout
 
 ## SpringLayout with clustered repulsion (faster).
 class window.ClusterSpringLayout
-  constructor: (@graph, @size, repulsion = 1, spring = 1/6) ->
+  constructor: (@graph, @size, repulsion = 1, spring = 1/6, @clusterCount = 7) ->
     density = Math.pow(@size.x*@size.y*@size.z / @graph.nodes.length, 1/3)
     @repulsionConstant = Math.pow(repulsion * density, 2)
     node.layout = new NodeClusterSpringLayout(node, @repulsionConstant) for node in @graph.nodes
@@ -145,7 +145,7 @@ class window.ClusterSpringLayout
     clusters
   
   step: ->
-    clusters = @mkClusters(7)
+    clusters = @mkClusters(@clusterCount)
 
     for clusterA, i in clusters when clusterA?
       for j in [i..clusters.length-1]
