@@ -45,9 +45,9 @@ class window.Graph
     to.addEdge(edge)
     edge
 
-epsilon = 0.000001
+epsilon = 0.01
 epsilonSq = epsilon * epsilon
-epsilonVector = new Vector(0.000001, 0, 0)
+epsilonVector = new Vector(epsilon, 0, 0)
 
 class EdgeSpringLayout
   constructor: (@edge, spring) ->
@@ -107,25 +107,27 @@ class window.SpringLayout
 class window.ClusterSpringLayout
   constructor: (@graph, @size, repulsion = 1, spring = 1/6) ->
     density = Math.pow(@size.x*@size.y*@size.z / @graph.nodes.length, 1/3)
-    repulsionConstant = Math.pow(repulsion * density, 2)
-    node.layout = new NodeClusterSpringLayout(node, repulsionConstant) for node in @graph.nodes
+    @repulsionConstant = Math.pow(repulsion * density, 2)
+    node.layout = new NodeClusterSpringLayout(node, @repulsionConstant) for node in @graph.nodes
     maxWeight = Math.max((e.weight for e in @graph.edges)...)
     springValue = spring / maxWeight
     edge.layout = new EdgeSpringLayout(edge, springValue) for edge in @graph.edges
     @temperature = 1000000
 
-  step: ->
-    splitInto = 4
-    # Cluster the nodes into splitInto^3 boxes
-    min = max = @graph.nodes[0].position
-    box = new THREE.Box3().setFromPoints(node.position for node in @graph.nodes)
-    sizePart = box.size().divideScalar(splitInto)
+  # Cluster the nodes into count^3 clusters
+  mkClusters: (count) ->
+    min = @graph.nodes[0].position.clone()
+    max = min.clone()
+    for node in @graph.nodes
+      min = min.min(node.position)
+      max = max.max(node.position)
+    sizePart = max.sub(min).divideScalar(count)
     clusters = []
-    for x in [0..splitInto-1]
-      for y in [0..splitInto-1]
-        for z in [0..splitInto-1]
-          a = new Vector(x, y, z).multiply(sizePart).add(box.min) 
-          b = new Vector(x+1, y+1, z+1).multiply(sizePart).add(box.min)
+    for x in [0..count-1]
+      for y in [0..count-1]
+        for z in [0..count-1]
+          a = new Vector(x, y, z).multiply(sizePart).add(min)
+          b = a.clone().add(sizePart)
           cluster = new THREE.Box3(a, b)
           cluster.x = x; cluster.y = y; cluster.z = z
           cluster.nodes = []
@@ -135,18 +137,27 @@ class window.ClusterSpringLayout
             cluster.centerOfMass = cluster.center() # TODO maybe calculate more exact
             cluster.mass = cluster.nodes.length
             clusters.push(cluster)
+    clusters
+  
+  step: ->
+    clusters = @mkClusters(7)
+    nearEachOther = (a,b) ->
+      Math.abs(a.x-b.x)<=1 and Math.abs(a.y-b.y)<=1 and Math.abs(a.z-b.z)<=1
 
     for cluster in clusters
       for c in clusters
-        if Math.abs(cluster.x-c.x)<=1 and Math.abs(cluster.y-c.y)<=1 and Math.abs(cluster.z-c.z)<=1 #includes this cluster
+        if nearEachOther(cluster, c)
           node.layout.repulseNodes(c.nodes) for node in cluster.nodes
         else
-          node.layout.repulseCluster(c) for node in cluster.nodes
+          f = cluster.centerOfMass.clone().sub(c.centerOfMass)
+          distanceSq = f.lengthSq()
+          f.setLength(c.mass * @repulsionConstant / distanceSq)
+          node.layout.force.add(f) for node in cluster.nodes
 
     edge.layout.attract() for edge in @graph.edges
     movements = 0
     movements += node.layout.moveAccordingToForce() for node in @graph.nodes
-    #@temperature = 1000000 * movements / Math.pow(@graph.nodes.length, 2)
+    @temperature = 1000000 * movements / Math.pow(@graph.nodes.length, 2)
     @temperature
 
 class NodeClusterSpringLayout
@@ -156,19 +167,13 @@ class NodeClusterSpringLayout
 
   repulseNodes: (nodes) ->
     for other in nodes when @node != other
-      f = @calculateForce(other.position, 1)
+      f = @node.position.clone().sub(other.position)
+      distanceSq = f.lengthSq()
+      if (distanceSq < epsilonSq)
+        f = epsilonVector
+        distanceSq = epsilonSq
+      f.setLength(@repulsionConstant / distanceSq)
       @force.add(f)
-  repulseCluster: (cluster) ->
-    f = @calculateForce(cluster.centerOfMass, cluster.mass)
-    @force.add(f)
-
-  calculateForce: (pos, mass) ->
-    f = @node.position.clone().sub(pos)
-    distanceSq = f.lengthSq()
-    if (distanceSq < epsilonSq)
-      f = epsilonVector
-      distanceSq = epsilonSq
-    f.setLength(@repulsionConstant / distanceSq)
 
   moveAccordingToForce: ->
     t = @force.length()
