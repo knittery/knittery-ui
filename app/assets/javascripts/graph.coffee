@@ -88,12 +88,11 @@ class window.SpringLayout
   constructor: (@graph, @size, repulsion = 1, spring = 1/6) ->
     density = Math.pow(@size.x*@size.y*@size.z / @graph.nodes.length, 1/3)
     repulsionConstant = Math.pow(repulsion * density, 2)
-    node.layout = @createNode(node, repulsionConstant) for node in @graph.nodes
+    node.layout = new NodeSpringLayout(node, repulsionConstant) for node in @graph.nodes
     maxWeight = Math.max((e.weight for e in @graph.edges)...)
     springValue = spring / maxWeight
     edge.layout = new EdgeSpringLayout(edge, springValue) for edge in @graph.edges
     @temperature = 1000000
-  createNode: (node, repulsion) -> new NodeSpringLayout(node, repulsion)
 
   step: ->
     @graph.nodes[i].layout.repulse(@graph.nodes, i+1) for i in [0..@graph.nodes.length-2]
@@ -102,6 +101,82 @@ class window.SpringLayout
     movements += node.layout.moveAccordingToForce() for node in @graph.nodes
     @temperature = 1000000 * movements / Math.pow(@graph.nodes.length, 2)
     @temperature
+
+
+## SpringLayout with clustered repulsion (faster).
+class window.ClusterSpringLayout
+  constructor: (@graph, @size, repulsion = 1, spring = 1/6) ->
+    density = Math.pow(@size.x*@size.y*@size.z / @graph.nodes.length, 1/3)
+    repulsionConstant = Math.pow(repulsion * density, 2)
+    node.layout = new NodeClusterSpringLayout(node, repulsionConstant) for node in @graph.nodes
+    maxWeight = Math.max((e.weight for e in @graph.edges)...)
+    springValue = spring / maxWeight
+    edge.layout = new EdgeSpringLayout(edge, springValue) for edge in @graph.edges
+    @temperature = 1000000
+
+  step: ->
+    splitInto = 4
+    # Cluster the nodes into splitInto^3 boxes
+    min = max = @graph.nodes[0].position
+    box = new THREE.Box3().setFromPoints(node.position for node in @graph.nodes)
+    sizePart = box.size().divideScalar(splitInto)
+    clusters = []
+    for x in [0..splitInto-1]
+      for y in [0..splitInto-1]
+        for z in [0..splitInto-1]
+          a = new Vector(x, y, z).multiply(sizePart).add(box.min) 
+          b = new Vector(x+1, y+1, z+1).multiply(sizePart).add(box.min)
+          cluster = new THREE.Box3(a, b)
+          cluster.x = x; cluster.y = y; cluster.z = z
+          cluster.nodes = []
+          for node in @graph.nodes when cluster.containsPoint(node.position)
+            cluster.nodes.push(node)
+          if cluster.nodes.length>0
+            cluster.centerOfMass = cluster.center() # TODO maybe calculate more exact
+            cluster.mass = cluster.nodes.length
+            clusters.push(cluster)
+
+    for cluster in clusters
+      for c in clusters
+        if Math.abs(cluster.x-c.x)<=1 and Math.abs(cluster.y-c.y)<=1 and Math.abs(cluster.z-c.z)<=1 #includes this cluster
+          node.layout.repulseNodes(c.nodes) for node in cluster.nodes
+        else
+          node.layout.repulseCluster(c) for node in cluster.nodes
+
+    edge.layout.attract() for edge in @graph.edges
+    movements = 0
+    movements += node.layout.moveAccordingToForce() for node in @graph.nodes
+    #@temperature = 1000000 * movements / Math.pow(@graph.nodes.length, 2)
+    @temperature
+
+class NodeClusterSpringLayout
+  constructor: (@node, @repulsionConstant) ->
+    @force = new Vector()
+  applyForce: (forceVector) -> @force.add(forceVector)
+
+  repulseNodes: (nodes) ->
+    for other in nodes when @node != other
+      f = @calculateForce(other.position, 1)
+      @force.add(f)
+  repulseCluster: (cluster) ->
+    f = @calculateForce(cluster.centerOfMass, cluster.mass)
+    @force.add(f)
+
+  calculateForce: (pos, mass) ->
+    f = @node.position.clone().sub(pos)
+    distanceSq = f.lengthSq()
+    if (distanceSq < epsilonSq)
+      f = epsilonVector
+      distanceSq = epsilonSq
+    f.setLength(@repulsionConstant / distanceSq)
+
+  moveAccordingToForce: ->
+    t = @force.length()
+    @node.position.add(@force)
+    @force.set(0,0,0)
+    t
+
+
 
 time = -> new Date().getTime()
 
