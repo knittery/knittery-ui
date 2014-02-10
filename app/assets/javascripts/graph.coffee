@@ -49,50 +49,51 @@ epsilon = 0.000001
 epsilonSq = epsilon * epsilon
 epsilonVector = new Vector(0.000001, 0, 0)
 
+class EdgeSpringLayout
+  constructor: (@edge, spring) ->
+    @spring = Math.max(epsilon, Math.min(0.95, @edge.weight * spring))
+  # Hooke's law, edges act like springs
+  attract: ->
+    f = @edge.vector().clone().multiplyScalar(@spring)
+    @edge.node2.layout.applyForce(f)
+    @edge.node1.layout.applyForce(f.negate())
+    f
+
+class NodeSpringLayout
+  constructor: (@node, @repulsionConstant) ->
+    @force = new Vector()
+  applyForce: (forceVector) -> @force.add(forceVector)
+  # Coulomb's law repulses the nodes.
+  #  Apply our repulsion to all other nodes
+  repulse: (nodes, offset) ->
+    for i in [offset..nodes.length-1]
+      other = nodes[i]
+      f = other.position.clone().sub(@node.position)
+      distanceSq = f.lengthSq()
+      if (distanceSq < epsilonSq)
+        f = epsilonVector
+        distanceSq = epsilonSq
+      f.setLength(@repulsionConstant / distanceSq)
+      other.layout.applyForce(f)
+      @applyForce(f.negate())
+    this
+  moveAccordingToForce: ->
+    t = @force.length()
+    @node.position.add(@force)
+    @force.set(0,0,0)
+    t
+
 ## Layouting algorithm based on repulsion between nodes and edges acting like springs.
 class window.SpringLayout
   constructor: (@graph, @size, repulsion = 1, spring = 1/6) ->
     density = Math.pow(@size.x*@size.y*@size.z / @graph.nodes.length, 1/3)
     repulsionConstant = Math.pow(repulsion * density, 2)
-    node.layout = new NodeLayout(node, repulsionConstant) for node in @graph.nodes
+    node.layout = @createNode(node, repulsionConstant) for node in @graph.nodes
     maxWeight = Math.max((e.weight for e in @graph.edges)...)
     springValue = spring / maxWeight
-    edge.layout = new EdgeLayout(edge, springValue) for edge in @graph.edges
+    edge.layout = new EdgeSpringLayout(edge, springValue) for edge in @graph.edges
     @temperature = 1000000
-
-  class NodeLayout
-    constructor: (@node, @repulsionConstant) ->
-      @force = new Vector()
-    applyForce: (forceVector) -> @force.add(forceVector)
-    # Coulomb's law repulses the nodes.
-    #  Apply our repulsion to all other nodes
-    repulse: (nodes, offset) ->
-      for i in [offset..nodes.length-1]
-        other = nodes[i]
-        f = other.position.clone().sub(@node.position)
-        distanceSq = f.lengthSq()
-        if (distanceSq < epsilonSq)
-          f = epsilonVector
-          distanceSq = epsilonSq
-        f.setLength(@repulsionConstant / distanceSq)
-        other.layout.applyForce(f)
-        @applyForce(f.negate())
-      this
-    moveAccordingToForce: ->
-      t = @force.length()
-      @node.position.add(@force)
-      @force.set(0,0,0)
-      t
-
-  class EdgeLayout
-    constructor: (@edge, spring) ->
-      @spring = Math.max(epsilon, Math.min(0.95, @edge.weight * spring))
-    # Hooke's law, edges act like springs
-    attract: ->
-      f = @edge.vector().clone().multiplyScalar(@spring)
-      @edge.node2.layout.applyForce(f)
-      @edge.node1.layout.applyForce(f.negate())
-      f
+  createNode: (node, repulsion) -> new NodeSpringLayout(node, repulsion)
 
   step: ->
     @graph.nodes[i].layout.repulse(@graph.nodes, i+1) for i in [0..@graph.nodes.length-2]
