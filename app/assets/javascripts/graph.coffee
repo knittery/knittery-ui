@@ -144,15 +144,18 @@ class window.ClusterSpringLayout
     nearEachOther = (a,b) ->
       Math.abs(a.x-b.x)<=1 and Math.abs(a.y-b.y)<=1 and Math.abs(a.z-b.z)<=1
 
-    for cluster in clusters
-      for c in clusters
-        if nearEachOther(cluster, c)
-          node.layout.repulseNodes(c.nodes) for node in cluster.nodes
+    for clusterA, i in clusters
+      for j in [i..clusters.length-1]
+        clusterB = clusters[j]
+        if nearEachOther(clusterA, clusterB)
+          node.layout.repulseNodes(clusterB.nodes) for node in clusterA.nodes
         else
-          f = cluster.centerOfMass.clone().sub(c.centerOfMass)
+          f = clusterA.centerOfMass.clone().sub(clusterB.centerOfMass)
           distanceSq = f.lengthSq()
-          f.setLength(c.mass * @repulsionConstant / distanceSq)
-          node.layout.force.add(f) for node in cluster.nodes
+          f.setLength(clusterB.mass * @repulsionConstant / distanceSq)
+          node.layout.force.add(f) for node in clusterA.nodes
+          f.setLength(clusterA.mass * @repulsionConstant / distanceSq)
+          node.layout.force.sub(f) for node in clusterB.nodes
 
     edge.layout.attract() for edge in @graph.edges
     movements = 0
@@ -174,6 +177,7 @@ class NodeClusterSpringLayout
         distanceSq = epsilonSq
       f.setLength(@repulsionConstant / distanceSq)
       @force.add(f)
+      other.layout.force.sub(f)
 
   moveAccordingToForce: ->
     t = @force.length()
