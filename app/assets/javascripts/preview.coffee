@@ -1,6 +1,6 @@
 $(() ->
   graph = new Graph()
-  nodeSize = 20
+  nodeSize = 0
   temperatureLimit = 5
   layoutStepTime = 33   #in ms
 
@@ -100,7 +100,7 @@ drawNodeEdge = (graph, scene, nodeSize) ->
     node.data.drawObject = mesh
     mesh
   edgeDrawObject = (edge) ->
-    material = new THREE.LineBasicMaterial({ color: edge.data.color, linewidth: 0.5 })
+    material = new THREE.LineBasicMaterial({ color: edge.data.color, linewidth: 1 })
     geo = new THREE.Geometry()
     geo.vertices.push(edge.node1.position)
     geo.vertices.push(edge.node2.position)
