@@ -102,3 +102,45 @@ class SpringLayout
     @temperature
 
 window.SpringLayout = SpringLayout
+
+time = -> new Date().getTime()
+
+class Layouter
+  class Stats
+    constructor: ->
+      @time = 0
+      @iterations = 0
+    add: (t, i) ->
+      @time += t
+      @iterations += i
+    reset: ->
+      @time = 0
+      @iterations = 0
+    i_per_ms: -> @iterations / @time
+    ms_per_i: -> @time / @iterations
+  constructor: (@graph, @temperatureLimit, @debugInterval = 3000) ->
+    @done = @graph.temperature < @temperatureLimit
+    @statsTotal = new Stats()
+    @statsRound = new Stats()
+    @statsRound.lastPrinted = time()
+
+  step: (durationMs) -> if not @done
+    t0 = time()
+    iterations = 0
+    while time()-t0 < durationMs and not @done
+      @graph.layout.step()
+      @done = @graph.layout.temperature < @temperatureLimit
+      iterations++
+    #update stats
+    t1 = time()
+    @statsTotal.add(t1 - t0, iterations)
+    @statsRound.add(t1 - t0, iterations)
+    if @done
+      console.debug("Done with graph layouting after #{@statsTotal.iterations} iterations. Performancel: #{@statsTotal.ms_per_i().toFixed(3)}ms/it")
+    if t1-@statsRound.lastPrinted > @debugInterval
+      console.debug("Graph layouting: temp=#{@graph.layout.temperature.toFixed(0)} after #{@statsTotal.iterations} iterations. Current: #{@statsRound.ms_per_i().toFixed(3)}ms/it; Total: #{@statsTotal.ms_per_i().toFixed(3)}ms/it")
+      @statsRound.reset()
+      @statsRound.lastPrinted = t1
+    not @done
+
+window.Layouter = Layouter
