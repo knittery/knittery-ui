@@ -123,39 +123,44 @@ class window.ClusterSpringLayout
       max = max.max(node.position)
     sizePart = max.sub(min).divideScalar(count)
     clusters = []
-    for x in [0..count-1]
-      for y in [0..count-1]
-        for z in [0..count-1]
-          a = new Vector(x, y, z).multiply(sizePart).add(min)
-          b = a.clone().add(sizePart)
-          cluster = new THREE.Box3(a, b)
-          cluster.x = x; cluster.y = y; cluster.z = z
-          cluster.nodes = []
-          for node in @graph.nodes when cluster.containsPoint(node.position)
-            cluster.nodes.push(node)
-          if cluster.nodes.length>0
-            cluster.centerOfMass = cluster.center() # TODO maybe calculate more exact
-            cluster.mass = cluster.nodes.length
-            clusters.push(cluster)
+    maxIndex = count * count * count - 1
+    for node in @graph.nodes
+      x = Math.floor((node.position.x - min.x) / sizePart.x)
+      y = Math.floor((node.position.y - min.y) / sizePart.y)
+      z = Math.floor((node.position.z - min.z) / sizePart.z)
+      i = Math.min(x*count*count + y*count + z, maxIndex)
+      cluster = clusters[i]
+      if not cluster?
+        clusters[i] = {
+          x: x
+          y: y
+          z: z
+          centerOfMass: new Vector(min.x+sizePart.x*(x+0.5), min.y+sizePart.y*(y+0.5), min.z+sizePart.z*(z+0.5))
+          mass: 1
+          nodes: [node]
+        }
+      else
+        cluster.nodes.push(node)
+        cluster.mass++
     clusters
   
   step: ->
     clusters = @mkClusters(7)
-    nearEachOther = (a,b) ->
-      Math.abs(a.x-b.x)<=1 and Math.abs(a.y-b.y)<=1 and Math.abs(a.z-b.z)<=1
 
-    for clusterA, i in clusters
+    for clusterA, i in clusters when clusterA?
       for j in [i..clusters.length-1]
         clusterB = clusters[j]
-        if nearEachOther(clusterA, clusterB)
-          node.layout.repulseNodes(clusterB.nodes) for node in clusterA.nodes
-        else
-          f = clusterA.centerOfMass.clone().sub(clusterB.centerOfMass)
-          distanceSq = f.lengthSq()
-          f.setLength(clusterB.mass * @repulsionConstant / distanceSq)
-          node.layout.force.add(f) for node in clusterA.nodes
-          f.setLength(clusterA.mass * @repulsionConstant / distanceSq)
-          node.layout.force.sub(f) for node in clusterB.nodes
+        if clusterB?
+          dx = clusterA.x-clusterB.x; dy = clusterA.y-clusterB.y; dz = clusterA.z-clusterB.z
+          if dx>=-1 and dx<=1 and dy>=-1 and dy<=1 and dz>=-1 and dz<=1
+            node.layout.repulseNodes(clusterB.nodes) for node in clusterA.nodes
+          else
+            f = clusterA.centerOfMass.clone().sub(clusterB.centerOfMass)
+            distanceSq = f.lengthSq()
+            f.setLength(clusterB.mass * @repulsionConstant / distanceSq)
+            node.layout.force.add(f) for node in clusterA.nodes
+            f.setLength(clusterA.mass * @repulsionConstant / distanceSq)
+            node.layout.force.sub(f) for node in clusterB.nodes
 
     edge.layout.attract() for edge in @graph.edges
     movements = 0
