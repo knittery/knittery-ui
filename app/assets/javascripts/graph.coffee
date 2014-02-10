@@ -136,7 +136,7 @@ class Layouter
     @statsTotal.add(t1 - t0, iterations)
     @statsRound.add(t1 - t0, iterations)
     if @done
-      console.debug("Done with graph layouting after #{@statsTotal.iterations} iterations. Performancel: #{@statsTotal.ms_per_i().toFixed(3)}ms/it")
+      console.debug("Done with graph layouting after #{@statsTotal.iterations} iterations. Duration: #{(@statsTotal.time/1000).toFixed(1)}s; Performance: #{@statsTotal.ms_per_i().toFixed(3)}ms/it")
     if t1-@statsRound.lastPrinted > @debugInterval
       console.debug("Graph layouting: temp=#{@graph.layout.temperature.toFixed(0)} after #{@statsTotal.iterations} iterations. Current: #{@statsRound.ms_per_i().toFixed(3)}ms/it; Total: #{@statsTotal.ms_per_i().toFixed(3)}ms/it")
       @statsRound.reset()
