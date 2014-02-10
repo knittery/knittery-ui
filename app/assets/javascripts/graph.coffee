@@ -67,8 +67,9 @@ class SpringLayout
     applyForce: (forceVector) -> @force.add(forceVector)
     # Coulomb's law repulses the nodes.
     #  Apply our repulsion to all other nodes
-    repulse: (nodes, except) ->
-      for other in nodes when other != @node
+    repulse: (nodes, offset) ->
+      for i in [offset..nodes.length-1]
+        other = nodes[i]
         f = other.position.clone().sub(@node.position)
         distanceSq = f.lengthSq()
         if (distanceSq < epsilonSq)
@@ -76,6 +77,7 @@ class SpringLayout
           distanceSq = epsilonSq
         f.setLength(@repulsionConstant / distanceSq)
         other.layout.applyForce(f)
+        @applyForce(f.negate())
       this
     moveAccordingToForce: ->
       t = @force.length()
@@ -94,8 +96,8 @@ class SpringLayout
       f
 
   step: ->
-    node.layout.repulse(@graph.nodes) for node in @graph.nodes
-    edge.layout.attract()             for edge in @graph.edges
+    @graph.nodes[i].layout.repulse(@graph.nodes, i+1) for i in [0..@graph.nodes.length-2]
+    edge.layout.attract() for edge in @graph.edges
     movements = 0
     movements += node.layout.moveAccordingToForce() for node in @graph.nodes
     @temperature = 1000000 * movements / Math.pow(@graph.nodes.length, 2)
