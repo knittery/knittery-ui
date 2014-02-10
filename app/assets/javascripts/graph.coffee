@@ -19,8 +19,8 @@ class Edge
   nodes: -> [@node1, @node2]
   vector: -> @node1.position.clone().sub(@node2.position)
 
-
-class Graph
+## Undirected graph
+class window.Graph
   nodeSet: {}
   nodes: []
   edges: []
@@ -45,13 +45,12 @@ class Graph
     to.addEdge(edge)
     edge
 
-window.Graph = Graph
-
 epsilon = 0.000001
 epsilonSq = epsilon * epsilon
 epsilonVector = new Vector(0.000001, 0, 0)
 
-class SpringLayout
+## Layouting algorithm based on repulsion between nodes and edges acting like springs.
+class window.SpringLayout
   constructor: (@graph, @size, repulsion = 1, spring = 1/6) ->
     density = Math.pow(@size.x*@size.y*@size.z / @graph.nodes.length, 1/3)
     repulsionConstant = Math.pow(repulsion * density, 2)
@@ -103,11 +102,10 @@ class SpringLayout
     @temperature = 1000000 * movements / Math.pow(@graph.nodes.length, 2)
     @temperature
 
-window.SpringLayout = SpringLayout
-
 time = -> new Date().getTime()
 
-class Layouter
+## Applies an incremental layout (with .step() and .temperature()).
+class window.Layouter
   class Stats
     constructor: ->
       @time = 0
@@ -144,5 +142,3 @@ class Layouter
       @statsRound.reset()
       @statsRound.lastPrinted = t1
     not @done
-
-window.Layouter = Layouter
