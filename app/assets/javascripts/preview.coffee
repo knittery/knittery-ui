@@ -126,47 +126,36 @@ drawMesh = (graph, scene) ->
     node.data.vertice = i
     geo.vertices.push(node.position)
 
-  quads = []
   for n1 in graph.nodes
     for n2 in n1.neighbors when n1.data.vertice < n2.data.vertice
       for n3 in n1.neighbors when n2.data.vertice < n3.data.vertice and n1.data.vertice < n3.data.vertice
         for n4 in n2.neighbors when n3 != n4 and n3 in n4.neighbors and n1.data.vertice < n4.data.vertice
           quad = [n1.data.vertice, n2.data.vertice, n3.data.vertice, n4.data.vertice]
-          quads.push(quad)
+          geo.faces.push(new THREE.Face3(quad[0], quad[1], quad[2]))
+          geo.faces.push(new THREE.Face3(quad[3], quad[2], quad[1]))
 
-  updateFaces = ->
-    geo.faces = []
-    for quad in quads
-      t = new THREE.Triangle(geo.vertices[quad[0]], geo.vertices[quad[1]], geo.vertices[quad[2]])
-      if t.normal().z > 0
-        geo.faces.push(new THREE.Face3(quad[0], quad[1], quad[2]))
-        geo.faces.push(new THREE.Face3(quad[3], quad[2], quad[1]))
-      else
-        geo.faces.push(new THREE.Face3(quad[0], quad[2], quad[1]))
-        geo.faces.push(new THREE.Face3(quad[3], quad[1], quad[2]))
-
-  updateFaces()
+  geo.computeFaceNormals()
+  geo.computeVertexNormals()
 
   material = new THREE.MeshLambertMaterial {
-    color: 0x0000ff
+    color: 0xee7070
+    emissive: 0x202020
     side: THREE.DoubleSide
   }
   mesh = new THREE.Mesh(geo, material)
   scene.add(mesh)
   ->
-    updateFaces()
-    geo.elementsNeedUpdate = true
-    geo.verticesNeedUpdate = true
     geo.computeFaceNormals()
-    geo.computeCentroids()
     geo.computeVertexNormals()
+    geo.verticesNeedUpdate = true
+    geo.normalsNeedUpdate = true
 
 
 initRenderer = (inElement) ->
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setSize(inElement.width(), inElement.height())
   $(renderer.domElement).appendTo(inElement)
-  renderer.setClearColor(0xffffff, 1) 
+  renderer.setClearColor(0xffffff, 1)
   renderer
 
 initCamera = (elem1) ->
