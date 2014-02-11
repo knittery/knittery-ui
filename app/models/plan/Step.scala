@@ -5,6 +5,7 @@ import scalaz._
 import Scalaz._
 import models._
 import utils._
+import models.plan.knitting._
 
 /** Step to perform during knitting. */
 sealed trait Step {
@@ -12,36 +13,30 @@ sealed trait Step {
 }
 
 /** Knits a row using a carriage. */
-case class KnitRow(carriage: Carriage, direction: Direction, needleActionRow: NeedleActionRow = AllNeedlesToB) extends Step {
-  override def apply(state: KnittingState) = {
-    for {
-      kc <- knittingCarriage(state, (needleActionRow))
-      res <- kc(direction, state.needles, state.doubleBedNeedles)
-    } yield {
-      res.yarn.values.foldLeft(state)(_.attachYarn(_)).
-        moveCarriage(carriage, direction).
-        modifyNeedles(res.needles).
-        knit(res.stitches).
-        knit2(res.knitted2)
-    }
-  }
-  private def knittingCarriage(state: KnittingState, pattern: NeedleActionRow) = for {
+case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActionRow = AllNeedlesToB) extends Step {
+  override def apply(state: KnittingState) = for {
     nextDir <- state.nextDirection(carriage)
     _ <- {
-      if (nextDir != direction) s"Cannot move carriage from $direction to $direction".fail[KnittingCarriage]
+      if (nextDir != direction) s"Cannot move carriage from $direction to $direction".fail
       else ().success
     }
-    c = KnittingCarriage(state.carriageState(carriage), state.yarnAttachments, pattern)
-  } yield c
+    state2 <- carriage match {
+      case KCarriage =>
+        val knitting = new KKnitting(state.carriageState(KCarriage), state, direction)
+        knitting(pattern)
+      case LCarriage => ???
+      case GCarriage => ???
+    }
+  } yield state2.moveCarriage(carriage, direction)
 
-  override def hashCode = carriage.hashCode ^ direction.hashCode ^ needleActionRow.all.hashCode
+  override def hashCode = carriage.hashCode ^ direction.hashCode ^ pattern.all.hashCode
   override def equals(o: Any) = o match {
     case o: KnitRow => o.carriage == carriage && o.direction == direction &&
-      o.needleActionRow.all == needleActionRow.all
+      o.pattern.all == pattern.all
     case _ => false
   }
   override def toString = {
-    val row = needleActionRow.all.map(_.toPosition.toString).mkString
+    val row = pattern.all.map(_.toPosition.toString).mkString
     s"KnitRow($carriage,$direction,${row})"
   }
 }
