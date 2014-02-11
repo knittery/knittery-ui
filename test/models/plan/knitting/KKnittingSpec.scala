@@ -46,6 +46,14 @@ class KKnittingSpec extends Specification {
     def partH = State(SinkerPlate(Some(redPiece)), Settings(partLeft = true, partRight = true, holdingCamLever = HoldingCamH))
     def state(pos: Needle => NeedlePosition) = stateWithYarn(pos, redPiece)
   }
+  private trait mc extends Yarns with StateSupport {
+    import KCarriage._
+    val redPiece = YarnPiece(red)
+    val greenPiece = YarnPiece(green)
+    def mc = State(SinkerPlate(Some(redPiece), Some(greenPiece)), Settings(mc = true))
+    def mcH = State(SinkerPlate(Some(redPiece), Some(greenPiece)), Settings(mc = true, holdingCamLever = HoldingCamH))
+    def state(pos: Needle => NeedlePosition) = stateWithYarn(pos, redPiece)
+  }
 
   def beAllStitch(stitch: Stitch) =
     contain(stitch).forall
@@ -229,6 +237,67 @@ class KKnittingSpec extends Specification {
       end.output.rows.size must_== 1
       end.output.rows(0) must beAllStitch(PlainStitch(red))
       end.needles must beAtPosition(NeedleD)
+      end.needles must carryYarn(redPiece)
+    }
+  }
+
+  "mc single bed knitting" should {
+    "knit nothing with all needles to A" in new mc {
+      val knit = new KKnitting(mc, state(_ => NeedleA), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(EmptyStitch)
+      end.needles must beAtPosition(NeedleA)
+      end.needles must carryYarn()
+    }
+    "knit plain red and put red on needle with needles at B" in new mc {
+      val knit = new KKnitting(mc, state(_ => NeedleB), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(redPiece)
+    }
+    "knit plain red and put green on needle with needles at D" in new mc {
+      val knit = new KKnitting(mc, state(_ => NeedleD), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(greenPiece)
+    }
+    "knit plain red and put green on needle with needles at E" in new mc {
+      val knit = new KKnitting(mc, state(_ => NeedleE), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(greenPiece)
+    }
+  }
+  "mc single bed knitting with holdingCamLever=H " should {
+    "knit plain red and put red on needle with needles at B" in new mc {
+      val knit = new KKnitting(mcH, state(_ => NeedleB), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(redPiece)
+    }
+    "knit plain red and put green on needle with needles at D" in new mc {
+      val knit = new KKnitting(mcH, state(_ => NeedleD), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(greenPiece)
+    }
+    "knit nothing with needles at E" in new mc {
+      val knit = new KKnitting(mcH, state(_ => NeedleE), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(NoStitch)
+      end.needles must beAtPosition(NeedleE)
       end.needles must carryYarn(redPiece)
     }
   }

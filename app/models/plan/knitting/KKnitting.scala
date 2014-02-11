@@ -110,7 +110,7 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (_, NeedleA, _)) =>
       //don't knit A needles
       x
-    case (x, (n, NeedleE, ys)) if takeback =>
+    case (x, (n, NeedleE, ys)) if !takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
       x.needle(n, NeedleE, ys).knit(n, NoStitch)
