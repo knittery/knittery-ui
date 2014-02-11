@@ -15,14 +15,9 @@ class KKnittingSpec extends Specification {
     }
   }
 
-  private trait plain extends Yarns {
-    import KCarriage._
-    val redPiece = YarnPiece(red)
-    def plain = State(SinkerPlate(Some(redPiece)))
-    def plainH = State(SinkerPlate(Some(redPiece)), Settings(holdingCamLever = HoldingCamH))
-
-    def state(pos: Needle => NeedlePosition) = {
-      val (yarn, ns) = Needle.all.foldLeft((redPiece: YarnFlow, Map.empty[Needle, NeedleState])) {
+  private trait StateSupport {
+    def stateWithYarn(pos: Needle => NeedlePosition, yarnToUse: YarnFlow) = {
+      val (yarn, ns) = Needle.all.foldLeft((yarnToUse, Map.empty[Needle, NeedleState])) {
         case ((yarn, r), n) =>
           val p = pos(n)
           if (p.isWorking) {
@@ -35,6 +30,21 @@ class KKnittingSpec extends Specification {
       KnittingState.initial.modifyNeedles(ns).
         attachYarn(YarnAttachment(yarn, Needle.all.reverse.head))
     }
+
+  }
+  private trait plain extends Yarns with StateSupport {
+    import KCarriage._
+    val redPiece = YarnPiece(red)
+    def plain = State(SinkerPlate(Some(redPiece)))
+    def plainH = State(SinkerPlate(Some(redPiece)), Settings(holdingCamLever = HoldingCamH))
+    def state(pos: Needle => NeedlePosition) = stateWithYarn(pos, redPiece)
+  }
+  private trait part extends Yarns with StateSupport {
+    import KCarriage._
+    val redPiece = YarnPiece(red)
+    def part = State(SinkerPlate(Some(redPiece)), Settings(partLeft = true, partRight = true))
+    def partH = State(SinkerPlate(Some(redPiece)), Settings(partLeft = true, partRight = true, holdingCamLever = HoldingCamH))
+    def state(pos: Needle => NeedlePosition) = stateWithYarn(pos, redPiece)
   }
 
   def beAllStitch(stitch: Stitch) =
@@ -113,6 +123,58 @@ class KKnittingSpec extends Specification {
       end.output.rows.size must_== 1
       end.output.rows(0) must beAllStitch(NoStitch)
       end.needles must beAtPosition(NeedleE)
+      end.needles must carryYarn(redPiece)
+    }
+  }
+  "plain single bed knitting with D-pattern" should {
+    "knit nothing with all needles to A" in new plain {
+      val knit = new KKnitting(plain, state(_ => NeedleA), ToRight)
+      val end = knit(AllNeedlesToD).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(EmptyStitch)
+      end.needles must beAtPosition(NeedleA)
+      end.needles must carryYarn()
+    }
+    "knit plain red stitches with needles to B and move needles to D" in new plain {
+      val knit = new KKnitting(plain, state(_ => NeedleB), ToRight)
+      val end = knit(AllNeedlesToD).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleD)
+      end.needles must carryYarn(redPiece)
+    }
+  }
+  "part single bed knitting" should {
+    "knit nothing with all needles to A" in new part {
+      val knit = new KKnitting(part, state(_ => NeedleA), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(EmptyStitch)
+      end.needles must beAtPosition(NeedleA)
+      end.needles must carryYarn()
+    }
+    "knit nothing with all needles to B" in new part {
+      val knit = new KKnitting(part, state(_ => NeedleB), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(NoStitch)
+      end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(redPiece)
+    }
+    "knit plain red stitches with needles to D" in new part {
+      val knit = new KKnitting(part, state(_ => NeedleD), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(redPiece)
+    }
+    "knit plain red stitches with needles to E" in new part {
+      val knit = new KKnitting(part, state(_ => NeedleE), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleB)
       end.needles must carryYarn(redPiece)
     }
   }
