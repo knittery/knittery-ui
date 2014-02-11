@@ -94,7 +94,7 @@ class KKnittingSpec extends Specification {
   }
   "plain single bed knitting with holdingCamLever=H" should {
     "knit nothing with all needles to A" in new plain {
-      val knit = new KKnitting(plain, state(_ => NeedleA), ToRight)
+      val knit = new KKnitting(plainH, state(_ => NeedleA), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.rows.size must_== 1
       end.output.rows(0) must beAllStitch(EmptyStitch)
@@ -102,7 +102,7 @@ class KKnittingSpec extends Specification {
       end.needles must carryYarn()
     }
     "knit plain red stitches with needles to B" in new plain {
-      val knit = new KKnitting(plain, state(_ => NeedleB), ToRight)
+      val knit = new KKnitting(plainH, state(_ => NeedleB), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.rows.size must_== 1
       end.output.rows(0) must beAllStitch(PlainStitch(red))
@@ -110,7 +110,7 @@ class KKnittingSpec extends Specification {
       end.needles must carryYarn(redPiece)
     }
     "knit plain red stitches with needles to D" in new plain {
-      val knit = new KKnitting(plain, state(_ => NeedleD), ToRight)
+      val knit = new KKnitting(plainH, state(_ => NeedleD), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.rows.size must_== 1
       end.output.rows(0) must beAllStitch(PlainStitch(red))
@@ -144,6 +144,7 @@ class KKnittingSpec extends Specification {
       end.needles must carryYarn(redPiece)
     }
   }
+
   "part single bed knitting" should {
     "knit nothing with all needles to A" in new part {
       val knit = new KKnitting(part, state(_ => NeedleA), ToRight)
@@ -175,6 +176,59 @@ class KKnittingSpec extends Specification {
       end.output.rows.size must_== 1
       end.output.rows(0) must beAllStitch(PlainStitch(red))
       end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(redPiece)
+    }
+  }
+  "part single bed knitting with holdingCamLever=H " should {
+    "knit nothing with all needles to B" in new part {
+      val knit = new KKnitting(partH, state(_ => NeedleB), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(NoStitch)
+      end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(redPiece)
+    }
+    "knit plain red stitches with needles to D" in new part {
+      val knit = new KKnitting(partH, state(_ => NeedleD), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleB)
+      end.needles must carryYarn(redPiece)
+    }
+    "knit nothing with needles to E" in new part {
+      val knit = new KKnitting(partH, state(_ => NeedleE), ToRight)
+      val end = knit(AllNeedlesToB).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(NoStitch)
+      end.needles must beAtPosition(NeedleE)
+      end.needles must carryYarn(redPiece)
+    }
+
+  }
+  "part single bed knitting with pattern D" should {
+    "knit nothing with all needles to B and move needles to D" in new part {
+      val knit = new KKnitting(part, state(_ => NeedleB), ToRight)
+      val end = knit(AllNeedlesToD).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(NoStitch)
+      end.needles must beAtPosition(NeedleD)
+      end.needles must carryYarn(redPiece)
+    }
+    "knit plain red stitches with needles to D and move needles to D" in new part {
+      val knit = new KKnitting(part, state(_ => NeedleD), ToRight)
+      val end = knit(AllNeedlesToD).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleD)
+      end.needles must carryYarn(redPiece)
+    }
+    "knit plain red stitches with needles to E and move needles to D" in new part {
+      val knit = new KKnitting(part, state(_ => NeedleE), ToRight)
+      val end = knit(AllNeedlesToD).check()
+      end.output.rows.size must_== 1
+      end.output.rows(0) must beAllStitch(PlainStitch(red))
+      end.needles must beAtPosition(NeedleD)
       end.needles must carryYarn(redPiece)
     }
   }
