@@ -77,7 +77,7 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (n, NeedleE, ys)) if !takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.needle(n, NeedleE, ys)
+      x.needle(n, NeedleE, ys).knit(n, NoStitch)
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, noose) = x.withYarnA(_.to(n).noose)
@@ -93,7 +93,7 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (n, NeedleE, ys)) if takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.needle(n, NeedleE, ys)
+      x.needle(n, NeedleE, ys).knit(n, NoStitch)
     case (x, (n, NeedleB, ys)) =>
       // don't knit B needles with part
       x.needle(n, pattern(n).toPosition, ys)
@@ -112,7 +112,7 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (n, NeedleE, ys)) if takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.needle(n, NeedleE, ys)
+      x.needle(n, NeedleE, ys).knit(n, NoStitch)
     case (x, (n, NeedleB, ys)) =>
       //knit yarnA
       val (x2, noose) = x.withYarnA(_.to(n).noose)
@@ -139,7 +139,7 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
     case (x, (n, NeedleE, ys)) if !takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.needle(n, NeedleE, ys)
+      x.needle(n, NeedleE, ys).knit(n, NoStitch)
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, noose) = x.withYarnA(_.to(n).noose)
