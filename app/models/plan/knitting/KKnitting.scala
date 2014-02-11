@@ -55,10 +55,8 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
       val bed = new KDoubleBed(dbc.needleTakeback(direction), state.needles)
       val part = dbc.part(direction)
       (part) match {
-        case (true) =>
-          bed.plain _
-        case (false) =>
-          ??? //part
+        case (true) => bed.plain _
+        case (false) => bed.part _
       }
     }
   }
@@ -146,6 +144,24 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
       val (x2, noose) = x.withYarnA(_.to(n).noose)
       x2.knit(Stitch2(noose._1, noose._3, ys))
         .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+        needle(n, NeedleB, noose._2)
+  }
+
+  def part(x: ResultBuilder, n: Needle): ResultBuilder = (x, (n, needles(n).position, needles(n).yarn)) match {
+    case (x, (_, NeedleA, _)) =>
+      //don't knit A needles
+      x
+    case (x, (n, NeedleE, ys)) if !takeback =>
+      //don't knit E needles if no needle pull back from E
+      //TODO do we need to "prevent" falling down of yarn in the yarn feeder
+      x.needle(n, NeedleE, ys).knit(n, NoStitch)
+    case (x, (n, NeedleB, ys)) =>
+      // don't knit B needles with part
+      x.needle(n, NeedleB, ys)
+    case (x, (n, _, ys)) =>
+      //knit normally
+      val (x2, noose) = x.withYarnA(_.to(n).noose)
+      x2.knit(Stitch2(noose._1, noose._3, ys)).
         needle(n, NeedleB, noose._2)
   }
 }
