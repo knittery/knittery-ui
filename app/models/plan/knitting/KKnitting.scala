@@ -142,8 +142,8 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, noose) = x.withYarnA(_.to(n).noose)
-      x2.knit(Stitch2(noose._1, noose._3, ys))
-        .knit(n, PlainStitch(ys.map(_.yarn).toList)).
+      x2.knit(Stitch2(ys, noose._3, noose._1))
+        .knit(n, PurlStitch(ys.map(_.yarn).toList)).
         needle(n, NeedleB, noose._2)
   }
 
@@ -161,7 +161,8 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, noose) = x.withYarnA(_.to(n).noose)
-      x2.knit(Stitch2(noose._1, noose._3, ys)).
+      x2.knit(Stitch2(ys, noose._3, noose._1)).
+        knit(n, PurlStitch(ys.map(_.yarn).toList)).
         needle(n, NeedleB, noose._2)
   }
 }
