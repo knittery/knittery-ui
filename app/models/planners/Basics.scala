@@ -79,12 +79,12 @@ object Basics {
   } yield ()
 
   /** Round knitting with the K-Carriage. */
-  def knitRoundK(yarn: YarnPiece, pattern: NeedleActionRow = AllNeedlesToB) = {
+  def knitRoundK(yarn: YarnPiece) = {
     import KCarriage._
     val assembly = DoubleBedCarriage(partRight = true, yarn = Some(yarn))
     val settings = Settings(partLeft = true)
     Basics.assembly(assembly) >>
-      knitRowWithK(settings, Some(yarn), None, pattern)
+      knitRowWithK(settings, Some(yarn))
   }
 
   /** Knit a row with the L-Carriage. */
