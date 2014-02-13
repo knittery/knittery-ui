@@ -35,23 +35,23 @@ class KKnittingSpec extends Specification {
   private trait plain extends Yarns with StateSupport {
     import KCarriage._
     val redPiece = YarnPiece(red)
-    def plain = State(SinkerPlate(Some(redPiece)))
-    def plainH = State(SinkerPlate(Some(redPiece)), Settings(holdingCamLever = HoldingCamH))
+    def plain = State(yarnA = Some(redPiece))
+    def plainH = State(yarnA = Some(redPiece), settings = Settings(holdingCamLever = HoldingCamH))
     def state(pos: Needle => NeedlePosition) = stateWithYarn(pos, redPiece)
   }
   private trait part extends Yarns with StateSupport {
     import KCarriage._
     val redPiece = YarnPiece(red)
-    def part = State(SinkerPlate(Some(redPiece)), Settings(partLeft = true, partRight = true))
-    def partH = State(SinkerPlate(Some(redPiece)), Settings(partLeft = true, partRight = true, holdingCamLever = HoldingCamH))
+    def part = State(yarnA = Some(redPiece), settings = Settings(partLeft = true, partRight = true))
+    def partH = State(yarnA = Some(redPiece), settings = Settings(partLeft = true, partRight = true, holdingCamLever = HoldingCamH))
     def state(pos: Needle => NeedlePosition) = stateWithYarn(pos, redPiece)
   }
   private trait mc extends Yarns with StateSupport {
     import KCarriage._
     val redPiece = YarnPiece(red)
     val greenPiece = YarnPiece(green)
-    def mc = State(SinkerPlate(Some(redPiece), Some(greenPiece)), Settings(mc = true))
-    def mcH = State(SinkerPlate(Some(redPiece), Some(greenPiece)), Settings(mc = true, holdingCamLever = HoldingCamH))
+    def mc = State(yarnA = Some(redPiece), yarnB = Some(greenPiece), settings = Settings(mc = true))
+    def mcH = State(yarnA = Some(redPiece), yarnB = Some(greenPiece), settings = Settings(mc = true, holdingCamLever = HoldingCamH))
     def state(pos: Needle => NeedlePosition) = stateWithYarn(pos, redPiece)
   }
 

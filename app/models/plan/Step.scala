@@ -120,13 +120,7 @@ case class ThreadYarnK(yarnA: Option[YarnPiece], yarnB: Option[YarnPiece]) exten
     val cs = state.carriageState(KCarriage)
     require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active K-carriage")
     require(yarnA.isEmpty || yarnA != yarnB, "Cannot thread same piece of yarn to A and B")
-    val newAssembly = cs.assembly match {
-      case a: SinkerPlate => a.copy(yarnA = yarnA, yarnB = yarnB)
-      case a: DoubleBedCarriage =>
-        require(yarnB.isEmpty, "Cannot thread two yarns in the double bed carriage")
-        a.copy(yarn = yarnA)
-    }
-    state.modifyCarriage(cs.copy(assembly = newAssembly))
+    state.modifyCarriage(cs.copy(yarnA = yarnA, yarnB = yarnB))
   }.toSuccess
 }
 case class ThreadYarnG(yarn: Option[YarnPiece]) extends ThreadYarn {

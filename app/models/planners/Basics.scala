@@ -81,7 +81,8 @@ object Basics {
   /** Round knitting with the K-Carriage. */
   def knitRoundK(yarn: YarnPiece) = for {
     _ <- carriageSettings(KCarriage.Settings(partRight = true))
-    _ <- assembly(KCarriage.DoubleBedCarriage(partLeft = true, yarn = Some(yarn)))
+    _ <- assembly(KCarriage.DoubleBedCarriage(partLeft = true))
+    _ <- ThreadYarnK(Some(yarn), None)
     dir <- nextDirection(KCarriage)
     _ <- KnitRow(KCarriage, dir)
   } yield ()

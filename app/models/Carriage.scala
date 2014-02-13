@@ -28,22 +28,22 @@ case object KCarriage extends Carriage {
 
   case class State(assembly: Assembly = KCarriage.SinkerPlate(),
     settings: Settings = Settings(),
+    yarnA: Option[YarnPiece] = None,
+    yarnB: Option[YarnPiece] = None,
     position: CarriagePosition = CarriageRemoved) extends CarriageState {
-    def yarnA = yarns._1
-    def yarnB = yarns._2
-    def yarns = assembly match {
-      case SinkerPlate(yarnA, yarnB, _, _) => (yarnA, yarnB)
-      case c: DoubleBedCarriage => (c.yarn, None)
-    }
+    require(yarnB.isEmpty || assembly.supportsYarnB, "No YarnB supported with this assembly")
+    def yarns = (yarnA, yarnB)
   }
   def initialState = State()
 
-  sealed trait Assembly
-  case class SinkerPlate(yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None,
-    weavingPatternLeft: Boolean = false, weavingPatternRight: Boolean = false)
-    extends Assembly
-  case class DoubleBedCarriage(yarn: Option[YarnPiece] = None,
-    partLeft: Boolean = false, partRight: Boolean = false,
+  sealed trait Assembly {
+    def supportsYarnB = false
+  }
+  case class SinkerPlate(weavingPatternLeft: Boolean = false, weavingPatternRight: Boolean = false)
+    extends Assembly {
+    override def supportsYarnB = true
+  }
+  case class DoubleBedCarriage(partLeft: Boolean = false, partRight: Boolean = false,
     needleTakebackLeft: Boolean = false, needleTakebackRight: Boolean = false)
     extends Assembly {
     def part(direction: Direction) = if (direction == ToLeft) partLeft else partRight
