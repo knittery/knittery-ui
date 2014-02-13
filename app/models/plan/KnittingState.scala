@@ -90,4 +90,4 @@ object CarriageStates {
   }
 }
 
-case class YarnAttachment(yarn: YarnFlow, needle: Needle, mainBed: Boolean, rowDistance: Int = 0)
+case class YarnAttachment(yarn: YarnFlow, needle: Needle, bed: Bed, rowDistance: Int = 0)

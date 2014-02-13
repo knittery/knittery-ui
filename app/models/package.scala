@@ -1,6 +1,10 @@
 import models.NeedlePosition
 
 package object models {
+  sealed trait Bed
+  case object MainBed extends Bed
+  case object DoubleBed extends Bed
+
   type NeedlePatternRow = Needle => NeedlePosition
   implicit class RichNeedlePatternRow(val row: NeedlePatternRow) extends AnyVal {
     def all = Needle.all.map(row)
