@@ -130,6 +130,13 @@ sealed trait GuideStep {
       (s"Change Settings K",
         s"Change K carriage settings Knob to ${s.knob} with lever at ${s.holdingCamLever.name} and ${settings.mkString(" and ")}")
 
+    case ChangeKCarriageAssembly(a: KCarriage.SinkerPlate) =>
+      (s"Mount Sinker Plate",
+        s"Add the sinker plate to the K carriage")
+    case ChangeKCarriageAssembly(a: KCarriage.DoubleBedCarriage) =>
+      (s"Mount Double Bed Carriage",
+        s"Add the double bed carriage to the K carriage")
+
     case Information(title, desc) => (title, desc)
   }
 
