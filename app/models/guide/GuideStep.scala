@@ -45,15 +45,36 @@ sealed trait GuideStep {
     case other => Set.empty
   }
 
+  private def formatNeedleRange(filter: Needle => Boolean) = {
+    val from = Needle.all.filter(filter).head
+    val to = Needle.all.filter(filter).last
+    s"needles ${from.number} through ${to.number}"
+  }
+
   private def info = step match {
     case ClosedCastOn(from, to, yarn) =>
       ("Cast on",
         s"Perform a closed cast on from needle ${from.number} until ${to.number} with yarn ${yarn.yarn.name}")
     case ClosedCastOff(yarn, filter) =>
-      val from = Needle.all.filter(filter).head
-      val to = Needle.all.filter(filter).last
       ("Cast off",
-        s"Perform a closed cast off for needles ${from.number} through ${to.number} with ${yarn.yarn.name}")
+        s"Perform a closed cast off for ${formatNeedleRange(filter)} with ${yarn.yarn.name}")
+
+    case MoveToDoubleBed(filter, offset, None) =>
+      val o = {
+        if (offset == 0) ""
+        else if (offset < 0) s"shifted $offset to the left"
+        else s"shifted $offset to the right"
+      }
+      (s"Move needles to double bed",
+        s"Move the yarns from ${formatNeedleRange(filter)} on the main bed to the double bed $o")
+    case MoveToDoubleBed(filter, offset, Some(at)) =>
+      val o = {
+        if (offset == 0) ""
+        else if (offset < 0) s"shifted $offset to the left"
+        else s"shifted $offset to the right"
+      }
+      (s"Move needles to double bed",
+        s"Move the yarns from ${formatNeedleRange(filter)} on the main bed to the double bed mirrored at $at $o")
 
     case ThreadYarnK(None, None) =>
       (s"Unthread Yarn from K",

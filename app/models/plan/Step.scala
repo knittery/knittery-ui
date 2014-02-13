@@ -172,6 +172,29 @@ case class ClosedCastOff(withYarn: YarnPiece, filter: Needle => Boolean) extends
   }
 }
 
+/** Moves the yarn from the main to the double bed. Needles affected are moved to B position. */
+case class MoveToDoubleBed(filter: Needle => Boolean, offset: Int = 0, flip: Option[Needle] = None) extends Step {
+  override def apply(state: KnittingState) = {
+    val (nm, nd) = Needle.all.foldLeft((state.needles, state.doubleBedNeedles)) {
+      case ((main, double), fromN) => movementTarget(fromN).map { toN =>
+        if (main(fromN).position.isWorking) {
+          val m = NeedleState(NeedleB)
+          val d = NeedleState(NeedleB, double(toN).yarn ++ main(fromN).yarn)
+          (main + (fromN -> m), double + (toN -> d))
+        } else (main, double)
+      }.getOrElse(main, double)
+    }
+    state.copy(needles = nm, doubleBedNeedles = nd).success
+  }
+  def movementTarget(from: Needle) = {
+    val index = flip match {
+      case Some(flipAt) => flipAt.index + (flipAt.index - from.index)
+      case None => from.index + offset
+    }
+    Some(index).filter(i => i >= 0 && i < Needle.count).map(Needle.atIndex)
+  }
+}
+
 case class AddCarriage(carriage: Carriage, at: LeftRight = Left) extends Step {
   override def apply(state: KnittingState) = Try {
     require(state.carriageState(carriage).position == CarriageRemoved,
