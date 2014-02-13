@@ -35,8 +35,10 @@ object Global extends GlobalSettings {
     _machine = Some(system.actorOf(Machine.props(connector), "machine"))
     _guider = Some(system.actorOf(Guider.props(machine), "guider"))
 
-    //    guider ! Guider.LoadPlan(imagePlan)
-    guider ! Guider.LoadPlan(examplePlan)
+    //    val plan = imagePlan
+    //    val plan = examplePlan
+    val plan = tubePlan
+    guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
 
   @volatile private var _machine: Option[ActorRef] = None
@@ -74,13 +76,25 @@ object Global extends GlobalSettings {
       Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
       Basics.knitRowWithK(KCarriage.Settings(), Some(last)) >>
       Cast.offClosed(last)
-    planner.plan().valueOr(e => throw new RuntimeException(e))
+    planner.plan()
   }
 
-  private val imagePlan = {
+  private def tubePlan = {
+    val width = 20
+    val length = 30
+    val yarn = YarnPiece(Yarn("red", Color.red))
+    val planner =
+      Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
+        (0 to length).toVector.traverse { _ =>
+          Basics.knitRoundK(yarn)
+        }
+    planner.plan()
+  }
+
+  private def imagePlan = {
     val img = ImageIO.read(new File("example.png"))
     val planner = Examples.imageRagDoubleBed(img)
-    planner.plan().valueOr(e => throw new RuntimeException(e))
+    planner.plan()
   }
 
 }
