@@ -72,6 +72,14 @@ case class ChangeKCarriageSettings(settings: KCarriage.Settings) extends ChangeC
   }.toSuccess
   override def carriage = KCarriage
 }
+case class ChangeKCarriageAssembly(assembly: KCarriage.Assembly) extends ChangeCarriageSettings {
+  override def apply(state: KnittingState) = Try {
+    val cs = state.carriageState(KCarriage)
+    require(cs.position != CarriageRemoved, "Cannot set assembly on non-active K-carriage")
+    state.modifyCarriage(cs.copy(assembly = assembly))
+  }.toSuccess
+  override def carriage = KCarriage
+}
 case class ChangeLCarriageSettings(settings: LCarriage.Settings) extends ChangeCarriageSettings {
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(LCarriage)

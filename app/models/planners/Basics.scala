@@ -25,6 +25,16 @@ object Basics {
     }
   } yield current
 
+  /** Change K-carriage assembly. */
+  def assembly(a: KCarriage.Assembly) = for {
+    _ <- needCarriage(KCarriage)
+    current <- Planner.state(_.carriageState(KCarriage).assembly)
+    _ <- {
+      if (current == a) Planner.noop
+      else Planner.step(ChangeKCarriageAssembly(a))
+    }
+  } yield current
+
   /** Change L-carriage settings. */
   def carriageSettings(settings: LCarriage.Settings) = for {
     _ <- needCarriage(KCarriage)
