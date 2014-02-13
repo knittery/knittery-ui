@@ -28,7 +28,7 @@ class KKnittingSpec extends Specification {
           }
       }
       KnittingState.initial.modifyNeedles(ns).
-        attachYarn(YarnAttachment(yarn, Needle.all.reverse.head))
+        attachYarn(YarnAttachment(yarn, Needle.all.reverse.head, true))
     }
 
   }
