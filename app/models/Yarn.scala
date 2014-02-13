@@ -41,7 +41,7 @@ sealed abstract class YarnPoint(val prev: YarnFlow, val distance: Int) extends Y
     }
   }
   //equals is object identity
-  override def toString = s"$start + $length"
+  override def toString = s"$start+$length"
 }
 class YarnPiece(val yarn: Yarn) extends YarnFlow {
   override def previous = Stream.empty
