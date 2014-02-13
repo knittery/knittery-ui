@@ -139,6 +139,11 @@ sealed trait GuideStep {
       (s"Change Settings K",
         s"Change K carriage settings Knob to ${s.knob} with lever at ${s.holdingCamLever.name} and ${settings.mkString(" and ")} with assembly $assembly")
 
+    case s @ RetireNeedle(needle, direction) =>
+      val d = if (direction == Left) "left" else "right"
+      (s"Retire needle ${needle.number}",
+        s"Move the yarns on needle ${needle.number} one needle to the $d and put it into A position. Leave needle ${s.target.number} at B position.")
+
     case Information(title, desc) => (title, desc)
   }
 

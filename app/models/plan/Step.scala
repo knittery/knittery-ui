@@ -214,6 +214,23 @@ case class AddCarriage(carriage: Carriage, at: LeftRight = Left) extends Step {
   }.toSuccess
 }
 
+/**
+ * Moves the needle into A position and moves the yarns that were on in one needle in the
+ * given direction. The needle the yarn is moved to is left in the B position.
+ */
+case class RetireNeedle(at: Needle, direction: Direction) extends Step {
+  override def apply(state: KnittingState) = Try {
+    require(at != Needle.all.head || direction == ToRight, "Cannot move to the left on first needle")
+    require(at != Needle.all.last || direction == ToLeft, "Cannot move to the right on last needle")
+    val before = state.needles(at)
+    if (before.position.isWorking) {
+      val m2 = NeedleState(NeedleB, state.needles(target).yarn ++ before.yarn)
+      state.modifyNeedles(state.needles.toMap + (target -> m2) + (at -> NeedleState(NeedleA)))
+    } else state
+  }.toSuccess
+  lazy val target = at + (if (direction == ToLeft) -1 else 1)
+}
+
 case class Information(title: String, description: String) extends Step {
   override def apply(state: KnittingState) = state.success
 }
