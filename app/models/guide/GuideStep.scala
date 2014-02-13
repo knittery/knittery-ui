@@ -99,7 +99,12 @@ sealed trait GuideStep {
       val affected = Needle.all.filter(n => stateBefore.needles(n).position != to(n))
       val movement = affected.map(n => s"${n.number} to ${to(n).toString}")
       (s"Move ${affected.size} needles by hand",
-        s"Move to following needles: ${movement.mkString(", ")}")
+        s"Move the following needles: ${movement.mkString(", ")}")
+    case MoveNeedlesDoubleBed(to) =>
+      val affected = Needle.all.filter(n => stateBefore.needles(n).position != to(n))
+      val movement = affected.map(n => s"${n.number} to ${to(n).toString}")
+      (s"Move needles on the double bed",
+        s"Move the following needles on the double bed: ${movement.mkString(", ")}")
 
     case KnitRow(c, dir, _) =>
       val from = if (ToLeft != dir) "left" else "right"

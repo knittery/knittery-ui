@@ -36,6 +36,9 @@ case class KnittingState(
   def moveNeedles(positions: Needle => NeedlePosition) =
     modifyNeedles(Needle.all.map(n => n -> needles(n).copy(position = positions(n))).toMap)
   def modifyNeedles(newNeedles: NeedleStateRow) = copy(needles = newNeedles.toMap)
+  def moveDoubleBedNeedles(positions: Needle => NeedlePosition) =
+    modifyDoubleBedNeedles(Needle.all.map(n => n -> needles(n).copy(position = positions(n))).toMap)
+  def modifyDoubleBedNeedles(newNeedles: NeedleStateRow) = copy(doubleBedNeedles = newNeedles.toMap)
 
   def knit(f: Needle => Stitch) = copy(output = output + f)
 

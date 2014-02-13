@@ -61,6 +61,20 @@ object MoveNeedles {
     else before(n))
 }
 
+/** Manual movement of needles on the double bed. */
+case class MoveNeedlesDoubleBed(to: NeedlePatternRow) extends Step {
+  override def apply(state: KnittingState) = {
+    val toAButYarn = Needle.all.filter(n => to(n).nonWorking && state.doubleBedNeedles(n).yarn.nonEmpty)
+    if (toAButYarn.nonEmpty) s"Needles ${toAButYarn.mkString(", ")} on double bed have yarn and cannot be moved to A".fail
+    else state.moveDoubleBedNeedles(to).success
+  }
+  override def hashCode = to.all.hashCode
+  override def equals(o: Any) = o match {
+    case MoveNeedles(to2) => to.all == to2.all
+    case _ => false
+  }
+}
+
 sealed trait ChangeCarriageSettings extends Step {
   def carriage: Carriage
 }
