@@ -58,6 +58,10 @@ case class PlainStitch(yarns: List[Yarn]) extends Stitch {
 }
 object PlainStitch {
   def apply(yarn: Yarn): PlainStitch = PlainStitch(yarn :: Nil)
+  def orEmpty(yarns: Traversable[Yarn]) = {
+    if (yarns.nonEmpty) EmptyStitch
+    else apply(yarns.toList)
+  }
 }
 
 case class PurlStitch(yarns: List[Yarn]) extends Stitch {
@@ -66,6 +70,10 @@ case class PurlStitch(yarns: List[Yarn]) extends Stitch {
 }
 object PurlStitch {
   def apply(yarn: Yarn): PurlStitch = PurlStitch(yarn :: Nil)
+  def orEmpty(yarns: Traversable[Yarn]) = {
+    if (yarns.nonEmpty) EmptyStitch
+    else apply(yarns.toList)
+  }
 }
 
 case class CastOnStitch(yarns: List[Yarn]) extends Stitch {
