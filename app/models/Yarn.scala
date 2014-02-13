@@ -1,5 +1,6 @@
 package models
 
+import java.util.concurrent.atomic.AtomicLong
 import java.awt.Color
 import utils.ConsoleColors
 import scala.annotation.tailrec
@@ -43,14 +44,15 @@ sealed abstract class YarnPoint(val prev: YarnFlow, val distance: Int) extends Y
   //equals is object identity
   override def toString = s"$start+$length"
 }
-class YarnPiece(val yarn: Yarn) extends YarnFlow {
+class YarnPiece(val yarn: Yarn, id: Long) extends YarnFlow {
   override def previous = Stream.empty
   override def start = YarnPiece.this
   override def length = 0
   override def contains(other: YarnFlow) = YarnPiece.this == other
   //equals must be for object identity
-  override def toString = s"$yarn"
+  override def toString = s"$id#$yarn"
 }
 object YarnPiece {
-  def apply(yarn: Yarn) = new YarnPiece(yarn)
+  def apply(yarn: Yarn) = new YarnPiece(yarn, ids.incrementAndGet)
+  private val ids = new AtomicLong
 }
