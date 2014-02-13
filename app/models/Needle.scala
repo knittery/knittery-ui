@@ -8,7 +8,7 @@ sealed trait Needle extends Ordered[Needle] {
 
   def +(i: Int) = Needle.atIndex(index + i)
   def -(i: Int) = +(-i)
-  def -(other: Needle) = index - other.index
+  def distanceTo(other: Needle) = (index - other.index).abs
 }
 
 object Needle {

@@ -12,11 +12,11 @@ object Cast {
     Planner.step(ClosedCastOn(from, until, withYarn)).map(_ => withYarn)
   }
 
-  def onClosedRound(from: Needle, until: Needle, withYarn: Yarn) = for {
+  def onClosedRound(from: Needle, until: Needle, withYarn: YarnPiece) = for {
     _ <- Planner.noop
     until2 <- Planner.precondidtions { _ =>
       require(from < until, "from > until")
-      val u2 = until.index + (until - from)
+      val u2 = until.index + (until distanceTo from)
       require(u2 < Needle.count, "Needle bed not wide enough")
       Needle.atIndex(u2)
     }
