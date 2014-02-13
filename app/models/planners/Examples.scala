@@ -17,10 +17,10 @@ object Examples {
     val zero = 100 - w / 2
 
     Cast.onClosed(Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
+      Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       FairIslePlanner.singleBed(pattern) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
+      Basics.knitRowWithK(yarnA = Some(yarn1)) >>
+      Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Cast.offClosed(yarn1)
   }
   def imageRagDoubleBed(img: BufferedImage, bg: Option[Yarn] = None) = {
@@ -31,10 +31,10 @@ object Examples {
     val zero = 100 - w / 2
 
     Cast.onClosed(Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
+      Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       FairIslePlanner.doubleBed(pattern) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(yarn1)) >>
+      Basics.knitRowWithK(yarnA = Some(yarn1)) >>
+      Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Cast.offClosed(yarn1)
   }
 

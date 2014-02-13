@@ -40,7 +40,7 @@ class FairIslePlannerSpec extends Specification {
     "process 5x4 red/green checkerboard pattern (after cast-on)" in new Patterns {
       val redStart = YarnPiece(red)
       val planner = Cast.onClosed(needle0, needle4, red) >>
-        Basics.knitRowWithK(KCarriage.Settings(), Some(redStart)) >>
+        Basics.knitRowWithK(yarnA = Some(redStart)) >>
         FairIslePlanner.singleBed(checkerboard(Needle.count, 4)) >>
         Cast.offClosed(redStart)
       val state = runPlan(planner)

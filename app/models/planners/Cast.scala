@@ -24,7 +24,7 @@ object Cast {
     // be able to move the yarn properly..
     _ <- onClosed(from, until2, yarn)
     _ <- Basics.needCarriage(KCarriage, Right)
-    _ <- Basics.knitRowWithK(KCarriage.Settings(), Some(yarn))
+    _ <- Basics.knitRowWithK(yarnA = Some(yarn))
     _ <- MoveToDoubleBed(n => n >= until && n <= until2, -1, Some(until))
     _ <- MoveNeedles(n => if (n >= from && n < until) NeedleB else NeedleA)
   } yield yarn

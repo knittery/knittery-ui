@@ -65,16 +65,16 @@ object Global extends GlobalSettings {
     val width = 20
     val height = 5
     val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), firstYarn) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(first)) >>
+      Basics.knitRowWithK(yarnA = Some(first)) >>
       (0 to height / 2).toVector.traverse { _ =>
-        Basics.knitRowWithK(KCarriage.Settings(), Some(bg))
+        Basics.knitRowWithK(yarnA = Some(bg))
       } >>
       FairIslePlanner.singleBed(checkerboard(Needle.count, height)) >>
       (0 to height / 2).toVector.traverse { _ =>
-        Basics.knitRowWithK(KCarriage.Settings(), Some(bg))
+        Basics.knitRowWithK(yarnA = Some(bg))
       } >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(bg)) >>
-      Basics.knitRowWithK(KCarriage.Settings(), Some(last)) >>
+      Basics.knitRowWithK(yarnA = Some(bg)) >>
+      Basics.knitRowWithK(yarnA = Some(last)) >>
       Cast.offClosed(last)
     planner.plan()
   }

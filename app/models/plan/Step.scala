@@ -80,19 +80,11 @@ case class MoveNeedlesDoubleBed(to: NeedlePatternRow) extends Step {
 sealed trait ChangeCarriageSettings extends Step {
   def carriage: Carriage
 }
-case class ChangeKCarriageSettings(settings: KCarriage.Settings) extends ChangeCarriageSettings {
+case class ChangeKCarriageSettings(settings: KCarriage.Settings, assembly: KCarriage.Assembly) extends ChangeCarriageSettings {
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(KCarriage)
     require(cs.position != CarriageRemoved, "Cannot set settings on non-active K-carriage")
-    state.modifyCarriage(cs.copy(settings = settings))
-  }.toSuccess
-  override def carriage = KCarriage
-}
-case class ChangeKCarriageAssembly(assembly: KCarriage.Assembly) extends ChangeCarriageSettings {
-  override def apply(state: KnittingState) = Try {
-    val cs = state.carriageState(KCarriage)
-    require(cs.position != CarriageRemoved, "Cannot set assembly on non-active K-carriage")
-    state.modifyCarriage(cs.copy(assembly = assembly))
+    state.modifyCarriage(cs.copy(settings = settings, assembly = assembly))
   }.toSuccess
   override def carriage = KCarriage
 }

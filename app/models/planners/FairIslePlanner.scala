@@ -28,10 +28,10 @@ object FairIslePlanner {
     settings = KCarriage.Settings(partLeft = true, partRight = true)
     //TODO background yarn...
     //with A
-    _ <- Basics.knitRowWithK(settings, Some(yarnA), None,
+    _ <- Basics.knitRowWithK(settings, KCarriage.SinkerPlate(), Some(yarnA), None,
       knitActionDoubleBed(row, startNeedle, Some(yarnA), false))
     //with B
-    _ <- Basics.knitRowWithK(settings, yarnB, None,
+    _ <- Basics.knitRowWithK(settings, KCarriage.SinkerPlate(),yarnB, None,
       knitActionDoubleBed(row, startNeedle, yarnB, false))
   } yield ()
 
@@ -60,7 +60,7 @@ object FairIslePlanner {
     _ <- pattern2.rows.toVector.traverse(row => for {
       yarns <- optimizeYarn(row.toSet)
       actionRow = knitActions(row, needle0, yarns) _
-      _ <- Basics.knitRowWithK(settings, yarns._1, yarns._2, actionRow)
+      _ <- Basics.knitRowWithK(settings, KCarriage.SinkerPlate(), yarns._1, yarns._2, actionRow)
     } yield ())
   } yield ()
 

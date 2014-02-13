@@ -15,23 +15,13 @@ object Basics {
     }
   } yield ()
 
-  /** Change K-carriage settings. */
-  def carriageSettings(settings: KCarriage.Settings) = for {
+  /** Change K-carriage settings (incl. assembly). */
+  def carriageSettings(settings: KCarriage.Settings, assembly: KCarriage.Assembly) = for {
     _ <- needCarriage(KCarriage)
     current <- Planner.state(_.carriageState(KCarriage).settings)
     _ <- {
       if (current == settings) Planner.noop
-      else Planner.step(ChangeKCarriageSettings(settings))
-    }
-  } yield current
-
-  /** Change K-carriage assembly. */
-  def assembly(a: KCarriage.Assembly) = for {
-    _ <- needCarriage(KCarriage)
-    current <- Planner.state(_.carriageState(KCarriage).assembly)
-    _ <- {
-      if (current == a) Planner.noop
-      else Planner.step(ChangeKCarriageAssembly(a))
+      else Planner.step(ChangeKCarriageSettings(settings, assembly))
     }
   } yield current
 
@@ -69,8 +59,9 @@ object Basics {
   }
 
   /** Knit a row with the K-Carriage. */
-  def knitRowWithK(settings: KCarriage.Settings, yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
-    _ <- carriageSettings(settings)
+  def knitRowWithK(settings: KCarriage.Settings = KCarriage.Settings(), assembly: KCarriage.Assembly = KCarriage.SinkerPlate(),
+    yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+    _ <- carriageSettings(settings, assembly)
     needlesBefore <- Planner.state(_.needles.positions)
     _ <- MoveNeedles(needlesBefore, pattern)
     _ <- ThreadYarnK(yarnA, yarnB)
@@ -80,8 +71,7 @@ object Basics {
 
   /** Round knitting with the K-Carriage. */
   def knitRoundK(yarn: YarnPiece) = for {
-    _ <- carriageSettings(KCarriage.Settings(partRight = true))
-    _ <- assembly(KCarriage.DoubleBedCarriage(partLeft = true))
+    _ <- carriageSettings(KCarriage.Settings(partRight = true), KCarriage.DoubleBedCarriage(partLeft = true))
     _ <- ThreadYarnK(Some(yarn), None)
     dir <- nextDirection(KCarriage)
     _ <- KnitRow(KCarriage, dir)
