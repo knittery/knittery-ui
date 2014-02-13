@@ -27,7 +27,9 @@ case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActi
       case LCarriage => ???
       case GCarriage => ???
     }
-  } yield state2.moveCarriage(carriage, direction)
+  } yield state2.
+    moveCarriage(carriage, direction).
+    pushRow(_ => true)
 
   override def hashCode = carriage.hashCode ^ direction.hashCode ^ pattern.all.hashCode
   override def equals(o: Any) = o match {
@@ -160,6 +162,7 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnPiece) extends St
       }.
       //TODO Knit2? we don't really have stitches..
       attachYarn(YarnAttachment(needleYarn(until), until)).
+      pushRow(needles.contains).
       success[String]
   }
 }
