@@ -76,9 +76,7 @@ object Basics {
     _ <- ThreadYarnK(yarnA, yarnB)
     dir <- nextDirection(KCarriage)
     _ <- KnitRow(KCarriage, dir)
-    yarnA2 <- yarnAttachment(yarnA)
-    yarnB2 <- yarnAttachment(yarnB)
-  } yield (yarnA2, yarnB2)
+  } yield ()
 
   /** Round knitting with the K-Carriage. */
   def knitRoundK(yarn: YarnPiece, pattern: NeedleActionRow = AllNeedlesToB) = {
@@ -105,6 +103,5 @@ object Basics {
     _ <- ThreadYarnG(yarn)
     dir <- nextDirection(GCarriage)
     _ <- KnitRow(LCarriage, dir, pattern)
-    yarn2 <- yarnAttachment(yarn)
-  } yield yarn2
+  } yield ()
 }
