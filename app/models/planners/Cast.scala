@@ -16,15 +16,16 @@ object Cast {
     _ <- Planner.noop
     until2 <- Planner.precondidtions { _ =>
       require(from < until, s"Cannot perform closed round cast on from right to left ($from -> $until)")
-      val u2 = until.index + (until distanceTo from)
+      val u2 = until.index + (until distanceTo from) + 1
       require(u2 < Needle.count, "Needle bed not wide enough")
       Needle.atIndex(u2)
     }
     //TODO basically we'd need to knit with contrast yarn first in order to
     // be able to move the yarn properly..
     _ <- onClosed(from, until2, yarn)
+    _ <- Basics.needCarriage(KCarriage, Right)
     _ <- Basics.knitRowWithK(KCarriage.Settings(), Some(yarn))
-    _ <- MoveToDoubleBed(n => n >= until && n <= until2, -(from distanceTo until), Some(until))
+    _ <- MoveToDoubleBed(n => n > until && n <= until2, -(from distanceTo until), Some(until))
     _ <- MoveNeedles(n => if (n >= from && n <= until) NeedleB else NeedleA)
   } yield yarn
 
