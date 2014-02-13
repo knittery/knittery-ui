@@ -10,7 +10,8 @@ $(() ->
 
   $(".graphical .carriage-type").link().text(machine, "carriage", (c) -> if c? then "Carriage #{c}" else "Carriage")
   $("#bar .progress-bar").carriageBar()
-  $(".needles").needles(200)
+  $(".needles.main").needles(200)
+  $(".needles.double").needles(200, "needles", false)
 
   totalSteps = -> +$(".step-number-total").text()
 
@@ -30,10 +31,15 @@ $(() ->
   $("#next").link().disabled(guide, "currentStep", (s) -> s? && s.number == totalSteps())
   $("#prev").link().disabled(guide, "currentStep", (s) -> s? && s.number == 1)
 
-  $(".needles").link().data("needles")(guide, "currentStep", (s) ->
+  $(".needles.main").link().data("needles")(guide, "currentStep", (s) ->
     if not s? then return ""
     for c, i in s.stateAfter.needles
       if s.manualNeedles.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
+  )
+  $(".needles.double").link().data("needles")(guide, "currentStep", (s) ->
+    if not s? then return ""
+    for c, i in s.stateAfter.doubleBedNeedles
+      if s.manualDoubleBedNeedles.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
 
   makeOutput($(".output"))

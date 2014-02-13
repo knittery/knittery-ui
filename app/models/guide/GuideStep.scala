@@ -44,6 +44,11 @@ sealed trait GuideStep {
       Needle.all.filter(n => stateBefore.needles(n).position != to(n)).toSet
     case other => Set.empty
   }
+  def manualDoubleBedNeedles: Set[Needle] = step match {
+    case MoveNeedlesDoubleBed(to) =>
+      Needle.all.filter(n => stateBefore.needles(n).position != to(n)).toSet
+    case other => Set.empty
+  }
 
   private def formatNeedleRange(filter: Needle => Boolean) = {
     val from = Needle.all.filter(filter).head
