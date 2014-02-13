@@ -213,7 +213,7 @@ case class MoveToDoubleBed(filter: Needle => Boolean, offset: Int = 0, flip: Opt
   }
   def movementTarget(from: Needle) = {
     val index = flip match {
-      case Some(flipAt) => flipAt.index + (flipAt.index - from.index)
+      case Some(flipAt) => flipAt.index + flipAt.index - from.index + 1
       case None => from.index + offset
     }
     Some(index).filter(i => i >= 0 && i < Needle.count).map(Needle.atIndex)
