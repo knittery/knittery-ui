@@ -147,7 +147,7 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnPiece) extends St
         else NoStitch
       }.
       //TODO Knit2? we don't really have stitches..
-      attachYarn(YarnAttachment(needleYarn(until), until)).
+      attachYarn(YarnAttachment(needleYarn(until), until, true)).
       pushRow(needles.contains).
       success[String]
   }

@@ -44,8 +44,8 @@ case class KnittingState(
 
   def pushRow(forNeedles: Needle => Boolean) = {
     val changed = yarnAttachments.collect {
-      case (yarn, YarnAttachment(y, needle, rd)) if forNeedles(needle) =>
-        (yarn, YarnAttachment(y, needle, rd + 1))
+      case (yarn, ya) if forNeedles(ya.needle) =>
+        (yarn, ya.copy(rowDistance = ya.rowDistance + 1))
     }
     copy(yarnAttachments = yarnAttachments ++ changed)
   }
@@ -90,4 +90,4 @@ object CarriageStates {
   }
 }
 
-case class YarnAttachment(yarn: YarnFlow, needle: Needle, rowDistance: Int = 0)
+case class YarnAttachment(yarn: YarnFlow, needle: Needle, mainBed: Boolean, rowDistance: Int = 0)
