@@ -7,6 +7,7 @@ private case class ResultBuilder(
   yarnA: Option[YarnFeeder] = None,
   yarnB: Option[YarnFeeder] = None,
   needles: Map[Needle, NeedleState] = Map.empty,
+  doubleBedNeedles: Map[Needle, NeedleState] = Map.empty,
   outputs: Seq[Stitch2] = Seq.empty,
   stitches: Map[Needle, Stitch] = Map.empty) {
 
@@ -25,6 +26,10 @@ private case class ResultBuilder(
     copy(needles = needles + (needle -> state))
   def needle(n: Needle, pos: NeedlePosition, ys: Set[YarnFlow]): ResultBuilder =
     needle(n, NeedleState(pos, ys))
+  def doubleBedNeedle(needle: Needle, state: NeedleState) =
+    copy(doubleBedNeedles = doubleBedNeedles + (needle -> state))
+  def doubleBedNeedle(n: Needle, pos: NeedlePosition, ys: Set[YarnFlow]): ResultBuilder =
+    doubleBedNeedle(n, NeedleState(pos, ys))
 
   def knit(s: Stitch2): ResultBuilder = copy(outputs = outputs :+ s)
   def knit(n: Needle, s: Stitch) = copy(stitches = stitches + (n -> s))
@@ -35,9 +40,9 @@ private case class ResultBuilder(
   def execute(state: KnittingState) = {
     yarnMap.values.foldLeft(state)(_.attachYarn(_)).
       modifyNeedles(needles.withDefaultValue(NeedleState(NeedleA))).
+      modifyDoubleBedNeedles(doubleBedNeedles.withDefaultValue(NeedleState(NeedleA))).
       knit(stitches.withDefaultValue(EmptyStitch)).
       knit2(_ ++ outputs)
-
   }
 }
 
