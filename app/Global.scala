@@ -80,8 +80,8 @@ object Global extends GlobalSettings {
   }
 
   private def tubePlan = {
-    val width = 20
-    val length = 30
+    val width = 10
+    val length = 40
     val yarn = YarnPiece(Yarn("red", Color.red))
     val planner =
       Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
