@@ -79,17 +79,7 @@ object Global extends GlobalSettings {
     planner.plan()
   }
 
-  private def tubePlan = {
-    val width = 10
-    val length = 40
-    val yarn = YarnPiece(Yarn("red", Color.red))
-    val planner =
-      Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
-        (0 to length).toVector.traverse { _ =>
-          Basics.knitRoundK(yarn)
-        }
-    planner.plan()
-  }
+  private def tubePlan = Examples.tube(10, 40, YarnPiece(Yarn("red", Color.red)))
 
   private def imagePlan = {
     val img = ImageIO.read(new File("example.png"))

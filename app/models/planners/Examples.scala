@@ -57,4 +57,13 @@ object Examples {
     pattern
   }
 
+  def tube(width: Int, height: Int, yarn: YarnPiece) = {
+    val planner =
+      Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
+        (0 until height).toVector.traverse { _ =>
+          Basics.knitRoundK(yarn)
+        }
+    planner.plan()
+  }
+
 }
