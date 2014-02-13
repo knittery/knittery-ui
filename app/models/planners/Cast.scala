@@ -15,7 +15,7 @@ object Cast {
   def onClosedRound(from: Needle, until: Needle, withYarn: YarnPiece) = for {
     _ <- Planner.noop
     until2 <- Planner.precondidtions { _ =>
-      require(from < until, "from > until")
+      require(from < until, s"Cannot perform closed round cast on from right to left ($from -> $until)")
       val u2 = until.index + (until distanceTo from)
       require(u2 < Needle.count, "Needle bed not wide enough")
       Needle.atIndex(u2)
