@@ -197,7 +197,7 @@ case class ClosedCastOff(withYarn: YarnPiece, filter: Needle => Boolean) extends
 /** Moves the yarn from the main to the double bed. Needles affected are moved to B position. */
 case class MoveToDoubleBed(filter: Needle => Boolean, offset: Int = 0, flip: Option[Needle] = None) extends Step {
   override def apply(state: KnittingState) = {
-    val (nm, nd) = Needle.all.foldLeft((state.needles, state.doubleBedNeedles)) {
+    val (nm, nd) = Needle.all.filter(filter).foldLeft((state.needles, state.doubleBedNeedles)) {
       case ((main, double), fromN) => movementTarget(fromN).map { toN =>
         if (main(fromN).position.isWorking) {
           val m = NeedleState(NeedleB)

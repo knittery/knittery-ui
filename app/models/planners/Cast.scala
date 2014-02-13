@@ -12,7 +12,7 @@ object Cast {
     Planner.step(ClosedCastOn(from, until, withYarn)).map(_ => withYarn)
   }
 
-  def onClosedRound(from: Needle, until: Needle, withYarn: YarnPiece) = for {
+  def onClosedRound(from: Needle, until: Needle, yarn: YarnPiece) = for {
     _ <- Planner.noop
     until2 <- Planner.precondidtions { _ =>
       require(from < until, s"Cannot perform closed round cast on from right to left ($from -> $until)")
@@ -22,9 +22,10 @@ object Cast {
     }
     //TODO basically we'd need to knit with contrast yarn first in order to
     // be able to move the yarn properly..
-    yarn <- onClosed(from, until2, withYarn)
+    _ <- onClosed(from, until2, yarn)
     _ <- Basics.knitRowWithK(KCarriage.Settings(), Some(yarn))
-    _ <- MoveToDoubleBed(n => n >= from && n <= until2, 0, Some(until))
+    _ <- MoveToDoubleBed(n => n >= until && n <= until2, -(from distanceTo until), Some(until))
+    _ <- MoveNeedles(n => if (n >= from && n <= until) NeedleB else NeedleA)
   } yield yarn
 
   def offClosed(withYarn: YarnPiece, filter: Needle => Boolean = _ => true): Planner = for {
