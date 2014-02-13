@@ -6,6 +6,7 @@ import scalaz._
 import Scalaz._
 import models._
 import utils._
+import models.plan.Planner
 
 object Examples {
 
@@ -66,4 +67,20 @@ object Examples {
     planner.plan()
   }
 
+  def decreasingTube(width: Int, height: Int, yarn: YarnPiece, every: Int = 2) = {
+    val planner =
+      Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
+        Basics.knitRoundK(yarn) >>
+        Basics.knitRoundK(yarn) >>
+        (1 to height / 2).toVector.traverse { i =>
+          val decrease = if (i % every == 0) {
+            FormGiving.raglanDecrease(Right) >>
+              FormGiving.raglanDecrease(Left)
+          } else Planner.noop
+          decrease >>
+            Basics.knitRoundK(yarn) >>
+            Basics.knitRoundK(yarn)
+        }
+    planner.plan()
+  }
 }
