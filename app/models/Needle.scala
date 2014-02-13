@@ -5,6 +5,10 @@ sealed trait Needle extends Ordered[Needle] {
   def index: Int
   /** Number as shown on the machine (-100 to 100, 0 does not exist, negative are yellow). */
   def number: Int
+
+  def +(i: Int) = Needle.atIndex(index + i)
+  def -(i: Int) = +(-i)
+  def -(other: Needle) = index - other.index
 }
 
 object Needle {
