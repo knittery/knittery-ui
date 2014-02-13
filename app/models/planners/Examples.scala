@@ -17,12 +17,12 @@ object Examples {
     val yarn1 = YarnPiece(bg.getOrElse(pattern(0)(0)))
     val zero = 100 - w / 2
 
-    Cast.onClosed(Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>
+    Cast.onClosed(MainBed, Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       FairIslePlanner.singleBed(pattern) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
-      Cast.offClosed(yarn1)
+      Cast.offClosed(MainBed, yarn1)
   }
   def imageRagDoubleBed(img: BufferedImage, bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)
@@ -31,12 +31,12 @@ object Examples {
     val yarn1 = YarnPiece(bg.getOrElse(pattern(0)(0)))
     val zero = 100 - w / 2
 
-    Cast.onClosed(Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>
+    Cast.onClosed(MainBed, Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       FairIslePlanner.doubleBed(pattern) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
-      Cast.offClosed(yarn1)
+      Cast.offClosed(MainBed, yarn1)
   }
 
   private def colorsToYarns(colors: Set[Color]) = {
@@ -67,15 +67,17 @@ object Examples {
     planner.plan()
   }
 
-  def decreasingTube(width: Int, height: Int, yarn: YarnPiece, every: Int = 2) = {
+  def decreasingTube(width: Int, height: Int, yarn: YarnPiece, every: Int = 4) = {
     val planner =
       Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
         Basics.knitRoundK(yarn) >>
         Basics.knitRoundK(yarn) >>
         (1 to height / 2).toVector.traverse { i =>
           val decrease = if (i % every == 0) {
-            FormGiving.raglanDecrease(Right) >>
-              FormGiving.raglanDecrease(Left)
+            FormGiving.raglanDecrease(MainBed, Right) >>
+              FormGiving.raglanDecrease(MainBed, Left) >>
+              FormGiving.raglanDecrease(DoubleBed, Right) >>
+              FormGiving.raglanDecrease(DoubleBed, Left)
           } else Planner.noop
           decrease >>
             Basics.knitRoundK(yarn) >>

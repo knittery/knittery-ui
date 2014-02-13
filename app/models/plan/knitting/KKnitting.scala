@@ -24,7 +24,7 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
   private def settings = carriageState.settings
 
   private def mainBed(pattern: NeedleActionRow) = {
-    val bed = new KMainBed(settings.holdingCamLever == HoldingCamN, pattern, state.needles)
+    val bed = new KMainBed(settings.holdingCamLever == HoldingCamN, pattern, state.needles(MainBed))
     val part = settings.part(direction)
     val tuck = settings.tuck(direction)
     (settings.mc, settings.l, part, tuck, carriageState.yarnA, carriageState.yarnB) match {
@@ -52,7 +52,7 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
     case dbc: DoubleBedCarriage => Some {
       require(!settings.mc, "MC not supported with double bed assembly.")
       require(!settings.l, "L not supported with double bed assembly.")
-      val bed = new KDoubleBed(dbc.needleTakeback(direction), state.doubleBedNeedles)
+      val bed = new KDoubleBed(dbc.needleTakeback(direction), state.needles(DoubleBed))
       val part = dbc.part(direction)
       (part) match {
         case (false) => bed.plain _

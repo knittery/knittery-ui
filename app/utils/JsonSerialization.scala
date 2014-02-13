@@ -75,8 +75,8 @@ object JsonSerialization {
 
   implicit object KnittingStateWrite extends Writes[KnittingState] {
     override def writes(state: KnittingState) = {
-      Json.obj("needles" -> state.needles.pattern,
-        "doubleBedNeedles" -> state.doubleBedNeedles.pattern,
+      Json.obj("needles" -> state.needles(MainBed).pattern,
+        "doubleBedNeedles" -> state.needles(DoubleBed).pattern,
         "output" -> state.output)
     }
   }
@@ -87,8 +87,8 @@ object JsonSerialization {
         "description" -> step.description,
         "number" -> step.stepNumber,
         "isKnitting" -> step.isKnitting,
-        "manualNeedles" -> step.manualNeedles.map(_.index),
-        "manualDoubleBedNeedles" -> step.manualDoubleBedNeedles.map(_.index),
+        "manualNeedles" -> step.manualNeedles(MainBed).map(_.index),
+        "manualDoubleBedNeedles" -> step.manualNeedles(DoubleBed).map(_.index),
         "stateBefore" -> step.stateBefore,
         "stateAfter" -> step.stateAfter)
     }

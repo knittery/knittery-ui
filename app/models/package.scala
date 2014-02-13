@@ -4,6 +4,9 @@ package object models {
   sealed trait Bed
   case object MainBed extends Bed
   case object DoubleBed extends Bed
+  object Beds {
+    val all = Set(MainBed, DoubleBed)
+  }
 
   type NeedlePatternRow = Needle => NeedlePosition
   implicit class RichNeedlePatternRow(val row: NeedlePatternRow) extends AnyVal {

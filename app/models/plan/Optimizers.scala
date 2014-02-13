@@ -66,30 +66,30 @@ object NoEffectStepOptimizer extends PlanOptimizer {
 object OptimizePatternKnitting extends PlanOptimizer {
   override def apply(steps: Seq[Step]) = {
     val (a, b) = steps.foldLeft((Processed(), Vector.empty[Step])) {
-      case ((processed, window), MoveNeedles(pattern)) if processed.state.needles.all == pattern.all =>
+      case ((processed, window), MoveNeedles(bed, pattern)) if processed.state.needles(bed).all == pattern.all =>
         //drop it because needles are already in the required position
         (processed, window)
 
-      case ((processed, (knit @ KnitRow(carriage, direction, _)) +: window), MoveNeedles(pattern)) =>
+      case ((processed, (knit @ KnitRow(carriage, direction, _)) +: window), MoveNeedles(bed, pattern)) =>
         //try to optimize
         def patternActions(n: Needle) = if (pattern(n) == NeedleD) NeedleToD else NeedleToB
         val modKnit = KnitRow(carriage, direction, patternActions)
         modKnit(processed.state).map { stateAfter =>
-          if (stateAfter.needles.positions.all == pattern.all) {
+          if (stateAfter.needles(bed).positions.all == pattern.all) {
             //Yay, we optimized all work away, drop the MoveNeedles
             (processed, modKnit +: window)
           } else {
             //Well, there still is some manual work left :(
-            ((processed :+ modKnit) ++ window :+ MoveNeedles(pattern), Vector.empty)
+            ((processed :+ modKnit) ++ window :+ MoveNeedles(bed, pattern), Vector.empty)
           }
         }.leftMap { _ =>
           //Apparently cannot pattern knit with this knitter
-          (processed :+ knit :+ MoveNeedles(pattern), Vector.empty)
+          (processed :+ knit :+ MoveNeedles(bed, pattern), Vector.empty)
         }.fold(identity, identity)
 
-      case ((processed, empty), MoveNeedles(pattern)) =>
+      case ((processed, empty), MoveNeedles(bed, pattern)) =>
         //cannot optimize, because nothing is knitted before
-        (processed :+ MoveNeedles(pattern), empty)
+        (processed :+ MoveNeedles(bed, pattern), empty)
 
       case ((processed, window), knit @ KnitRow(KCarriage, _, _)) =>
         (processed ++ window, Vector(knit))
@@ -128,8 +128,8 @@ object OptimizeUselessMoveNeedles extends PlanOptimizer {
           val state2 = step(state).valueOr(e => throw new RuntimeException("Plan is not valid: " + e))
           (out :+ (step, state2), state2)
       }._1.foldRight(List.empty[(Step, KnittingState)]) {
-        case ((step @ MoveNeedles(to), stateBefore), processed) =>
-          val posBefore = stateBefore.needles.positions
+        case ((step @ MoveNeedles(bed, to), stateBefore), processed) =>
+          val posBefore = stateBefore.needles(bed).positions
           val onlyBToD = Needle.all.filter(n => (posBefore(n), to(n)) match {
             case (a, b) if a == b => false
             case (NeedleB, NeedleD) => false

@@ -39,8 +39,8 @@ private case class ResultBuilder(
 
   def execute(state: KnittingState) = {
     yarnMap.values.foldLeft(state)(_.attachYarn(_)).
-      modifyNeedles(needles.withDefaultValue(NeedleState(NeedleA))).
-      modifyDoubleBedNeedles(doubleBedNeedles.withDefaultValue(NeedleState(NeedleA))).
+      modifyNeedles(MainBed, needles.withDefaultValue(NeedleState(NeedleA))).
+      modifyNeedles(DoubleBed, doubleBedNeedles.withDefaultValue(NeedleState(NeedleA))).
       knit(stitches.withDefaultValue(EmptyStitch)).
       knit2(_ ++ outputs)
   }

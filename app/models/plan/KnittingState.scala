@@ -5,18 +5,17 @@ import Scalaz._
 import models._
 
 case class KnittingState(
-  needles: Map[Needle, NeedleState],
-  doubleBedNeedles: Map[Needle, NeedleState],
+  bedNeedles: Map[Bed, Map[Needle, NeedleState]],
   carriageState: CarriageStates,
   output: Knitted,
   output2: Knitted2,
   yarnAttachments: Map[YarnPiece, YarnAttachment]) {
 
-  def workingNeedles = Needle.all.filter(needles(_).position.isWorking)
   def nextDirection(carriage: Carriage) = carriageState(carriage).position match {
     case CarriageRemoved => "Cannot find direction for removed carriage".fail
     case pos =>
-      val overlappedWorking = carriage.over(pos).filter(needles(_).position.isWorking)
+      val working = this.workingNeedles.toSet
+      val overlappedWorking = carriage.over(pos).filter(working.contains)
       if (overlappedWorking.nonEmpty) s"carriage still over working needeles ${overlappedWorking.mkString(",")}".fail
       else pos.directionTo(workingNeedles.headOption.getOrElse(Needle.middle)).success
   }
@@ -33,12 +32,21 @@ case class KnittingState(
     case GCarriage => carriageState(GCarriage).copy(position = to)
   })
 
-  def moveNeedles(positions: Needle => NeedlePosition) =
-    modifyNeedles(Needle.all.map(n => n -> needles(n).copy(position = positions(n))).toMap)
-  def modifyNeedles(newNeedles: NeedleStateRow) = copy(needles = newNeedles.toMap)
-  def moveDoubleBedNeedles(positions: Needle => NeedlePosition) =
-    modifyDoubleBedNeedles(Needle.all.map(n => n -> needles(n).copy(position = positions(n))).toMap)
-  def modifyDoubleBedNeedles(newNeedles: NeedleStateRow) = copy(doubleBedNeedles = newNeedles.toMap)
+  def needles(bed: Bed): NeedleStateRow = bedNeedles.getOrElse(bed, _ => NeedleState(NeedleA))
+  def workingNeedles: Seq[Needle] = {
+    Beds.all.map(workingNeedles).
+      foldLeft(Set.empty[Needle])(_ ++ _).
+      toSeq.sorted
+  }
+  def workingNeedles(bed: Bed): Seq[Needle] =
+    Needle.all.filter(n => needles(bed)(n).position.isWorking)
+
+  def moveNeedles(bed: Bed, positions: Needle => NeedlePosition) = {
+    def value(n: Needle) = n -> needles(bed)(n).copy(position = positions(n))
+    modifyNeedles(bed, Needle.all.map(value).toMap)
+  }
+  def modifyNeedles(bed: Bed, newNeedles: NeedleStateRow) =
+    copy(bedNeedles = bedNeedles + (bed -> newNeedles.toMap))
 
   def knit(f: Needle => Stitch) = copy(output = output + f)
 
@@ -55,7 +63,7 @@ case class KnittingState(
   def knit2(f: Knitted2 => Knitted2) = copy(output2 = f(output2))
 }
 object KnittingState {
-  val initial = KnittingState((allNeedlesA _).toMap, (allNeedlesA _).toMap, CarriageStates.empty, Knitted.empty, Knitted2.empty, Map.empty)
+  val initial = KnittingState(Map.empty, CarriageStates.empty, Knitted.empty, Knitted2.empty, Map.empty)
   private def allNeedlesA(n: Needle) = NeedleState(NeedleA)
 }
 

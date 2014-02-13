@@ -62,7 +62,7 @@ object Basics {
   def knitRowWithK(settings: KCarriage.Settings = KCarriage.Settings(), assembly: KCarriage.Assembly = KCarriage.SinkerPlate(),
     yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings, assembly)
-    needlesBefore <- Planner.state(_.needles.positions)
+    needlesBefore <- Planner.state(_.needles(MainBed).positions)
     _ <- MoveNeedles(needlesBefore, pattern)
     _ <- ThreadYarnK(yarnA, yarnB)
     dir <- nextDirection(KCarriage)
@@ -80,7 +80,7 @@ object Basics {
   /** Knit a row with the L-Carriage. */
   def knitRowWithL(settings: LCarriage.Settings, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
-    needlesBefore <- Planner.state(_.needles.positions)
+    needlesBefore <- Planner.state(_.needles(MainBed).positions)
     _ <- MoveNeedles(needlesBefore, pattern)
     dir <- nextDirection(LCarriage)
     _ <- KnitRow(LCarriage, dir)
@@ -89,7 +89,6 @@ object Basics {
   /** Knit a row with the G-Carriage. */
   def knitRowWithG(settings: GCarriage.Settings, yarn: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
-    needlesBefore <- Planner.state(_.needles.positions)
     _ <- ThreadYarnG(yarn)
     dir <- nextDirection(GCarriage)
     _ <- KnitRow(LCarriage, dir, pattern)

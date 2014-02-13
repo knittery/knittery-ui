@@ -65,7 +65,7 @@ object Global extends GlobalSettings {
 
     val width = 20
     val height = 5
-    val planner = Cast.onClosed(Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), firstYarn) >>
+    val planner = Cast.onClosed(MainBed, Needle.atIndex(100 - width / 2), Needle.atIndex(100 + width / 2), firstYarn) >>
       Basics.knitRowWithK(yarnA = Some(first)) >>
       (0 to height / 2).toVector.traverse { _ =>
         Basics.knitRowWithK(yarnA = Some(bg))
@@ -76,12 +76,12 @@ object Global extends GlobalSettings {
       } >>
       Basics.knitRowWithK(yarnA = Some(bg)) >>
       Basics.knitRowWithK(yarnA = Some(last)) >>
-      Cast.offClosed(last)
+      Cast.offClosed(MainBed, last)
     planner.plan()
   }
 
   private def tubePlan = Examples.tube(10, 40, YarnPiece(Yarn("red", Color.red)))
-  private def decreasingTubePlan = Examples.decreasingTube(10, 40, YarnPiece(Yarn("red", Color.red)))
+  private def decreasingTubePlan = Examples.decreasingTube(20, 60, YarnPiece(Yarn("red", Color.red)))
 
   private def imagePlan = {
     val img = ImageIO.read(new File("example.png"))

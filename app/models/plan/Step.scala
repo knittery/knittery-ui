@@ -44,37 +44,23 @@ case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActi
 }
 
 /** Manual movement of needles. */
-case class MoveNeedles(to: NeedlePatternRow) extends Step {
+case class MoveNeedles(bed: Bed, to: NeedlePatternRow) extends Step {
   override def apply(state: KnittingState) = {
-    val toAButYarn = Needle.all.filter(n => to(n).nonWorking && state.needles(n).yarn.nonEmpty)
+    val toAButYarn = Needle.all.filter(n => to(n).nonWorking && state.needles(bed)(n).yarn.nonEmpty)
     if (toAButYarn.nonEmpty) s"Needles ${toAButYarn.mkString(", ")} have yarn and cannot be moved to A".fail
-    else state.moveNeedles(to).success
+    else state.moveNeedles(bed, to).success
   }
-  override def hashCode = to.all.hashCode
+  override def hashCode = bed.hashCode ^ to.all.hashCode
   override def equals(o: Any) = o match {
-    case MoveNeedles(to2) => to.all == to2.all
+    case MoveNeedles(bed2, to2) => bed == bed2 && to.all == to2.all
     case _ => false
   }
 }
 object MoveNeedles {
   /** Changes working needles to the values in the pattern. Non working are not touched. */
-  def apply(before: NeedlePatternRow, pattern: NeedleActionRow) = new MoveNeedles(n =>
+  def apply(before: NeedlePatternRow, pattern: NeedleActionRow) = new MoveNeedles(MainBed, n =>
     if (before(n).isWorking) pattern(n).toPosition
     else before(n))
-}
-
-/** Manual movement of needles on the double bed. */
-case class MoveNeedlesDoubleBed(to: NeedlePatternRow) extends Step {
-  override def apply(state: KnittingState) = {
-    val toAButYarn = Needle.all.filter(n => to(n).nonWorking && state.doubleBedNeedles(n).yarn.nonEmpty)
-    if (toAButYarn.nonEmpty) s"Needles ${toAButYarn.mkString(", ")} on double bed have yarn and cannot be moved to A".fail
-    else state.moveDoubleBedNeedles(to).success
-  }
-  override def hashCode = to.all.hashCode
-  override def equals(o: Any) = o match {
-    case MoveNeedles(to2) => to.all == to2.all
-    case _ => false
-  }
 }
 
 sealed trait ChangeCarriageSettings extends Step {
@@ -128,7 +114,7 @@ case class ThreadYarnG(yarn: Option[YarnPiece]) extends ThreadYarn {
  *  Performs a closed cast on for the needles. The needles are then moved to D position.
  *  All other needles are not touched.
  */
-case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnPiece) extends Step {
+case class ClosedCastOn(bed: Bed, from: Needle, until: Needle, yarn: YarnPiece) extends Step {
   def needles = Needle.interval(from, until)
   def direction: Direction = if (from < until) ToLeft else ToRight
   val width = 1
@@ -136,12 +122,12 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnPiece) extends St
     val yarnFlow = yarn.nexts(width)
     val needleYarn = needles.zip(yarnFlow).toMap
     state.
-      modifyNeedles { n =>
-        val before = state.needles(n)
+      modifyNeedles(bed, { n =>
+        val before = state.needles(bed)(n)
         needleYarn.get(n).map { yarn =>
           NeedleState(NeedleD, before.yarn + yarn)
         }.getOrElse(before)
-      }.
+      }).
       knit { n =>
         if (needles.contains(n)) CastOnStitch(yarn.yarn)
         else NoStitch
@@ -153,32 +139,33 @@ case class ClosedCastOn(from: Needle, until: Needle, yarn: YarnPiece) extends St
   }
 }
 
-case class ClosedCastOff(withYarn: YarnPiece, filter: Needle => Boolean) extends Step {
+case class ClosedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolean) extends Step {
   override def apply(state: KnittingState) = {
+    val needles = state.needles(bed)
     state.
       knit { n =>
-        if (filter(n)) state.needles(n) match {
+        if (filter(n)) needles(n) match {
           case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
           case NeedleState(_, yarns) => PlainStitch(yarns.map(_.yarn).toList)
         }
         else NoStitch
       }.
       knit { n =>
-        if (filter(n)) state.needles(n) match {
+        if (filter(n)) needles(n) match {
           case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
           case NeedleState(_, yarns) => CastOffStitch(withYarn.yarn)
         }
         else NoStitch
       }.
       //TODO implement .knit2
-      modifyNeedles(n => if (filter(n)) NeedleState(NeedleA) else state.needles(n)).
+      modifyNeedles(bed, n => if (filter(n)) NeedleState(NeedleA) else needles(n)).
       pushRow(filter).
       detachYarn(withYarn).
       success
   }
-  override def hashCode = withYarn.hashCode ^ filter.all.hashCode
+  override def hashCode = bed.hashCode ^ withYarn.hashCode ^ filter.all.hashCode
   override def equals(o: Any) = o match {
-    case ClosedCastOff(y, f) => withYarn == y && filter.all == f.all
+    case ClosedCastOff(b, y, f) => bed == b && withYarn == y && filter.all == f.all
     case _ => false
   }
 }
@@ -186,7 +173,7 @@ case class ClosedCastOff(withYarn: YarnPiece, filter: Needle => Boolean) extends
 /** Moves the yarn from the main to the double bed. Needles affected are moved to B position. */
 case class MoveToDoubleBed(filter: Needle => Boolean, offset: Int = 0, flip: Option[Needle] = None) extends Step {
   override def apply(state: KnittingState) = {
-    val (nm, nd) = Needle.all.filter(filter).foldLeft((state.needles, state.doubleBedNeedles)) {
+    val (nm, nd) = Needle.all.filter(filter).foldLeft((state.needles(MainBed).toMap, state.needles(DoubleBed).toMap)) {
       case ((main, double), fromN) => movementTarget(fromN).map { toN =>
         if (main(fromN).position.isWorking) {
           val m = NeedleState(NeedleB)
@@ -195,7 +182,7 @@ case class MoveToDoubleBed(filter: Needle => Boolean, offset: Int = 0, flip: Opt
         } else (main, double)
       }.getOrElse(main, double)
     }
-    state.copy(needles = nm, doubleBedNeedles = nd).success
+    state.modifyNeedles(MainBed, nm).modifyNeedles(DoubleBed, nd).success
   }
   def movementTarget(from: Needle) = {
     val index = flip match {
@@ -218,14 +205,15 @@ case class AddCarriage(carriage: Carriage, at: LeftRight = Left) extends Step {
  * Moves the needle into A position and moves the yarns that were on in one needle in the
  * given direction. The needle the yarn is moved to is left in the B position.
  */
-case class RetireNeedle(at: Needle, direction: Direction) extends Step {
+case class RetireNeedle(bed: Bed, at: Needle, direction: Direction) extends Step {
   override def apply(state: KnittingState) = Try {
     require(at != Needle.all.head || direction == ToRight, "Cannot move to the left on first needle")
     require(at != Needle.all.last || direction == ToLeft, "Cannot move to the right on last needle")
-    val before = state.needles(at)
+    val needles = state.needles(bed)
+    val before = needles(at)
     if (before.position.isWorking) {
-      val m2 = NeedleState(NeedleB, state.needles(target).yarn ++ before.yarn)
-      state.modifyNeedles(state.needles.toMap + (target -> m2) + (at -> NeedleState(NeedleA)))
+      val m2 = NeedleState(NeedleB, needles(target).yarn ++ before.yarn)
+      state.modifyNeedles(bed, needles.toMap + (target -> m2) + (at -> NeedleState(NeedleA)))
     } else state
   }.toSuccess
   lazy val target = at + (if (direction == ToLeft) -1 else 1)

@@ -13,7 +13,7 @@ class OptimizersSpec extends Specification {
     val greenPiece = YarnPiece(green)
 
     val simpleLines = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), redPiece),
+      ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
       AddCarriage(KCarriage, Left),
       ThreadYarnK(Some(redPiece), None),
       KnitRow(KCarriage, ToRight),
@@ -22,10 +22,10 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToLeft),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
-      ClosedCastOff(redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles)))
 
     val simpleLinesWithUnknittedSettings = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), redPiece),
+      ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
       AddCarriage(KCarriage, Left),
       ThreadYarnK(Some(redPiece), None),
       KnitRow(KCarriage, ToRight),
@@ -35,10 +35,10 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
-      ClosedCastOff(redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles)))
 
     val simpleLinesWithDuplicateSettings = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), redPiece),
+      ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
       AddCarriage(KCarriage, Left),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       ThreadYarnK(Some(redPiece), None),
@@ -56,10 +56,10 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToRight),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       KnitRow(KCarriage, ToLeft),
-      ClosedCastOff(redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles)))
 
     val simpleLinesWitUselessSettings = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), redPiece),
+      ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       AddCarriage(KCarriage, Left),
       ChangeLCarriageSettings(LCarriage.Settings()),
@@ -80,13 +80,13 @@ class OptimizersSpec extends Specification {
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       KnitRow(KCarriage, ToLeft),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
-      ClosedCastOff(redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles)))
 
     def evenOddPattern(n: Needle) = if (n.index % 2 == 0 || n.index >= 1 || n.index <= 40) NeedleToB else NeedleToD
     def oddEvenPattern(n: Needle) = if (n.index % 2 == 1 || n.index >= 1 || n.index <= 40) NeedleToB else NeedleToD
 
     val patternLines = Plan(List(
-      ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), redPiece),
+      ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
       AddCarriage(KCarriage, Left),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       ThreadYarnK(Some(redPiece), None),
@@ -100,38 +100,38 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToLeft, oddEvenPattern),
       KnitRow(KCarriage, ToRight, evenOddPattern),
       KnitRow(KCarriage, ToLeft),
-      ClosedCastOff(redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles)))
 
     val patternLinesWithManualNeedleSettings = {
       def line(n: Needle) = if (n.index >= 1 && n.index <= 40) NeedleB else NeedleA
       Plan(List(
-        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), redPiece),
+        ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
         AddCarriage(KCarriage, Left),
         ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
         ThreadYarnK(Some(redPiece), None),
         KnitRow(KCarriage, ToRight, evenOddPattern),
         ThreadYarnK(Some(redPiece), Some(greenPiece)),
         ChangeKCarriageSettings(KCarriage.Settings(mc = true), KCarriage.SinkerPlate()),
-        MoveNeedles(line, oddEvenPattern),
+        MoveNeedles(line _, oddEvenPattern _),
         KnitRow(KCarriage, ToLeft),
-        MoveNeedles(line, oddEvenPattern),
+        MoveNeedles(line _, oddEvenPattern _),
         KnitRow(KCarriage, ToRight),
-        MoveNeedles(line, oddEvenPattern),
+        MoveNeedles(line _, oddEvenPattern _),
         KnitRow(KCarriage, ToLeft),
-        MoveNeedles(line, oddEvenPattern),
+        MoveNeedles(line _, oddEvenPattern _),
         KnitRow(KCarriage, ToRight),
-        MoveNeedles(line, oddEvenPattern),
+        MoveNeedles(line _, oddEvenPattern _),
         KnitRow(KCarriage, ToLeft),
-        MoveNeedles(line, oddEvenPattern),
+        MoveNeedles(line _, oddEvenPattern _),
         KnitRow(KCarriage, ToRight),
-        MoveNeedles(line, oddEvenPattern),
+        MoveNeedles(line _, oddEvenPattern _),
         KnitRow(KCarriage, ToLeft),
-        ClosedCastOff(redPiece, allNeedles)))
+        ClosedCastOff(MainBed, redPiece, allNeedles)))
     }
 
     val plainKnittingK = {
       Plan(List(
-        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), redPiece),
+        ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
         AddCarriage(KCarriage, Left),
         ThreadYarnK(Some(redPiece), None),
         KnitRow(KCarriage, ToRight, AllNeedlesToD),
@@ -144,20 +144,20 @@ class OptimizersSpec extends Specification {
     val plainKnittingKManualMovements = {
       def line(n: Needle) = if (n.index >= 1 && n.index <= 40) NeedleB else NeedleA
       Plan(List(
-        ClosedCastOn(Needle.atIndex(1), Needle.atIndex(40), redPiece),
+        ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
         AddCarriage(KCarriage, Left),
         ThreadYarnK(Some(redPiece), None),
-        MoveNeedles(line),
+        MoveNeedles(MainBed, line _),
         KnitRow(KCarriage, ToRight, AllNeedlesToD),
-        MoveNeedles(line),
+        MoveNeedles(MainBed, line _),
         KnitRow(KCarriage, ToLeft),
-        MoveNeedles(line),
+        MoveNeedles(MainBed, line _),
         KnitRow(KCarriage, ToRight, AllNeedlesToD),
-        MoveNeedles(line),
+        MoveNeedles(MainBed, line _),
         KnitRow(KCarriage, ToLeft),
-        MoveNeedles(line),
+        MoveNeedles(MainBed, line _),
         KnitRow(KCarriage, ToRight, AllNeedlesToD),
-        MoveNeedles(line),
+        MoveNeedles(MainBed, line _),
         KnitRow(KCarriage, ToLeft)))
     }
 

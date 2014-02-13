@@ -35,18 +35,13 @@ sealed trait GuideStep {
   }
 
   /** Needles that have to be manually processed. */
-  def manualNeedles: Set[Needle] = step match {
-    case c @ ClosedCastOn(_, _, _) =>
+  def manualNeedles(bed: Bed): Set[Needle] = step match {
+    case c @ ClosedCastOn(`bed`, _, _, _) =>
       c.needles.toSet
-    case ClosedCastOff(_, f) =>
+    case ClosedCastOff(`bed`, _, f) =>
       Needle.all.filter(f).toSet
-    case MoveNeedles(to) =>
-      Needle.all.filter(n => stateBefore.needles(n).position != to(n)).toSet
-    case other => Set.empty
-  }
-  def manualDoubleBedNeedles: Set[Needle] = step match {
-    case MoveNeedlesDoubleBed(to) =>
-      Needle.all.filter(n => stateBefore.needles(n).position != to(n)).toSet
+    case MoveNeedles(`bed`, to) =>
+      Needle.all.filter(n => stateBefore.needles(bed)(n).position != to(n)).toSet
     case other => Set.empty
   }
 
@@ -55,14 +50,18 @@ sealed trait GuideStep {
     val to = Needle.all.filter(filter).last
     s"needles ${from.number} through ${to.number}"
   }
+  private def formatBed(bed: Bed) = bed match {
+    case MainBed => "main bed"
+    case DoubleBed => "double bed"
+  }
 
   private def info = step match {
-    case ClosedCastOn(from, to, yarn) =>
+    case ClosedCastOn(bed, from, to, yarn) =>
       ("Cast on",
-        s"Perform a closed cast on from needle ${from.number} until ${to.number} with yarn ${yarn.yarn.name}")
-    case ClosedCastOff(yarn, filter) =>
+        s"Perform a closed cast on the ${formatBed(bed)} from needle ${from.number} until ${to.number} with yarn ${yarn.yarn.name}")
+    case ClosedCastOff(bed, yarn, filter) =>
       ("Cast off",
-        s"Perform a closed cast off for ${formatNeedleRange(filter)} with ${yarn.yarn.name}")
+        s"Perform a closed cast off on the ${formatBed(bed)} for ${formatNeedleRange(filter)} with ${yarn.yarn.name}")
 
     case MoveToDoubleBed(filter, offset, None) =>
       val o = {
@@ -100,16 +99,11 @@ sealed trait GuideStep {
       (s"Thread Yarn ${yarn.yarn.name} to G",
         s"Thread the yarn ${yarn.yarn.name} to the G carriage")
 
-    case MoveNeedles(to) =>
-      val affected = Needle.all.filter(n => stateBefore.needles(n).position != to(n))
+    case MoveNeedles(bed, to) =>
+      val affected = Needle.all.filter(n => stateBefore.needles(bed)(n).position != to(n))
       val movement = affected.map(n => s"${n.number} to ${to(n).toString}")
-      (s"Move ${affected.size} needles by hand",
-        s"Move the following needles: ${movement.mkString(", ")}")
-    case MoveNeedlesDoubleBed(to) =>
-      val affected = Needle.all.filter(n => stateBefore.needles(n).position != to(n))
-      val movement = affected.map(n => s"${n.number} to ${to(n).toString}")
-      (s"Move needles on the double bed",
-        s"Move the following needles on the double bed: ${movement.mkString(", ")}")
+      (s"Move ${affected.size} needles by hand (${formatBed(bed)})",
+        s"Move the following needles on the ${formatBed(bed)}: ${movement.mkString(", ")}")
 
     case KnitRow(c, dir, _) =>
       val from = if (ToLeft != dir) "left" else "right"
@@ -139,10 +133,10 @@ sealed trait GuideStep {
       (s"Change Settings K",
         s"Change K carriage settings Knob to ${s.knob} with lever at ${s.holdingCamLever.name} and ${settings.mkString(" and ")} with assembly $assembly")
 
-    case s @ RetireNeedle(needle, direction) =>
+    case s @ RetireNeedle(bed, needle, direction) =>
       val d = if (direction == Left) "left" else "right"
-      (s"Retire needle ${needle.number}",
-        s"Move the yarns on needle ${needle.number} one needle to the $d and put it into A position. Leave needle ${s.target.number} at B position.")
+      (s"Retire needle ${needle.number} (${formatBed(bed)})",
+        s"Move the yarns on the ${formatBed(bed)} needle ${needle.number} one needle to the $d and put it into A position. Leave needle ${s.target.number} at B position.")
 
     case Information(title, desc) => (title, desc)
   }
