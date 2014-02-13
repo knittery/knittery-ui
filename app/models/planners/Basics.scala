@@ -80,6 +80,15 @@ object Basics {
     yarnB2 <- yarnAttachment(yarnB)
   } yield (yarnA2, yarnB2)
 
+  /** Round knitting with the K-Carriage. */
+  def knitRoundK(yarn: YarnPiece, pattern: NeedleActionRow = AllNeedlesToB) = {
+    import KCarriage._
+    val assembly = DoubleBedCarriage(partRight = true, yarn = Some(yarn))
+    val settings = Settings(partLeft = true)
+    Basics.assembly(assembly) >>
+      knitRowWithK(settings, Some(yarn), None, pattern)
+  }
+
   /** Knit a row with the L-Carriage. */
   def knitRowWithL(settings: LCarriage.Settings, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
