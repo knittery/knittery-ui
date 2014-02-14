@@ -58,9 +58,12 @@ case class MoveNeedles(bed: Bed, to: NeedlePatternRow) extends Step {
 }
 object MoveNeedles {
   /** Changes working needles to the values in the pattern. Non working are not touched. */
-  def apply(before: NeedlePatternRow, pattern: NeedleActionRow) = new MoveNeedles(MainBed, n =>
-    if (before(n).isWorking) pattern(n).toPosition
-    else before(n))
+  def apply(before: NeedlePatternRow, pattern: NeedleActionRow, moveE: Boolean) = {
+    def filter(pos: NeedlePosition) = pos.isWorking && (pos != NeedleE || moveE)
+    new MoveNeedles(MainBed, n =>
+      if (filter(before(n))) pattern(n).toPosition
+      else before(n))
+  }
 }
 
 sealed trait ChangeCarriageSettings extends Step {

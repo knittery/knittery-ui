@@ -58,12 +58,18 @@ object Basics {
     }
   }
 
+  def moveNeedles(bed: Bed, filter: Needle => Boolean, to: NeedlePosition): Planner = for {
+    needles <- Planner.state(_.needles(bed).toMap.mapValues(_.position))
+    newlyPositioned = Needle.all.filter(filter).map((_, to))
+    _ <- MoveNeedles(bed, needles ++ newlyPositioned)
+  } yield ()
+
   /** Knit a row with the K-Carriage. */
   def knitRowWithK(settings: KCarriage.Settings = KCarriage.Settings(), assembly: KCarriage.Assembly = KCarriage.SinkerPlate(),
     yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings, assembly)
     needlesBefore <- Planner.state(_.needles(MainBed).positions)
-    _ <- MoveNeedles(needlesBefore, pattern)
+    _ <- MoveNeedles(needlesBefore, pattern, settings.holdingCamLever == KCarriage.HoldingCamN)
     _ <- ThreadYarnK(yarnA, yarnB)
     dir <- nextDirection(KCarriage)
     _ <- KnitRow(KCarriage, dir)
@@ -81,7 +87,7 @@ object Basics {
   def knitRowWithL(settings: LCarriage.Settings, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
     needlesBefore <- Planner.state(_.needles(MainBed).positions)
-    _ <- MoveNeedles(needlesBefore, pattern)
+    _ <- MoveNeedles(needlesBefore, pattern, true)
     dir <- nextDirection(LCarriage)
     _ <- KnitRow(LCarriage, dir)
   } yield ()
