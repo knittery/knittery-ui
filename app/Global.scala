@@ -38,7 +38,8 @@ object Global extends GlobalSettings {
     //    val plan = imagePlan
     //    val plan = examplePlan
     //    val plan = tubePlan
-    val plan = decreasingTubePlan
+    //    val plan = decreasingTubePlan
+    val plan = sockPlan
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
 
@@ -82,6 +83,7 @@ object Global extends GlobalSettings {
 
   private def tubePlan = Examples.tube(10, 40, YarnPiece(Yarn("red", Color.red)))
   private def decreasingTubePlan = Examples.decreasingTube(20, 60, YarnPiece(Yarn("red", Color.red)))
+  private def sockPlan = Examples.sock(12, 20, 15, YarnPiece(Yarn("red", Color.red)))
 
   private def imagePlan = {
     val img = ImageIO.read(new File("example.png"))
