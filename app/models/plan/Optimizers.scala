@@ -9,7 +9,7 @@ object Optimizers {
   val list =
     UnknittedSettingsOptimizer ::
       NoEffectStepOptimizer ::
-      OptimizeUselessMoveNeedles ::
+//      OptimizeUselessMoveNeedles ::
       OptimizePatternKnitting ::
       Nil
   implicit val all = list.foldLeft(Monoid[PlanOptimizer].zero)(_ |+| _)
