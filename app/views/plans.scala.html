@@ -1,0 +1,103 @@
+@()
+
+@import helper._
+
+@main("Plans", "wide-container") {
+
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+            Image
+      </h3>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse">
+	    <div class="panel-body">
+	      <div class="pattern-form">
+	        @form(action = routes.Plans.loadImagePlan, 'enctype -> "multipart/form-data", 'class -> "form-horizontal", 'role -> "form") {
+	            <div class="form-group">
+	                <div class="col-sm-offset-2 col-sm-7">
+	                    <input type="file" class="form-control" name="pattern">
+	                </div>
+	            </div>
+	            <div class="form-group">
+	                <div class="col-sm-offset-2 col-sm-9">
+	                    <button type="submit" class="btn btn-default">Submit</button>
+	                </div>
+	            </div>
+	        }
+	      </div>
+	    </div>
+    </div>
+  </div>
+  
+  <div class="panel panel-default pattern">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+            Pattern
+      </h3>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse">
+	    <div class="panel-body">
+	      <div class="pattern-form">
+	        @form(action = routes.Plans.loadPatternPlan, 'enctype -> "multipart/form-data", 'class -> "form-horizontal", 'role -> "form") {
+	            <div class="form-group">
+	            	<label class="col-sm-6 control-label">widthInCmImg</label>
+	            	<div class="col-sm-3">
+	            		<input type="text" class="form-control" value="0.0" name="widthInCmImg">
+	            	</div>
+	            </div>
+	            <div class="form-group">
+	            	<label class="col-sm-6 control-label">heightInCmImg</label>
+	            	<div class="col-sm-3">
+	            		<input type="text" class="form-control" value="0.0" name="heightInCmImg">
+	            	</div>
+	            </div>
+	            <div class="form-group">
+	            	<label class="col-sm-6 control-label">widthInCm</label>
+	            	<div class="col-sm-3">
+	            		<input type="text" class="form-control" value="0.0" name="widthInCm">
+	            	</div>
+	            </div>
+	            <div class="form-group">
+	            	<label class="col-sm-6 control-label">countStitches</label>
+	            	<div class="col-sm-3">
+	            		<input type="text" class="form-control" value="0" name="countStitches">
+	            	</div>
+	            </div>
+	            <div class="form-group">
+	            	<label class="col-sm-6 control-label">heightInCm</label>
+	            	<div class="col-sm-3">
+	            		<input type="text" class="form-control" value="0.0" name="heightInCm">
+	            	</div>
+	            </div>
+	            <div class="form-group">
+	            	<label class="col-sm-6 control-label">countRows</label>
+	            	<div class="col-sm-3">
+	            		<input type="text" class="form-control" value="0" name="countRows">
+	            	</div>
+	            </div>
+	            <div class="form-group">
+	            	<div class="col-sm-offset-2 col-sm-7">
+		            	<input type="file" class="form-control" name="pattern">
+	    	        </div>
+	            </div>
+	            <div class="form-group">
+	    			<div class="col-sm-offset-2 col-sm-9">
+	      				<button type="submit" class="btn btn-default">Submit</button>
+	    			</div>
+	  			</div>
+	            
+	        }
+	      </div>
+	      <div class="pattern-image">
+	        <image src="@routes.Assets.at("images/pattern.png")"/>
+	      </div>
+	    </div>
+    </div>
+  </div>
+</div> 
+
+}

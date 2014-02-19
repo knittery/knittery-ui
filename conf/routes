@@ -17,8 +17,9 @@ POST    /guide/next                 controllers.Guide.next
 POST    /guide/previous             controllers.Guide.previous
 GET     /guide/subscribe            controllers.Guide.subscribe
 
-GET     /pattern                    controllers.Pattern.show
-POST    /pattern/upload				controllers.Pattern.upload
+GET     /plans                      controllers.Plans.show
+POST    /plans/loadpatternplan		controllers.Plans.loadPatternPlan
+POST    /plans/loadimageplan         controllers.Plans.loadImagePlan
 
 GET     /preview                    controllers.Preview.show
 GET     /preview/dot                controllers.Preview.dot
