@@ -44,9 +44,22 @@ object Plans extends Controller {
   }
 
   def loadImagePlan = Action(parse.multipartFormData) { implicit request =>
-    request.body.file("pattern").map { patternFile =>
+    request.body.file("img").map { patternFile =>
       val image = ImageIO.read(patternFile.ref.file)
       val planner = Examples.imageRag(image)
+      val plan = planner.plan().valueOr(e => throw new RuntimeException(e))
+      guider ! Guider.LoadPlan(plan)
+      Redirect(routes.Plans.show())
+    }.getOrElse {
+      Redirect(routes.Plans.show).flashing(
+        "error" -> "Upload failed")
+    }
+  }
+
+  def loadImageDoubleBedPlan = Action(parse.multipartFormData) { implicit request =>
+    request.body.file("imgDoubleBed").map { patternFile =>
+      val image = ImageIO.read(patternFile.ref.file)
+      val planner = Examples.imageRagDoubleBed(image)
       val plan = planner.plan().valueOr(e => throw new RuntimeException(e))
       guider ! Guider.LoadPlan(plan)
       Redirect(routes.Plans.show())
