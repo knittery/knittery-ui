@@ -260,21 +260,21 @@ class OptimizersSpec extends Specification {
     }
   }
 
-  "useless move needles optimizer" should {
+  "useless move needles optimization" should {
     "not change already optimal" in new plans {
-      OptimizeUselessMoveNeedles(plainKnittingK.steps) must
+      OptimizeStepWithNoEffect(plainKnittingK.steps) must
         containTheSameElementsAs(plainKnittingK.steps)
     }
     "remove useless move needles" in new plans {
-      OptimizeUselessMoveNeedles(plainKnittingKManualMovements.steps) must
+      OptimizeStepWithNoEffect(plainKnittingKManualMovements.steps) must
         containTheSameElementsAs(plainKnittingK.steps)
     }
     "not optimize away movements to E with HoldingCam H" in new plans {
-      OptimizeUselessMoveNeedles(plainKnittingKWithEAndH.steps) must
+      OptimizeStepWithNoEffect(plainKnittingKWithEAndH.steps) must
         containTheSameElementsAs(plainKnittingKWithEAndH.steps)
     }
     "optimize away movements to E with HoldingCam N" in new plans {
-      OptimizeUselessMoveNeedles(plainKnittingKWithEAndN_unoptimized.steps) must
+      OptimizeStepWithNoEffect(plainKnittingKWithEAndN_unoptimized.steps) must
         containTheSameElementsAs(plainKnittingKWithEAndN.steps)
     }
   }
