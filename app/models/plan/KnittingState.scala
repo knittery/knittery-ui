@@ -91,6 +91,7 @@ sealed trait CarriageStates {
     case o: CarriageStates => data == o.data
     case _ => false
   }
+  override def toString = data.toString
 }
 object CarriageStates {
   def empty = new CarriageStates {
