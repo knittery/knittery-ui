@@ -29,6 +29,7 @@ class window.Graph
     if @nodeSet[id]? then throw "node #{id} already in graph"
     node = new Node(id, data)
     @nodeSet[id] = node
+    node.index = @nodes.length
     @nodes.push(node)
     node
   node: (id) ->
@@ -44,6 +45,25 @@ class window.Graph
     from.addEdge(edge)
     to.addEdge(edge)
     edge
+
+  #Find circles in graph. Limit = max number of nodes in a circle
+  findCircles: (limit = 2147483647) ->
+    circles = []
+    for start in @nodes
+      findWithStart = (members, current) ->
+        for candidate in current.neighbors
+          if candidate == start and members.length > 2 
+            #Found the smallest circle
+            circles.push(members) if current.index <= members[1].index
+          else if members.length < limit and            #circle size within limit?
+                  members.indexOf(candidate) == -1 and  #else not smallest circle
+                  start.index < candidate.index         #circles always start at the node with the smallest index (avoid duplicates)
+            m2 = members.slice(0)
+            m2.push(candidate)
+            findWithStart(m2, candidate)
+        0
+      findWithStart([start], start)
+    circles
 
 epsilon = 0.01
 epsilonSq = epsilon * epsilon

@@ -111,13 +111,11 @@ drawMesh = (graph, scene) ->
     node.data.vertice = i
     geo.vertices.push(node.position)
 
-  for n1 in graph.nodes
-    for n2 in n1.neighbors when n1.data.vertice < n2.data.vertice
-      for n3 in n1.neighbors when n2.data.vertice < n3.data.vertice and n1.data.vertice < n3.data.vertice
-        for n4 in n2.neighbors when n3 != n4 and n3 in n4.neighbors and n1.data.vertice < n4.data.vertice
-          quad = [n1.data.vertice, n2.data.vertice, n3.data.vertice, n4.data.vertice]
-          geo.faces.push(new THREE.Face3(quad[0], quad[1], quad[2]))
-          geo.faces.push(new THREE.Face3(quad[3], quad[2], quad[1]))
+  circles = graph.findCircles(4)
+  console.debug("Found #{circles.length} circles in the graph.")
+  for circle in circles
+    for i in [1..circle.length-2]
+      geo.faces.push(new THREE.Face3(circle[0].data.vertice, circle[i].data.vertice, circle[i+1].data.vertice))
 
   geo.computeFaceNormals()
   geo.computeVertexNormals()
