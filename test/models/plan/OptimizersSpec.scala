@@ -161,6 +161,33 @@ class OptimizersSpec extends Specification {
         KnitRow(KCarriage, ToLeft)))
     }
 
+    val plainKnittingKWithEAndH = {
+      Plan(List(
+        ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
+        AddCarriage(KCarriage, Left),
+        ThreadYarnK(Some(redPiece), None),
+        KnitRow(KCarriage, ToRight),
+        MoveNeedles(MainBed, _ => NeedleE),
+        KnitRow(KCarriage, ToLeft)))
+    }
+    val plainKnittingKWithEAndN_unoptimized = {
+      Plan(List(
+        ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
+        AddCarriage(KCarriage, Left),
+        ThreadYarnK(Some(redPiece), None),
+        KnitRow(KCarriage, ToRight),
+        MoveNeedles(MainBed, _ => NeedleE),
+        KnitRow(KCarriage, ToLeft)))
+    }
+    val plainKnittingKWithEAndN = {
+      Plan(List(
+        ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
+        AddCarriage(KCarriage, Left),
+        ThreadYarnK(Some(redPiece), None),
+        KnitRow(KCarriage, ToRight),
+        KnitRow(KCarriage, ToLeft)))
+    }
+
     val plans = simpleLines ::
       simpleLinesWithUnknittedSettings ::
       simpleLinesWithDuplicateSettings ::
@@ -230,6 +257,14 @@ class OptimizersSpec extends Specification {
     "remove useless move needles" in new plans {
       OptimizeUselessMoveNeedles(plainKnittingKManualMovements.steps) must
         containTheSameElementsAs(plainKnittingK.steps)
+    }
+    "not optimize away movements to E with HoldingCam H" in new plans {
+      OptimizeUselessMoveNeedles(plainKnittingKWithEAndH.steps) must_==
+        plainKnittingKWithEAndH.steps
+    }
+    "optimize away movements to E with HoldingCam N" in new plans {
+      OptimizeUselessMoveNeedles(plainKnittingKWithEAndN_unoptimized.steps) must_==
+        plainKnittingKWithEAndN.steps
     }
   }
 }
