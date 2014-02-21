@@ -205,6 +205,7 @@ class OptimizersSpec extends Specification {
       ("Plan fails: " + unopt) <==> (unopt.isSuccess must beTrue)
       opt.isSuccess must beTrue
       unopt.map(_.output) must_== opt.map(_.output)
+      unopt.map(_.output2) must_== opt.map(_.output2)
     }
 
     "not change result" in new plans {
@@ -214,7 +215,7 @@ class OptimizersSpec extends Specification {
 
   "unknitted settings optimizer" should {
     "not change already optimal" in new plans {
-      UnknittedSettingsOptimizer(simpleLines.steps) must_== simpleLines.steps
+      UnknittedSettingsOptimizer(simpleLines.steps) must containTheSameElementsAs(simpleLines.steps)
     }
     "remove unknitted change settings" in new plans {
       UnknittedSettingsOptimizer(simpleLinesWithUnknittedSettings.steps) must
@@ -223,7 +224,7 @@ class OptimizersSpec extends Specification {
   }
   "no effect step optimizer" should {
     "not change already optimal" in new plans {
-      NoEffectStepOptimizer(simpleLines.steps) must_== simpleLines.steps
+      NoEffectStepOptimizer(simpleLines.steps) must containTheSameElementsAs(simpleLines.steps)
     }
     "remove duplicate change settings" in new plans {
       NoEffectStepOptimizer(simpleLinesWithDuplicateSettings.steps) must
@@ -232,7 +233,7 @@ class OptimizersSpec extends Specification {
   }
   "settings optimizers" should {
     "not change already optimal" in new plans {
-      NoEffectStepOptimizer(simpleLines.steps) must_== simpleLines.steps
+      NoEffectStepOptimizer(simpleLines.steps) must containTheSameElementsAs(simpleLines.steps)
     }
     "remove useless change settings" in new plans {
       NoEffectStepOptimizer(
@@ -243,28 +244,30 @@ class OptimizersSpec extends Specification {
 
   "pattern knitting optimizer" should {
     "not change already optimal" in new plans {
-      OptimizePatternKnitting(patternLines.steps) must_== patternLines.steps
+      OptimizePatternKnitting(patternLines.steps) must containTheSameElementsAs(patternLines.steps)
     }
     "prevent manual needle movement" in new plans {
       OptimizePatternKnitting(patternLinesWithManualNeedleSettings.steps) must
         containTheSameElementsAs(patternLines.steps)
     }
   }
+
   "useless move needles optimizer" should {
     "not change already optimal" in new plans {
-      OptimizeUselessMoveNeedles(plainKnittingK.steps) must_== plainKnittingK.steps
+      OptimizeUselessMoveNeedles(plainKnittingK.steps) must
+        containTheSameElementsAs(plainKnittingK.steps)
     }
     "remove useless move needles" in new plans {
       OptimizeUselessMoveNeedles(plainKnittingKManualMovements.steps) must
         containTheSameElementsAs(plainKnittingK.steps)
     }
     "not optimize away movements to E with HoldingCam H" in new plans {
-      OptimizeUselessMoveNeedles(plainKnittingKWithEAndH.steps) must_==
-        plainKnittingKWithEAndH.steps
+      OptimizeUselessMoveNeedles(plainKnittingKWithEAndH.steps) must
+        containTheSameElementsAs(plainKnittingKWithEAndH.steps)
     }
     "optimize away movements to E with HoldingCam N" in new plans {
-      OptimizeUselessMoveNeedles(plainKnittingKWithEAndN_unoptimized.steps) must_==
-        plainKnittingKWithEAndN.steps
+      OptimizeUselessMoveNeedles(plainKnittingKWithEAndN_unoptimized.steps) must
+        containTheSameElementsAs(plainKnittingKWithEAndN.steps)
     }
   }
 }
