@@ -41,7 +41,11 @@ sealed abstract class YarnPoint(val prev: YarnFlow, val distance: Int) extends Y
       case p => p.contains(other)
     }
   }
-  //equals is object identity
+  override def hashCode = start.hashCode ^ length
+  override def equals(o: Any) = o match {
+    case other: YarnPoint => start == other.start && length == other.length
+    case _ => false
+  }
   override def toString = s"$start+$length"
 }
 class YarnPiece(val yarn: Yarn, id: Long) extends YarnFlow {
