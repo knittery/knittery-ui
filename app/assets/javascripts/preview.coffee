@@ -114,8 +114,9 @@ drawMesh = (graph, scene) ->
   circles = graph.findCircles(4)
   console.debug("Found #{circles.length} circles in the graph.")
   for circle in circles
-    for i in [1..circle.length-2]
-      geo.faces.push(new THREE.Face3(circle[0].data.vertice, circle[i].data.vertice, circle[i+1].data.vertice))
+    nodes = circle.nodes
+    for i in [1..nodes.length-2]
+      geo.faces.push(new THREE.Face3(nodes[0].data.vertice, nodes[i].data.vertice, nodes[i+1].data.vertice))
 
   geo.computeFaceNormals()
   geo.computeVertexNormals()

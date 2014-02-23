@@ -19,6 +19,27 @@ class Edge
   nodes: -> [@node1, @node2]
   vector: -> @node1.position.clone().sub(@node2.position)
 
+class Path
+  constructor: () ->
+    @nodes = []
+    @edges = []
+  add: (edge) ->
+    if @nodes.length == 0 then @nodes.push(edge.nodes()...)
+    else @nodes.push(edge.other(@end()))
+    @edges.push(edge)
+    this
+  start: () -> @nodes[0]
+  end: () -> @nodes[@nodes.length-1]
+  firstEdge: () -> @edges[0]
+  lastEdge: () -> @edges[@edges.length-1]
+  circular: () -> @start() == @end()
+  length: () -> @nodes.length
+  clone: () ->
+    c = new Path()
+    c.nodes = @nodes.slice()
+    c.edges = @edges.slice()
+    c
+
 ## Undirected graph
 class window.Graph
   nodeSet: {}
@@ -41,29 +62,27 @@ class window.Graph
     if not @nodeSet[from.id] then throw "node #{from.id} not in graph"
     if not @nodeSet[to.id] then throw "node #{to.id} not in graph"
     edge = new Edge(from, to, weight, data)
+    edge.index = @edges.length
     @edges.push(edge)
     from.addEdge(edge)
     to.addEdge(edge)
     edge
 
-  #Find circles in graph. Limit = max number of nodes in a circle
-  findCircles: (limit = 2147483647) ->
-    circles = []
-    for start in @nodes
-      findWithStart = (members, current) ->
-        for candidate in current.neighbors
-          if candidate == start and members.length > 2 
-            #Found the smallest circle
-            circles.push(members) if current.index <= members[1].index
-          else if members.length < limit and            #circle size within limit?
-                  members.indexOf(candidate) == -1 and  #else not smallest circle
-                  start.index < candidate.index         #circles always start at the node with the smallest index (avoid duplicates)
-            m2 = members.slice(0)
-            m2.push(candidate)
-            findWithStart(m2, candidate)
-        0
-      findWithStart([start], start)
-    circles
+  #Find circles in graph. limit = max number of nodes in a circle
+  findCircles: (limit) ->
+    find = (path) ->
+      found = []
+      if (path.length() <= limit)
+        for current in path.end().edges when current != path.lastEdge() and current.index < path.firstEdge().index
+          path2 = path.clone().add(current)
+          x = (n.id for n in path2.nodes)
+          if path2.circular() then found.push(path2)
+          else found.push(find(path2)...)
+      found
+    result = []
+    result.push(find(new Path().add(edge))...) for edge in @edges
+    result
+
 
 epsilon = 0.01
 epsilonSq = epsilon * epsilon
