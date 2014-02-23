@@ -111,9 +111,29 @@ drawMesh = (graph, scene) ->
     node.data.vertice = i
     geo.vertices.push(node.position)
 
-  circles = graph.findCircles(4)
-  console.debug("Found #{circles.length} circles in the graph.")
-  for circle in circles
+  # Find circular paths in the graph (with max length of 8 edges)
+  circles = graph.findCircles(8)
+
+  # Reduce found circles by only keeping those that don't overlap
+  byEdge = {}
+  for c in circles
+    for e in c.edges
+      ecs = byEdge[e.index]
+      if ecs? then ecs.push(c)
+      else byEdge[e.index] = ecs = [c]
+    c.badness = - c.length()
+  relevantCircles = []
+  circles.sort((a,b) -> a.length() - b.length())
+  for c in circles
+    # remove this from byEdge
+    byEdge[e.index].splice(byEdge[e.index].indexOf(c), 1) for e in c.edges
+    if c.badness < 1   # only keep if not too many common edges with already chosen
+      relevantCircles.push(c)
+      # punish all others that have common edges with us
+      o.badness++ for o in byEdge[e.index] for e in c.edges
+
+  console.debug("Found #{circles.length} circles in the graph and reduced it to #{relevantCircles.length} faces.")
+  for circle in relevantCircles
     nodes = circle.nodes
     for i in [1..nodes.length-2]
       geo.faces.push(new THREE.Face3(nodes[0].data.vertice, nodes[i].data.vertice, nodes[i+1].data.vertice))
