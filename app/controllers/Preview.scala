@@ -50,7 +50,7 @@ object Preview extends Controller {
       i = i + 1
     }
     val duration = System.currentTimeMillis - t
-    println(s"Performance: ${(duration * 1000 / i).round} us per it")
+    println(s"Performance: ${(duration * 1000 / i).round} us per iteration ($i iterations).")
 
     val nodeJson = graph.nodes.map { node =>
       val yarns = node.value.points.map(_.yarn).toSet
