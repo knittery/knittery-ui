@@ -1,8 +1,5 @@
 package utils
 
-import javax.vecmath.Vector3d
-import javax.vecmath.Point3d
-
 package object graph {
   type Position = Vector3
 
