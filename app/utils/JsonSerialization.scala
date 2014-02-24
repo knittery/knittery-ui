@@ -6,6 +6,7 @@ import models._
 import models.machine.Machine._
 import models.guide._
 import models.plan._
+import graph._
 
 object JsonSerialization {
 
@@ -53,7 +54,10 @@ object JsonSerialization {
       JsString("#" + value.toHexString.drop(2))
     }
   }
-
+  implicit object PositionWrite extends Writes[Position] {
+    override def writes(pos: Position) = Json.obj(
+      "x" -> BigDecimal(pos.x), "y" -> BigDecimal(pos.y), "z" -> BigDecimal(pos.z))
+  }
   implicit object YarnWrite extends Writes[Yarn] {
     override def writes(yarn: Yarn) = Json.obj("name" -> yarn.name, "color" -> yarn.color)
   }
