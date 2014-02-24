@@ -36,9 +36,9 @@ $(() ->
       
       area = 2000
       for node in graph.nodes
-        node.position.x = Math.floor(Math.random() * area - area/2)
-        node.position.y = Math.floor(Math.random() * area - area/2)
-        node.position.z = Math.floor(Math.random() * area - area/2)
+        node.position.x = node.data.initialPosition.x
+        node.position.y = node.data.initialPosition.y
+        node.position.z = node.data.initialPosition.z
       if graph.nodes.length < 500
         console.debug("Using spring layout")
         graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
@@ -58,7 +58,8 @@ $(() ->
 
 loadGraph = (data, graph) ->
   for n in data.nodes
-    graph.addNode(n.id, {colors: n.colors})
+    gn = graph.addNode(n.id, {colors: n.colors})
+    gn.data.initialPosition = n.position
   for e in data.edges when e.n1 != e.n2
     graph.addEdge(graph.node(e.n1), graph.node(e.n2), e.weight, {color: e.color})
 

@@ -17,6 +17,8 @@ import akka.util._
 import models.Yarn
 import models.guide._
 import models.plan._
+import utils.graph._
+import utils.JsonSerialization._
 
 object Preview extends Controller {
   private implicit val timeout: Timeout = 100.millis
@@ -37,11 +39,24 @@ object Preview extends Controller {
     val alias = graph.nodes.zipWithIndex.map {
       case (node, index) => node.value -> s"s$index"
     }.toMap
+
+    val layout = SpringLayout(graph, Box(2000))
+
+    println(s"Layouting ${graph.size} nodes...")
+    val iterations = 2000
+    val t = System.currentTimeMillis
+    (1 to iterations).foreach { _ =>
+      layout.improve()
+    }
+    val duration = System.currentTimeMillis - t
+    println(s"Performance: ${(duration * 1000 / iterations).round} us per it")
+
     val nodeJson = graph.nodes.map { node =>
       val yarns = node.value.points.map(_.yarn).toSet
       Json.obj(
         "id" -> alias(node),
-        "colors" -> yarns.map(_.color).map(colorRgb))
+        "colors" -> yarns.map(_.color).map(colorRgb),
+        "position" -> layout(node))
     }
     val edgeJson = graph.edges.map { edge =>
       val color = edge.label match { case Yarn(_, color) => color }
