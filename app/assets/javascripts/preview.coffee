@@ -32,6 +32,7 @@ $(() ->
 
   jsRoutes.controllers.Preview.json().ajax {
     success: (data) ->
+      console.debug("Received graph data from server")
       loadGraph(data, graph)
       
       area = 2000
@@ -113,7 +114,7 @@ drawMesh = (graph, scene) ->
     geo.vertices.push(node.position)
 
   # Find circular paths in the graph (with max length of 8 edges)
-  circles = graph.findCircles(8)
+  circles = graph.findCircles(6)
 
   # Reduce found circles by only keeping those that don't overlap
   byEdge = {}
