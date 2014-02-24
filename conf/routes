@@ -18,9 +18,10 @@ POST    /guide/previous             controllers.Guide.previous
 GET     /guide/subscribe            controllers.Guide.subscribe
 
 GET     /plans                      controllers.Plans.show
-POST    /plans/loadimageplan        controllers.Plans.loadImagePlan
-POST    /plans/loadimagedoublebedplan         controllers.Plans.loadImageDoubleBedPlan
-POST    /plans/loadpatternplan		controllers.Plans.loadPatternPlan
+POST    /plans/load/imageplan        controllers.Plans.loadImagePlan
+POST    /plans/load/imagedoublebedplan         controllers.Plans.loadImageDoubleBedPlan
+POST    /plans/load/patternplan		controllers.Plans.loadPatternPlan
+POST    /plans/load/sock     		controllers.Plans.loadSock
 
 GET     /preview                    controllers.Preview.show
 GET     /preview/dot                controllers.Preview.dot

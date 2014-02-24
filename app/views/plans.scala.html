@@ -60,6 +60,47 @@
         </div>
     </div>
   </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseSock">
+            Sock
+        </a>
+      </h3>
+    </div>
+    <div id="collapseSock" class="panel-collapse collapse">
+        <div class="panel-body">
+          <div class="pattern-form">
+            @form(action = routes.Plans.loadSock, 'class -> "form-horizontal", 'role -> "form") {
+              <div class="form-group">
+                <label class="col-sm-6 control-label">width at top</label>
+                <div class="col-sm-3">
+                  <input type="text" class="form-control" value="10" name="width">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-6 control-label">shaft height</label>
+                <div class="col-sm-3">
+                  <input type="text" class="form-control" value="10" name="shaft">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-6 control-label">foot length</label>
+                <div class="col-sm-3">
+                  <input type="text" class="form-control" value="15" name="foot">
+                </div>
+              </div>
+              <div class="form-group">
+                  <div class="col-sm-offset-2 col-sm-9">
+                      <button type="submit" class="btn btn-default">Submit</button>
+                  </div>
+              </div>
+            }
+          </div>
+        </div>
+    </div>
+  </div>
   
   <div class="panel panel-default pattern">
     <div class="panel-heading">

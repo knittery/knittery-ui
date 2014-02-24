@@ -23,6 +23,7 @@ import play.api.data.format.Formats._
 import java.awt.image.BufferedImage
 import models.guide._
 import models.planners._
+import java.awt.Color
 
 object Plans extends Controller {
 
@@ -38,6 +39,12 @@ object Plans extends Controller {
       "countStitches" -> number,
       "heightInCm" -> bigDecimal,
       "countRows" -> number)(GaugeFormData.apply)(GaugeFormData.unapply))
+
+  case class SockFormData(width: Int, shaft: Int, foot: Int)
+  val sockForm = Form(mapping(
+    "width" -> number,
+    "shaft" -> number,
+    "foot" -> number)(SockFormData.apply)(SockFormData.unapply))
 
   def show = Action {
     Ok(views.html.plans())
@@ -95,5 +102,13 @@ object Plans extends Controller {
       Redirect(routes.Plans.show).flashing(
         "error" -> "Upload failed")
     }
+  }
+
+  def loadSock = Action { implicit request =>
+    val form = sockForm.bindFromRequest.get
+    val plan = Examples.sock(form.width, form.shaft, form.foot, YarnPiece(Yarn("red", Color.red)))
+      .valueOr(e => throw new RuntimeException(s"Invalid Plan: $e"))
+    guider ! Guider.LoadPlan(plan)
+    Redirect(routes.Plans.show())
   }
 }
