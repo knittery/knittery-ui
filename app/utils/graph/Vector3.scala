@@ -37,6 +37,7 @@ class Vector3 private (var x: Double, var y: Double, var z: Double) extends Prod
   def /(by: Double) = clone /= by
 
   def length = Math.sqrt(x * x + y * y + z * z)
+  def lengthSq = x * x + y * y + z * z
   def volume = x * y * z
 
   def negate() = {
@@ -67,6 +68,6 @@ case class Box(origin: Vector3, size: Vector3)
 object Box {
   def apply(size: Double): Box = {
     val v = Vector3(size, size, size)
-    Box((v /= 2).clone.negate(), v)
+    Box(v / -2, v)
   }
 }

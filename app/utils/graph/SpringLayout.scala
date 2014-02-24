@@ -52,30 +52,39 @@ object SpringLayout {
     protected def repulse() = {
       val const = repulsionConstant
       val epsilon = size.length / 10000000
-      for (i <- 0 until count; j <- i + 1 until count) {
-        val v = positions(i) - positions(j)
-        val distance = v.length + epsilon
-        v *= const / (distance * distance * distance)
-        forces(i) += v
-        forces(j) -= v
+      var i = 0
+      var j = 0
+      while (i < count) {
+        j = i + 1
+        while (j < count) {
+          val v = positions(i) - positions(j)
+          val distance = v.length + epsilon
+          v *= const / (distance * distance * distance)
+          forces(i) += v
+          forces(j) -= v
+          j = j + 1
+        }
+        i = i + 1
       }
     }
     protected def attract() = {
       val const = springConstant
       for (conn <- connections) {
         val v = positions(conn.index1) - positions(conn.index2)
-        v *= const
+        v *= const * conn.weight
         forces(conn.index1) -= v
         forces(conn.index2) += v
       }
     }
     protected def move() = {
       var total = 0d
-      for (i <- 0 until count) {
+      var i = 0
+      while (i < count) {
         val v = forces(i)
         positions(i) += v
         total += v.length
         v.zero()
+        i = i + 1
       }
       total
     }
