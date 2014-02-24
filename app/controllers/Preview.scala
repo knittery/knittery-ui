@@ -42,14 +42,15 @@ object Preview extends Controller {
 
     val layout = SpringLayout(graph, Box(2000))
 
-    println(s"Layouting ${graph.size} nodes...")
-    val iterations = 2000
+    println(s"Prelayouting ${graph.size} nodes...")
+    var i = 0
     val t = System.currentTimeMillis
-    (1 to iterations).foreach { _ =>
+    while (i < 2000 && System.currentTimeMillis - t < 5000) {
       layout.improve()
+      i = i + 1
     }
     val duration = System.currentTimeMillis - t
-    println(s"Performance: ${(duration * 1000 / iterations).round} us per it")
+    println(s"Performance: ${(duration * 1000 / i).round} us per it")
 
     val nodeJson = graph.nodes.map { node =>
       val yarns = node.value.points.map(_.yarn).toSet
