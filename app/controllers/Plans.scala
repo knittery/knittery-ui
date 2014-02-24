@@ -24,13 +24,13 @@ import java.awt.image.BufferedImage
 import models.guide._
 import models.planners._
 
-object Pattern extends Controller {
+object Plans extends Controller {
 
   protected def guider = Akka.system.actorSelection(Akka.system / "guider")
 
   case class GaugeFormData(widthInCmImg: BigDecimal, heightInCmImg: BigDecimal, widthInCm: BigDecimal, countStitches: Int, heightInCm: BigDecimal, countRows: Int)
 
-  val uploadForm = Form(
+  val uploadPatternForm = Form(
     mapping(
       "widthInCmImg" -> bigDecimal,
       "heightInCmImg" -> bigDecimal,
@@ -40,11 +40,37 @@ object Pattern extends Controller {
       "countRows" -> number)(GaugeFormData.apply)(GaugeFormData.unapply))
 
   def show = Action {
-    Ok(views.html.pattern())
+    Ok(views.html.plans())
   }
 
-  def upload = Action(parse.multipartFormData) { implicit request =>
-    val gaugeFormData = uploadForm.bindFromRequest().get
+  def loadImagePlan = Action(parse.multipartFormData) { implicit request =>
+    request.body.file("img").map { patternFile =>
+      val image = ImageIO.read(patternFile.ref.file)
+      val planner = Examples.imageRag(image)
+      val plan = planner.plan().valueOr(e => throw new RuntimeException(e))
+      guider ! Guider.LoadPlan(plan)
+      Redirect(routes.Plans.show())
+    }.getOrElse {
+      Redirect(routes.Plans.show).flashing(
+        "error" -> "Upload failed")
+    }
+  }
+
+  def loadImageDoubleBedPlan = Action(parse.multipartFormData) { implicit request =>
+    request.body.file("imgDoubleBed").map { patternFile =>
+      val image = ImageIO.read(patternFile.ref.file)
+      val planner = Examples.imageRagDoubleBed(image)
+      val plan = planner.plan().valueOr(e => throw new RuntimeException(e))
+      guider ! Guider.LoadPlan(plan)
+      Redirect(routes.Plans.show())
+    }.getOrElse {
+      Redirect(routes.Plans.show).flashing(
+        "error" -> "Upload failed")
+    }
+  }
+
+  def loadPatternPlan = Action(parse.multipartFormData) { implicit request =>
+    val gaugeFormData = uploadPatternForm.bindFromRequest().get
     val gauge = new Gauge(gaugeFormData.widthInCm.doubleValue, gaugeFormData.countStitches, gaugeFormData.heightInCm.doubleValue, gaugeFormData.countRows)
 
     request.body.file("pattern").map { patternFile =>
@@ -64,9 +90,9 @@ object Pattern extends Controller {
       val plan = planner.plan().valueOr(e => throw new RuntimeException(e))
       guider ! Guider.LoadPlan(plan)
 
-      Redirect(routes.Pattern.show())
+      Redirect(routes.Plans.show())
     }.getOrElse {
-      Redirect(routes.Pattern.show).flashing(
+      Redirect(routes.Plans.show).flashing(
         "error" -> "Upload failed")
     }
   }
