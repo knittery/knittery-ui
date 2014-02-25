@@ -16,27 +16,25 @@ object SpringBarnesHutLayout {
     def apply(n: N) = nodes(n)
 
     def improve = {
-      val bodies = nodes.map {
-        case (n, pos) => Body(Vec(pos), n)
-      }.toVector
-
-      val repulsed = bodies.map { node =>
-        val force = bodies.foldLeft(Vec.zero) {
-          case (f, o) => node.force(o) + f
-        }
-        node.applyForce(force)
-      }.seq
-
-      val repulsedAndAttracted = edges.foldLeft(repulsed.map(n => (n.value, n)).toMap) {
-        case (nodeMap, (a, b, weigth)) =>
+      val attracted = edges.foldLeft(nodes.mapValues(Vec.apply)) {
+        case (nodeMap, (a, b, weight)) =>
           val nodeA = nodeMap(a)
           val nodeB = nodeMap(b)
-          val spring = Spring(nodeA, nodeMap(b), weigth)
-          val force = spring.force
-          nodeMap + (a -> nodeA.applyForce(-force)) + (b -> nodeB.applyForce(force))
+          val force = (nodeA - nodeB) * (springConstant * weight)
+          nodeMap + ((a, nodeA - force)) + ((b, nodeB + force))
       }
 
-      new SBHLayout(size)(repulsedAndAttracted.mapValues(_.centerOfMass.toVector3), edges)
+      val bodies = attracted.map(x => (Body(x._2, x._1))).toVector
+      val repulsedAndAttracted = bodies.map { node =>
+        val newPosition = bodies.foldLeft(node.centerOfMass) {
+          case (pos, o) => pos + node.force(o)
+        }
+        node.copy(centerOfMass = newPosition)
+      }.seq
+
+      new SBHLayout(size)(
+        repulsedAndAttracted.map(x => x.value -> x.centerOfMass.toVector3).toMap,
+        edges)
     }
 
     val repulsionConstant = {
