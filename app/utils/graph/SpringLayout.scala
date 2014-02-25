@@ -78,16 +78,13 @@ object SpringLayout {
       }
     }
     protected def move() = {
-      var total = 0d
       var i = 0
       while (i < count) {
         val v = forces(i)
         positions(i) += v
-        total += v.length
         v.zero()
         i = i + 1
       }
-      total
     }
   }
 }
