@@ -5,7 +5,7 @@ package object graph {
 
   type Layout[N] = N => Position
   trait IncrementalLayout[N] extends Layout[N] {
-    /** Improves the layout. Returns a quality measurement [0,1]. */
-    def improve(): Double
+    /** Improves the layout. */
+    def improve(): IncrementalLayout[N]
   }
 }

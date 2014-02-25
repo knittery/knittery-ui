@@ -47,6 +47,7 @@ object SpringLayout {
       repulse()
       attract()
       move()
+      this
     }
 
     protected def repulse() = {
