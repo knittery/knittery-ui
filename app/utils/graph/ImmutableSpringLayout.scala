@@ -43,28 +43,17 @@ object ImmutableSpringLayout {
       val maxWeight = edges.map(_._3).max
       1 / (maxWeight * 5)
     }
-
     val epsilon = size.length / 10000000
-    sealed trait Node {
-      def centerOfMass: Vec3
-      def mass: Double
-      def distance(to: Node) = (centerOfMass - to.centerOfMass).length
-      def force(against: Node) = {
+
+    case class Body(centerOfMass: Vec3, value: N) {
+      def mass = 1
+      def distance(to: Body) = (centerOfMass - to.centerOfMass).length
+      def force(against: Body) = {
         val vec = (centerOfMass - against.centerOfMass)
         val distance = vec.length
         vec * (repulsionConstant * mass * against.mass / (distance * distance * distance + epsilon))
       }
-    }
-    case class Body(centerOfMass: Vec3, value: N) extends Node {
-      def mass = 1
       def applyForce(f: Vec3) = copy(centerOfMass = centerOfMass + f)
-    }
-
-    case class Spring(a: Node, b: Node, strength: Double) {
-      def force = {
-        val vec = a.centerOfMass - b.centerOfMass
-        vec * (springConstant * strength)
-      }
     }
   }
 }
