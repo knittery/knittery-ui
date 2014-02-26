@@ -29,12 +29,10 @@ object SpringBarnesHutLayout {
         val newPosition = bodies.foldLeft(node.centerOfMass) {
           case (pos, o) => pos + node.force(o)
         }
-        node.copy(centerOfMass = newPosition)
-      }.seq
+        (node.value, newPosition.toVector3)
+      }.toMap
 
-      new SBHLayout(size)(
-        repulsedAndAttracted.map(x => x.value -> x.centerOfMass.toVector3).toMap,
-        edges)
+      new SBHLayout(size)(repulsedAndAttracted, edges)
     }
 
     val repulsionConstant = {
