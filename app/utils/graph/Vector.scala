@@ -51,6 +51,7 @@ class Vector3 private (var x: Double, var y: Double, var z: Double) extends Prod
     y = 0
     z = 0
   }
+  def toVec3 = Vec3(x, y, z)
   override def clone = new Vector3(x, y, z)
   def canEqual(o: Any) = o.isInstanceOf[Vector3]
   override def toString = s"(${x.round},${y.round},${z.round})"
