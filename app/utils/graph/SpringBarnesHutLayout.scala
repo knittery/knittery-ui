@@ -16,7 +16,7 @@ object SpringBarnesHutLayout {
     def apply(n: N) = nodes(n)
 
     def improve = {
-      val attracted = edges.foldLeft(nodes.mapValues(Vec.apply)) {
+      val attracted = edges.foldLeft(nodes.mapValues(Vec3.apply)) {
         case (nodeMap, (a, b, weight)) =>
           val nodeA = nodeMap(a)
           val nodeB = nodeMap(b)
@@ -44,26 +44,10 @@ object SpringBarnesHutLayout {
       1 / (maxWeight * 5)
     }
 
-    type F = Double
-    case class Vec(x: F, y: F, z: F) {
-      def +(o: Vec) = Vec(x + o.x, y + o.y, z + o.z)
-      def -(o: Vec) = Vec(x - o.x, y - o.y, z - o.z)
-      def *(scalar: F) = Vec(x * scalar, y * scalar, z * scalar)
-      def /(scalar: F) = Vec(x / scalar, y / scalar, z / scalar)
-      def unary_- = Vec(-x, -y, -z)
-      def length = Math.sqrt(x * x + y * y + z * z)
-      def toVector3 = Vector3(x, y, z)
-      override def toString = s"($x,$y,$z)"
-    }
-    object Vec {
-      val zero = Vec(0, 0, 0)
-      def apply(v: Vector3): Vec = Vec(v.x, v.y, v.z)
-    }
-
     val epsilon = size.length / 10000000
     sealed trait Node {
-      def centerOfMass: Vec
-      def mass: F
+      def centerOfMass: Vec3
+      def mass: Double
       def distance(to: Node) = (centerOfMass - to.centerOfMass).length
       def force(against: Node) = {
         val vec = (centerOfMass - against.centerOfMass)
@@ -71,9 +55,9 @@ object SpringBarnesHutLayout {
         vec * (repulsionConstant * mass * against.mass / (distance * distance * distance + epsilon))
       }
     }
-    case class Body(centerOfMass: Vec, value: N) extends Node {
+    case class Body(centerOfMass: Vec3, value: N) extends Node {
       def mass = 1
-      def applyForce(f: Vec) = copy(centerOfMass = centerOfMass + f)
+      def applyForce(f: Vec3) = copy(centerOfMass = centerOfMass + f)
     }
 
     case class Spring(a: Node, b: Node, strength: Double) {

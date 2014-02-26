@@ -2,7 +2,7 @@ package utils.graph
 
 import scala.util.Random
 
-/**  3 component vector. */
+/**  mutable 3 component vector. */
 class Vector3 private (var x: Double, var y: Double, var z: Double) extends Product3[Double, Double, Double] {
   def _1 = x
   def _2 = y
@@ -62,6 +62,22 @@ object Vector3 {
   }
   def random(in: Box): Vector3 = random(in.size) += in.origin
   def apply(x: Double, y: Double, z: Double) = new Vector3(x, y, z)
+}
+
+/** Immutable 3 component vector. */
+case class Vec3(x: Double, y: Double, z: Double) {
+  def +(o: Vec3) = Vec3(x + o.x, y + o.y, z + o.z)
+  def -(o: Vec3) = Vec3(x - o.x, y - o.y, z - o.z)
+  def *(scalar: Double) = Vec3(x * scalar, y * scalar, z * scalar)
+  def /(scalar: Double) = Vec3(x / scalar, y / scalar, z / scalar)
+  def unary_- = Vec3(-x, -y, -z)
+  def length = Math.sqrt(x * x + y * y + z * z)
+  def toVector3 = Vector3(x, y, z)
+  override def toString = s"($x,$y,$z)"
+}
+object Vec3 {
+  val zero = Vec3(0, 0, 0)
+  def apply(v: Vector3): Vec3 = Vec3(v.x, v.y, v.z)
 }
 
 case class Box(origin: Vector3, size: Vector3)
