@@ -13,6 +13,12 @@ class Vector3 private (var x: Double, var y: Double, var z: Double) extends Prod
     z += other.z
     this
   }
+  def +=(other: Vec3) = {
+    x += other.x
+    y += other.y
+    z += other.z
+    this
+  }
   def +(other: Vector3) = clone += other
   def -=(other: Vector3) = {
     x -= other.x

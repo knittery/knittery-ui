@@ -45,14 +45,36 @@ object ImmutableSpringLayout {
           .updated(spring.node2, forces(spring.node2) + force)
     }
 
-    def repulse(forces: Seq[Vec3]) = {
-      val bodies = positions.map(pos => Body(pos))
-      bodies.zip(forces) map {
+    def repulse(forces: Vector[Vec3]) = {
+      val bodies = genericArrayOps(positions.map(pos => Body(pos)).toArray).toSeq
+
+      // Parallel implementation
+      bodies.zip(forces).par.map {
         case (body, force) =>
-          bodies.foldLeft(force) { (force, other) =>
-            force + body.force(other)
-          }
-      }
+          //The immutable variant would be:
+          //   bodies.foldLeft(force) { (force, other) =>
+          //     force + body.force(other)
+          //   }
+          //How ever this one is faster by almost a factor of two
+          var forceV = force.toVector3
+          bodies.foreach { forceV += body.force(_) }
+          forceV.toVec3
+      }.toVector
+
+      //The fastest single threaded implementation
+      //        @tailrec
+      //        def repulseBodies(remainingBodies: List[Body], forces: List[Vec3], out: VectorBuilder[Vec3]): Vector[Vec3] = {
+      //          if (remainingBodies.isEmpty) out.result
+      //          else {
+      //            val body = remainingBodies.head
+      //            var force = forces.head.toVector3
+      //            bodies.foreach { other =>
+      //              force += body.force(other)
+      //            }
+      //            repulseBodies(remainingBodies.tail, forces.tail, out += force.toVec3)
+      //          }
+      //        }
+      //        repulseBodies(bodies.toList, forces.toList, new VectorBuilder).toVector
     }
   }
 
