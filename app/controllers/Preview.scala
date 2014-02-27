@@ -40,14 +40,19 @@ object Preview extends Controller {
       case (node, index) => node.value -> s"s$index"
     }.toMap
 
-    val layout = SpringLayout(graph, Box(2000))
+    //var layout = SpringLayout(graph, Box(2000))
+    //var layout = SpringBarnesHutLayout(graph, Box(2000))
+    var layout = ImmutableSpringLayout(graph, Box(2000))
 
     println(s"Prelayouting ${graph.size} nodes...")
     var i = 0
     val t = System.currentTimeMillis
-    while (i < 2000 && System.currentTimeMillis - t < 5000) {
-      layout.improve()
+    val layoutingSteps = 3000
+    val layoutingMax = 10.minutes
+    while (i < 5000 && System.currentTimeMillis - t < layoutingMax.toMillis) {
+      layout = layout.improve()
       i = i + 1
+      if (i % 200 == 0) println(s"  layout step $i of $layoutingSteps (after ${(System.currentTimeMillis - t) / 1000}s)")
     }
     val duration = System.currentTimeMillis - t
     println(s"Performance: ${(duration * 1000 / i).round} us per iteration ($i iterations).")
