@@ -49,7 +49,7 @@ object Preview extends Controller {
     val t = System.currentTimeMillis
     val layoutingSteps = 3000
     val layoutingMax = 10.minutes
-    while (i < 5000 && System.currentTimeMillis - t < layoutingMax.toMillis) {
+    while (i < layoutingSteps && System.currentTimeMillis - t < layoutingMax.toMillis) {
       layout = layout.improve()
       i = i + 1
       if (i % 200 == 0) println(s"  layout step $i of $layoutingSteps (after ${(System.currentTimeMillis - t) / 1000}s)")
