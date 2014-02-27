@@ -81,9 +81,9 @@ object Global extends GlobalSettings {
     planner.plan()
   }
 
-  private def tubePlan = Examples.tube(10, 40, YarnPiece(Yarn("red", Color.red)))
-  private def decreasingTubePlan = Examples.decreasingTube(20, 60, YarnPiece(Yarn("red", Color.red)))
-  private def sockPlan = Examples.sock(12, 20, 15, YarnPiece(Yarn("red", Color.red)))
+  private def tubePlan = Examples.tube(10, 40, YarnPiece(Yarn("red", Color.red))).plan()
+  private def decreasingTubePlan = Examples.decreasingTube(20, 60, YarnPiece(Yarn("red", Color.red))).plan()
+  private def sockPlan = Examples.sock(12, 20, 15, YarnPiece(Yarn("red", Color.red))).plan()
 
   private def imagePlan = {
     val img = ImageIO.read(new File("example.png"))

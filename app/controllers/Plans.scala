@@ -107,7 +107,7 @@ object Plans extends Controller {
   def loadSock = Action { implicit request =>
     val form = sockForm.bindFromRequest.get
     val plan = Examples.sock(form.width, form.shaft, form.foot, YarnPiece(Yarn("red", Color.red)))
-      .valueOr(e => throw new RuntimeException(s"Invalid Plan: $e"))
+      .plan().valueOr(e => throw new RuntimeException(s"Invalid Plan: $e"))
     guider ! Guider.LoadPlan(plan)
     Redirect(routes.Plans.show())
   }

@@ -59,36 +59,32 @@ object Examples {
   }
 
   def tube(width: Int, height: Int, yarn: YarnPiece) = {
-    val planner =
-      Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
-        (0 until height).toVector.traverse { _ =>
-          Basics.knitRoundK(yarn)
-        }
-    planner.plan()
+    Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
+      (0 until height).toVector.traverse { _ =>
+        Basics.knitRoundK(yarn)
+      }
   }
 
   def decreasingTube(width: Int, height: Int, yarn: YarnPiece, every: Int = 4) = {
-    val planner =
-      Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
-        Basics.knitRoundK(yarn) >>
-        Basics.knitRoundK(yarn) >>
-        (1 to height / 2).toVector.traverse { i =>
-          val decrease = if (i % every == 0) {
-            FormGiving.raglanDecrease(MainBed, Right) >>
-              FormGiving.raglanDecrease(MainBed, Left) >>
-              FormGiving.raglanDecrease(DoubleBed, Right) >>
-              FormGiving.raglanDecrease(DoubleBed, Left)
-          } else Planner.noop
-          decrease >>
-            Basics.knitRoundK(yarn) >>
-            Basics.knitRoundK(yarn)
-        }
-    planner.plan()
+    Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn) >>
+      Basics.knitRoundK(yarn) >>
+      Basics.knitRoundK(yarn) >>
+      (1 to height / 2).toVector.traverse { i =>
+        val decrease = if (i % every == 0) {
+          FormGiving.raglanDecrease(MainBed, Right) >>
+            FormGiving.raglanDecrease(MainBed, Left) >>
+            FormGiving.raglanDecrease(DoubleBed, Right) >>
+            FormGiving.raglanDecrease(DoubleBed, Left)
+        } else Planner.noop
+        decrease >>
+          Basics.knitRoundK(yarn) >>
+          Basics.knitRoundK(yarn)
+      }
   }
 
   def sock(width: Int, shaftHeight: Int, footLength: Int, yarn: YarnPiece) = {
     import KCarriage.{ Settings, HoldingCamH, DoubleBedCarriage }
-    val planner = for {
+    for {
       _ <- Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn)
       _ <- (1 to shaftHeight).toVector.traverse { _ =>
         Basics.knitRoundK(yarn) >> Basics.knitRoundK(yarn)
@@ -122,7 +118,6 @@ object Examples {
           Basics.knitRoundK(yarn) >> Basics.knitRoundK(yarn)
       }
     } yield ()
-    planner.plan()
   }
   private def reduceHeel() = for {
     working <- Planner.state(s => Needle.all.filter { n =>
