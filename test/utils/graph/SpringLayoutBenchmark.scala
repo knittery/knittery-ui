@@ -6,20 +6,18 @@ import models.planners.Examples
 import javax.imageio.ImageIO
 import java.io.File
 import scalaz.Validation
+import models.plan.Optimizers
 
 class SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
-  case class Plan(name: String, plan: models.plan.Plan) {
+  case class Plan(name: String, planner: models.plan.PlannerM[_]) {
+    val plan = planner.plan(Optimizers.no).valueOr(e => throw new RuntimeException(e))
     val result = plan.run.valueOr(e => throw new RuntimeException(e.error))
     val graph = result.output2.asGraph
     override def toString = name
   }
-  object Plan {
-    def apply(name: String, plan: Validation[String, models.plan.Plan]): Plan =
-      Plan(name, plan.valueOr(e => throw new RuntimeException(e)))
-  }
-  //  val sheet = Examples.imageRag(ImageIO.read(new File("example.png"))).plan()
 
   val plans = Gen.enumeration("Plans")(
+	//Plan("pattern", Examples.imageRag(ImageIO.read(new File("example.png")))),
     //Plan("normalSock", Examples.sock(30, 60, 40, YarnPiece(red))),
     Plan("tinySock", Examples.sock(10, 10, 10, YarnPiece(red))),
     Plan("smallSock", Examples.sock(12, 20, 15, YarnPiece(red))))
