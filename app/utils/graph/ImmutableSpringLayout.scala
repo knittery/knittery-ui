@@ -33,16 +33,16 @@ object ImmutableSpringLayout {
     def apply(n: N) = positions(lookupMap(n)).toVector3
 
     def improve = {
-      val f = (repulse _).andThen(attract)
+      val f = (attract _).andThen(repulse)
       new ImmutableSpringLayout(lookupMap, springs, f(positions))
     }
 
-    def attract(forces: Seq[Vec3]) = springs.foldLeft(positions) {
-      case (pos2, spring) =>
+    def attract(forces: Vector[Vec3]) = springs.foldLeft(forces) {
+      case (forces, spring) =>
         val force = spring.force(positions(spring.node1), positions(spring.node2))
-        pos2
-          .updated(spring.node1, pos2(spring.node1) - force)
-          .updated(spring.node2, pos2(spring.node2) + force)
+        forces
+          .updated(spring.node1, forces(spring.node1) - force)
+          .updated(spring.node2, forces(spring.node2) + force)
     }
 
     def repulse(forces: Seq[Vec3]) = {
