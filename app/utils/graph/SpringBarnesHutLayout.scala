@@ -105,7 +105,14 @@ object SpringBarnesHutLayout {
         vec * (repulsionConstant.value * mass / (distance * distance * distance + epsilon.value))
       } else {
         // need to calculate the force for each child
-        children.foldLeft(Vec3.zero)((v, c) => v + c.force(body))
+        val v = children(0).force(body).toVector3
+        v += children(1).force(body)
+        v += children(2).force(body)
+        v += children(3).force(body)
+        v += children(4).force(body)
+        v += children(5).force(body)
+        v += children(6).force(body)
+        v.toVec3
       }
     }
 
