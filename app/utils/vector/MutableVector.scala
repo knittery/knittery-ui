@@ -5,6 +5,7 @@ class MutableVector3 private (var x: Double, var y: Double, var z: Double) exten
   def _1 = x
   def _2 = y
   def _3 = z
+  def +(other: MutableVector3) = new MutableVector3(x + other.x, y + other.y, z + other.z)
   def +=(other: MutableVector3) = {
     x += other.x
     y += other.y
@@ -17,14 +18,19 @@ class MutableVector3 private (var x: Double, var y: Double, var z: Double) exten
     z += other.z
     this
   }
-  def +(other: MutableVector3) = clone += other
+  def -(other: MutableVector3) = new MutableVector3(x - other.x, y - other.y, z - other.z)
   def -=(other: MutableVector3) = {
     x -= other.x
     y -= other.y
     z -= other.z
     this
   }
-  def -(other: MutableVector3) = clone -= other
+  def -=(other: Vector3) = {
+    x -= other.x
+    y -= other.y
+    z -= other.z
+    this
+  }
   def *=(by: Double) = {
     x *= by
     y *= by

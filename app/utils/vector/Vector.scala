@@ -5,7 +5,9 @@ import scala.util.Random
 /** Immutable 3 component vector. */
 case class Vector3(x: Double, y: Double, z: Double) {
   def +(o: Vector3) = Vector3(x + o.x, y + o.y, z + o.z)
+  def +(o: MutableVector3) = Vector3(x + o.x, y + o.y, z + o.z)
   def -(o: Vector3) = Vector3(x - o.x, y - o.y, z - o.z)
+  def -(o: MutableVector3) = Vector3(x - o.x, y - o.y, z - o.z)
   def *(scalar: Double) = Vector3(x * scalar, y * scalar, z * scalar)
   def /(scalar: Double) = Vector3(x / scalar, y / scalar, z / scalar)
   def unary_- = Vector3(-x, -y, -z)
