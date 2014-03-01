@@ -56,7 +56,7 @@ object SpringBarnesHutLayout {
 
       bodies.zip(forces).map {
         case (body, force) =>
-          val f = -oct.force(body)
+          val f = oct.force(body)
 
           //          var forceV = Vector3.zero
           //          bodies.foreach { forceV += body.force(_) }
