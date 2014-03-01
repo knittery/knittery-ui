@@ -72,7 +72,6 @@ object ImmutableParallelSpringLayout {
       val distance = vec.length
       vec * (repulsionConstant.value / (distance * distance * distance + epsilon.value))
     }
-    def applyForce(f: Vec3) = copy(centerOfMass = centerOfMass + f)
   }
   private case class Spring(node1: Int, node2: Int, strength: Double, springConstant: Double) {
     private val factor = springConstant * strength
