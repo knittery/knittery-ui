@@ -7,7 +7,7 @@ import GraphPredef._
 
 object ImmutableSpringLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] =
-    apply(graph, _ => Vector3.random(in))
+    apply(graph, _ => Vec3.random(in).toVector3)
 
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N]): IncrementalLayout[N] = {
     val in = Box3.containing(graph.nodes.map(_.value).map(positions).map(_.toVec3))

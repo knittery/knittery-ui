@@ -6,7 +6,7 @@ import GraphPredef._
 
 object SpringBarnesHutLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box, theta: Double): IncrementalLayout[N] =
-    apply(graph, _ => Vector3.random(in), theta)
+    apply(graph, _ => Vec3.random(in).toVector3, theta)
 
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N], theta: Double): IncrementalLayout[N] = {
     val in = Box3.containing(graph.nodes.map(_.value).map(positions).map(_.toVec3))

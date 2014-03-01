@@ -1,7 +1,7 @@
 package utils
 
 package object graph {
-  type Position = Vector3
+  type Position = MutableVector3
 
   type Layout[N] = N => Position
   trait IncrementalLayout[N] extends Layout[N] {

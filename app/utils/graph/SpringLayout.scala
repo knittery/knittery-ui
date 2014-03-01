@@ -7,8 +7,8 @@ object SpringLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] = {
     new SpringLayout[N] {
       val nodes = graph.nodes.map(_.value).zipWithIndex.toMap
-      val positions = graph.nodes.map(_ => Vector3.random(in)).toArray
-      val forces = graph.nodes.map(_ => Vector3.zero).toArray
+      val positions = graph.nodes.map(_ => Vec3.random(in).toVector3).toArray
+      val forces = graph.nodes.map(_ => MutableVector3.zero).toArray
       val connections = graph.edges.map { e =>
         Connection(nodes(e._1.value), nodes(e._2.value), e.weight)
       }.toVector
@@ -20,12 +20,12 @@ object SpringLayout {
 
   private trait SpringLayout[N] extends IncrementalLayout[N] {
     protected val nodes: Map[N, Int]
-    protected val positions: Array[Vector3]
-    protected val forces: Array[Vector3]
+    protected val positions: Array[MutableVector3]
+    protected val forces: Array[MutableVector3]
     protected val connections: Traversable[Connection]
     def count = forces.length
 
-    def size: Vector3
+    def size: MutableVector3
     def spring = 1d / 5
     def repulsion = 1d
 
