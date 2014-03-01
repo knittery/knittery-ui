@@ -66,12 +66,11 @@ object ImmutableParallelSpringLayout {
   private case class RepulsionConstant(value: Double) extends AnyVal
   private case class Epsilon(value: Double) extends AnyVal
   private case class Body(centerOfMass: Vec3) extends AnyVal {
-    def mass = 1
     def distance(to: Body) = (centerOfMass - to.centerOfMass).length
     def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon) = {
       val vec = (centerOfMass - against.centerOfMass)
       val distance = vec.length
-      vec * (repulsionConstant.value * mass * against.mass / (distance * distance * distance + epsilon.value))
+      vec * (repulsionConstant.value / (distance * distance * distance + epsilon.value))
     }
     def applyForce(f: Vec3) = copy(centerOfMass = centerOfMass + f)
   }
