@@ -60,7 +60,7 @@ class Vector3 private (var x: Double, var y: Double, var z: Double) extends Prod
   def toVec3 = Vec3(x, y, z)
   override def clone = new Vector3(x, y, z)
   def canEqual(o: Any) = o.isInstanceOf[Vector3]
-  override def toString = s"(${x.round},${y.round},${z.round})"
+  override def toString = s"(${x.round}, ${y.round}, ${z.round})"
 }
 object Vector3 {
   def zero = new Vector3(0d, 0d, 0d)
@@ -78,11 +78,13 @@ case class Vec3(x: Double, y: Double, z: Double) {
   def *(scalar: Double) = Vec3(x * scalar, y * scalar, z * scalar)
   def /(scalar: Double) = Vec3(x / scalar, y / scalar, z / scalar)
   def unary_- = Vec3(-x, -y, -z)
-  def length = Math.sqrt(x * x + y * y + z * z)
+  def length = Math.sqrt(lengthSq)
+  def lengthSq = x * x + y * y + z * z
+  def volume = x * y * z
   def min(other: Vec3) = Vec3(x min other.x, y min other.y, z min other.z)
   def max(other: Vec3) = Vec3(x max other.x, y max other.y, z max other.z)
   def toVector3 = Vector3(x, y, z)
-  override def toString = s"($x,$y,$z)"
+  override def toString = s"(${x.round}, ${y.round}, ${z.round})"
 }
 object Vec3 {
   val zero = Vec3(0, 0, 0)

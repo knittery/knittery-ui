@@ -8,7 +8,7 @@ import java.io.File
 import scalaz.Validation
 import models.plan.Optimizers
 
-class SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
+object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
   case class Plan(name: String, planner: models.plan.PlannerM[_]) {
     val plan = planner.plan(Optimizers.no).valueOr(e => throw new RuntimeException(e))
     val result = plan.run.valueOr(e => throw new RuntimeException(e.error))
