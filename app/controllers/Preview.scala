@@ -48,7 +48,7 @@ object Preview extends Controller {
     var i = 0
     val t = System.currentTimeMillis
     val layoutingSteps = 3000
-    val layoutingMax = 10.minutes
+    val layoutingMax = 1.minute
     while (i < layoutingSteps && System.currentTimeMillis - t < layoutingMax.toMillis) {
       layout = layout.improve()
       i = i + 1
