@@ -5,21 +5,26 @@ import scalax.collection._
 import GraphPredef._
 
 object SpringBarnesHutLayout {
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] = {
+  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box, theta: Double): IncrementalLayout[N] =
+    apply(graph, _ => Vector3.random(in), theta)
+
+  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N], theta: Double): IncrementalLayout[N] = {
+    val in = Box3.containing(graph.nodes.map(_.value).map(positions).map(_.toVec3))
     val springConstant = 1d / (graph.edges.map(_.weight).max * 5)
-    val repulsionConstant = RepulsionConstant {
+    implicit val repulsionConstant = RepulsionConstant {
       val density = Math.pow(in.size.volume / graph.size, 1d / 3)
       density * density
     }
-    val epsilon = Epsilon(in.size.length / 10000000)
+    implicit val epsilon = Epsilon(in.size.length / 10000000)
+    implicit val mac = MultipoleAcceptanceCriterion(theta)
 
     val nodeMap = graph.nodes.map(_.value).zipWithIndex.toMap
     val springs = graph.edges.map { e =>
       Spring(nodeMap(e._1.value), nodeMap(e._2.value), e.weight, springConstant)
     }
-    val nodePos = graph.nodes.map(_ => Vector3.random(in).toVec3)
+    val nodePos = graph.nodes.map(n => positions(n.value).toVec3)
 
-    new SpringBarnesHutLayout(nodeMap, springs.toVector, nodePos.toVector)(repulsionConstant, epsilon)
+    new SpringBarnesHutLayout(nodeMap, springs.toVector, nodePos.toVector)
   }
 
   private class SpringBarnesHutLayout[N](
@@ -27,7 +32,8 @@ object SpringBarnesHutLayout {
     springs: Vector[Spring],
     positions: Vector[Vec3])(
       implicit repulsionConstant: RepulsionConstant,
-      epsilon: Epsilon) extends IncrementalLayout[N] {
+      epsilon: Epsilon,
+      mac: MultipoleAcceptanceCriterion) extends IncrementalLayout[N] {
 
     def apply(n: N) = positions(lookupMap(n)).toVector3
 
@@ -48,38 +54,71 @@ object SpringBarnesHutLayout {
       val bodies = positions.map(Body)
       val oct = bodies.foldLeft(Oct(Box3.containing(positions)))(_ + _)
 
-      forces
+      bodies.zip(forces).map {
+        case (body, force) =>
+          val f = -oct.force(body)
+
+          //          var forceV = Vector3.zero
+          //          bodies.foreach { forceV += body.force(_) }
+          //          val f2 = forceV.toVec3
+          //          val delta = f - f2
+          //          val factor = Vec3(f.x / forceV.x, f.y / forceV.y, forceV.z / f.z)
+          //          println(s"$delta\t=>\t$f\t$forceV")
+          //          println(s"    is $factor")
+
+          force + f
+      }
     }
   }
 
   private case class RepulsionConstant(value: Double) extends AnyVal
   private case class Epsilon(value: Double) extends AnyVal
+  private case class MultipoleAcceptanceCriterion(value: Double) extends AnyVal {
+    def accepts(boxSize: Double, distance: Double) = boxSize / distance < value
+  }
 
   private sealed trait Node {
     def mass: Double
     def centerOfMass: Vec3
     def distance(to: Node) = (centerOfMass - to.centerOfMass).length
-    def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon) = {
-      val vec = (centerOfMass - against.centerOfMass)
-      val distance = vec.length
-      vec * (repulsionConstant.value * mass * against.mass / (distance * distance * distance + epsilon.value))
-    }
+    def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion): Vec3
   }
   private case class Body(centerOfMass: Vec3) extends Node {
     override def mass = 1
     def applyForce(f: Vec3) = copy(centerOfMass = centerOfMass + f)
+    override def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion) = {
+      val vec = (against.centerOfMass - centerOfMass)
+      val distance = vec.length
+      vec * (repulsionConstant.value / (distance * distance * distance + epsilon.value))
+    }
   }
   private case object Empty extends Node {
     override val mass = 0d
     override val centerOfMass = Vec3.zero
+    override def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion) =
+      Vec3.zero
   }
   private case class Oct private (
     bounds: Box3,
     children: Vector[Node]) extends Node {
     def center = bounds.center
-    override def mass = children.view.map(_.mass).sum
-    override def centerOfMass =
+    override val mass = children.view.map(_.mass).sum
+    override val centerOfMass =
       children.view.map(n => n.centerOfMass * n.mass).reduce(_ + _) / mass
+    def size = bounds.size.x //same size in each direction
+
+    override def force(body: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion) = {
+      val vec = (body.centerOfMass - centerOfMass)
+      val distance = vec.length
+      if (mac.accepts(size, distance)) {
+        // distance is big enough so we can threat ourself as a cluster regarding body
+        vec * (repulsionConstant.value * mass / (distance * distance * distance + epsilon.value))
+      } else {
+        // need to calculate the force for each child
+        children.foldLeft(Vec3.zero)((v, c) => v + c.force(body))
+      }
+    }
+
     def +(body: Body): Oct = {
       val p = body.centerOfMass
       val index = (if (p.x < center.x) 0 else 1) +
@@ -88,13 +127,22 @@ object SpringBarnesHutLayout {
       val newC = children(index) match {
         case Empty => body
         case oct: Oct => oct + body
-        case other: Body => Oct(bounds) + body + other
+        case other: Body =>
+          val origin = Vec3(
+            if (p.x < center.x) bounds.origin.x else center.x,
+            if (p.y < center.y) bounds.origin.y else center.y,
+            if (p.z < center.z) bounds.origin.z else center.z)
+          Oct(Box3(origin, bounds.size / 2)) + body + other
       }
       copy(children = children.updated(index, newC))
     }
   }
   private object Oct {
-    def apply(bounds: Box3): Oct = Oct(bounds, emptyVector)
+    def apply(bounds: Box3): Oct = {
+      //make bounds the same size in each dimension
+      val size = bounds.size.x max bounds.size.y max bounds.size.z
+      Oct(bounds.copy(size = Vec3(size, size, size)), emptyVector)
+    }
     private val emptyVector = (0 until 8).map(_ => Empty: Node).toVector
   }
 
