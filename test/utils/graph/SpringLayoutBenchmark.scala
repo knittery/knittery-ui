@@ -54,6 +54,15 @@ class SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     }
   }
 
+  performance of "ImmutableParallelSpringLayout" in {
+    measure method "improve" in {
+      val ls = layouts(p => ImmutableParallelSpringLayout.apply(p.graph, box))
+      using(ls) in { l =>
+        l.improve()
+      }
+    }
+  }
+
   performance of "SpringBarnesHutLayout" in {
     measure method "improve" in {
       val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box))

@@ -1,11 +1,10 @@
 package utils.graph
 
 import scala.annotation.tailrec
-import scala.collection.immutable.VectorBuilder
 import scalax.collection._
 import GraphPredef._
 
-object ImmutableSpringLayout {
+object ImmutableParallelSpringLayout {
 
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] = {
     val springConstant = 1d / (graph.edges.map(_.weight).max * 5)
@@ -21,10 +20,10 @@ object ImmutableSpringLayout {
     }
     val nodePos = graph.nodes.map(_ => Vector3.random(in).toVec3)
 
-    new ImmutableSpringLayout(nodeMap, springs.toVector, nodePos.toVector)(repulsionConstant, epsilon)
+    new ImmutableParallelSpringLayout(nodeMap, springs.toVector, nodePos.toVector)(repulsionConstant, epsilon)
   }
 
-  private class ImmutableSpringLayout[N](
+  private class ImmutableParallelSpringLayout[N](
     lookupMap: Map[N, Int],
     springs: Vector[Spring],
     positions: Vector[Vec3])(
@@ -35,7 +34,7 @@ object ImmutableSpringLayout {
 
     def improve = {
       val f = (attract _).andThen(repulse)
-      new ImmutableSpringLayout(lookupMap, springs, f(positions))
+      new ImmutableParallelSpringLayout(lookupMap, springs, f(positions))
     }
 
     def attract(forces: Vector[Vec3]) = springs.foldLeft(forces) {
@@ -49,20 +48,18 @@ object ImmutableSpringLayout {
     def repulse(forces: Vector[Vec3]) = {
       val bodies = genericArrayOps(positions.map(pos => Body(pos)).toArray).toSeq
 
-      //The fastest single threaded implementation
-      @tailrec
-      def repulseBodies(remainingBodies: List[Body], forces: List[Vec3], out: VectorBuilder[Vec3]): Vector[Vec3] = {
-        if (remainingBodies.isEmpty) out.result
-        else {
-          val body = remainingBodies.head
-          var force = forces.head.toVector3
-          bodies.foreach { other =>
-            force += body.force(other)
-          }
-          repulseBodies(remainingBodies.tail, forces.tail, out += force.toVec3)
-        }
-      }
-      repulseBodies(bodies.toList, forces.toList, new VectorBuilder).toVector
+      // Parallel implementation
+      bodies.zip(forces).par.map {
+        case (body, force) =>
+          //The immutable variant would be:
+          //   bodies.foldLeft(force) { (force, other) =>
+          //     force + body.force(other)
+          //   }
+          //How ever this one is faster by almost a factor of two
+          var forceV = force.toVector3
+          bodies.foreach { forceV += body.force(_) }
+          forceV.toVec3
+      }.toVector
     }
   }
 
