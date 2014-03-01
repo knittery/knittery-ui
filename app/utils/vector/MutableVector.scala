@@ -11,7 +11,7 @@ class MutableVector3 private (var x: Double, var y: Double, var z: Double) exten
     z += other.z
     this
   }
-  def +=(other: Vec3) = {
+  def +=(other: Vector3) = {
     x += other.x
     y += other.y
     z += other.z
@@ -55,7 +55,7 @@ class MutableVector3 private (var x: Double, var y: Double, var z: Double) exten
     y = 0
     z = 0
   }
-  def toVec3 = Vec3(x, y, z)
+  def toVec3 = Vector3(x, y, z)
   override def clone = new MutableVector3(x, y, z)
   def canEqual(o: Any) = o.isInstanceOf[MutableVector3]
   override def toString = s"(${x.round}, ${y.round}, ${z.round})"

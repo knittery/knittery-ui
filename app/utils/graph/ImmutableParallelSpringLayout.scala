@@ -7,7 +7,7 @@ import utils.vector._
 
 object ImmutableParallelSpringLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] =
-    apply(graph, _ => Vec3.random(in).toVector3)
+    apply(graph, _ => Vector3.random(in).toVector3)
 
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N]): IncrementalLayout[N] = {
     val in = Box3.containing(graph.nodes.map(_.value).map(positions).map(_.toVec3))
@@ -30,7 +30,7 @@ object ImmutableParallelSpringLayout {
   private class ImmutableParallelSpringLayout[N](
     lookupMap: Map[N, Int],
     springs: Vector[Spring],
-    positions: Vector[Vec3])(
+    positions: Vector[Vector3])(
       implicit repulsionConstant: RepulsionConstant,
       epsilon: Epsilon) extends IncrementalLayout[N] {
 
@@ -41,7 +41,7 @@ object ImmutableParallelSpringLayout {
       new ImmutableParallelSpringLayout(lookupMap, springs, f(positions))
     }
 
-    def attract(forces: Vector[Vec3]) = springs.foldLeft(forces) {
+    def attract(forces: Vector[Vector3]) = springs.foldLeft(forces) {
       case (forces, spring) =>
         val force = spring.force(positions(spring.node1), positions(spring.node2))
         forces
@@ -49,7 +49,7 @@ object ImmutableParallelSpringLayout {
           .updated(spring.node2, forces(spring.node2) + force)
     }
 
-    def repulse(forces: Vector[Vec3]) = {
+    def repulse(forces: Vector[Vector3]) = {
       val bodies = genericArrayOps(positions.map(pos => Body(pos)).toArray).toSeq
 
       // Parallel implementation
@@ -69,7 +69,7 @@ object ImmutableParallelSpringLayout {
 
   private case class RepulsionConstant(value: Double) extends AnyVal
   private case class Epsilon(value: Double) extends AnyVal
-  private case class Body(centerOfMass: Vec3) extends AnyVal {
+  private case class Body(centerOfMass: Vector3) extends AnyVal {
     def distance(to: Body) = (centerOfMass - to.centerOfMass).length
     def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon) = {
       val vec = (centerOfMass - against.centerOfMass)
@@ -79,6 +79,6 @@ object ImmutableParallelSpringLayout {
   }
   private case class Spring(node1: Int, node2: Int, strength: Double, springConstant: Double) {
     private val factor = springConstant * strength
-    def force(nodeA: Vec3, nodeB: Vec3) = (nodeA - nodeB) * factor
+    def force(nodeA: Vector3, nodeB: Vector3) = (nodeA - nodeB) * factor
   }
 }

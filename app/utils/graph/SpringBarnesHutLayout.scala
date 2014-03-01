@@ -7,7 +7,7 @@ import utils.vector._
 
 object SpringBarnesHutLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box, theta: Double): IncrementalLayout[N] =
-    apply(graph, _ => Vec3.random(in).toVector3, theta)
+    apply(graph, _ => Vector3.random(in).toVector3, theta)
 
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N], theta: Double): IncrementalLayout[N] = {
     val in = Box3.containing(graph.nodes.map(_.value).map(positions).map(_.toVec3))
@@ -31,7 +31,7 @@ object SpringBarnesHutLayout {
   private class SpringBarnesHutLayout[N](
     lookupMap: Map[N, Int],
     springs: Vector[Spring],
-    positions: Vector[Vec3])(
+    positions: Vector[Vector3])(
       implicit repulsionConstant: RepulsionConstant,
       epsilon: Epsilon,
       mac: MultipoleAcceptanceCriterion) extends IncrementalLayout[N] {
@@ -43,7 +43,7 @@ object SpringBarnesHutLayout {
       new SpringBarnesHutLayout(lookupMap, springs, f(positions))
     }
 
-    private def attract(forces: Vector[Vec3]) = springs.foldLeft(forces) {
+    private def attract(forces: Vector[Vector3]) = springs.foldLeft(forces) {
       case (forces, spring) =>
         val force = spring.force(positions(spring.node1), positions(spring.node2))
         forces
@@ -51,7 +51,7 @@ object SpringBarnesHutLayout {
           .updated(spring.node2, forces(spring.node2) + force)
     }
 
-    private def repulse(forces: Vector[Vec3]) = {
+    private def repulse(forces: Vector[Vector3]) = {
       val bodies = positions.map(Body)
       val oct = bodies.foldLeft(Oct(Box3.containing(positions)))(_ + _)
 
@@ -70,13 +70,13 @@ object SpringBarnesHutLayout {
 
   private sealed trait Node {
     def mass: Double
-    def centerOfMass: Vec3
+    def centerOfMass: Vector3
     def distance(to: Node) = (centerOfMass - to.centerOfMass).length
-    def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion): Vec3
+    def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion): Vector3
   }
-  private case class Body(centerOfMass: Vec3) extends Node {
+  private case class Body(centerOfMass: Vector3) extends Node {
     override def mass = 1
-    def applyForce(f: Vec3) = copy(centerOfMass = centerOfMass + f)
+    def applyForce(f: Vector3) = copy(centerOfMass = centerOfMass + f)
     override def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion) = {
       val vec = (against.centerOfMass - centerOfMass)
       val distance = vec.length
@@ -85,9 +85,9 @@ object SpringBarnesHutLayout {
   }
   private case object Empty extends Node {
     override val mass = 0d
-    override val centerOfMass = Vec3.zero
+    override val centerOfMass = Vector3.zero
     override def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion) =
-      Vec3.zero
+      Vector3.zero
   }
   private case class Oct private (
     bounds: Box3,
@@ -126,7 +126,7 @@ object SpringBarnesHutLayout {
         case Empty => body
         case oct: Oct => oct + body
         case other: Body =>
-          val origin = Vec3(
+          val origin = Vector3(
             if (p.x < center.x) bounds.origin.x else center.x,
             if (p.y < center.y) bounds.origin.y else center.y,
             if (p.z < center.z) bounds.origin.z else center.z)
@@ -139,13 +139,13 @@ object SpringBarnesHutLayout {
     def apply(bounds: Box3): Oct = {
       //make bounds the same size in each dimension
       val size = bounds.size.x max bounds.size.y max bounds.size.z
-      Oct(bounds.copy(size = Vec3(size, size, size)), emptyVector)
+      Oct(bounds.copy(size = Vector3(size, size, size)), emptyVector)
     }
     private val emptyVector = (0 until 8).map(_ => Empty: Node).toVector
   }
 
   private case class Spring(node1: Int, node2: Int, strength: Double, springConstant: Double) {
     private val factor = springConstant * strength
-    def force(nodeA: Vec3, nodeB: Vec3) = (nodeA - nodeB) * factor
+    def force(nodeA: Vector3, nodeB: Vector3) = (nodeA - nodeB) * factor
   }
 }

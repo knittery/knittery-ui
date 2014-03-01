@@ -20,18 +20,18 @@ class SpringBarnesHutLayoutSpec extends Specification {
     val graph = finalState.output2.asGraph
     def nodes = graph.nodes.map(_.value)
 
-    val initialPositions = nodes.map(n => (n, Vec3.random(boundaries).toVector3)).toMap
+    val initialPositions = nodes.map(n => (n, Vector3.random(boundaries).toVector3)).toMap
     val step_0 = ImmutableSpringLayout(graph, initialPositions)
     val step_1 = step_0.improve
     val step_10 = step_0.improve(10)
   }
 
-  def beNear(ref: Position, epsilon: Vec3): Matcher[Position] = {
+  def beNear(ref: Position, epsilon: Vector3): Matcher[Position] = {
     beCloseTo(ref.x, epsilon.x) ^^ ((a: Position) => a.x) and
       beCloseTo(ref.y, epsilon.y) ^^ ((a: Position) => a.y) and
       beCloseTo(ref.z, epsilon.z) ^^ ((a: Position) => a.z)
   }
-  def beLayoutedSimilarTo[N](to: Layout[N], forNodes: Traversable[N], epsilon: Vec3): Matcher[Layout[N]] = new Matcher[Layout[N]] {
+  def beLayoutedSimilarTo[N](to: Layout[N], forNodes: Traversable[N], epsilon: Vector3): Matcher[Layout[N]] = new Matcher[Layout[N]] {
     def apply[S <: Layout[N]](t: Expectable[S]) = {
       val pairs = forNodes.map(n => (to(n), t.value(n)))
       val a = forall(pairs) {
