@@ -6,7 +6,7 @@ import GraphPredef._
 import utils.vector._
 
 object ImmutableParallelSpringLayout {
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: MutableBox3): IncrementalLayout[N] =
+  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box3): IncrementalLayout[N] =
     apply(graph, _ => Vector3.random(in).toMutable)
 
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N]): IncrementalLayout[N] = {

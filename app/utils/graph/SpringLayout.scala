@@ -5,7 +5,7 @@ import GraphPredef._
 import utils.vector._
 
 object SpringLayout {
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: MutableBox3): IncrementalLayout[N] = {
+  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box3): IncrementalLayout[N] = {
     new SpringLayout[N] {
       val nodes = graph.nodes.map(_.value).zipWithIndex.toMap
       val positions = graph.nodes.map(_ => Vector3.random(in).toMutable).toArray
@@ -26,7 +26,7 @@ object SpringLayout {
     protected val connections: Traversable[Connection]
     def count = forces.length
 
-    def size: MutableVector3
+    def size: Vector3
     def spring = 1d / 5
     def repulsion = 1d
 

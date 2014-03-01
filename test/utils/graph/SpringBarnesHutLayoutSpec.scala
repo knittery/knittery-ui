@@ -11,7 +11,7 @@ import utils.vector._
 
 class SpringBarnesHutLayoutSpec extends Specification {
   val boundaries = Box3(2000)
-  val baseEpsilon = (boundaries.size / 10000d).toVector3
+  val baseEpsilon = boundaries.size / 10000d
 
   object P extends Yarns {
     def planner = Examples.sock(12, 20, 20, YarnPiece(red))

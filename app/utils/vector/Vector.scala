@@ -20,10 +20,7 @@ case class Vector3(x: Double, y: Double, z: Double) {
 
 object Vector3 {
   val zero = Vector3(0, 0, 0)
-  def apply(v: MutableVector3): Vector3 = Vector3(v.x, v.y, v.z)
-  def random(in: Vector3) = {
+  def random(in: Vector3) =
     Vector3(Random.nextDouble() * in.x, Random.nextDouble() * in.y, Random.nextDouble() * in.z)
-  }
   def random(in: Box3): Vector3 = random(in.size) + in.origin
-  def random(in: MutableBox3): Vector3 = random(in.size.toVector3) + in.origin.toVector3
 }
