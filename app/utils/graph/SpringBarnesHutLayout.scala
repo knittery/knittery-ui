@@ -39,25 +39,26 @@ object SpringBarnesHutLayout {
     def apply(n: N) = positions(lookupMap(n))
 
     def improve = {
-      val f = (attract _).andThen(repulse)
-      new SpringBarnesHutLayout(lookupMap, springs, f(positions))
+      val forces = positions.map(_.toMutable)
+      attract(forces)
+      repulse(forces)
+      new SpringBarnesHutLayout(lookupMap, springs, forces.map(_.toVector3).toVector)
     }
 
-    private def attract(forces: Vector[Vector3]) = springs.foldLeft(forces) {
-      case (forces, spring) =>
+    private def attract(forces: IndexedSeq[MutableVector3]) = {
+      springs.foreach { spring =>
         val force = spring.force(positions(spring.node1), positions(spring.node2))
-        forces
-          .updated(spring.node1, forces(spring.node1) - force)
-          .updated(spring.node2, forces(spring.node2) + force)
+        forces(spring.node1) -= force
+        forces(spring.node2) += force
+      }
     }
 
-    private def repulse(forces: Vector[Vector3]) = {
+    private def repulse(forces: IndexedSeq[MutableVector3]) = {
       val bodies = positions.map(Body)
       val oct = bodies.foldLeft(Oct(Box3.containing(positions)))(_ + _)
 
-      bodies.zip(forces).map {
-        case (body, force) =>
-          force + oct.force(body)
+      (0 until forces.size).foreach { i =>
+        forces(i) += oct.force(bodies(i))
       }
     }
   }
