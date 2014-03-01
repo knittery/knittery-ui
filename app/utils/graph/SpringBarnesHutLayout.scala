@@ -56,17 +56,7 @@ object SpringBarnesHutLayout {
 
       bodies.zip(forces).map {
         case (body, force) =>
-          val f = oct.force(body)
-
-          //          var forceV = Vector3.zero
-          //          bodies.foreach { forceV += body.force(_) }
-          //          val f2 = forceV.toVec3
-          //          val delta = f - f2
-          //          val factor = Vec3(f.x / forceV.x, f.y / forceV.y, forceV.z / f.z)
-          //          println(s"$delta\t=>\t$f\t$forceV")
-          //          println(s"    is $factor")
-
-          force + f
+          force + oct.force(body)
       }
     }
   }
