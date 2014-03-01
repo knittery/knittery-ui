@@ -79,6 +79,8 @@ case class Vec3(x: Double, y: Double, z: Double) {
   def /(scalar: Double) = Vec3(x / scalar, y / scalar, z / scalar)
   def unary_- = Vec3(-x, -y, -z)
   def length = Math.sqrt(x * x + y * y + z * z)
+  def min(other: Vec3) = Vec3(x min other.x, y min other.y, z min other.z)
+  def max(other: Vec3) = Vec3(x max other.x, y max other.y, z max other.z)
   def toVector3 = Vector3(x, y, z)
   override def toString = s"($x,$y,$z)"
 }
@@ -92,5 +94,16 @@ object Box {
   def apply(size: Double): Box = {
     val v = Vector3(size, size, size)
     Box(v / -2, v)
+  }
+}
+
+case class Box3(origin: Vec3, size: Vec3) {
+  def center = origin + size / 2
+}
+object Box3 {
+  def containing(points: Traversable[Vec3]) = {
+    val origin = points.reduce(_ min _)
+    val size = points.reduce(_ max _) - origin
+    Box3(origin, size)
   }
 }

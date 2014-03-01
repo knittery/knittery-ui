@@ -5,66 +5,101 @@ import scalax.collection._
 import GraphPredef._
 
 object SpringBarnesHutLayout {
-
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] = {
-    val nodes = graph.nodes.map(n => (n.value, Vector3.random(in))).toMap
-    val edges = graph.edges.map(e => (e._1.value, e._2.value, e.weight.toDouble))
-    new SBHLayout(in.size)(nodes, edges)
+    val springConstant = 1d / (graph.edges.map(_.weight).max * 5)
+    val repulsionConstant = RepulsionConstant {
+      val density = Math.pow(in.size.volume / graph.size, 1d / 3)
+      density * density
+    }
+    val epsilon = Epsilon(in.size.length / 10000000)
+
+    val nodeMap = graph.nodes.map(_.value).zipWithIndex.toMap
+    val springs = graph.edges.map { e =>
+      Spring(nodeMap(e._1.value), nodeMap(e._2.value), e.weight, springConstant)
+    }
+    val nodePos = graph.nodes.map(_ => Vector3.random(in).toVec3)
+
+    new SpringBarnesHutLayout(nodeMap, springs.toVector, nodePos.toVector)(repulsionConstant, epsilon)
   }
 
-  private class SBHLayout[N](size: Vector3)(nodes: Map[N, Position], edges: Traversable[(N, N, Double)]) extends IncrementalLayout[N] {
-    def apply(n: N) = nodes(n)
+  private class SpringBarnesHutLayout[N](
+    lookupMap: Map[N, Int],
+    springs: Vector[Spring],
+    positions: Vector[Vec3])(
+      implicit repulsionConstant: RepulsionConstant,
+      epsilon: Epsilon) extends IncrementalLayout[N] {
+
+    def apply(n: N) = positions(lookupMap(n)).toVector3
 
     def improve = {
-      val attracted = edges.foldLeft(nodes.mapValues(Vec3.apply)) {
-        case (nodeMap, (a, b, weight)) =>
-          val nodeA = nodeMap(a)
-          val nodeB = nodeMap(b)
-          val force = (nodeA - nodeB) * (springConstant * weight)
-          nodeMap + ((a, nodeA - force)) + ((b, nodeB + force))
+      val f = (attract _).andThen(repulse)
+      new SpringBarnesHutLayout(lookupMap, springs, f(positions))
+    }
+
+    private def attract(forces: Vector[Vec3]) = springs.foldLeft(forces) {
+      case (forces, spring) =>
+        val force = spring.force(positions(spring.node1), positions(spring.node2))
+        forces
+          .updated(spring.node1, forces(spring.node1) - force)
+          .updated(spring.node2, forces(spring.node2) + force)
+    }
+
+    private def repulse(forces: Vector[Vec3]) = {
+      val bodies = positions.map(Body)
+      val oct = bodies.foldLeft(Oct(Box3.containing(positions)))(_ + _)
+
+      forces
+    }
+  }
+
+  private case class RepulsionConstant(value: Double) extends AnyVal
+  private case class Epsilon(value: Double) extends AnyVal
+
+  private sealed trait Node {
+    def mass: Double
+    def centerOfMass: Vec3
+    def distance(to: Node) = (centerOfMass - to.centerOfMass).length
+    def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon) = {
+      val vec = (centerOfMass - against.centerOfMass)
+      val distance = vec.length
+      vec * (repulsionConstant.value * mass * against.mass / (distance * distance * distance + epsilon.value))
+    }
+  }
+  private case class Body(centerOfMass: Vec3) extends Node {
+    override def mass = 1
+    def applyForce(f: Vec3) = copy(centerOfMass = centerOfMass + f)
+  }
+  private case object Empty extends Node {
+    override val mass = 0d
+    override val centerOfMass = Vec3.zero
+  }
+  private case class Oct private (
+    bounds: Box3,
+    children: Vector[Node]) extends Node {
+    def center = bounds.center
+    override def mass = children.view.map(_.mass).sum
+    override def centerOfMass =
+      children.view.map(n => n.centerOfMass * n.mass).reduce(_ + _) / mass
+    def +(body: Body): Oct = {
+      val p = body.centerOfMass
+      val index = (if (p.x < center.x) 0 else 1) +
+        (if (p.y < center.y) 0 else 2) +
+        (if (p.z < center.z) 0 else 4)
+      val newC = children(index) match {
+        case Empty => body
+        case oct: Oct => oct + body
+        case other: Body => Oct(bounds) + body + other
       }
+      copy(children = children.updated(index, newC))
+    }
+  }
+  private object Oct {
+    def apply(bounds: Box3): Oct = Oct(bounds, emptyVector)
+    private val emptyVector = (0 until 8).map(_ => Empty: Node).toVector
+  }
 
-      val bodies = attracted.map(x => (Body(x._2, x._1))).toVector
-      val repulsedAndAttracted = bodies.map { node =>
-        val newPosition = bodies.foldLeft(node.centerOfMass) {
-          case (pos, o) => pos + node.force(o)
-        }
-        (node.value, newPosition.toVector3)
-      }.toMap
-
-      new SBHLayout(size)(repulsedAndAttracted, edges)
-    }
-
-    val repulsionConstant = {
-      val density = Math.pow(size.volume / nodes.size, 1d / 3)
-      Math.pow(density, 2)
-    }
-    val springConstant = {
-      val maxWeight = edges.map(_._3).max
-      1 / (maxWeight * 5)
-    }
-
-    val epsilon = size.length / 10000000
-    sealed trait Node {
-      def centerOfMass: Vec3
-      def mass: Double
-      def distance(to: Node) = (centerOfMass - to.centerOfMass).length
-      def force(against: Node) = {
-        val vec = (centerOfMass - against.centerOfMass)
-        val distance = vec.length
-        vec * (repulsionConstant * mass * against.mass / (distance * distance * distance + epsilon))
-      }
-    }
-    case class Body(centerOfMass: Vec3, value: N) extends Node {
-      def mass = 1
-      def applyForce(f: Vec3) = copy(centerOfMass = centerOfMass + f)
-    }
-
-    case class Spring(a: Node, b: Node, strength: Double) {
-      def force = {
-        val vec = a.centerOfMass - b.centerOfMass
-        vec * (springConstant * strength)
-      }
-    }
+  private case class Spring(node1: Int, node2: Int, strength: Double, springConstant: Double) {
+    private val factor = springConstant * strength
+    def force(nodeA: Vec3, nodeB: Vec3) = (nodeA - nodeB) * factor
   }
 }
