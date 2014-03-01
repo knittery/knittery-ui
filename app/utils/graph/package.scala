@@ -8,4 +8,11 @@ package object graph {
     /** Improves the layout. */
     def improve(): IncrementalLayout[N]
   }
+
+  implicit class RichIncrementalLayout[N](layout: IncrementalLayout[N]) {
+    def improve(steps: Int) = {
+      require(steps > 0)
+      (0 until steps).foldLeft(layout)((l, _) => l.improve)
+    }
+  }
 }
