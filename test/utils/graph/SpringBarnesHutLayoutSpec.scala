@@ -7,6 +7,7 @@ import models._
 import models.plan._
 import models.planners.Examples
 import org.specs2.matcher.Expectable
+import utils.vector._
 
 class SpringBarnesHutLayoutSpec extends Specification {
   val boundaries = Box(2000)

@@ -1,4 +1,4 @@
-package utils.graph
+package utils.vector
 
 import scala.util.Random
 

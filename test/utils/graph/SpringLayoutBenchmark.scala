@@ -1,12 +1,13 @@
 package utils.graph
 
-import org.scalameter.api._
-import models._
-import models.planners.Examples
 import javax.imageio.ImageIO
 import java.io.File
 import scalaz.Validation
+import org.scalameter.api._
+import models._
+import models.planners.Examples
 import models.plan.Optimizers
+import utils.vector._
 
 object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
   case class Plan(name: String, planner: models.plan.PlannerM[_]) {

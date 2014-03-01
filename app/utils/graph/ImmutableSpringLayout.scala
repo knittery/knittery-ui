@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable.VectorBuilder
 import scalax.collection._
 import GraphPredef._
+import utils.vector._
 
 object ImmutableSpringLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] =

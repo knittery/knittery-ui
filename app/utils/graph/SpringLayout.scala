@@ -2,6 +2,7 @@ package utils.graph
 
 import scalax.collection._
 import GraphPredef._
+import utils.vector._
 
 object SpringLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] = {

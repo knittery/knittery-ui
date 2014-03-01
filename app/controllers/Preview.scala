@@ -18,6 +18,7 @@ import models.Yarn
 import models.guide._
 import models.plan._
 import utils.graph._
+import utils.vector._
 import utils.JsonSerialization._
 
 object Preview extends Controller {

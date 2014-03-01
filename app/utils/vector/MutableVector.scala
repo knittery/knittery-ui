@@ -1,4 +1,4 @@
-package utils.graph
+package utils.vector
 
 /**  mutable 3 component vector. */
 class MutableVector3 private (var x: Double, var y: Double, var z: Double) extends Product3[Double, Double, Double] {

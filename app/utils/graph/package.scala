@@ -1,5 +1,7 @@
 package utils
 
+import utils.vector._
+
 package object graph {
   type Position = MutableVector3
 

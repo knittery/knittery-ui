@@ -3,6 +3,7 @@ package utils.graph
 import scala.annotation.tailrec
 import scalax.collection._
 import GraphPredef._
+import utils.vector._
 
 object SpringBarnesHutLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box, theta: Double): IncrementalLayout[N] =
