@@ -7,10 +7,10 @@ import utils.vector._
 
 object SpringBarnesHutLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box3, theta: Double): IncrementalLayout[N] =
-    apply(graph, _ => Vector3.random(in).toMutable, theta)
+    apply(graph, _ => Vector3.random(in), theta)
 
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N], theta: Double): IncrementalLayout[N] = {
-    val in = Box3.containing(graph.nodes.map(_.value).map(positions).map(_.toVector3))
+    val in = Box3.containing(graph.nodes.map(_.value).map(positions))
     val springConstant = 1d / (graph.edges.map(_.weight).max * 5)
     implicit val repulsionConstant = RepulsionConstant {
       val density = Math.pow(in.size.volume / graph.size, 1d / 3)
@@ -23,7 +23,7 @@ object SpringBarnesHutLayout {
     val springs = graph.edges.map { e =>
       Spring(nodeMap(e._1.value), nodeMap(e._2.value), e.weight, springConstant)
     }
-    val nodePos = graph.nodes.map(n => positions(n.value).toVector3)
+    val nodePos = graph.nodes.map(n => positions(n.value))
 
     new SpringBarnesHutLayout(nodeMap, springs.toVector, nodePos.toVector)
   }
@@ -36,7 +36,7 @@ object SpringBarnesHutLayout {
       epsilon: Epsilon,
       mac: MultipoleAcceptanceCriterion) extends IncrementalLayout[N] {
 
-    def apply(n: N) = positions(lookupMap(n)).toMutable
+    def apply(n: N) = positions(lookupMap(n))
 
     def improve = {
       val f = (attract _).andThen(repulse)

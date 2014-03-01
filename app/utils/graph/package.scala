@@ -3,7 +3,7 @@ package utils
 import utils.vector._
 
 package object graph {
-  type Position = MutableVector3
+  type Position = Vector3
 
   type Layout[N] = N => Position
   trait IncrementalLayout[N] extends Layout[N] {

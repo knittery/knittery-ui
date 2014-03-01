@@ -20,7 +20,7 @@ class SpringBarnesHutLayoutSpec extends Specification {
     val graph = finalState.output2.asGraph
     def nodes = graph.nodes.map(_.value)
 
-    val initialPositions = nodes.map(n => (n, Vector3.random(boundaries).toMutable)).toMap
+    val initialPositions = nodes.map(n => (n, Vector3.random(boundaries))).toMap
     val step_0 = ImmutableSpringLayout(graph, initialPositions)
     val step_1 = step_0.improve
     val step_10 = step_0.improve(10)

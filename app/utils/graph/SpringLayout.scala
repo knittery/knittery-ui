@@ -40,7 +40,7 @@ object SpringLayout {
     }
 
     def apply(node: N) = {
-      nodes.get(node).map(positions).
+      nodes.get(node).map(n => positions(n).toVector3).
         getOrElse(throw new IllegalArgumentException(s"$node is not part of the layout"))
     }
 
