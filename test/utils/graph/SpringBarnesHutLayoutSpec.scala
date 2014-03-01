@@ -1,0 +1,51 @@
+package utils.graph
+
+import org.specs2.mutable.Specification
+import org.specs2.matcher.Matcher
+import org.specs2.specification.Scope
+import models._
+import models.plan._
+import models.planners.Examples
+import org.specs2.matcher.Expectable
+
+class SpringBarnesHutLayoutSpec extends Specification {
+  val boundaries = Box(2000)
+  val baseEpsilon = (boundaries.size / 10000d).toVec3
+
+  object P extends Yarns {
+    def planner = Examples.sock(12, 20, 20, YarnPiece(red))
+    def plan = planner.plan(Optimizers.no).valueOr(e => throw new RuntimeException(s"Invalid plan: $e"))
+    def finalState = plan.run.valueOr(e => throw new RuntimeException(s"Invalid plan: $e"))
+    val graph = finalState.output2.asGraph
+    def nodes = graph.nodes.map(_.value)
+
+    val initialPositions = nodes.map(n => (n, Vector3.random(boundaries))).toMap
+    val referenceFirstStep = ImmutableSpringLayout(graph, initialPositions)
+      .improve
+  }
+
+  def beNear(ref: Position, epsilon: Vec3): Matcher[Position] = {
+    beCloseTo(ref.x, epsilon.x) ^^ ((a: Position) => a.x) and
+      beCloseTo(ref.y, epsilon.y) ^^ ((a: Position) => a.y) and
+      beCloseTo(ref.z, epsilon.z) ^^ ((a: Position) => a.z)
+  }
+  def beLayoutedSimilarTo[N](to: Layout[N], forNodes: Traversable[N], epsilon: Vec3): Matcher[Layout[N]] = new Matcher[Layout[N]] {
+    def apply[S <: Layout[N]](t: Expectable[S]) = {
+      val pairs = forNodes.map(n => (to(n), t.value(n)))
+      val a = forall(pairs) {
+        case (should, is) =>
+          is must beNear(should, epsilon).updateMessage(m => s"$is not close to $should (e=$epsilon)")
+      }
+      result(a.isSuccess, a.message, a.message, t)
+    }
+  }
+
+  "Barnes-Hut spring layout with theta = 0" should {
+    "perform first step of small sock layouting very similar to spring layout" in {
+      val afterFirst = SpringBarnesHutLayout(P.graph, P.initialPositions, 0d)
+        .improve
+      afterFirst must beLayoutedSimilarTo(P.referenceFirstStep, P.nodes, baseEpsilon)
+    }
+  }
+
+}
