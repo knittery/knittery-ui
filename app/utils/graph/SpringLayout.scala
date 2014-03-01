@@ -5,7 +5,7 @@ import GraphPredef._
 import utils.vector._
 
 object SpringLayout {
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] = {
+  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: MutableBox3): IncrementalLayout[N] = {
     new SpringLayout[N] {
       val nodes = graph.nodes.map(_.value).zipWithIndex.toMap
       val positions = graph.nodes.map(_ => Vector3.random(in).toMutable).toArray

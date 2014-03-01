@@ -10,7 +10,7 @@ import org.specs2.matcher.Expectable
 import utils.vector._
 
 class SpringBarnesHutLayoutSpec extends Specification {
-  val boundaries = Box(2000)
+  val boundaries = Box3(2000)
   val baseEpsilon = (boundaries.size / 10000d).toVector3
 
   object P extends Yarns {

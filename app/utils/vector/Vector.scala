@@ -17,23 +17,13 @@ case class Vector3(x: Double, y: Double, z: Double) {
   def toMutable = MutableVector3(x, y, z)
   override def toString = s"(${x.round}, ${y.round}, ${z.round})"
 }
+
 object Vector3 {
   val zero = Vector3(0, 0, 0)
   def apply(v: MutableVector3): Vector3 = Vector3(v.x, v.y, v.z)
   def random(in: Vector3) = {
-    Vector3(Random.nextDouble() * in.x,      Random.nextDouble() * in.y,      Random.nextDouble() * in.z)
+    Vector3(Random.nextDouble() * in.x, Random.nextDouble() * in.y, Random.nextDouble() * in.z)
   }
   def random(in: Box3): Vector3 = random(in.size) + in.origin
-  def random(in: Box): Vector3 = random(in.size.toVector3) + in.origin.toVector3
-}
-
-case class Box3(origin: Vector3, size: Vector3) {
-  def center = origin + size / 2
-}
-object Box3 {
-  def containing(points: Traversable[Vector3]) = {
-    val origin = points.reduce(_ min _)
-    val size = points.reduce(_ max _) - origin
-    Box3(origin, size)
-  }
+  def random(in: MutableBox3): Vector3 = random(in.size.toVector3) + in.origin.toVector3
 }

@@ -33,7 +33,7 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     (1 to preps).foldLeft(f(plan))((l, _) => l.improve)
   }
 
-  val box = Box(1000)
+  val box = Box3(1000)
 
   println("Done initializing")
 

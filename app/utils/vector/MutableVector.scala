@@ -60,15 +60,8 @@ class MutableVector3 private (var x: Double, var y: Double, var z: Double) exten
   def canEqual(o: Any) = o.isInstanceOf[MutableVector3]
   override def toString = s"(${x.round}, ${y.round}, ${z.round})"
 }
+
 object MutableVector3 {
   def zero = new MutableVector3(0d, 0d, 0d)
   def apply(x: Double, y: Double, z: Double) = new MutableVector3(x, y, z)
-}
-
-case class Box(origin: MutableVector3, size: MutableVector3)
-object Box {
-  def apply(size: Double): Box = {
-    val v = MutableVector3(size, size, size)
-    Box(v / -2, v)
-  }
 }

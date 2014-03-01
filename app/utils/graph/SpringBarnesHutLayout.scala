@@ -6,7 +6,7 @@ import GraphPredef._
 import utils.vector._
 
 object SpringBarnesHutLayout {
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box, theta: Double): IncrementalLayout[N] =
+  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: MutableBox3, theta: Double): IncrementalLayout[N] =
     apply(graph, _ => Vector3.random(in).toMutable, theta)
 
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N], theta: Double): IncrementalLayout[N] = {

@@ -41,9 +41,9 @@ object Preview extends Controller {
       case (node, index) => node.value -> s"s$index"
     }.toMap
 
-    //var layout = SpringLayout(graph, Box(2000))
-    //var layout = SpringBarnesHutLayout(graph, Box(2000))
-    var layout = ImmutableSpringLayout(graph, Box(2000))
+    //var layout = SpringLayout(graph, Box3(2000))
+    //var layout = SpringBarnesHutLayout(graph, Box3(2000), 1d)
+    //var layout = ImmutableParrallelSpringLayout(graph, Box3(2000))
 
     println(s"Prelayouting ${graph.size} nodes...")
     var i = 0
