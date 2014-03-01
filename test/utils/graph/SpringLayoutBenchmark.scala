@@ -13,14 +13,15 @@ class SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     val plan = planner.plan(Optimizers.no).valueOr(e => throw new RuntimeException(e))
     val result = plan.run.valueOr(e => throw new RuntimeException(e.error))
     val graph = result.output2.asGraph
-    override def toString = name
+    override def toString = s"$name (${graph.nodes.size})"
   }
 
   val plans = Gen.enumeration("Plans")(
-	//Plan("pattern", Examples.imageRag(ImageIO.read(new File("example.png")))),
+    //Plan("pattern", Examples.imageRag(ImageIO.read(new File("example.png")))),
     //Plan("normalSock", Examples.sock(30, 60, 40, YarnPiece(red))),
     Plan("tinySock", Examples.sock(10, 10, 10, YarnPiece(red))),
-    Plan("smallSock", Examples.sock(12, 20, 15, YarnPiece(red))))
+    Plan("smallerSock", Examples.sock(12, 20, 20, YarnPiece(red))),
+    Plan("smallSock", Examples.sock(20, 25, 20, YarnPiece(red))))
 
   val atStep = Gen.enumeration("atStep")(1)
 
