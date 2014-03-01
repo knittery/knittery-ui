@@ -7,10 +7,10 @@ import utils.vector._
 
 object ImmutableParallelSpringLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] =
-    apply(graph, _ => Vector3.random(in).toVector3)
+    apply(graph, _ => Vector3.random(in).toMutable)
 
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N]): IncrementalLayout[N] = {
-    val in = Box3.containing(graph.nodes.map(_.value).map(positions).map(_.toVec3))
+    val in = Box3.containing(graph.nodes.map(_.value).map(positions).map(_.toVector3))
     val springConstant = 1d / (graph.edges.map(_.weight).max * 5)
     val repulsionConstant = RepulsionConstant {
       val density = Math.pow(in.size.volume / graph.size, 1d / 3)
@@ -22,7 +22,7 @@ object ImmutableParallelSpringLayout {
     val springs = graph.edges.map { e =>
       Spring(nodeMap(e._1.value), nodeMap(e._2.value), e.weight, springConstant)
     }
-    val nodePos = graph.nodes.map(n => positions(n).toVec3)
+    val nodePos = graph.nodes.map(n => positions(n).toVector3)
 
     new ImmutableParallelSpringLayout(nodeMap, springs.toVector, nodePos.toVector)(repulsionConstant, epsilon)
   }
@@ -34,7 +34,7 @@ object ImmutableParallelSpringLayout {
       implicit repulsionConstant: RepulsionConstant,
       epsilon: Epsilon) extends IncrementalLayout[N] {
 
-    def apply(n: N) = positions(lookupMap(n)).toVector3
+    def apply(n: N) = positions(lookupMap(n)).toMutable
 
     def improve = {
       val f = (attract _).andThen(repulse)
@@ -60,9 +60,9 @@ object ImmutableParallelSpringLayout {
           //     force + body.force(other)
           //   }
           //However this one is faster by almost a factor of two
-          var forceV = force.toVector3
+          var forceV = force.toMutable
           bodies.foreach { forceV += body.force(_) }
-          forceV.toVec3
+          forceV.toVector3
       }.toVector
     }
   }

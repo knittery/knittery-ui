@@ -11,7 +11,7 @@ import utils.vector._
 
 class SpringBarnesHutLayoutSpec extends Specification {
   val boundaries = Box(2000)
-  val baseEpsilon = (boundaries.size / 10000d).toVec3
+  val baseEpsilon = (boundaries.size / 10000d).toVector3
 
   object P extends Yarns {
     def planner = Examples.sock(12, 20, 20, YarnPiece(red))
@@ -20,7 +20,7 @@ class SpringBarnesHutLayoutSpec extends Specification {
     val graph = finalState.output2.asGraph
     def nodes = graph.nodes.map(_.value)
 
-    val initialPositions = nodes.map(n => (n, Vector3.random(boundaries).toVector3)).toMap
+    val initialPositions = nodes.map(n => (n, Vector3.random(boundaries).toMutable)).toMap
     val step_0 = ImmutableSpringLayout(graph, initialPositions)
     val step_1 = step_0.improve
     val step_10 = step_0.improve(10)

@@ -14,7 +14,7 @@ case class Vector3(x: Double, y: Double, z: Double) {
   def volume = x * y * z
   def min(other: Vector3) = Vector3(x min other.x, y min other.y, z min other.z)
   def max(other: Vector3) = Vector3(x max other.x, y max other.y, z max other.z)
-  def toVector3 = MutableVector3(x, y, z)
+  def toMutable = MutableVector3(x, y, z)
   override def toString = s"(${x.round}, ${y.round}, ${z.round})"
 }
 object Vector3 {
@@ -24,7 +24,7 @@ object Vector3 {
     Vector3(Random.nextDouble() * in.x,      Random.nextDouble() * in.y,      Random.nextDouble() * in.z)
   }
   def random(in: Box3): Vector3 = random(in.size) + in.origin
-  def random(in: Box): Vector3 = random(in.size.toVec3) + in.origin.toVec3
+  def random(in: Box): Vector3 = random(in.size.toVector3) + in.origin.toVector3
 }
 
 case class Box3(origin: Vector3, size: Vector3) {

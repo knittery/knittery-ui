@@ -55,7 +55,7 @@ class MutableVector3 private (var x: Double, var y: Double, var z: Double) exten
     y = 0
     z = 0
   }
-  def toVec3 = Vector3(x, y, z)
+  def toVector3 = Vector3(x, y, z)
   override def clone = new MutableVector3(x, y, z)
   def canEqual(o: Any) = o.isInstanceOf[MutableVector3]
   override def toString = s"(${x.round}, ${y.round}, ${z.round})"

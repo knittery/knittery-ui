@@ -8,7 +8,7 @@ object SpringLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box): IncrementalLayout[N] = {
     new SpringLayout[N] {
       val nodes = graph.nodes.map(_.value).zipWithIndex.toMap
-      val positions = graph.nodes.map(_ => Vector3.random(in).toVector3).toArray
+      val positions = graph.nodes.map(_ => Vector3.random(in).toMutable).toArray
       val forces = graph.nodes.map(_ => MutableVector3.zero).toArray
       val connections = graph.edges.map { e =>
         Connection(nodes(e._1.value), nodes(e._2.value), e.weight)
