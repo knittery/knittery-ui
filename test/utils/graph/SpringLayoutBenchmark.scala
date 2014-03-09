@@ -20,8 +20,8 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
   val plans = Gen.enumeration("Plans")(
     //Plan("pattern", Examples.imageRag(ImageIO.read(new File("example.png")))),
     Plan("normalSock", Examples.sock(30, 60, 40, YarnPiece(red))),
-    Plan("smallerSock", Examples.sock(12, 20, 15, YarnPiece(red))),
     Plan("smallSock", Examples.sock(20, 25, 20, YarnPiece(red))),
+    Plan("smallerSock", Examples.sock(12, 20, 15, YarnPiece(red))),
     Plan("tinySock", Examples.sock(10, 10, 10, YarnPiece(red))))
 
   val atStep = Gen.enumeration("atStep")(1)

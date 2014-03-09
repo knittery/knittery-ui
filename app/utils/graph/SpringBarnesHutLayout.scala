@@ -57,7 +57,7 @@ object SpringBarnesHutLayout {
       val bodies = positions.map(Body)
       val oct = bodies.foldLeft(Oct(Box3.containing(positions)))(_ + _)
 
-      (0 until forces.size).foreach { i =>
+      (0 until forces.size).par.foreach { i =>
         forces(i) += oct.force(bodies(i))
       }
     }
@@ -94,8 +94,8 @@ object SpringBarnesHutLayout {
     bounds: Box3,
     children: Vector[Node]) extends Node {
     def center = bounds.center
-    override val mass = children.view.map(_.mass).sum
-    override val centerOfMass =
+    override lazy val mass = children.view.map(_.mass).sum
+    override lazy val centerOfMass =
       children.view.map(n => n.centerOfMass * n.mass).reduce(_ + _) / mass
     def size = bounds.size.x //same size in each direction
 
