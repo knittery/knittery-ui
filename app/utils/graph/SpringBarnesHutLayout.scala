@@ -55,7 +55,7 @@ object SpringBarnesHutLayout {
 
     private def repulse(forces: IndexedSeq[MutableVector3]) = {
       val bodies = positions.map(Body)
-      val oct = bodies.foldLeft(Oct(Box3.containing(positions)))(_ + _)
+      val oct = Oct.create(bodies)
 
       (0 until forces.size).par.foreach { i =>
         forces(i) += oct.force(bodies(i))
@@ -85,17 +85,16 @@ object SpringBarnesHutLayout {
     }
   }
   private case object Empty extends Node {
-    override val mass = 0d
-    override val centerOfMass = Vector3.zero
+    override def mass = 0d
+    override def centerOfMass = Vector3.zero
     override def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion) =
       Vector3.zero
   }
   private case class Oct private (
     bounds: Box3,
-    children: Vector[Node]) extends Node {
-    def center = bounds.center
-    override lazy val mass = children.view.map(_.mass).sum
-    override lazy val centerOfMass =
+    children: IndexedSeq[Node]) extends Node {
+    override val mass = children.view.map(_.mass).sum
+    override val centerOfMass =
       children.view.map(n => n.centerOfMass * n.mass).reduce(_ + _) / mass
     def size = bounds.size.x //same size in each direction
 
@@ -117,32 +116,40 @@ object SpringBarnesHutLayout {
         v.toVector3
       }
     }
-
-    def +(body: Body): Oct = {
-      val p = body.centerOfMass
-      val index = (if (p.x < center.x) 0 else 1) +
-        (if (p.y < center.y) 0 else 2) +
-        (if (p.z < center.z) 0 else 4)
-      val newC = children(index) match {
-        case Empty => body
-        case oct: Oct => oct + body
-        case other: Body =>
-          val origin = Vector3(
-            if (p.x < center.x) bounds.origin.x else center.x,
-            if (p.y < center.y) bounds.origin.y else center.y,
-            if (p.z < center.z) bounds.origin.z else center.z)
-          Oct(Box3(origin, bounds.size / 2)) + body + other
-      }
-      copy(children = children.updated(index, newC))
-    }
   }
   private object Oct {
-    def apply(bounds: Box3): Oct = {
-      //make bounds the same size in each dimension
-      val size = bounds.size.x max bounds.size.y max bounds.size.z
-      Oct(bounds.copy(size = Vector3(size, size, size)), emptyVector)
+    def create(contents: Traversable[Body]): Oct = {
+      val rawBounds = Box3.containing(contents.view.map(_.centerOfMass))
+      val size = rawBounds.size.x max rawBounds.size.y max rawBounds.size.z
+      val bounds = Box3(rawBounds.origin, Vector3(size, size, size))
+      create(bounds, contents)
     }
-    private val emptyVector = (0 until 8).map(_ => Empty: Node).toVector
+    def create(bounds: Box3, contents: Traversable[Body]): Oct = {
+      val center = bounds.center
+      lazy val childSize = bounds.size / 2
+      val array = Array[Node](Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty)
+      contents.groupBy { body =>
+        val p = body.centerOfMass
+        (if (p.x < center.x) 0 else 1) +
+          (if (p.y < center.y) 0 else 2) +
+          (if (p.z < center.z) 0 else 4)
+      }.foreach {
+        case (index, bodies) =>
+          val c = {
+            if (bodies.isEmpty) Empty
+            else if (bodies.size == 1) bodies.head
+            else {
+              val origin = Vector3(
+                if ((index & 1) == 0) bounds.origin.x else center.x,
+                if ((index & 2) == 0) bounds.origin.y else center.y,
+                if ((index & 4) == 0) bounds.origin.z else center.z)
+              Oct.create(Box3(origin, childSize), bodies)
+            }
+          }
+          array(index) = c
+      }
+      new Oct(bounds, array)
+    }
   }
 
   private case class Spring(node1: Int, node2: Int, strength: Double, springConstant: Double) {
