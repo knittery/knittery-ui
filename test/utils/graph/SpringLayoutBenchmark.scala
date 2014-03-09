@@ -65,18 +65,18 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
   //  }
 
   performance of "SpringBarnesHutLayout" in {
-    //    measure method "improve with theta 0" in {
-    //      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0d))
-    //      using(ls) in { l =>
-    //        l.improve()
-    //      }
-    //    }
-    //    measure method "improve with theta 0.5" in {
-    //      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.5d))
-    //      using(ls) in { l =>
-    //        l.improve()
-    //      }
-    //    }
+    measure method "improve with theta 0" in {
+      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0d))
+      using(ls) in { l =>
+        l.improve()
+      }
+    }
+    measure method "improve with theta 0.5" in {
+      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.5d))
+      using(ls) in { l =>
+        l.improve()
+      }
+    }
     measure method "improve with theta 0.7" in {
       val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.7d))
       using(ls) in { l =>
@@ -92,6 +92,15 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
 
     measure method "improve with theta 1" in {
       val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 1d))
+      using(ls) in { l =>
+        l.improve()
+      }
+    }
+  }
+
+  performance of "MutableSpringBarnesHutLayout" in {
+    measure method "improve with theta 1" in {
+      val ls = layouts(p => MutableSpringBarnesHutLayout.apply(p.graph, box, 1d))
       using(ls) in { l =>
         l.improve()
       }
