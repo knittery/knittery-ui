@@ -33,10 +33,10 @@ class SpringBarnesHutLayoutSpec extends Specification {
   }
   def beLayoutedSimilarTo[N](to: Layout[N], forNodes: Traversable[N], epsilon: Vector3): Matcher[Layout[N]] = new Matcher[Layout[N]] {
     def apply[S <: Layout[N]](t: Expectable[S]) = {
-      val pairs = forNodes.map(n => (to(n), t.value(n)))
+      val pairs = forNodes.map(n => (n, to(n), t.value(n)))
       val a = forall(pairs) {
-        case (should, is) =>
-          is must beNear(should, epsilon).updateMessage(m => s"$is not close to $should (e=$epsilon)")
+        case (n, should, is) =>
+          is must beNear(should, epsilon).updateMessage(m => s"$n: $is not close to $should (e=$epsilon)")
       }
       result(a.isSuccess, a.message, a.message, t)
     }
