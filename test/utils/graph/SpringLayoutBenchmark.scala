@@ -52,7 +52,7 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     measure method "improve" in {
       val ls = layoutsSmall(p => SpringLayout.apply(p.graph, box))
       using(ls) in { l =>
-        l.improve()
+        l.improve
       }
     }
   }
@@ -61,7 +61,7 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     measure method "improve" in {
       val ls = layoutsSmall(p => ImmutableSpringLayout.apply(p.graph, box))
       using(ls) in { l =>
-        l.improve()
+        l.improve
       }
     }
   }
@@ -70,7 +70,7 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     measure method "improve" in {
       val ls = layouts(p => ImmutableParallelSpringLayout.apply(p.graph, box))
       using(ls) in { l =>
-        l.improve()
+        l.improve
       }
     }
   }
@@ -79,31 +79,31 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     measure method "improve with theta 0" in {
       val ls = layoutsSmall(p => SpringBarnesHutLayout.apply(p.graph, box, 0d))
       using(ls) in { l =>
-        l.improve()
+        l.improve
       }
     }
     measure method "improve with theta 0.5" in {
       val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.5d))
       using(ls) in { l =>
-        l.improve()
+        l.improve
       }
     }
     measure method "improve with theta 0.7" in {
       val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.7d))
       using(ls) in { l =>
-        l.improve()
+        l.improve
       }
     }
     measure method "improve with theta 0.7 after 200 steps" in {
-      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.7d).improve(200))
+      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.7d).improves(200))
       using(ls) in { l =>
-        l.improve()
+        l.improve
       }
     }
     measure method "improve with theta 1" in {
-      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 1d))
+      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 1))
       using(ls) in { l =>
-        l.improve()
+        l.improve
       }
     }
   }

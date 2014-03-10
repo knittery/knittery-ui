@@ -12,7 +12,7 @@ package object graph {
   }
 
   implicit class RichIncrementalLayout[N](layout: IncrementalLayout[N]) {
-    def improve(steps: Int) = {
+    def improves(steps: Int) = {
       require(steps > 0)
       (0 until steps).foldLeft(layout)((l, _) => l.improve)
     }

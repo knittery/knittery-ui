@@ -23,7 +23,7 @@ class SpringBarnesHutLayoutSpec extends Specification {
     val initialPositions = nodes.map(n => (n, Vector3.random(boundaries))).toMap
     val step_0 = ImmutableSpringLayout(graph, initialPositions)
     val step_1 = step_0.improve
-    val step_10 = step_0.improve(10)
+    val step_10 = step_0.improves(10)
   }
 
   def beNear(ref: Position, epsilon: Vector3): Matcher[Position] = {
@@ -51,7 +51,7 @@ class SpringBarnesHutLayoutSpec extends Specification {
       baseLayout.improve must beLayoutedSimilarTo(P.step_1, P.nodes, baseEpsilon)
     }
     "perform 10 steps of small sock layouting very similar to spring layout" in {
-      baseLayout.improve(10) must beLayoutedSimilarTo(P.step_10, P.nodes, baseEpsilon * 10)
+      baseLayout.improves(10) must beLayoutedSimilarTo(P.step_10, P.nodes, baseEpsilon * 10)
     }
   }
   "Barnes-Hut spring layout with theta = 0.3" should {
