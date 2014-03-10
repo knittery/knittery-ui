@@ -23,7 +23,6 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     Plan("tinySock", Examples.sock(10, 10, 10, YarnPiece(red))))
 
   val allPlans = Gen.enumeration("Plans")(
-    Plan("pattern", Examples.imageRag(ImageIO.read(new File("example.png")))),
     Plan("bigSock", Examples.sock(40, 100, 60, YarnPiece(red))),
     Plan("normalSock", Examples.sock(30, 60, 40, YarnPiece(red))),
     Plan("smallSock", Examples.sock(20, 25, 20, YarnPiece(red))),
@@ -69,7 +68,7 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
 
   performance of "ImmutableParallelSpringLayout" in {
     measure method "improve" in {
-      val ls = layoutsSmall(p => ImmutableParallelSpringLayout.apply(p.graph, box))
+      val ls = layouts(p => ImmutableParallelSpringLayout.apply(p.graph, box))
       using(ls) in { l =>
         l.improve()
       }
@@ -103,15 +102,6 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     }
     measure method "improve with theta 1" in {
       val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 1d))
-      using(ls) in { l =>
-        l.improve()
-      }
-    }
-  }
-
-  performance of "MutableSpringBarnesHutLayout" in {
-    measure method "improve with theta 1" in {
-      val ls = layouts(p => MutableSpringBarnesHutLayout.apply(p.graph, box, 1d))
       using(ls) in { l =>
         l.improve()
       }
