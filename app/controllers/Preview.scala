@@ -42,8 +42,8 @@ object Preview extends Controller {
     }.toMap
 
     //var layout = SpringLayout(graph, Box3(2000))
-    //var layout = SpringBarnesHutLayout(graph, Box3(2000), 1d)
-    var layout = ImmutableParallelSpringLayout(graph, Box3(2000))
+    var layout = SpringBarnesHutLayout(graph, Box3(2000), 1d)
+    //var layout = ImmutableParallelSpringLayout(graph, Box3(2000))
 
     println(s"Prelayouting ${graph.size} nodes...")
     var i = 0
