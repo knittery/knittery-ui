@@ -19,13 +19,14 @@ object SpringBarnesHutLayout {
     implicit val epsilon = Epsilon(in.size.length / 10000000)
     implicit val mac = MultipoleAcceptanceCriterion(theta)
 
-    val nodeMap = graph.nodes.map(_.value).zipWithIndex.toMap
+    val nodes = graph.nodes.map(_.value).toVector
+    val nodeMap = nodes.zipWithIndex.toMap
     val springs = graph.edges.map { e =>
       Spring(nodeMap(e._1.value), nodeMap(e._2.value), e.weight, springConstant)
     }
-    val bodies = graph.nodes.map(n => Body(positions(n.value)))
+    val bodies = nodes.map(n => Body(positions(n.value)))
 
-    new SpringBarnesHutLayout(nodeMap, springs.toVector, bodies.toVector)
+    new SpringBarnesHutLayout(nodeMap, springs.toVector, bodies)
   }
 
   private class SpringBarnesHutLayout[N](
@@ -84,7 +85,7 @@ object SpringBarnesHutLayout {
     override val mass = children.foldLeft(0d)(_ + _.mass)
     override val centerOfMass = {
       children.foldLeft(Vector3.zero) { (sum, child) =>
-        sum + child.centerOfMass * child.mass
+        sum + (child.centerOfMass * child.mass)
       } / mass
     }
     def size = bounds.size.x //same size in each direction

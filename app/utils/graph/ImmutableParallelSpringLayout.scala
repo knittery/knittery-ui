@@ -18,11 +18,12 @@ object ImmutableParallelSpringLayout {
     }
     val epsilon = Epsilon(in.size.length / 10000000)
 
-    val nodeMap = graph.nodes.map(_.value).zipWithIndex.toMap
+    val nodes = graph.nodes.toVector
+    val nodeMap = nodes.map(_.value).zipWithIndex.toMap
     val springs = graph.edges.map { e =>
       Spring(nodeMap(e._1.value), nodeMap(e._2.value), e.weight, springConstant)
     }
-    val nodePos = graph.nodes.map(n => positions(n))
+    val nodePos = nodes.map(n => positions(n))
 
     new ImmutableParallelSpringLayout(nodeMap, springs.toVector, nodePos.toVector)(repulsionConstant, epsilon)
   }

@@ -6,12 +6,13 @@ import utils.vector._
 
 object SpringLayout {
   def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box3): IncrementalLayout[N] = {
+    val nodes = graph.nodes.toVector
     new SpringLayout[N] {
-      val nodes = graph.nodes.map(_.value).zipWithIndex.toMap
-      val positions = graph.nodes.map(_ => Vector3.random(in).toMutable).toArray
-      val forces = graph.nodes.map(_ => MutableVector3.zero).toArray
+      val nodeMap = nodes.map(_.value).zipWithIndex.toMap
+      val positions = nodes.map(_ => Vector3.random(in).toMutable).toArray
+      val forces = nodes.map(_ => MutableVector3.zero).toArray
       val connections = graph.edges.map { e =>
-        Connection(nodes(e._1.value), nodes(e._2.value), e.weight)
+        Connection(nodeMap(e._1.value), nodeMap(e._2.value), e.weight)
       }.toVector
       val size = in.size
     }
@@ -20,7 +21,7 @@ object SpringLayout {
   private case class Connection(index1: Int, index2: Int, weight: Double)
 
   private trait SpringLayout[N] extends IncrementalLayout[N] {
-    protected val nodes: Map[N, Int]
+    protected val nodeMap: Map[N, Int]
     protected val positions: Array[MutableVector3]
     protected val forces: Array[MutableVector3]
     protected val connections: Traversable[Connection]
@@ -40,7 +41,7 @@ object SpringLayout {
     }
 
     def apply(node: N) = {
-      nodes.get(node).map(n => positions(n).toVector3).
+      nodeMap.get(node).map(n => positions(n).toVector3).
         getOrElse(throw new IllegalArgumentException(s"$node is not part of the layout"))
     }
 
