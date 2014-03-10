@@ -17,8 +17,14 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     override def toString = s"$name (${graph.nodes.size})"
   }
 
-  val plans = Gen.enumeration("Plans")(
-    //Plan("pattern", Examples.imageRag(ImageIO.read(new File("example.png")))),
+  val smallPlans = Gen.enumeration("Plans")(
+    Plan("smallSock", Examples.sock(20, 25, 20, YarnPiece(red))),
+    Plan("smallerSock", Examples.sock(12, 20, 15, YarnPiece(red))),
+    Plan("tinySock", Examples.sock(10, 10, 10, YarnPiece(red))))
+
+  val allPlans = Gen.enumeration("Plans")(
+    Plan("pattern", Examples.imageRag(ImageIO.read(new File("example.png")))),
+    Plan("bigSock", Examples.sock(40, 100, 60, YarnPiece(red))),
     Plan("normalSock", Examples.sock(30, 60, 40, YarnPiece(red))),
     Plan("smallSock", Examples.sock(20, 25, 20, YarnPiece(red))),
     Plan("smallerSock", Examples.sock(12, 20, 15, YarnPiece(red))),
@@ -26,8 +32,14 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
 
   val atStep = Gen.enumeration("atStep")(1)
 
+  def layoutsSmall[N](f: Plan => IncrementalLayout[N]) = for {
+    plan <- smallPlans
+    preps <- atStep
+  } yield {
+    (1 to preps).foldLeft(f(plan))((l, _) => l.improve)
+  }
   def layouts[N](f: Plan => IncrementalLayout[N]) = for {
-    plan <- plans
+    plan <- allPlans
     preps <- atStep
   } yield {
     (1 to preps).foldLeft(f(plan))((l, _) => l.improve)
@@ -37,36 +49,36 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
 
   println("Done initializing")
 
-  //  performance of "SpringLayout" in {
-  //    measure method "improve" in {
-  //      val ls = layouts(p => SpringLayout.apply(p.graph, box))
-  //      using(ls) in { l =>
-  //        l.improve()
-  //      }
-  //    }
-  //  }
-  //
-  //  performance of "ImmutableSpringLayout" in {
-  //    measure method "improve" in {
-  //      val ls = layouts(p => ImmutableSpringLayout.apply(p.graph, box))
-  //      using(ls) in { l =>
-  //        l.improve()
-  //      }
-  //    }
-  //  }
+  performance of "SpringLayout" in {
+    measure method "improve" in {
+      val ls = layoutsSmall(p => SpringLayout.apply(p.graph, box))
+      using(ls) in { l =>
+        l.improve()
+      }
+    }
+  }
 
-  //  performance of "ImmutableParallelSpringLayout" in {
-  //    measure method "improve" in {
-  //      val ls = layouts(p => ImmutableParallelSpringLayout.apply(p.graph, box))
-  //      using(ls) in { l =>
-  //        l.improve()
-  //      }
-  //    }
-  //  }
+  performance of "ImmutableSpringLayout" in {
+    measure method "improve" in {
+      val ls = layoutsSmall(p => ImmutableSpringLayout.apply(p.graph, box))
+      using(ls) in { l =>
+        l.improve()
+      }
+    }
+  }
+
+  performance of "ImmutableParallelSpringLayout" in {
+    measure method "improve" in {
+      val ls = layoutsSmall(p => ImmutableParallelSpringLayout.apply(p.graph, box))
+      using(ls) in { l =>
+        l.improve()
+      }
+    }
+  }
 
   performance of "SpringBarnesHutLayout" in {
     measure method "improve with theta 0" in {
-      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0d))
+      val ls = layoutsSmall(p => SpringBarnesHutLayout.apply(p.graph, box, 0d))
       using(ls) in { l =>
         l.improve()
       }
@@ -89,7 +101,6 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
         l.improve()
       }
     }
-
     measure method "improve with theta 1" in {
       val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 1d))
       using(ls) in { l =>
