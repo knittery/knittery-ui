@@ -23,43 +23,31 @@ object SpringBarnesHutLayout {
     val springs = graph.edges.map { e =>
       Spring(nodeMap(e._1.value), nodeMap(e._2.value), e.weight, springConstant)
     }
-    val nodePos = graph.nodes.map(n => positions(n.value))
+    val bodies = graph.nodes.map(n => Body(positions(n.value)))
 
-    new SpringBarnesHutLayout(nodeMap, springs.toVector, nodePos.toVector)
+    new SpringBarnesHutLayout(nodeMap, springs.toVector, bodies.toVector)
   }
 
   private class SpringBarnesHutLayout[N](
     lookupMap: Map[N, Int],
     springs: Vector[Spring],
-    positions: Vector[Vector3])(
+    bodies: Vector[Body])(
       implicit repulsionConstant: RepulsionConstant,
       epsilon: Epsilon,
       mac: MultipoleAcceptanceCriterion) extends IncrementalLayout[N] {
 
-    def apply(n: N) = positions(lookupMap(n))
+    def apply(n: N) = bodies(lookupMap(n)).centerOfMass
 
     def improve = {
-      val forces = positions.map(_.toMutable)
-      attract(forces)
-      repulse(forces)
-      new SpringBarnesHutLayout(lookupMap, springs, forces.map(_.toVector3).toVector)
-    }
-
-    private def attract(forces: IndexedSeq[MutableVector3]) = {
+      val oct = Oct.create(bodies)
+      val forces = bodies.toArray.par.map(oct.force)
       springs.foreach { spring =>
-        val force = spring.force(positions(spring.node1), positions(spring.node2))
+        val force = spring.force(bodies(spring.node1).centerOfMass, bodies(spring.node2).centerOfMass)
         forces(spring.node1) -= force
         forces(spring.node2) += force
       }
-    }
 
-    private def repulse(forces: IndexedSeq[MutableVector3]) = {
-      val bodies = positions.map(Body)
-      val oct = Oct.create(bodies)
-
-      (0 until forces.size).par.foreach { i =>
-        forces(i) += oct.force(bodies(i))
-      }
+      new SpringBarnesHutLayout(lookupMap, springs, forces.view.map(Body).toVector)
     }
   }
 
@@ -93,9 +81,12 @@ object SpringBarnesHutLayout {
   private case class Oct private (
     bounds: Box3,
     children: IndexedSeq[Node]) extends Node {
-    override val mass = children.view.map(_.mass).sum
-    override val centerOfMass =
-      children.view.map(n => n.centerOfMass * n.mass).reduce(_ + _) / mass
+    override val mass = children.foldLeft(0d)(_ + _.mass)
+    override val centerOfMass = {
+      children.foldLeft(Vector3.zero) { (sum, child) =>
+        sum + child.centerOfMass * child.mass
+      } / mass
+    }
     def size = bounds.size.x //same size in each direction
 
     override def force(body: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion) = {
@@ -118,37 +109,37 @@ object SpringBarnesHutLayout {
     }
   }
   private object Oct {
-    def create(contents: Traversable[Body]): Oct = {
+    def create(contents: Traversable[Body]): Node = {
       val rawBounds = Box3.containing(contents.view.map(_.centerOfMass))
       val size = rawBounds.size.x max rawBounds.size.y max rawBounds.size.z
       val bounds = Box3(rawBounds.origin, Vector3(size, size, size))
       create(bounds, contents)
     }
-    def create(bounds: Box3, contents: Traversable[Body]): Oct = {
-      val center = bounds.center
-      lazy val childSize = bounds.size / 2
-      val array = Array[Node](Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty)
-      contents.groupBy { body =>
-        val p = body.centerOfMass
-        (if (p.x < center.x) 0 else 1) +
-          (if (p.y < center.y) 0 else 2) +
-          (if (p.z < center.z) 0 else 4)
-      }.foreach {
-        case (index, bodies) =>
-          val c = {
-            if (bodies.isEmpty) Empty
-            else if (bodies.size == 1) bodies.head
-            else {
-              val origin = Vector3(
-                if ((index & 1) == 0) bounds.origin.x else center.x,
-                if ((index & 2) == 0) bounds.origin.y else center.y,
-                if ((index & 4) == 0) bounds.origin.z else center.z)
-              Oct.create(Box3(origin, childSize), bodies)
-            }
-          }
-          array(index) = c
+    def create(bounds: Box3, contents: Traversable[Body]): Node = {
+      if (contents.isEmpty) Empty
+      else if (contents.tail.isEmpty) contents.head
+      else {
+        val center = bounds.center
+        val array = Array[List[Body]](Nil, Nil, Nil, Nil, Nil, Nil, Nil, Nil)
+        contents.foreach { body =>
+          val p = body.centerOfMass
+          val index = (if (p.x < center.x) 0 else 1) +
+            (if (p.y < center.y) 0 else 2) +
+            (if (p.z < center.z) 0 else 4)
+          array(index) = body :: array(index)
+        }
+        val size = bounds.size / 2
+        val children = Array(
+          create(Box3(bounds.origin, size), array(0)),
+          create(Box3(Vector3((center).x, (bounds.origin).y, (bounds.origin).z), size), array(1)),
+          create(Box3(Vector3((bounds.origin).x, (center).y, (bounds.origin).z), size), array(2)),
+          create(Box3(Vector3((center).x, (center).y, (bounds.origin).z), size), array(3)),
+          create(Box3(Vector3((bounds.origin).x, (bounds.origin).y, (center).z), size), array(4)),
+          create(Box3(Vector3((center).x, (bounds.origin).y, (center).z), size), array(5)),
+          create(Box3(Vector3((bounds.origin).x, (center).y, (center).z), size), array(6)),
+          create(Box3(center, size), array(7)))
+        new Oct(bounds, children)
       }
-      new Oct(bounds, array)
     }
   }
 
