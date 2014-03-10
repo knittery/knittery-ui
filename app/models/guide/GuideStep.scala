@@ -112,7 +112,7 @@ sealed trait GuideStep {
         s"Knit a row from $from to $to with the ${c.name} carriage")
 
     case AddCarriage(c, at) =>
-      val lr = if (ToLeft == at) "left" else "right"
+      val lr = if (at == Left) "left" else "right"
       (s"Add Carriage ${c.name}",
         s"Add the carriage ${c.name} at the $lr side")
 
@@ -134,7 +134,7 @@ sealed trait GuideStep {
         s"Change K carriage settings Knob to ${s.knob} with lever at ${s.holdingCamLever.name} and ${settings.mkString(" and ")} with assembly $assembly")
 
     case s @ RetireNeedle(bed, needle, direction) =>
-      val d = if (direction == Left) "left" else "right"
+      val d = if (direction == ToLeft) "left" else "right"
       (s"Retire needle ${needle.number} (${formatBed(bed)})",
         s"Move the yarns on the ${formatBed(bed)} needle ${needle.number} one needle to the $d and put it into A position. Leave needle ${s.target.number} at B position.")
 

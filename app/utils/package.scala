@@ -13,11 +13,11 @@ package object utils {
     def columns = transpose
     def transpose: IndexedSeq[IndexedSeq[A]] = matrix match {
       case m: TransposedMatrix[A] => m.matrix //don't make a chain of wrapping
-      case matrix => new TransposedMatrix(matrix)
+      case m => new TransposedMatrix(m)
     }
     def matrixMap[B](f: A => B): Matrix[B] = matrix.map(_.map(f))
     def reverseBoth = matrix.columns.reverse.transpose.reverse
-    def validate = {
+    def validate() = {
       if (matrix.nonEmpty) matrix.foreach(r => require(r.size == width, "row widths are non-equal"))
     }
   }

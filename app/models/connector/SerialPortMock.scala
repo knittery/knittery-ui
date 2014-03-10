@@ -39,11 +39,11 @@ object SerialPortMock {
     }
     val encoding = "ASCII"
 
-    override def preStart = {
+    override def preStart() = {
       context watch commander
       enumeratorToPort(iteratee)
     }
-    override def postStop = {
+    override def postStop() = {
       stopped = true
       commander ! Closed
     }

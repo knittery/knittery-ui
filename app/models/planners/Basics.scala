@@ -87,7 +87,7 @@ object Basics {
   def knitRowWithL(settings: LCarriage.Settings, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings)
     needlesBefore <- Planner.state(_.needles(MainBed).positions)
-    _ <- MoveNeedles(needlesBefore, pattern, true)
+    _ <- MoveNeedles(needlesBefore, pattern, moveE = true)
     dir <- nextDirection(LCarriage)
     _ <- KnitRow(LCarriage, dir)
   } yield ()

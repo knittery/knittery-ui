@@ -6,10 +6,10 @@ import GraphPredef._
 import utils.vector._
 
 object SpringBarnesHutLayout {
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box3, theta: Double): IncrementalLayout[N] =
+  def apply[N, E[X] <: EdgeLikeIn[X]](graph: Graph[N, E], in: Box3, theta: Double): IncrementalLayout[N] =
     apply(graph, _ => Vector3.random(in), theta)
 
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N], theta: Double): IncrementalLayout[N] = {
+  def apply[N, E[X] <: EdgeLikeIn[X]](graph: Graph[N, E], positions: Layout[N], theta: Double): IncrementalLayout[N] = {
     val in = Box3.containing(graph.nodes.map(_.value).map(positions))
     val springConstant = 1d / (graph.edges.map(_.weight).max * 5)
     implicit val repulsionConstant = RepulsionConstant {
@@ -68,7 +68,7 @@ object SpringBarnesHutLayout {
     override def mass = 1
     def applyForce(f: Vector3) = copy(centerOfMass = centerOfMass + f)
     override def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion) = {
-      val vec = (against.centerOfMass - centerOfMass)
+      val vec = against.centerOfMass - centerOfMass
       val distance = vec.length
       vec * (repulsionConstant.value / (distance * distance * distance + epsilon.value))
     }
@@ -85,16 +85,16 @@ object SpringBarnesHutLayout {
     override val mass = children.foldLeft(0d)(_ + _.mass)
     override val centerOfMass = {
       children.foldLeft(Vector3.zero) { (sum, child) =>
-        sum + (child.centerOfMass * child.mass)
+        sum + child.centerOfMass * child.mass
       } / mass
     }
     def size = bounds.size.x //same size in each direction
 
     override def force(body: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon, mac: MultipoleAcceptanceCriterion) = {
-      val vec = (body.centerOfMass - centerOfMass)
+      val vec = body.centerOfMass - centerOfMass
       val distance = vec.length
       if (mac.accepts(size, distance)) {
-        // distance is big enough so we can threat ourself as a cluster regarding body
+        // distance is big enough so we can threat us as a cluster regarding the body
         vec * (repulsionConstant.value * mass / (distance * distance * distance + epsilon.value))
       } else {
         // need to calculate the force for each child
@@ -133,12 +133,12 @@ object SpringBarnesHutLayout {
         val size = bounds.size / 2
         val children = Array(
           create(Box3(bounds.origin, size), array(0)),
-          create(Box3(Vector3((center).x, (bounds.origin).y, (bounds.origin).z), size), array(1)),
-          create(Box3(Vector3((bounds.origin).x, (center).y, (bounds.origin).z), size), array(2)),
-          create(Box3(Vector3((center).x, (center).y, (bounds.origin).z), size), array(3)),
-          create(Box3(Vector3((bounds.origin).x, (bounds.origin).y, (center).z), size), array(4)),
-          create(Box3(Vector3((center).x, (bounds.origin).y, (center).z), size), array(5)),
-          create(Box3(Vector3((bounds.origin).x, (center).y, (center).z), size), array(6)),
+          create(Box3(Vector3(center.x, bounds.origin.y, bounds.origin.z), size), array(1)),
+          create(Box3(Vector3(bounds.origin.x, center.y, bounds.origin.z), size), array(2)),
+          create(Box3(Vector3(center.x, center.y, bounds.origin.z), size), array(3)),
+          create(Box3(Vector3(bounds.origin.x, bounds.origin.y, center.z), size), array(4)),
+          create(Box3(Vector3(center.x, bounds.origin.y, center.z), size), array(5)),
+          create(Box3(Vector3(bounds.origin.x, center.y, center.z), size), array(6)),
           create(Box3(center, size), array(7)))
         new Oct(bounds, children)
       }

@@ -23,12 +23,12 @@ trait SubscriptionActor extends Actor {
   /** Timeout for setting up the subscription. */
   def timeout = 200.millis
 
-  override final def preStart = {
+  override final def preStart() = {
     context watch to
     to ! subscribe
     context.setReceiveTimeout(timeout)
   }
-  override final def postStop = to ! unsubscribe
+  override final def postStop() = to ! unsubscribe
   override final def receive = handleCrash orElse {
     case msg if subscribed.isDefinedAt(msg) =>
       if (subscribed(msg)) context become handleMessages
@@ -36,7 +36,7 @@ trait SubscriptionActor extends Actor {
     case ReceiveTimeout => throw SubscribeFailed("Timeout")
   }
   private def handleCrash: Receive = {
-    case Terminated(to) => to ! subscribe
+    case Terminated(`to`) => to ! subscribe
   }
   private def handleMessages: Receive = handleCrash orElse {
     case msg => onMessage(msg)

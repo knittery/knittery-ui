@@ -22,8 +22,8 @@ object ActorEnumerator {
       override def preRestart(cause: Throwable, msg: Option[Any]) {
         channel foreach (_ end cause)
       }
-      override def postStop = {
-        if (stopMsgPending) channel foreach (_.end)
+      override def postStop() = {
+        if (stopMsgPending) channel foreach (_.end())
       }
       override def receive = {
         case Init(c) => channel = Some(c)

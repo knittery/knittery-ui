@@ -29,10 +29,10 @@ object FairIslePlanner {
     //TODO background yarn...
     //with A
     _ <- Basics.knitRowWithK(settings, KCarriage.SinkerPlate(), Some(yarnA), None,
-      knitActionDoubleBed(row, startNeedle, Some(yarnA), false))
+      knitActionDoubleBed(row, startNeedle, Some(yarnA), knitBackground = false))
     //with B
     _ <- Basics.knitRowWithK(settings, KCarriage.SinkerPlate(),yarnB, None,
-      knitActionDoubleBed(row, startNeedle, yarnB, false))
+      knitActionDoubleBed(row, startNeedle, yarnB, knitBackground = false))
   } yield ()
 
   private def knitActionDoubleBed(row: Seq[YarnPiece], startNeedle: Needle, yarn: Option[YarnPiece], knitBackground: Boolean)(needle: Needle) = {
@@ -65,7 +65,7 @@ object FairIslePlanner {
   } yield ()
 
   private def checkPattern(pattern: Matrix[Yarn]) = Planner.precondidtions { _ =>
-    pattern.validate
+    pattern.validate()
     require(pattern.height > 0, "Empty pattern")
     pattern.rows.map(_.toSet).zipWithIndex.foreach {
       case (yarns, index) =>
@@ -87,7 +87,7 @@ object FairIslePlanner {
     for {
       yarnA <- Planner.state(_.carriageState(KCarriage).yarnA)
       yarnB <- Planner.state(_.carriageState(KCarriage).yarnB)
-      available = (yarnA.toSet ++ yarnB.toSet)
+      available = yarnA.toSet ++ yarnB.toSet
     } yield {
       if (required.forall(available.contains)) (yarnA, yarnB)
       else required.toList match {

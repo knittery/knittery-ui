@@ -41,9 +41,9 @@ object Examples {
 
   private def colorsToYarns(colors: Set[Color]) = {
     colors.zipWithIndex.map {
-      case (c @ Color.white, i) => (c -> Yarn(s"White", new Color(0xf4f4f4)))
-      case (c @ Color.black, i) => (c -> Yarn(s"Black", c))
-      case (color, i) => (color -> Yarn(s"Yarn $i", color))
+      case (c @ Color.white, i) => c -> Yarn(s"White", new Color(0xf4f4f4))
+      case (c @ Color.black, i) => c -> Yarn(s"Black", c)
+      case (color, i) => color -> Yarn(s"Yarn $i", color)
     }.toMap
   }
 

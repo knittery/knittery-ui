@@ -8,7 +8,7 @@ package object graph {
   type Layout[N] = N => Position
   trait IncrementalLayout[N] extends Layout[N] {
     /** Improves the layout. */
-    def improve(): IncrementalLayout[N]
+    def improve: IncrementalLayout[N]
   }
 
   implicit class RichIncrementalLayout[N](layout: IncrementalLayout[N]) {

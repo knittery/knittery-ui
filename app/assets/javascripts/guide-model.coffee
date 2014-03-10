@@ -2,6 +2,8 @@
 
 guide = $().model("currentStep")
 
+started = false
+
 guide.start = (route) -> if (!started)
   me = this
   ws = new ReconnectingWebSocket(route.webSocketURL())

@@ -54,7 +54,7 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
       require(!settings.l, "L not supported with double bed assembly.")
       val bed = new KDoubleBed(dbc.needleTakeback(direction), state.needles(DoubleBed))
       val part = dbc.part(direction)
-      (part) match {
+      part match {
         case (false) => bed.plain _
         case (true) => bed.part _
       }

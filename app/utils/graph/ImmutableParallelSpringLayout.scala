@@ -6,10 +6,10 @@ import GraphPredef._
 import utils.vector._
 
 object ImmutableParallelSpringLayout {
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box3): IncrementalLayout[N] =
+  def apply[N, E[X] <: EdgeLikeIn[X]](graph: Graph[N, E], in: Box3): IncrementalLayout[N] =
     apply(graph, _ => Vector3.random(in))
 
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], positions: Layout[N]): IncrementalLayout[N] = {
+  def apply[N, E[X] <: EdgeLikeIn[X]](graph: Graph[N, E], positions: Layout[N]): IncrementalLayout[N] = {
     val in = Box3.containing(graph.nodes.map(_.value).map(positions))
     val springConstant = 1d / (graph.edges.map(_.weight).max * 5)
     val repulsionConstant = RepulsionConstant {
@@ -43,11 +43,11 @@ object ImmutableParallelSpringLayout {
     }
 
     def attract(forces: Vector[Vector3]) = springs.foldLeft(forces) {
-      case (forces, spring) =>
+      case (result, spring) =>
         val force = spring.force(positions(spring.node1), positions(spring.node2))
-        forces
-          .updated(spring.node1, forces(spring.node1) - force)
-          .updated(spring.node2, forces(spring.node2) + force)
+        result
+          .updated(spring.node1, result(spring.node1) - force)
+          .updated(spring.node2, result(spring.node2) + force)
     }
 
     def repulse(forces: Vector[Vector3]) = {
@@ -73,7 +73,7 @@ object ImmutableParallelSpringLayout {
   private case class Body(centerOfMass: Vector3) extends AnyVal {
     def distance(to: Body) = (centerOfMass - to.centerOfMass).length
     def force(against: Body)(implicit repulsionConstant: RepulsionConstant, epsilon: Epsilon) = {
-      val vec = (centerOfMass - against.centerOfMass)
+      val vec = centerOfMass - against.centerOfMass
       val distance = vec.length
       vec * (repulsionConstant.value / (distance * distance * distance + epsilon.value))
     }

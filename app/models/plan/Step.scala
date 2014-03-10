@@ -39,7 +39,7 @@ case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActi
   }
   override def toString = {
     val row = pattern.all.map(_.toPosition.toString).mkString
-    s"KnitRow($carriage,$direction,${row})"
+    s"KnitRow($carriage,$direction,$row)"
   }
 }
 

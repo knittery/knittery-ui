@@ -31,7 +31,7 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
 
   private val encoding = "ASCII"
 
-  override def preStart = {
+  override def preStart() = {
     serialManager ! Open(port, 19200)
     context.setReceiveTimeout(5.seconds)
   }
@@ -83,11 +83,11 @@ class BrotherConnector(port: String, serialManager: ActorRef, parser: String => 
 }
 
 private class BrotherPatternManger(operator: ActorRef, encoding: String) extends Actor with ActorLogging {
-  override def preStart = {
+  override def preStart() = {
     // Turn solenoids off
     loadPattern(offPattern, self)
   }
-  override def postStop = {
+  override def postStop() = {
     // Turn solenoids off
     operator ! Write(serializePattern(offPattern))
   }
@@ -201,7 +201,7 @@ object BrotherConnector {
           })
         } yield PositionUpdate(p, d, c)
         value.
-          map(Some(_)).
+          map(Some.apply).
           recover {
             case e =>
               Logger.debug(s"Failed to parse input from machine: ${e.getMessage}")

@@ -5,7 +5,7 @@ import GraphPredef._
 import utils.vector._
 
 object SpringLayout {
-  def apply[N, E[N] <: EdgeLikeIn[N]](graph: Graph[N, E], in: Box3): IncrementalLayout[N] = {
+  def apply[N, E[X] <: EdgeLikeIn[X]](graph: Graph[N, E], in: Box3): IncrementalLayout[N] = {
     val nodes = graph.nodes.toVector
     new SpringLayout[N] {
       val nodeMap = nodes.map(_.value).zipWithIndex.toMap
@@ -45,7 +45,7 @@ object SpringLayout {
         getOrElse(throw new IllegalArgumentException(s"$node is not part of the layout"))
     }
 
-    def improve() = {
+    def improve = {
       repulse()
       attract()
       move()

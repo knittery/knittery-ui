@@ -18,25 +18,25 @@ private object RowTracker {
 
     override def receive = general orElse {
       case PositionUpdate(CarriageOverNeedles(needle), direction, _) =>
-        context.become(verifyDirection(direction, needle), false)
+        context.become(verifyDirection(direction, needle), discardOld = false)
     }
 
     def knitting(direction: Direction): Receive = general orElse {
       case PositionUpdate(CarriageOverNeedles(needle), dir, _) if dir != direction =>
-        context.become(verifyDirection(dir, needle), false)
+        context.become(verifyDirection(dir, needle), discardOld = false)
     }
 
     def verifyDirection(candidate: Direction, startAt: Needle): Receive = general orElse {
       case PositionUpdate(CarriageOverNeedles(needle), `candidate`, _) =>
         val distance = (needle.index - startAt.index) * (if (candidate == ToLeft) -1 else 1)
-        if (distance < 0 || distance > 30) context.unbecome
+        if (distance < 0 || distance > 30) context.unbecome()
         else if (distance > 5) {
-          context.unbecome // so we don't leak memory
-          nextRow
+          context.unbecome() // so we don't leak memory
+          nextRow()
           context become knitting(candidate)
         }
       case PositionUpdate(CarriageOverNeedles(_), _, _) =>
-        context.unbecome
+        context.unbecome()
     }
 
     def general: Receive = {
@@ -45,7 +45,7 @@ private object RowTracker {
         commander ! RowChanged(row)
     }
 
-    def nextRow = {
+    def nextRow() = {
       row = row + 1
       commander ! RowChanged(row)
     }

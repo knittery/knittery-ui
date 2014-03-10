@@ -29,7 +29,7 @@ sealed trait Knitted2 {
   def ++(stitches: Traversable[Stitch2]) = stitches.foldLeft(this)(_ + _)
 
   def contains(flow: YarnFlow) =
-    ends.get(flow.start).map(_.stream.contains(flow)).getOrElse(false)
+    ends.get(flow.start).exists(_.stream.contains(flow))
 
   private def copy(ends: Map[YarnPiece, YarnFlow] = ends, stitches: Set[Stitch2] = stitches): Knitted2 = {
     val e2 = ends

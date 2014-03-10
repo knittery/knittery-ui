@@ -83,7 +83,7 @@ object Plans extends Controller {
     request.body.file("pattern").map { patternFile =>
       val image = {
         //Pattern-Image will be converted, if a gauge is provided
-        if (gauge.getStitchesPerCm() > 0) {
+        if (gauge.getStitchesPerCm > 0) {
           PatternConverter.convertToPattern(ImageIO.read(patternFile.ref.file),
             gaugeFormData.widthInCmImg.doubleValue, gaugeFormData.heightInCmImg.doubleValue, gauge)
         } else {

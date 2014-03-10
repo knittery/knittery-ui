@@ -51,7 +51,7 @@ object Guider {
     override def receive = {
       case cmd @ LoadPlan(plan) =>
         val step = GuideStep(plan)
-        context become (stepping(step))
+        context become stepping(step)
         sender ! CommandExecuted(cmd)
     }
 
@@ -65,7 +65,7 @@ object Guider {
           machine ! Machine.LoadNeedlePattern(pattern)
         case _ => ()
       }
-      context become (stepping(newStep))
+      context become stepping(newStep)
     }
 
     private var row = 0

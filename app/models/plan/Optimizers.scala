@@ -35,8 +35,7 @@ object UnknittedSettingsOptimizer extends PlanOptimizer {
       case (step: ChangeCarriageSettings, processed) =>
         val necessary = processed.
           takeWhile(changesSettings(step.carriage).not).
-          find(knitting(step.carriage)).
-          isDefined
+          exists(knitting(step.carriage))
         if (necessary) step :: processed
         else processed
       case (step, processed) => step :: processed
