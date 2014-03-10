@@ -44,25 +44,24 @@ class SpringBarnesHutLayoutSpec extends Specification {
 
   "Barnes-Hut spring layout with theta = 0" should {
     val baseLayout = SpringBarnesHutLayout(P.graph, P.initialPositions, 0d)
+    "have same initial state as spring layout" in {
+      baseLayout must beLayoutedSimilarTo(P.step_0, P.nodes, baseEpsilon)
+    }
     "perform first step of small sock layouting very similar to spring layout" in {
-      val afterFirst = baseLayout.improve
-      afterFirst must beLayoutedSimilarTo(P.step_1, P.nodes, baseEpsilon)
+      baseLayout.improve must beLayoutedSimilarTo(P.step_1, P.nodes, baseEpsilon)
     }
     "perform 10 steps of small sock layouting very similar to spring layout" in {
-      val afterFirst = baseLayout.improve(10)
-      afterFirst must beLayoutedSimilarTo(P.step_10, P.nodes, baseEpsilon * 10)
+      baseLayout.improve(10) must beLayoutedSimilarTo(P.step_10, P.nodes, baseEpsilon * 10)
     }
   }
   "Barnes-Hut spring layout with theta = 0.3" should {
     val baseLayout = SpringBarnesHutLayout(P.graph, P.initialPositions, 0.3d)
+    "have same initial state as spring layout" in {
+      baseLayout must beLayoutedSimilarTo(P.step_0, P.nodes, baseEpsilon)
+    }
     "perform first step of small sock layouting very similar to spring layout" in {
       val afterFirst = baseLayout.improve
-      afterFirst must beLayoutedSimilarTo(P.step_1, P.nodes, baseEpsilon)
-    }
-    "perform 10 steps of small sock layouting very similar to spring layout" in {
-      val afterFirst = baseLayout.improve(10)
-      afterFirst must beLayoutedSimilarTo(P.step_10, P.nodes, baseEpsilon * 10)
+      afterFirst must beLayoutedSimilarTo(P.step_1, P.nodes, baseEpsilon * 10)
     }
   }
-
 }
