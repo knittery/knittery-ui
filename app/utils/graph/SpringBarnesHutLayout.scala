@@ -41,7 +41,7 @@ object SpringBarnesHutLayout {
 
     def improve = {
       val oct = Oct.create(bodies)
-      val forces = bodies.toArray.par.map(oct.force)
+      val forces = bodies.toArray.par.map(body => body.centerOfMass + oct.force(body))
       springs.foreach { spring =>
         val force = spring.force(bodies(spring.node1).centerOfMass, bodies(spring.node2).centerOfMass)
         forces(spring.node1) -= force
@@ -105,6 +105,7 @@ object SpringBarnesHutLayout {
         v += children(4).force(body)
         v += children(5).force(body)
         v += children(6).force(body)
+        v += children(7).force(body)
         v.toVector3
       }
     }
