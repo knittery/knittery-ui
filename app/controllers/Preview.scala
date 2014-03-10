@@ -8,6 +8,7 @@ import scalax.collection.edge.WLUnDiEdge
 import scalax.collection.GraphPredef._
 import scalax.collection.io.dot._
 import play.api.Play._
+import play.api.Logger
 import play.api.mvc._
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
@@ -45,7 +46,7 @@ object Preview extends Controller {
     var layout = SpringBarnesHutLayout(graph, Box3(2000), 1d)
     //var layout = ImmutableParallelSpringLayout(graph, Box3(2000))
 
-    println(s"Prelayouting ${graph.size} nodes...")
+    Logger.info(s"Prelayouting ${graph.size} nodes...")
     var i = 0
     val t = System.currentTimeMillis
     val layoutingSteps = 3000
@@ -53,10 +54,11 @@ object Preview extends Controller {
     while (i < layoutingSteps && System.currentTimeMillis - t < layoutingMax.toMillis) {
       layout = layout.improve
       i = i + 1
-      if (i % 200 == 0) println(s"  layout step $i of $layoutingSteps (after ${(System.currentTimeMillis - t) / 1000}s)")
+      if (i % 200 == 0)
+        Logger.debug(s"  layout step $i of $layoutingSteps (after ${(System.currentTimeMillis - t) / 1000}s)")
     }
     val duration = System.currentTimeMillis - t
-    println(s"Performance: ${(duration * 1000 / i).round} us per iteration ($i iterations).")
+    Logger.info(s"Performance: ${(duration * 1000 / i).round} us per iteration ($i iterations).")
 
     val nodeJson = graph.nodes.map { node =>
       val yarns = node.value.points.map(_.yarn).toSet
