@@ -7,10 +7,7 @@ import scalax.collection.GraphEdge._
 import scalax.collection.edge._
 import scalax.collection.edge.Implicits._
 
-sealed trait Knitted3D {
-  val ends: Map[YarnPiece, YarnFlow]
-  val stitches: Set[Stitch3D]
-
+case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Set[Stitch3D]) {
   private def addFlow(ends: Map[YarnPiece, YarnFlow], flow: YarnFlow) = {
     val start = flow.start
     ends.get(start).map { old =>
@@ -30,15 +27,6 @@ sealed trait Knitted3D {
 
   def contains(flow: YarnFlow) =
     ends.get(flow.start).exists(_.stream.contains(flow))
-
-  private def copy(ends: Map[YarnPiece, YarnFlow] = ends, stitches: Set[Stitch3D] = stitches): Knitted3D = {
-    val e2 = ends
-    val s2 = stitches
-    new Knitted3D {
-      override val ends = e2
-      override val stitches = s2
-    }
-  }
 
   def asGraph = {
     val stitchToYarn = stitches.foldLeft(Map.empty[YarnFlow, Stitch3D]) { (map, stitch) =>
@@ -84,8 +72,5 @@ case class Stitch3D(left: Set[YarnFlow], right: Set[YarnFlow], noose: Set[YarnFl
 }
 
 object Knitted3D {
-  object empty extends Knitted3D {
-    override val ends = Map.empty[YarnPiece, YarnFlow]
-    override val stitches = Set.empty[Stitch3D]
-  }
+  val empty = Knitted3D(Map.empty[YarnPiece, YarnFlow], Set.empty[Stitch3D])
 }
