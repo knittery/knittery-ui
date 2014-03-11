@@ -2,12 +2,11 @@ package models.plan
 
 import models._
 import scalax.collection.Graph
-import scalax.collection.GraphPredef._
-import scalax.collection.GraphEdge._
-import scalax.collection.edge._
 import scalax.collection.edge.Implicits._
+import utils.vector.{Box3, Vector3}
+import utils.graph.Layout
 
-case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Set[Stitch3D]) {
+case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Map[Stitch3D, Vector3], yOffset: Int) {
   private def addFlow(ends: Map[YarnPiece, YarnFlow], flow: YarnFlow) = {
     val start = flow.start
     ends.get(start).map { old =>
@@ -19,17 +18,21 @@ case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Set[Stit
     }
   }
 
-  def +(stitch: Stitch3D) = {
+  def add(stitch: Stitch3D, atBed: Bed, atNeedle: Needle) = {
     val ends2 = stitch.points.foldLeft(ends)(addFlow)
-    copy(stitches = stitches + stitch, ends = ends2)
+    val pos = Vector3(atNeedle.number, yOffset, if (atBed == MainBed) -1 else 1)
+    copy(stitches = stitches + (stitch -> pos), ends = ends2)
   }
-  def ++(stitches: Traversable[Stitch3D]) = stitches.foldLeft(this)(_ + _)
+  def +(stitch: (Stitch3D, Bed, Needle)) = (add _).tupled(stitch)
+  def ++(stitches: Traversable[(Stitch3D, Bed, Needle)]) = stitches.foldLeft(this)(_ + _)
+
+  def pushDown = copy(yOffset = yOffset + 1)
 
   def contains(flow: YarnFlow) =
     ends.get(flow.start).exists(_.stream.contains(flow))
 
   def asGraph = {
-    val stitchToYarn = stitches.foldLeft(Map.empty[YarnFlow, Stitch3D]) { (map, stitch) =>
+    val stitchToYarn = stitches.keys.foldLeft(Map.empty[YarnFlow, Stitch3D]) { (map, stitch) =>
       map ++ stitch.points.map(_ -> stitch)
     }
 
@@ -48,6 +51,8 @@ case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Set[Stit
 
     Graph.fromStream(edges = edges)
   }
+
+  def asLayout: Layout[Stitch3D] = stitches
 
   override def hashCode = ends.hashCode ^ stitches.hashCode
   override def equals(o: Any) = o match {
@@ -72,5 +77,5 @@ case class Stitch3D(left: Set[YarnFlow], right: Set[YarnFlow], noose: Set[YarnFl
 }
 
 object Knitted3D {
-  val empty = Knitted3D(Map.empty[YarnPiece, YarnFlow], Set.empty[Stitch3D])
+  val empty = Knitted3D(Map.empty[YarnPiece, YarnFlow], Map.empty[Stitch3D, Vector3], 0)
 }

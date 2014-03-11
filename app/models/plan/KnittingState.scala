@@ -55,7 +55,7 @@ case class KnittingState(
       case (yarn, ya) if forNeedles(ya.needle) =>
         (yarn, ya.copy(rowDistance = ya.rowDistance + 1))
     }
-    copy(yarnAttachments = yarnAttachments ++ changed)
+    copy(yarnAttachments = yarnAttachments ++ changed, output3D = output3D.pushDown)
   }
   def attachYarn(ya: YarnAttachment) = copy(yarnAttachments = yarnAttachments + (ya.yarn.start -> ya))
   def detachYarn(yarn: YarnPiece) = copy(yarnAttachments = yarnAttachments - yarn)

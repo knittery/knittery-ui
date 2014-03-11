@@ -37,28 +37,29 @@ object Preview extends Controller {
   }
 
   def json = GuiderAction { req =>
-    val graph = req.finalGraph
+    val output = req.finalState.output3D
+    val graph = output.asGraph
     val alias = graph.nodes.zipWithIndex.map {
       case (node, index) => node.value -> s"s$index"
     }.toMap
 
-    //var layout = SpringLayout(graph, Box3(2000))
-    var layout = SpringBarnesHutLayout(graph, Box3(2000), 1d)
-    //var layout = ImmutableParallelSpringLayout(graph, Box3(2000))
-
+    val initialLayout = req.finalState.output3D.asLayout
+    var incrementalLayout = SpringBarnesHutLayout(graph, initialLayout, 1d)
     Logger.info(s"Prelayouting ${graph.size} nodes...")
     var i = 0
     val t = System.currentTimeMillis
     val layoutingSteps = 3000
     val layoutingMax = 1.minute
     while (i < layoutingSteps && System.currentTimeMillis - t < layoutingMax.toMillis) {
-      layout = layout.improve
+      incrementalLayout = incrementalLayout.improve
       i = i + 1
       if (i % 200 == 0)
         Logger.debug(s"  layout step $i of $layoutingSteps (after ${(System.currentTimeMillis - t) / 1000}s)")
     }
     val duration = System.currentTimeMillis - t
     Logger.info(s"Performance: ${(duration * 1000 / i).round} us per iteration ($i iterations).")
+
+    val layout = LayoutOps(incrementalLayout, output.stitches.keys).inside(Box3(3000))
 
     val nodeJson = graph.nodes.map { node =>
       val yarns = node.value.points.map(_.yarn).toSet
