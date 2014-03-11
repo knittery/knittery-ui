@@ -87,7 +87,7 @@ object Preview extends Controller {
       case (node, index) => node.value -> s"n-$index"
     }.toMap
     val root = DotRootGraph(directed = false, id = None)
-    def trans(e: Graph[Stitch2, WLUnDiEdge]#EdgeT): Option[(DotGraph, DotEdgeStmt)] = {
+    def trans(e: Graph[Stitch3D, WLUnDiEdge]#EdgeT): Option[(DotGraph, DotEdgeStmt)] = {
       Some((root, DotEdgeStmt(alias(e.edge._1.value), alias(e.edge._2.value), Nil)))
     }
     val dot = graph.toDot(root, trans _)
@@ -96,7 +96,7 @@ object Preview extends Controller {
 
   class RequestWithStep[A](val step: GuideStep, request: Request[A]) extends WrappedRequest[A](request) {
     def finalState = step.last.stateAfter
-    def finalGraph = finalState.output2.asGraph
+    def finalGraph = finalState.output3D.asGraph
   }
   case object GuiderAction extends ActionBuilder[RequestWithStep] {
     protected override def invokeBlock[A](request: Request[A], block: (RequestWithStep[A]) ⇒ Future[SimpleResult]) = {

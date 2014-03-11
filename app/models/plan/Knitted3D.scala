@@ -7,9 +7,9 @@ import scalax.collection.GraphEdge._
 import scalax.collection.edge._
 import scalax.collection.edge.Implicits._
 
-sealed trait Knitted2 {
+sealed trait Knitted3D {
   val ends: Map[YarnPiece, YarnFlow]
-  val stitches: Set[Stitch2]
+  val stitches: Set[Stitch3D]
 
   private def addFlow(ends: Map[YarnPiece, YarnFlow], flow: YarnFlow) = {
     val start = flow.start
@@ -22,26 +22,26 @@ sealed trait Knitted2 {
     }
   }
 
-  def +(stitch: Stitch2) = {
+  def +(stitch: Stitch3D) = {
     val ends2 = stitch.points.foldLeft(ends)(addFlow)
     copy(stitches = stitches + stitch, ends = ends2)
   }
-  def ++(stitches: Traversable[Stitch2]) = stitches.foldLeft(this)(_ + _)
+  def ++(stitches: Traversable[Stitch3D]) = stitches.foldLeft(this)(_ + _)
 
   def contains(flow: YarnFlow) =
     ends.get(flow.start).exists(_.stream.contains(flow))
 
-  private def copy(ends: Map[YarnPiece, YarnFlow] = ends, stitches: Set[Stitch2] = stitches): Knitted2 = {
+  private def copy(ends: Map[YarnPiece, YarnFlow] = ends, stitches: Set[Stitch3D] = stitches): Knitted3D = {
     val e2 = ends
     val s2 = stitches
-    new Knitted2 {
+    new Knitted3D {
       override val ends = e2
       override val stitches = s2
     }
   }
 
   def asGraph = {
-    val stitchToYarn = stitches.foldLeft(Map.empty[YarnFlow, Stitch2]) { (map, stitch) =>
+    val stitchToYarn = stitches.foldLeft(Map.empty[YarnFlow, Stitch3D]) { (map, stitch) =>
       map ++ stitch.points.map(_ -> stitch)
     }
 
@@ -63,7 +63,7 @@ sealed trait Knitted2 {
 
   override def hashCode = ends.hashCode ^ stitches.hashCode
   override def equals(o: Any) = o match {
-    case o: Knitted2 => ends == o.ends && stitches == o.stitches
+    case o: Knitted3D => ends == o.ends && stitches == o.stitches
     case _ => false
   }
   override def toString = s"Knitted2(${ends.values.mkString(", ")})"
@@ -78,14 +78,14 @@ sealed trait Knitted2 {
  * So it forms the popular knitted V's in the front and the lying-S in the back.
  * See a schematic picture of a knitted garment to understand this stuff better :).
  */
-case class Stitch2(left: Set[YarnFlow], right: Set[YarnFlow], noose: Set[YarnFlow]) {
+case class Stitch3D(left: Set[YarnFlow], right: Set[YarnFlow], noose: Set[YarnFlow]) {
   def points = left ++ right ++ noose
   def affects(p: YarnPoint) = points.contains(p)
 }
 
-object Knitted2 {
-  object empty extends Knitted2 {
+object Knitted3D {
+  object empty extends Knitted3D {
     override val ends = Map.empty[YarnPiece, YarnFlow]
-    override val stitches = Set.empty[Stitch2]
+    override val stitches = Set.empty[Stitch3D]
   }
 }

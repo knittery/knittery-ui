@@ -8,7 +8,7 @@ private case class ResultBuilder(
   yarnB: Option[YarnFeeder] = None,
   needles: Map[Needle, NeedleState] = Map.empty,
   doubleBedNeedles: Map[Needle, NeedleState] = Map.empty,
-  outputs: Seq[Stitch2] = Seq.empty,
+  outputs: Seq[Stitch3D] = Seq.empty,
   stitches: Map[Needle, Stitch] = Map.empty) {
 
   def withYarnA[X](f: YarnFeeder => (YarnFeeder, X)): (ResultBuilder, X) = {
@@ -31,7 +31,7 @@ private case class ResultBuilder(
   def doubleBedNeedle(n: Needle, pos: NeedlePosition, ys: Set[YarnFlow]): ResultBuilder =
     doubleBedNeedle(n, NeedleState(pos, ys))
 
-  def knit(s: Stitch2): ResultBuilder = copy(outputs = outputs :+ s)
+  def knit(s: Stitch3D): ResultBuilder = copy(outputs = outputs :+ s)
   def knit(n: Needle, s: Stitch) = copy(stitches = stitches + (n -> s))
 
   val yarnMap = (yarnA.flatMap(_.attachment).toList ++

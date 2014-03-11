@@ -213,7 +213,7 @@ class OptimizersSpec extends Specification {
       ("Plan fails: " + unopt) <==> (unopt.isSuccess must beTrue)
       opt.isSuccess must beTrue
       unopt.map(_.output) must_== opt.map(_.output)
-      unopt.map(_.output2) must_== opt.map(_.output2)
+      unopt.map(_.output3D) must_== opt.map(_.output3D)
     }
 
     "not change result" in new plans {

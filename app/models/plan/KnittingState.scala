@@ -8,7 +8,7 @@ case class KnittingState(
   bedNeedles: Map[Bed, Map[Needle, NeedleState]],
   carriageState: CarriageStates,
   output: Knitted,
-  output2: Knitted2,
+  output3D: Knitted3D,
   yarnAttachments: Map[YarnPiece, YarnAttachment]) {
 
   def nextDirection(carriage: Carriage) = carriageState(carriage).position match {
@@ -60,10 +60,10 @@ case class KnittingState(
   def attachYarn(ya: YarnAttachment) = copy(yarnAttachments = yarnAttachments + (ya.yarn.start -> ya))
   def detachYarn(yarn: YarnPiece) = copy(yarnAttachments = yarnAttachments - yarn)
 
-  def knit2(f: Knitted2 => Knitted2) = copy(output2 = f(output2))
+  def knit2(f: Knitted3D => Knitted3D) = copy(output3D = f(output3D))
 }
 object KnittingState {
-  val initial = KnittingState(Map.empty, CarriageStates.empty, Knitted.empty, Knitted2.empty, Map.empty)
+  val initial = KnittingState(Map.empty, CarriageStates.empty, Knitted.empty, Knitted3D.empty, Map.empty)
   private def allNeedlesA(n: Needle) = NeedleState(NeedleA)
 }
 

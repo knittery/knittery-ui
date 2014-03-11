@@ -17,7 +17,7 @@ class SpringBarnesHutLayoutSpec extends Specification {
     def planner = Examples.sock(12, 20, 20, YarnPiece(red))
     def plan = planner.plan(Optimizers.no).valueOr(e => throw new RuntimeException(s"Invalid plan: $e"))
     def finalState = plan.run.valueOr(e => throw new RuntimeException(s"Invalid plan: $e"))
-    val graph = finalState.output2.asGraph
+    val graph = finalState.output3D.asGraph
     def nodes = graph.nodes.map(_.value)
 
     val initialPositions = nodes.map(n => (n, Vector3.random(boundaries))).toMap
