@@ -15,7 +15,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json._
 import akka.pattern.ask
 import akka.util._
-import ch.inventsoft.graph.layout.LayoutOps
+import ch.inventsoft.graph.layout.{Layout, LayoutOps}
 import ch.inventsoft.graph.layout.spring.BarnesHutLayout
 import ch.inventsoft.graph.vector.Box3
 import models.Yarn
@@ -44,23 +44,7 @@ object Preview extends Controller {
       case (node, index) => node.value -> s"s$index"
     }.toMap
 
-    val initialLayout = req.finalState.output3D.asLayout
-    var incrementalLayout = BarnesHutLayout(graph, initialLayout, 1d)
-    Logger.info(s"Prelayouting ${graph.size} nodes...")
-    var i = 0
-    val t = System.currentTimeMillis
-    val layoutingSteps = 3000
-    val layoutingMax = 1.minute
-    while (i < layoutingSteps && System.currentTimeMillis - t < layoutingMax.toMillis) {
-      incrementalLayout = incrementalLayout.improve
-      i = i + 1
-      if (i % 200 == 0)
-        Logger.debug(s"  layout step $i of $layoutingSteps (after ${(System.currentTimeMillis - t) / 1000}s)")
-    }
-    val duration = System.currentTimeMillis - t
-    Logger.info(s"Performance: ${(duration * 1000 / i).round} us per iteration ($i iterations).")
-
-    val layout = LayoutOps(incrementalLayout, output.stitches.keys).inside(Box3(3000))
+    val layout = LayoutOps(req.layout, output.stitches.keys).inside(Box3(3000))
 
     val nodeJson = graph.nodes.map { node =>
       val yarns = node.value.points.map(_.yarn).toSet
@@ -96,7 +80,7 @@ object Preview extends Controller {
     Ok(dot).as("text/vnd.graphviz")
   }
 
-  class RequestWithStep[A](val step: GuideStep, request: Request[A]) extends WrappedRequest[A](request) {
+  class RequestWithStep[A](val step: GuideStep, val layout: Layout[Stitch3D], request: Request[A]) extends WrappedRequest[A](request) {
     def finalState = step.last.stateAfter
     def finalGraph = finalState.output3D.asGraph
   }
@@ -104,10 +88,10 @@ object Preview extends Controller {
     protected override def invokeBlock[A](request: Request[A], block: (RequestWithStep[A]) ⇒ Future[SimpleResult]) = {
       for {
         Guider.CurrentStep(step) <- guider ? Guider.QueryStep
-        req = new RequestWithStep(step, request)
+        Guider.Knitted3DLayout(knitted, layout) <- guider ? Guider.GetKnitted3D
+        req = new RequestWithStep(step, layout, request)
         result <- block(req)
       } yield result
     }
   }
-
 }
