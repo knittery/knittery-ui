@@ -2,7 +2,6 @@ package models.guide
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scalaz._
 import akka.actor._
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
