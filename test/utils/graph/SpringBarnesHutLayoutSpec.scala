@@ -2,12 +2,13 @@ package utils.graph
 
 import org.specs2.mutable.Specification
 import org.specs2.matcher.Matcher
-import org.specs2.specification.Scope
+import org.specs2.matcher.Expectable
+import ch.inventsoft.graph.vector._
+import ch.inventsoft.graph.layout._
+import ch.inventsoft.graph.layout.spring._
 import models._
 import models.plan._
 import models.planners.Examples
-import org.specs2.matcher.Expectable
-import utils.vector._
 
 class SpringBarnesHutLayoutSpec extends Specification {
   val boundaries = Box3(2000)
@@ -21,7 +22,7 @@ class SpringBarnesHutLayoutSpec extends Specification {
     def nodes = graph.nodes.map(_.value)
 
     val initialPositions = nodes.map(n => (n, Vector3.random(boundaries))).toMap
-    val step_0 = ImmutableSpringLayout(graph, initialPositions)
+    val step_0 = SpringLayout(graph, initialPositions)
     val step_1 = step_0.improve
     val step_10 = step_0.improves(10)
   }
@@ -43,7 +44,7 @@ class SpringBarnesHutLayoutSpec extends Specification {
   }
 
   "Barnes-Hut spring layout with theta = 0" should {
-    val baseLayout = SpringBarnesHutLayout(P.graph, P.initialPositions, 0d)
+    val baseLayout = BarnesHutLayout(P.graph, P.initialPositions, 0d)
     "have same initial state as spring layout" in {
       baseLayout must beLayoutedSimilarTo(P.step_0, P.nodes, baseEpsilon)
     }
@@ -55,7 +56,7 @@ class SpringBarnesHutLayoutSpec extends Specification {
     }
   }
   "Barnes-Hut spring layout with theta = 0.3" should {
-    val baseLayout = SpringBarnesHutLayout(P.graph, P.initialPositions, 0.3d)
+    val baseLayout = BarnesHutLayout(P.graph, P.initialPositions, 0.3d)
     "have same initial state as spring layout" in {
       baseLayout must beLayoutedSimilarTo(P.step_0, P.nodes, baseEpsilon)
     }

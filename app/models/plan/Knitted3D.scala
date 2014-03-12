@@ -3,8 +3,8 @@ package models.plan
 import models._
 import scalax.collection.Graph
 import scalax.collection.edge.Implicits._
-import utils.vector.{Box3, Vector3}
-import utils.graph.Layout
+import ch.inventsoft.graph.layout.Layout
+import ch.inventsoft.graph.vector.Vector3
 
 case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Map[Stitch3D, Vector3], yOffset: Int) {
   private def addFlow(ends: Map[YarnPiece, YarnFlow], flow: YarnFlow) = {

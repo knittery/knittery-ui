@@ -6,7 +6,7 @@ import models._
 import models.machine.Machine._
 import models.guide._
 import models.plan._
-import graph._
+import ch.inventsoft.graph.layout.Position
 
 object JsonSerialization {
 

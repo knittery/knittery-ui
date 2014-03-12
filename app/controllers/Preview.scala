@@ -15,11 +15,12 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json._
 import akka.pattern.ask
 import akka.util._
+import ch.inventsoft.graph.layout.LayoutOps
+import ch.inventsoft.graph.layout.spring.BarnesHutLayout
+import ch.inventsoft.graph.vector.Box3
 import models.Yarn
 import models.guide._
 import models.plan._
-import utils.graph._
-import utils.vector._
 import utils.JsonSerialization._
 
 object Preview extends Controller {
@@ -44,7 +45,7 @@ object Preview extends Controller {
     }.toMap
 
     val initialLayout = req.finalState.output3D.asLayout
-    var incrementalLayout = SpringBarnesHutLayout(graph, initialLayout, 1d)
+    var incrementalLayout = BarnesHutLayout(graph, initialLayout, 1d)
     Logger.info(s"Prelayouting ${graph.size} nodes...")
     var i = 0
     val t = System.currentTimeMillis

@@ -4,10 +4,12 @@ import javax.imageio.ImageIO
 import java.io.File
 import scalaz.Validation
 import org.scalameter.api._
+import ch.inventsoft.graph.vector._
+import ch.inventsoft.graph.layout._
+import ch.inventsoft.graph.layout.spring._
 import models._
 import models.planners.Examples
 import models.plan.Optimizers
-import utils.vector._
 
 object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
   case class Plan(name: String, planner: models.plan.PlannerM[_]) {
@@ -57,51 +59,42 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
     }
   }
 
-  performance of "ImmutableSpringLayout" in {
+  performance of "ParallelSpringLayout" in {
     measure method "improve" in {
-      val ls = layoutsSmall(p => ImmutableSpringLayout.apply(p.graph, box))
+      val ls = layouts(p => ParallelSpringLayout.apply(p.graph, box))
       using(ls) in { l =>
         l.improve
       }
     }
   }
 
-  performance of "ImmutableParallelSpringLayout" in {
-    measure method "improve" in {
-      val ls = layouts(p => ImmutableParallelSpringLayout.apply(p.graph, box))
-      using(ls) in { l =>
-        l.improve
-      }
-    }
-  }
-
-  performance of "SpringBarnesHutLayout" in {
+  performance of "BarnesHutLayout" in {
     measure method "improve with theta 0" in {
-      val ls = layoutsSmall(p => SpringBarnesHutLayout.apply(p.graph, box, 0d))
+      val ls = layoutsSmall(p => BarnesHutLayout.apply(p.graph, box, 0d))
       using(ls) in { l =>
         l.improve
       }
     }
     measure method "improve with theta 0.5" in {
-      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.5d))
+      val ls = layouts(p => BarnesHutLayout.apply(p.graph, box, 0.5d))
       using(ls) in { l =>
         l.improve
       }
     }
     measure method "improve with theta 0.7" in {
-      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.7d))
+      val ls = layouts(p => BarnesHutLayout.apply(p.graph, box, 0.7d))
       using(ls) in { l =>
         l.improve
       }
     }
     measure method "improve with theta 0.7 after 200 steps" in {
-      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 0.7d).improves(200))
+      val ls = layouts(p => BarnesHutLayout.apply(p.graph, box, 0.7d).improves(200))
       using(ls) in { l =>
         l.improve
       }
     }
     measure method "improve with theta 1" in {
-      val ls = layouts(p => SpringBarnesHutLayout.apply(p.graph, box, 1))
+      val ls = layouts(p => BarnesHutLayout.apply(p.graph, box, 1))
       using(ls) in { l =>
         l.improve
       }

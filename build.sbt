@@ -7,6 +7,7 @@ libraryDependencies ++= Seq(
   anorm,
   "org.scalaz" %% "scalaz-core" % "7.0.6",
   "ch.inventsoft.akka" %% "rxtx-akka-io" % "1.0.2-SNAPSHOT",
+  "ch.inventsoft.graph" %% "graph-layout" % "1.0.0-SNAPSHOT",
   "org.webjars" %% "webjars-play" % "2.2.1",
   "org.webjars" % "jquery" % "2.1.0-2",
   "org.webjars" % "bootstrap" % "3.1.1",
