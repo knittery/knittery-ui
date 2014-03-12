@@ -5,10 +5,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalax.collection.Graph
 import scalax.collection.edge.WLUnDiEdge
-import scalax.collection.GraphPredef._
 import scalax.collection.io.dot._
 import play.api.Play._
-import play.api.Logger
 import play.api.mvc._
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
@@ -16,7 +14,6 @@ import play.api.libs.json._
 import akka.pattern.ask
 import akka.util._
 import ch.inventsoft.graph.layout.{Layout, LayoutOps}
-import ch.inventsoft.graph.layout.spring.BarnesHutLayout
 import ch.inventsoft.graph.vector.Box3
 import models.Yarn
 import models.guide._
@@ -54,7 +51,9 @@ object Preview extends Controller {
         "position" -> layout(node))
     }
     val edgeJson = graph.edges.map { edge =>
-      val color = edge.label match { case Yarn(_, color) => color }
+      val color = edge.label match {
+        case Yarn(_, color) => color
+      }
       Json.obj(
         "n1" -> alias(edge._1),
         "n2" -> alias(edge._2),
