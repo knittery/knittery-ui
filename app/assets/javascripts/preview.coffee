@@ -1,7 +1,6 @@
 $(() ->
   graph = new Graph()
   nodeSize = 0
-  layoutInBrowser = false
 
   elem = $("#preview-canvas")
   renderer = initRenderer(elem)
@@ -11,11 +10,8 @@ $(() ->
   
   layouter = new Layouter(graph, 100)
   animate = () ->
-    if graph.layout? and layouter.step(33) # 33 ms per layouting step => ~33 fps
-      updateScene()
     requestAnimationFrame(animate)
     controls.update()
-    render()
 
   render = () ->
     renderer.render(scene, camera)
@@ -36,18 +32,10 @@ $(() ->
       console.debug("Received graph data from server")
       loadGraph(data, graph)
       
-      area = 2000
       for node in graph.nodes
         node.position.x = node.data.initialPosition.x
         node.position.y = node.data.initialPosition.y
         node.position.z = node.data.initialPosition.z
-      if layoutInBrowser
-        if graph.nodes.length < 500
-          console.debug("Using spring layout")
-          graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
-        else
-          console.debug("Using clustered spring layout")
-          graph.layout = new ClusterSpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
 
       updateScene1 = drawNodeEdge(graph, scene, nodeSize)
       updateScene2 = drawMesh(graph, scene)
