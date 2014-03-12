@@ -4,7 +4,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz._
 import akka.actor._
-import akka.pattern.{ask,pipe}
+import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 import ch.inventsoft.graph.layout.Layout
 import models.plan._
@@ -56,7 +56,7 @@ object Guider {
     context.actorOf(Machine.subscription(machine))
 
     override def receive = {
-      case cmd @ LoadPlan(plan) =>
+      case cmd@LoadPlan(plan) =>
         val step = GuideStep(plan)
         val output3D = step.last.stateAfter.output3D
         val layouter = context actorOf Layouter.props(output3D)
@@ -99,14 +99,14 @@ object Guider {
           changeStep(newStep, layouter)
         }
 
-      case cmd @ Next =>
+      case cmd@Next =>
         if (!step.isLast) {
           changeStep(step.next, layouter)
           sender ! CommandExecuted(cmd)
         } else {
           sender ! CommandNotExecuted(cmd, "Already at last step")
         }
-      case cmd @ Previous =>
+      case cmd@Previous =>
         if (!step.isFirst) {
           changeStep(step.previous, layouter)
           sender ! CommandExecuted(cmd)
@@ -114,11 +114,11 @@ object Guider {
           sender ! CommandNotExecuted(cmd, "Already at first step")
         }
 
-      case cmd @ Subscribe =>
+      case cmd@Subscribe =>
         subscribers = subscribers + sender
         context watch sender
         sender ! CommandExecuted(cmd)
-      case cmd @ Unsubscribe =>
+      case cmd@Unsubscribe =>
         subscribers = subscribers - sender
         context unwatch sender
         sender ! CommandExecuted(cmd)
