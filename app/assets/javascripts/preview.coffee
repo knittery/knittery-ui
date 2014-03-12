@@ -1,6 +1,7 @@
 $(() ->
   graph = new Graph()
   nodeSize = 0
+  layoutInBrowser = false
 
   elem = $("#preview-canvas")
   renderer = initRenderer(elem)
@@ -40,12 +41,13 @@ $(() ->
         node.position.x = node.data.initialPosition.x
         node.position.y = node.data.initialPosition.y
         node.position.z = node.data.initialPosition.z
-      if graph.nodes.length < 500
-        console.debug("Using spring layout")
-        graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
-      else
-        console.debug("Using clustered spring layout")
-        graph.layout = new ClusterSpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
+      if layoutInBrowser
+        if graph.nodes.length < 500
+          console.debug("Using spring layout")
+          graph.layout = new SpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
+        else
+          console.debug("Using clustered spring layout")
+          graph.layout = new ClusterSpringLayout(graph, new THREE.Vector3(area, area, area), 1, 1/5)
 
       updateScene1 = drawNodeEdge(graph, scene, nodeSize)
       updateScene2 = drawMesh(graph, scene)
