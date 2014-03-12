@@ -72,14 +72,14 @@ makeOutput = (elem) ->
             ctx.fillRect(0, 0, stitchWidth, stitchHeight)
           when "castOn"
             ctx.fillStyle = stitch.yarns[0].color
-            ctx.fillRect(0, 0, stitchWidth, stitchHeight/2)
+            ctx.fillRect(0, 0, stitchWidth, stitchHeight / 2)
             ctx.fillStyle = "#000000"
-            ctx.fillRect(0, stitchHeight/2, stitchWidth, stitchHeight/2)
+            ctx.fillRect(0, stitchHeight / 2, stitchWidth, stitchHeight / 2)
           when "castOff"
             ctx.fillStyle = "#000000"
-            ctx.fillRect(0, 0, stitchWidth, stitchHeight/2)
+            ctx.fillRect(0, 0, stitchWidth, stitchHeight / 2)
             ctx.fillStyle = stitch.yarns[0].color
-            ctx.fillRect(0, stitchHeight/2, stitchWidth, stitchHeight/2)
+            ctx.fillRect(0, stitchHeight / 2, stitchWidth, stitchHeight / 2)
         ctx.translate(stitchWidth, 0)
       ctx.translate(-w, stitchHeight)
     ctx.translate(0, -h)

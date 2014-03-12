@@ -29,7 +29,7 @@ stopAuto = () -> autoRunning = false
 
 $(".automatic a.start").click(() ->
   stopAuto()
-  
+
   autoSpeed = $(this).data("speed")
   carriage = $(this).data("carriage")
   min = $(this).data("min")
@@ -42,7 +42,8 @@ $(".automatic a.start").click(() ->
     [cp, needle] = switch autoPos
       when autoPos < 0 then ["<", 0]
       when autoPos > 199 then [">", 199]
-      else ["_", autoPos]
+      else
+        ["_", autoPos]
     send("@\t#{needle}\t#{autoPos}\t#{dir}\t#{carriage}\t#{cp}", () ->
       window.setTimeout(handle, autoSpeed) if autoRunning
     )

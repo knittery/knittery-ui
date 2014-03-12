@@ -5,7 +5,7 @@ machine.derived("positionPercentage", "position", (p) ->
   if p? then switch p.where
     when "left" then 0
     when "right" then 100
-    when "needles" then (p.index+0.5)*100/200
+    when "needles" then (p.index + 0.5) * 100 / 200
     when "removed" then 0
   else undefined
 )
@@ -40,9 +40,7 @@ window.machine = machine
 window.machine.start(jsRoutes.controllers.Display.subscribe())
 
 jQuery.fn.extend({
-  ###
-    Shows the carriage position as a progress bar.
-  ###
+  ### Shows the carriage position as a progress bar. ###
   carriageBar: () ->
     bar = $(this)
     # Color of the bar

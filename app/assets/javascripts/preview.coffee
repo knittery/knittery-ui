@@ -7,15 +7,14 @@ $(() ->
   [camera, controls] = initCamera(renderer.domElement)
   scene = setupScene()
   updateScene = ->
-  
-  layouter = new Layouter(graph, 100)
+
   animate = () ->
     requestAnimationFrame(animate)
     controls.update()
 
   render = () ->
     renderer.render(scene, camera)
-  
+
   controls.addEventListener("change", render)
   onWindowResize = () ->
     camera.aspect = elem.width() / elem.height()
@@ -24,14 +23,14 @@ $(() ->
     controls.handleResize()
     render()
   window.addEventListener("resize", onWindowResize, false)
-  
+
   render()
 
   jsRoutes.controllers.Preview.json().ajax {
     success: (data) ->
       console.debug("Received graph data from server")
       loadGraph(data, graph)
-      
+
       for node in graph.nodes
         node.position.x = node.data.initialPosition.x
         node.position.y = node.data.initialPosition.y
@@ -113,22 +112,22 @@ drawMesh = (graph, scene) ->
       ecs = byEdge[e.index]
       if ecs? then ecs.push(c)
       else byEdge[e.index] = ecs = [c]
-    c.badness = - c.length()
+    c.badness = -c.length()
   relevantCircles = []
-  circles.sort((a,b) -> a.length() - b.length())
+  circles.sort((a, b) -> a.length() - b.length())
   for c in circles
     # remove this from byEdge
     byEdge[e.index].splice(byEdge[e.index].indexOf(c), 1) for e in c.edges
     if c.badness < 1   # only keep if not too many common edges with already chosen
       relevantCircles.push(c)
       # punish all others that have common edges with us
-      o.badness++ for o in byEdge[e.index] for e in c.edges
+      (o.badness++) for o in byEdge[e.index] for e in c.edges
 
   console.debug("Found #{circles.length} circles in the graph and reduced it to #{relevantCircles.length} faces.")
   for circle in relevantCircles
     nodes = circle.nodes
-    for i in [1..nodes.length-2]
-      geo.faces.push(new THREE.Face3(nodes[0].data.vertice, nodes[i].data.vertice, nodes[i+1].data.vertice))
+    for i in [1..nodes.length - 2]
+      geo.faces.push(new THREE.Face3(nodes[0].data.vertice, nodes[i].data.vertice, nodes[i + 1].data.vertice))
 
   geo.computeFaceNormals()
   geo.computeVertexNormals()
