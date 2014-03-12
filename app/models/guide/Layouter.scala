@@ -45,8 +45,7 @@ private object Layouter {
         if (stepNr < limit) {
           self ! Improve
         } else {
-          log.debug(s"Done layouting $size nodes after $stepNr steps in $since")
-          println(s"Done layouting $size nodes after $stepNr steps in $since")
+          log.info(s"Done layouting $size nodes after $stepNr steps in $since")
           context.parent ! Done(layout)
         }
 
