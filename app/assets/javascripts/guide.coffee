@@ -43,6 +43,8 @@ $(() ->
   )
 
   makeOutput($(".output"))
+
+  $(".output-3d").knitted3d()
 )
 
 makeOutput = (elem) ->
