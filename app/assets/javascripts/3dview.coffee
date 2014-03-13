@@ -28,8 +28,11 @@ jQuery.fn.extend({
         animate() #start animation
     }
 
+    $(this).data("camera", camera)
     render() #draw empty scene, content will be added later by the ajax callback
   )
+
+  camera: -> $(this).data("camera")
 })
 
 ### Make the graph from the json data received from the server. ###
