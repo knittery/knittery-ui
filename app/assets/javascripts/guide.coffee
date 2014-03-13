@@ -20,11 +20,11 @@ $(() ->
     active = $("#step-#{step.number}")
     active.addClass("active").removeClass("future").removeClass("past")
     active.prevAll(".step").
-      removeClass("future").
-      addClass("past")
+    removeClass("future").
+    addClass("past")
     active.nextAll(".step").
-      removeClass("past").
-      addClass("future")
+    removeClass("past").
+    addClass("future")
   )
   $(".current-step-number").link().text(guide, "currentStep", (s) -> if s? then s.number else "")
 
@@ -45,6 +45,13 @@ $(() ->
   makeOutput($(".output"))
 
   $(".output-3d").knitted3d()
+
+  Leap.loop({enableGestures: true}, (frame) ->
+    for gesture in frame.gestures
+      switch gesture.type
+        when "keyTap" then $("#next").click()
+        when "screenTap" then $("#prev").click()
+  )
 )
 
 makeOutput = (elem) ->
