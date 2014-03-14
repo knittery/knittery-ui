@@ -23,9 +23,10 @@ jQuery.fn.extend({
           node.position.z = node.data.initialPosition.z
 
         console.debug("Generating the model from the 3d data..")
-        sceneControl = drawNodeEdge(graph, scene, nodeSize)
+        sceneControl = new AggregateSceneControls()
+        sceneControl.add(drawNodeEdge(graph, scene, nodeSize))
         if (showMesh)
-          drawMesh(graph, scene)
+          sceneControl.add(drawMesh(graph, scene))
         console.info("3d model loaded")
 
         updateVisibleStitches = () ->
@@ -47,6 +48,16 @@ jQuery.fn.extend({
 
   camera: -> $(this).data("camera")
 })
+
+# Aggregates SceneControls
+class AggregateSceneControls
+  constructor: -> @members = []
+  add: (sceneControl) ->
+    @members.push(sceneControl)
+  showStitchesUpTo: (limit) ->
+    m.showStitchesUpTo(limit) for m in @members
+  layoutChanged: ->
+    m.layoutChanged() for m in @members
 
 ### Make the graph from the json data received from the server. ###
 loadGraph = (data, graph) ->
@@ -145,6 +156,7 @@ drawNodeEdge = (graph, scene, nodeSize) ->
 
 ### Draws the graph as a mesh (surface between the stitches). ###
 drawMesh = (graph, scene) ->
+  sbv = new StitchBasedVisibility()
   geo = new THREE.Geometry()
   for node,i in graph.nodes
     node.data.vertice = i
@@ -175,7 +187,10 @@ drawMesh = (graph, scene) ->
   for circle in relevantCircles
     nodes = circle.nodes
     for i in [1..nodes.length - 2]
-      geo.faces.push(new THREE.Face3(nodes[0].data.vertice, nodes[i].data.vertice, nodes[i + 1].data.vertice))
+      face = new THREE.Face3(nodes[0].data.vertice, nodes[i].data.vertice, nodes[i + 1].data.vertice)
+      face.materialIndex = 0
+      geo.faces.push(face)
+      sbv.add(face, nodes[0].id, nodes[i].id, nodes[i + 1].id)
 
   geo.computeFaceNormals()
   geo.computeVertexNormals()
@@ -185,10 +200,21 @@ drawMesh = (graph, scene) ->
     emissive: 0x404090
     side: THREE.DoubleSide
   }
-  mesh = new THREE.Mesh(geo, material)
+  transparent = new THREE.MeshBasicMaterial {
+    color: 0xffffff
+    transparent: true
+    opacity: 0.0
+  }
+  faceMaterial = new THREE.MeshFaceMaterial([material, transparent])
+  mesh = new THREE.Mesh(geo, faceMaterial)
   scene.add(mesh)
-  ->
-    geo.computeFaceNormals()
-    geo.computeVertexNormals()
-    geo.verticesNeedUpdate = true
-    geo.normalsNeedUpdate = true
+  sceneControl =
+    showStitchesUpTo: (limit) ->
+      sbv.processAt(((o) -> o.materialIndex= 0), ((o) -> o.materialIndex = 1), limit)
+      geo.elementsNeedUpdate = true
+    layoutChanged: ->
+      geo.computeFaceNormals()
+      geo.computeVertexNormals()
+      geo.verticesNeedUpdate = true
+      geo.normalsNeedUpdate = true
+  sceneControl
