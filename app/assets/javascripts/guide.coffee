@@ -42,12 +42,25 @@ $(() ->
       if s.manualDoubleBedNeedles.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
 
-  makeOutput($(".output"))
+  makeOutput($(".output-2d"))
 
   $(".output-3d").knitted3d()
   $(".output-3d").link().data("visibleStitches")(guide, "currentStep", (s) ->
     if s? then s.stateBefore.visibleStitches3D
     else 0
+  )
+
+  $("#btn-output-3d").click(->
+    $(".output-2d").hide()
+    $(".output-3d").show()
+    $("#btn-output-2d").addClass("btn-default")
+    $("#btn-output-3d").removeClass("btn-default")
+  )
+  $("#btn-output-2d").click(->
+    $(".output-2d").show()
+    $(".output-3d").hide()
+    $("#btn-output-2d").removeClass("btn-default")
+    $("#btn-output-3d").addClass("btn-default")
   )
 
   Leap.loop({enableGestures: true}, (frame) ->

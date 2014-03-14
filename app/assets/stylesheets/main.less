@@ -82,20 +82,25 @@ body {
   }
 }
 
-.step-listing {
-  overflow: hidden;
-  height: 80vh;
-  
-  .navigation {
+.panel-heading {
+  .buttonbar {
+    display: inline;
     position: absolute;
     margin: 0;
     padding: 0;
     margin-top: -3px;
   }
-  .navigation.next {
+  .right {
     right: 15px;
     margin-right: 15px;
   }
+  .left {
+  }
+}
+
+.step-listing {
+  overflow: hidden;
+  height: 80vh;
 
   .total-count {
     margin-bottom: 0.8em;
@@ -130,13 +135,12 @@ body {
   }
 
   .output {
-    height: 10em;
+    height: 30em;
     width: 100%;
+    display: none;
   }
-
   .output-3d {
-    height: 13em;
-    width: 100%;
+    display: block;
   }
 }
 

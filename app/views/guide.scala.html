@@ -8,12 +8,12 @@
 <div class="col-sm-3">  
 	<div class="panel panel-default step-listing">
 	  <div class="panel-heading">
-	    <span class="navigation prev navbar-form">
+	    <span class="buttonbar left prev navbar-form">
 		    @form(routes.Guide.previous) {
 		      <button type="submit" @if(step.isFirst){disabled} id="prev">Back</button>
 		    }
 	    </span>
-      <span class="navigation next navbar-form">
+      <span class="buttonbar right next navbar-form">
         @form(routes.Guide.next) {
            <button type="submit" @if(step.isLast){disabled} id="next">Next</button>
         }
@@ -57,20 +57,20 @@
 
   <div class="panel panel-default graphical">
     <div class="panel-heading">
+      <span class="buttonbar right btn-group">
+        <button type="button" id="btn-output-3d" class="btn btn-xs">
+          <span class="glyphicon glyphicon-globe"></span>
+        </button>
+        <button type="button" id="btn-output-2d" class="btn btn-xs btn-default">
+          <span class="glyphicon glyphicon-picture"></span>
+        </button>
+      </span>
       <h3 class="panel-title">Output</h3>
     </div>
     <div class="panel-body">
-      <div class="output"></div>
+      <div class="output-2d output"></div>
+      <div class="output-3d output"></div>
     </div>
-  </div>
-
-  <div class="panel panel-default graphical">
-      <div class="panel-heading">
-          <h3 class="panel-title">3D-Output</h3>
-      </div>
-      <div class="panel-body">
-          <div class="output-3d"></div>
-      </div>
   </div>
 </div>
 </div>
