@@ -10,12 +10,16 @@
 	  <div class="panel-heading">
 	    <span class="buttonbar left prev navbar-form">
 		    @form(routes.Guide.previous) {
-		      <button type="submit" @if(step.isFirst){disabled} id="prev">Back</button>
+		      <button type="button" @if(step.isFirst){disabled} id="prev" class="btn btn-xs btn-default">
+            <span class="glyphicon glyphicon-chevron-left"></span>
+		      </button>
 		    }
 	    </span>
       <span class="buttonbar right next navbar-form">
         @form(routes.Guide.next) {
-           <button type="submit" @if(step.isLast){disabled} id="next">Next</button>
+           <button type="button" @if(step.isLast){disabled} id="next" class="btn btn-xs btn-default">
+              <span class="glyphicon glyphicon-chevron-right"></span>
+           </button>
         }
       </span>
       <h2 class="panel-title text-center">
