@@ -156,15 +156,13 @@ drawNodeEdge = (graph, scene, nodeSize) ->
 
 ### Draws the graph as a mesh (surface between the stitches). ###
 drawMesh = (graph, scene) ->
-  sbv = new StitchBasedVisibility()
-  geo = new THREE.Geometry()
+  nodeSbv = new StitchBasedVisibility()
   for node,i in graph.nodes
     node.data.vertice = i
-    geo.vertices.push(node.position)
+    nodeSbv.add(node, i)
 
   # Find circular paths in the graph (with max length of 8 edges)
   circles = graph.findCircles(6)
-
   # Reduce found circles by only keeping those that don't overlap
   byEdge = {}
   for c in circles
@@ -182,36 +180,36 @@ drawMesh = (graph, scene) ->
       relevantCircles.push(c)
       # punish all others that have common edges with us
       ((o.badness++) for o in byEdge[e.index]) for e in c.edges
-
   console.debug("Found #{circles.length} circles in the graph and reduced it to #{relevantCircles.length} faces.")
+  # Now prepare the faces
+  faceSbv = new StitchBasedVisibility()
   for circle in relevantCircles
     nodes = circle.nodes
     for i in [1..nodes.length - 2]
       face = new THREE.Face3(nodes[0].data.vertice, nodes[i].data.vertice, nodes[i + 1].data.vertice)
-      face.materialIndex = 0
-      geo.faces.push(face)
-      sbv.add(face, nodes[0].id, nodes[i].id, nodes[i + 1].id)
-
-  geo.computeFaceNormals()
-  geo.computeVertexNormals()
+      faceSbv.add(face, nodes[0].id, nodes[i].id, nodes[i + 1].id)
 
   material = new THREE.MeshLambertMaterial {
     color: 0x003090
     emissive: 0x404090
     side: THREE.DoubleSide
   }
-  transparent = new THREE.MeshBasicMaterial {
-    color: 0xffffff
-    transparent: true
-    opacity: 0.0
-  }
-  faceMaterial = new THREE.MeshFaceMaterial([material, transparent])
-  mesh = new THREE.Mesh(geo, faceMaterial)
-  scene.add(mesh)
+
+  geo = undefined
+  mesh = undefined
+  makeGeometry = (limit) ->
+    geo = new THREE.Geometry()
+    nodeSbv.processAt(((n) -> geo.vertices.push(n.position)), (->), limit)
+    faceSbv.processAt(((face) -> geo.faces.push(face)), (->), limit)
+    geo.computeFaceNormals()
+    geo.computeVertexNormals()
+    scene.remove(mesh) if mesh?
+    mesh = new THREE.Mesh(geo, material)
+    scene.add(mesh)
+
   sceneControl =
     showStitchesUpTo: (limit) ->
-      sbv.processAt(((o) -> o.materialIndex= 0), ((o) -> o.materialIndex = 1), limit)
-      geo.elementsNeedUpdate = true
+      makeGeometry(limit)
     layoutChanged: ->
       geo.computeFaceNormals()
       geo.computeVertexNormals()
