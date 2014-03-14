@@ -35,7 +35,7 @@ object Preview extends Controller {
   private def alias(stitch: Stitch3D, in: Knitted3D) = {
     val index = in.stitches.indexOf(stitch)
     assert(index != -1, "Alias for non-existing stitch")
-    s"s$index"
+    index.toString
   }
 
   def json = GuiderAction { req =>
@@ -70,7 +70,9 @@ object Preview extends Controller {
     val knitted3d = req.knitted3d
     val dotRoot = DotRootGraph(directed = false, id = None)
     val dot = knitted3d.asGraph.toDot(dotRoot, e =>
-      Some((dotRoot, DotEdgeStmt(alias(e.edge._1.value, knitted3d), alias(e.edge._2.value, knitted3d), Nil)))
+      Some((dotRoot, DotEdgeStmt(
+        "s-"+alias(e.edge._1.value, knitted3d),
+        "s-"+alias(e.edge._2.value, knitted3d), Nil)))
     )
     Ok(dot).as("text/vnd.graphviz")
   }
