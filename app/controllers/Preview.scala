@@ -3,8 +3,6 @@ package controllers
 import java.awt.Color
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import scalax.collection.Graph
-import scalax.collection.edge.WLUnDiEdge
 import scalax.collection.io.dot._
 import play.api.Play._
 import play.api.mvc._
@@ -34,19 +32,21 @@ object Preview extends Controller {
     "#" + value.toHexString.drop(2)
   }
 
+  private def alias(stitch: Stitch3D, in: Knitted3D) = {
+    val index = in.stitches.indexOf(stitch)
+    assert(index != -1, "Alias for non-existing stitch")
+    s"s$index"
+  }
+
   def json = GuiderAction { req =>
-    val output = req.finalState.output3D
-    val graph = output.asGraph
-    val alias = graph.nodes.zipWithIndex.map {
-      case (node, index) => node.value -> s"s$index"
-    }.toMap
+    val knitted3D = req.knitted3d
+    val graph = req.finalState.output3D.asGraph
+    val layout = LayoutOps(req.layout, knitted3D.stitches).inside(Box3(3000))
 
-    val layout = LayoutOps(req.layout, output.stitches.keys).inside(Box3(3000))
-
-    val nodeJson = graph.nodes.map { node =>
-      val yarns = node.value.points.map(_.yarn).toSet
+    val nodeJson = knitted3D.stitches.map { node =>
+      val yarns = node.points.map(_.yarn).toSet
       Json.obj(
-        "id" -> alias(node),
+        "id" -> alias(node, knitted3D),
         "colors" -> yarns.map(_.color).map(colorRgb),
         "position" -> layout(node))
     }
@@ -55,8 +55,8 @@ object Preview extends Controller {
         case Yarn(_, color) => color
       }
       Json.obj(
-        "n1" -> alias(edge._1),
-        "n2" -> alias(edge._2),
+        "n1" -> alias(edge._1, knitted3D),
+        "n2" -> alias(edge._2, knitted3D),
         "weight" -> edge.weight,
         "color" -> colorRgb(color))
     }
@@ -67,21 +67,17 @@ object Preview extends Controller {
   }
 
   def dot = GuiderAction { req =>
-    val graph = req.finalGraph
-    val alias = graph.nodes.zipWithIndex.map {
-      case (node, index) => node.value -> s"n-$index"
-    }.toMap
-    val root = DotRootGraph(directed = false, id = None)
-    def trans(e: Graph[Stitch3D, WLUnDiEdge]#EdgeT): Option[(DotGraph, DotEdgeStmt)] = {
-      Some((root, DotEdgeStmt(alias(e.edge._1.value), alias(e.edge._2.value), Nil)))
-    }
-    val dot = graph.toDot(root, trans _)
+    val knitted3d = req.knitted3d
+    val dotRoot = DotRootGraph(directed = false, id = None)
+    val dot = knitted3d.asGraph.toDot(dotRoot, e =>
+      Some((dotRoot, DotEdgeStmt(alias(e.edge._1.value, knitted3d), alias(e.edge._2.value, knitted3d), Nil)))
+    )
     Ok(dot).as("text/vnd.graphviz")
   }
 
   class RequestWithStep[A](val step: GuideStep, val layout: Layout[Stitch3D], request: Request[A]) extends WrappedRequest[A](request) {
     def finalState = step.last.stateAfter
-    def finalGraph = finalState.output3D.asGraph
+    def knitted3d = finalState.output3D
   }
   case object GuiderAction extends ActionBuilder[RequestWithStep] {
     protected override def invokeBlock[A](request: Request[A], block: (RequestWithStep[A]) ⇒ Future[SimpleResult]) = {

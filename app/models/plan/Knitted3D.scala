@@ -6,7 +6,7 @@ import scalax.collection.edge.Implicits._
 import ch.inventsoft.graph.layout.Layout
 import ch.inventsoft.graph.vector.Vector3
 
-case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Map[Stitch3D, Vector3], yOffset: Int) {
+case class Knitted3D private(ends: Map[YarnPiece, YarnFlow], stitches: Seq[Stitch3D], stitchPosition: Map[Stitch3D, Vector3], yOffset: Int) {
   private def addFlow(ends: Map[YarnPiece, YarnFlow], flow: YarnFlow) = {
     val start = flow.start
     ends.get(start).map { old =>
@@ -19,9 +19,12 @@ case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Map[Stit
   }
 
   def add(stitch: Stitch3D, atBed: Bed, atNeedle: Needle) = {
+    require(!stitchPosition.contains(stitch), s"Duplicate stitch $stitch")
     val ends2 = stitch.points.foldLeft(ends)(addFlow)
     val pos = Vector3(atNeedle.number, yOffset, if (atBed == MainBed) -1 else 1)
-    copy(stitches = stitches + (stitch -> pos), ends = ends2)
+    copy(stitches = stitches :+ stitch,
+      stitchPosition = stitchPosition + (stitch -> pos),
+      ends = ends2)
   }
   def +(stitch: (Stitch3D, Bed, Needle)) = (add _).tupled(stitch)
   def ++(stitches: Traversable[(Stitch3D, Bed, Needle)]) = stitches.foldLeft(this)(_ + _)
@@ -32,13 +35,13 @@ case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Map[Stit
     ends.get(flow.start).exists(_.stream.contains(flow))
 
   def asGraph = {
-    val stitchToYarn = stitches.keys.foldLeft(Map.empty[YarnFlow, Stitch3D]) { (map, stitch) =>
+    val stitchToYarn = stitches.foldLeft(Map.empty[YarnFlow, Stitch3D]) { (map, stitch) =>
       map ++ stitch.points.map(_ -> stitch)
     }
 
     val edges = ends.values.flatMap { yarn =>
-      //reverse through the points of the yarn piece and find the stitches that are
-      // connected by this yarn along with their position on the yarn
+    //reverse through the points of the yarn piece and find the stitches that are
+    // connected by this yarn along with their position on the yarn
       val stitches = yarn.stream.map(p => (p, p.length)).flatMap({
         case (point, pos) => stitchToYarn.get(point).map(_ -> pos)
       })
@@ -52,7 +55,7 @@ case class Knitted3D private (ends: Map[YarnPiece, YarnFlow], stitches: Map[Stit
     Graph.fromStream(edges = edges)
   }
 
-  def asLayout: Layout[Stitch3D] = stitches
+  def asLayout: Layout[Stitch3D] = stitchPosition
 
   override def hashCode = ends.hashCode ^ stitches.hashCode
   override def equals(o: Any) = o match {
@@ -77,5 +80,5 @@ case class Stitch3D(left: Set[YarnFlow], right: Set[YarnFlow], noose: Set[YarnFl
 }
 
 object Knitted3D {
-  val empty = Knitted3D(Map.empty[YarnPiece, YarnFlow], Map.empty[Stitch3D, Vector3], 0)
+  val empty = Knitted3D(Map.empty, Seq.empty, Map.empty, 0)
 }
