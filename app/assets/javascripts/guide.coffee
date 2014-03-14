@@ -45,6 +45,10 @@ $(() ->
   makeOutput($(".output"))
 
   $(".output-3d").knitted3d()
+  $(".output-3d").link().data("visibleStitches")(guide, "currentStep", (s) ->
+    if s? then s.stateBefore.visibleStitches3D
+    else 0
+  )
 
   Leap.loop({enableGestures: true}, (frame) ->
     for gesture in frame.gestures

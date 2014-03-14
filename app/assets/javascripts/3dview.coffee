@@ -1,7 +1,8 @@
 ### Shows the 3d model of the knitting. ###
 jQuery.fn.extend({
-  knitted3d: (nodeSize) -> this.each(->
-    renderer = initRenderer($(this))
+  knitted3d: (nodeSize = 0, showMesh = true) -> this.each(->
+    root = $(this)
+    renderer = initRenderer(root)
     [camera, controls] = initCamera(renderer.domElement)
     scene = setupScene()
     animate = () ->
@@ -21,14 +22,26 @@ jQuery.fn.extend({
           node.position.y = node.data.initialPosition.y
           node.position.z = node.data.initialPosition.z
 
-        console.debug("Generating the model from the 3d date..")
-        drawNodeEdge(graph, scene, nodeSize)
-        drawMesh(graph, scene)
+        console.debug("Generating the model from the 3d data..")
+        sceneControl = drawNodeEdge(graph, scene, nodeSize)
+        if (showMesh)
+          drawMesh(graph, scene)
         console.info("3d model loaded")
+
+        updateVisibleStitches = () ->
+          limit = root.data("visibleStitches")
+          if not limit? then limit = graph.nodes.length
+          sceneControl.showStitchesUpTo(limit)
+        root.bind("visibleStitches:data", ->
+          updateVisibleStitches()
+          render()
+        )
+
+        updateVisibleStitches()
         animate() #start animation
     }
 
-    $(this).data("camera", camera)
+    root.data("camera", camera)
     render() #draw empty scene, content will be added later by the ajax callback
   )
 
@@ -76,8 +89,29 @@ setupScene = ->
   scene
 
 
+### Execute logic based on existence of objects (i.e. Meshes) at a certain knitting progress ###
+class StitchBasedVisibility
+  constructor: ->
+    @data = {}
+    @push = (index, obj...) ->
+      if @data[index]? then @data[index].push(obj...)
+      else @data[index] = obj
+      this
+  add: (obj, stitchIndex...) ->
+    max = stitchIndex.sort((a, b) -> b - a)[0]
+    @push(max, obj)
+  mergeWith: (other) ->
+    @push(i, os) for i, os of other.data
+  processAt: (onVisible, onInvisible, limit) ->
+    @foreach((o, i) -> if i < limit then onVisible(o) else onInvisible(o))
+  foreach: (f) ->
+    for i,os of @data
+      f(o, i) for o in os
+    this
+
 ### Draws the graph as spheres (nodes) and lines between the spheres (edges). ###
 drawNodeEdge = (graph, scene, nodeSize) ->
+  sbv = new StitchBasedVisibility()
   nodeDrawObject = (node, size) ->
     color = node.data.colors[0]
     material = new THREE.MeshBasicMaterial({ color: color })
@@ -86,6 +120,7 @@ drawNodeEdge = (graph, scene, nodeSize) ->
     mesh.position = node.position
     mesh.id = node.id
     node.data.drawObject = mesh
+    sbv.add(mesh, node.id)
     mesh
   edgeDrawObject = (edge) ->
     material = new THREE.LineBasicMaterial({ color: edge.data.color, linewidth: 1 })
@@ -95,16 +130,17 @@ drawNodeEdge = (graph, scene, nodeSize) ->
     line = new THREE.Line(geo, material, THREE.LinePieces)
     line.scale.x = line.scale.y = line.scale.z = 1
     line.originalScale = 1
+    sbv.add(line, edge.node1.id, edge.node2.id)
     line
 
-  if nodeSize > 0
-    scene.add(nodeDrawObject(node, nodeSize)) for node in graph.nodes
-  lines = []
-  for edge in graph.edges
-    e = edgeDrawObject(edge)
-    lines.push(e)
-    scene.add(e)
-  -> (l.geometry.verticesNeedUpdate = true) for l in lines
+  if nodeSize > 0 then scene.add(nodeDrawObject(node, nodeSize)) for node in graph.nodes
+  scene.add(edgeDrawObject(edge)) for edge in graph.edges
+  sceneControl =
+    showStitchesUpTo: (limit) ->
+      sbv.processAt(((o) -> o.visible = true), ((o) -> o.visible = false), limit)
+    layoutChanged: ->
+      sbv.foreach((o) -> o.geometry.verticesNeedUpdate = true)
+  sceneControl
 
 
 ### Draws the graph as a mesh (surface between the stitches). ###
