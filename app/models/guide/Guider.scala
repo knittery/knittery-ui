@@ -24,6 +24,10 @@ object Guider {
   case object Next extends Command
   /** Move to the previous step. Answer: Command[Not]Executed. */
   case object Previous extends Command
+  /** Move to the first step. Answer: Command[Not]Executed. */
+  case object First extends Command
+  /** Move to the last step. Answer: Command[Not]Executed. */
+  case object Last extends Command
 
   /** Get the current step. Answer: CurrentStep. */
   case object QueryStep extends Command
@@ -105,9 +109,23 @@ object Guider {
         } else {
           sender ! CommandNotExecuted(cmd, "Already at last step")
         }
+      case cmd@Last =>
+        if (!step.isLast) {
+          changeStep(step.last, layouter)
+          sender ! CommandExecuted(cmd)
+        } else {
+          sender ! CommandNotExecuted(cmd, "Already at last step")
+        }
       case cmd@Previous =>
         if (!step.isFirst) {
           changeStep(step.previous, layouter)
+          sender ! CommandExecuted(cmd)
+        } else {
+          sender ! CommandNotExecuted(cmd, "Already at first step")
+        }
+      case cmd@First =>
+        if (!step.isFirst) {
+          changeStep(step.first, layouter)
           sender ! CommandExecuted(cmd)
         } else {
           sender ! CommandNotExecuted(cmd, "Already at first step")

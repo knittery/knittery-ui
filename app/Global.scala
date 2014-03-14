@@ -35,11 +35,13 @@ object Global extends GlobalSettings {
     _machine = Some(system.actorOf(Machine.props(connector), "machine"))
     _guider = Some(system.actorOf(Guider.props(machine), "guider"))
 
+    Logger.info("Loading initial plan...")
     //    val plan = imagePlan
     //    val plan = examplePlan
     //    val plan = tubePlan
     //    val plan = decreasingTubePlan
     val plan = sockPlan
+    Logger.info("Initial plan loaded.")
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
 

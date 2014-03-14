@@ -1,12 +1,25 @@
 $(() ->
+  $("#next").link().disabled(guide, "currentStep", (s) -> s? && s.number == totalSteps())
   $("#next").click(() ->
     jsRoutes.controllers.Guide.next().ajax()
     false
   )
+  $("#prev").link().disabled(guide, "currentStep", (s) -> s? && s.number == 1)
   $("#prev").click(() ->
     jsRoutes.controllers.Guide.previous().ajax()
     false
   )
+  $("#first").link().disabled(guide, "currentStep", (s) -> s? && s.number == 1)
+  $("#first").click(() ->
+    jsRoutes.controllers.Guide.first().ajax()
+    false
+  )
+  $("#last").click(() ->
+    jsRoutes.controllers.Guide.last().ajax()
+    false
+  )
+  $("#last").link().disabled(guide, "currentStep", (s) -> s? && s.number == totalSteps())
+
 
   $(".graphical .carriage-type").link().text(machine, "carriage", (c) -> if c? then "Carriage #{c}" else "Carriage")
   $("#bar .progress-bar").carriageBar()
@@ -27,9 +40,6 @@ $(() ->
     addClass("future")
   )
   $(".current-step-number").link().text(guide, "currentStep", (s) -> if s? then s.number else "")
-
-  $("#next").link().disabled(guide, "currentStep", (s) -> s? && s.number == totalSteps())
-  $("#prev").link().disabled(guide, "currentStep", (s) -> s? && s.number == 1)
 
   $(".needles.main").link().data("needles")(guide, "currentStep", (s) ->
     if not s? then return ""

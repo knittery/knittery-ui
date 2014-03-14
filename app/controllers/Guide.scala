@@ -41,6 +41,16 @@ object Guide extends Controller {
       Guider.CommandExecuted(_) <- guider ? Guider.Previous
     } yield Redirect(routes.Guide.view)
   }
+  def first = Action.async { request =>
+    for {
+      Guider.CommandExecuted(_) <- guider ? Guider.First
+    } yield Redirect(routes.Guide.view)
+  }
+  def last = Action.async { request =>
+    for {
+      Guider.CommandExecuted(_) <- guider ? Guider.Last
+    } yield Redirect(routes.Guide.view)
+  }
 
   def subscribe = WebSocket.async[JsValue] { request =>
     for {

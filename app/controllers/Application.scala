@@ -16,7 +16,7 @@ object Application extends Controller {
         SerialSimulator.send, SerialSimulator.subscribe, //
         Display.subscribe,
         Preview.json,
-        Guide.subscribe, Guide.next, Guide.previous)). //
+        Guide.subscribe, Guide.next, Guide.previous, Guide.first, Guide.last)). //
       as("text/javascript")
   }
 }
