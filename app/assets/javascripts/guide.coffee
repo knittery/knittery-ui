@@ -43,6 +43,7 @@ $(() ->
   )
 
   makeOutput($(".output"))
+  makeKCarriage($(".kcarriage"))
 
   $(".output-3d").knitted3d()
 
@@ -96,4 +97,64 @@ makeOutput = (elem) ->
 
   guide.bind("currentStep:change", (_, step) ->
     if step? then drawOutput($(".output"), step.stateBefore.output)
+  )
+
+
+makeKCarriage = (elem) ->
+  canvasJ = $("<canvas style='width: 30; height: 30'></canvas>")
+  canvasJ.appendTo(elem)
+  canvas = canvasJ.get(0)
+  ctx = canvas.getContext("2d")
+
+  drawKCarriage = (elem, settings) ->
+    ctx.clearRect(0, 0, 200, 100)
+    ctx.save()
+    if settings.holdingCamLever is "I"
+      ctx.fillStyle = "red"
+    else if settings.holdingCamLever is "H"
+      ctx.fillStyle = "grey"
+    else
+      ctx.fillStyle = "green"
+    ctx.fillRect(0, 10, 10, 5)
+    
+    if settings.tuckLeft
+      ctx.fillStyle = "red"
+    else
+      ctx.fillStyle = "grey"
+    ctx.fillRect(15, 10, 10, 5)
+
+    if settings.tuckRight
+      ctx.fillStyle = "red"
+    else
+      ctx.fillStyle = "grey"
+    ctx.fillRect(30, 10, 10, 5)
+    
+    if settings.mc
+      ctx.fillStyle = "red"
+    else
+      ctx.fillStyle = "grey"
+    ctx.fillRect(45, 10, 10, 5)
+
+    if settings.l
+      ctx.fillStyle = "red"
+    else
+      ctx.fillStyle = "grey"
+    ctx.fillRect(60, 10, 10, 5)
+
+    if settings.partLeft
+      ctx.fillStyle = "red"
+    else
+      ctx.fillStyle = "grey"
+    ctx.fillRect(75, 10, 10, 5)
+
+    if settings.partRight
+      ctx.fillStyle = "red"
+    else
+      ctx.fillStyle = "grey"
+    ctx.fillRect(90, 10, 10, 5)
+
+
+      
+  guide.bind("currentStep:change", (_, step) ->
+    if step? then drawKCarriage($(".kcarriage"), step.stateAfter.kCarriageSetting)
   )
