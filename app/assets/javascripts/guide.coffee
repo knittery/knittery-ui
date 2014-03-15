@@ -76,8 +76,12 @@ $(() ->
   Leap.loop({enableGestures: true}, (frame) ->
     for gesture in frame.gestures
       switch gesture.type
-        when "keyTap" then $("#next").click()
-        when "screenTap" then $("#prev").click()
+        when "keyTap"
+          console.debug("LeapMotion detected 'next' gesture (keyTap)")
+          jsRoutes.controllers.Guide.next().ajax()
+        when      "screenTap"
+          console.debug("LeapMotion detected 'next' gesture (keyTap)")
+          jsRoutes.controllers.Guide.previous().ajax()
   )
 )
 
