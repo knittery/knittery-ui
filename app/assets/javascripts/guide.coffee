@@ -109,51 +109,63 @@ makeKCarriage = (elem) ->
   drawKCarriage = (elem, settings) ->
     ctx.clearRect(0, 0, 200, 100)
     ctx.save()
-    if settings.holdingCamLever is "I"
-      ctx.fillStyle = "red"
+    
+    ctx.fillStyle = "grey"
+    ctx.strokeStyle="grey";
+    ctx.font="6px Arial";  
+
+    ctx.beginPath();
+    ctx.lineWidth="1";
+    ctx.rect(0,0,120,45); 
+    ctx.stroke();
+ 
+    ctx.beginPath();
+    ctx.lineWidth="1";
+    ctx.rect(10, 33, 15, 5); 
+    ctx.stroke(); 
+    
+    if settings.holdingCamLever is "N"
+      ctx.fillRect(10, 33, 5, 5)
+      ctx.fillText("N", 10, 28);
     else if settings.holdingCamLever is "H"
-      ctx.fillStyle = "grey"
+      ctx.fillRect(15, 33, 5, 5)
+      ctx.fillText("H", 15, 28);
     else
-      ctx.fillStyle = "green"
-    ctx.fillRect(0, 10, 10, 5)
+      ctx.fillRect(20, 33, 5, 5)
+      ctx.fillText("I", 15, 28);
     
     if settings.tuckLeft
-      ctx.fillStyle = "red"
+      ctx.fillRect(36, 46, 10, 3)
     else
-      ctx.fillStyle = "grey"
-    ctx.fillRect(15, 10, 10, 5)
-
+      drawButtons(36)
     if settings.tuckRight
-      ctx.fillStyle = "red"
+      ctx.fillRect(48, 46, 10, 3)
     else
-      ctx.fillStyle = "grey"
-    ctx.fillRect(30, 10, 10, 5)
-    
-    if settings.mc
-      ctx.fillStyle = "red"
-    else
-      ctx.fillStyle = "grey"
-    ctx.fillRect(45, 10, 10, 5)
+      drawButtons(48)
 
-    if settings.l
-      ctx.fillStyle = "red"
+    if settings.mc
+      ctx.fillRect(60, 46, 10, 3)
     else
-      ctx.fillStyle = "grey"
-    ctx.fillRect(60, 10, 10, 5)
+      drawButtons(60)
+    if settings.l
+      ctx.fillRect(60, 46, 10, 3)
+    else
+      drawButtons(60)
 
     if settings.partLeft
-      ctx.fillStyle = "red"
+      ctx.fillRect(72, 46, 10, 3)
     else
-      ctx.fillStyle = "grey"
-    ctx.fillRect(75, 10, 10, 5)
-
+      drawButtons(72)
     if settings.partRight
-      ctx.fillStyle = "red"
+      ctx.fillRect(84, 46, 10, 3)
     else
-      ctx.fillStyle = "grey"
-    ctx.fillRect(90, 10, 10, 5)
+      drawButtons(84)
 
-
+  drawButtons = (x) ->
+    ctx.beginPath();
+    ctx.lineWidth="1";
+    ctx.rect(x, 46, 10, 5); 
+    ctx.stroke();
       
   guide.bind("currentStep:change", (_, step) ->
     if step? then drawKCarriage($(".kcarriage"), step.stateAfter.kCarriageSetting)
