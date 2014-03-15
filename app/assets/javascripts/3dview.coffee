@@ -5,8 +5,11 @@ jQuery.fn.extend({
     renderer = initRenderer(root)
     [camera, controls] = initCamera(renderer.domElement)
     scene = setupScene()
+    knittingAnimator = undefined
+
     animate = () ->
       requestAnimationFrame(animate)
+      knittingAnimator.update() if knittingAnimator?
       controls.update()
     render = () -> renderer.render(scene, camera)
     controls.addEventListener("change", render)
@@ -29,16 +32,16 @@ jQuery.fn.extend({
           sceneControl.add(drawMesh(graph, scene))
         console.info("3d model loaded")
 
-        updateVisibleStitches = () ->
+        knitUpToFromData = () ->
           limit = root.data("visibleStitches")
-          if not limit? then limit = graph.nodes.length
-          sceneControl.showStitchesUpTo(limit)
-        root.bind("visibleStitches:data", ->
-          updateVisibleStitches()
-          render()
-        )
+          if limit? then limit else graph.nodes.length
+        knittingAnimator = new KnittingAnimator(sceneControl, knitUpToFromData(), render)
+        updateVisibleStitches = () ->
+          knittingAnimator.continious(knitUpToFromData())
+        root.bind("visibleStitches:data", updateVisibleStitches)
 
         updateVisibleStitches()
+        knittingAnimator.update()
         animate() #start animation
     }
 
@@ -58,6 +61,34 @@ class AggregateSceneControls
     m.showStitchesUpTo(limit) for m in @members
   layoutChanged: ->
     m.layoutChanged() for m in @members
+
+class KnittingAnimator
+  ### speed =  ms to go to target ###
+  constructor: (@sceneControl, initial = 0, @render, @speed = 300) ->
+    @last = -1
+    @lastTime = 0
+    @current = initial
+    @target = initial
+    @lastTarget = @target
+  instant: (to) -> if @target != to
+    @target = to
+    @lastTarget = @to
+    @lastTime = new Date().getTime()
+    @current = to
+  continious: (to) -> if @target != to
+    @lastTarget = @target
+    @lastTime = new Date().getTime()
+    @target = to
+  update: ->
+    if @current != @target
+      delta = (@target - @lastTarget) / @speed * (new Date().getTime() - @lastTime)
+      if (delta >= @target - @lastTarget) then @current = @target
+      else @current = @lastTarget + delta
+    if @current != @last
+      @sceneControl.showStitchesUpTo(Math.round(@current))
+      @last = @current
+      @render()
+
 
 ### Make the graph from the json data received from the server. ###
 loadGraph = (data, graph) ->
