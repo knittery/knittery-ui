@@ -77,11 +77,32 @@ object JsonSerialization {
     override def writes(knitted: Knitted) = Json.toJson(knitted.rows)
   }
 
+  implicit object HoldingCamLeverWrite extends Writes[KCarriage.HoldingCamLever] {
+    override def writes(holdingCamLever: KCarriage.HoldingCamLever) = JsString(holdingCamLever match {
+      case KCarriage.HoldingCamH => "H"
+      case KCarriage.HoldingCamI => "I"
+      case KCarriage.HoldingCamN => "N"
+    })
+  }
+    
+  implicit object KCarriageSettingWrite extends Writes[KCarriage.Settings] {
+    override def writes(settings: KCarriage.Settings) = {
+      Json.obj("mc" -> settings.mc,
+          "l" -> settings.l,
+          "partLeft" -> settings.partLeft,
+          "partRight" -> settings.partRight,
+          "tuckLeft" -> settings.tuckLeft,
+          "tuckRight" -> settings.tuckRight,
+          "holdingCamLever" -> settings.holdingCamLever)
+    }
+  }
+    
   implicit object KnittingStateWrite extends Writes[KnittingState] {
     override def writes(state: KnittingState) = {
       Json.obj("needles" -> state.needles(MainBed).pattern,
         "doubleBedNeedles" -> state.needles(DoubleBed).pattern,
-        "output" -> state.output)
+        "output" -> state.output,
+        "kCarriageSetting" -> state.carriageState(KCarriage).settings)
     }
   }
 
