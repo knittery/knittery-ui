@@ -144,10 +144,9 @@ makeKCarriage = (elem) ->
       drawButtons(48)
 
     if settings.mc
-      ctx.fillRect(60, 46, 10, 3)
-    else
       drawButtons(60)
-    if settings.l
+      ctx.fillRect(60, 46, 10, 3)
+    else if settings.l
       ctx.fillRect(60, 46, 10, 3)
     else
       drawButtons(60)
