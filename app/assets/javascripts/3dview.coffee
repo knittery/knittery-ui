@@ -237,6 +237,7 @@ drawMesh = (graph, scene) ->
     new THREE.MeshLambertMaterial {
       color: color
       side: THREE.DoubleSide
+      shading: THREE.FlatShading
     }
   material = new THREE.MeshFaceMaterial(materials)
 
