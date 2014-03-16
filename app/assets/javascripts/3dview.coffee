@@ -46,6 +46,8 @@ jQuery.fn.extend({
     }
 
     root.data("camera", camera)
+    root.data("scene", scene)
+    root.data("renderer", renderer)
     render() #draw empty scene, content will be added later by the ajax callback
   )
 
