@@ -34,7 +34,7 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
         bed.part _
       case (false, false, false, true, Some(yarn), None) =>
         ??? //tuck
-      case (true, false, false, false, Some(yarnA), Some(yarnB)) =>
+      case (true, false, false, false, Some(yarnA), _) =>
         bed.mc _
       case (_, true, false, false, Some(yarn), Some(yarnB)) =>
         ??? //l
@@ -120,6 +120,7 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
         needle(n, pattern(n).toPosition, t)
     case (x, (n, _, ys)) =>
       //knit yarnB
+      require(x.yarnB.isDefined, "MC knitting with needle at D without yarn in B")
       val (x2, (l, t, r)) = x.withYarnB(_.to(n, MainBed).noose)
       x2.knit(Stitch3D(l, ys, r), MainBed, n).
         knit(n, PlainStitch.orEmpty(ys.map(_.yarn))).
