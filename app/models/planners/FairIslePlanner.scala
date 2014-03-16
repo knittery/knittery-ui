@@ -70,7 +70,7 @@ object FairIslePlanner {
     pattern.rows.map(_.toSet).zipWithIndex.foreach {
       case (yarns, index) =>
         require(yarns.size <= 2,
-          s"fair isle pattern only support max two yarns per row. Row $index uses ${yarns.mkString(", ")}")
+          s"fair isle pattern only support max two yarns per row. Row $index uses ${yarns.map(y => s"$y (${y.color})").mkString(", ")}")
     }
   }
 
