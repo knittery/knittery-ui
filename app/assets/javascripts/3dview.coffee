@@ -4,7 +4,7 @@ jQuery.fn.extend({
     root = $(this)
     renderer = initRenderer(root)
     [camera, controls] = initCamera(renderer.domElement)
-    scene = setupScene()
+    scene = setupScene(camera)
     knittingAnimator = undefined
 
     animate = () ->
@@ -120,14 +120,13 @@ initCamera = (element) ->
   controls.keys = [65, 83, 68]
   [camera, controls]
 
-setupScene = ->
+setupScene = (camera) ->
   scene = new THREE.Scene()
-  light = new THREE.DirectionalLight(0xffffff, 0.5)
-  light.position.set(0, 0, 5000)
+  ambientLight = new THREE.AmbientLight(0x333333)
+  scene.add(ambientLight)
+  light = new THREE.DirectionalLight(0xdfebff, 0.7)
+  light.position = camera.position
   scene.add(light)
-  light2 = new THREE.DirectionalLight(0xffffff, 0.5)
-  light2.position.set(0, 0, -5000)
-  scene.add(light2)
   scene
 
 
