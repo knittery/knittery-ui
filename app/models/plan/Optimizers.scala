@@ -1,11 +1,9 @@
 package models.plan
 
-import scala.util.Try
 import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
 import models._
-import utils._
 
 object Optimizers {
   val list =
