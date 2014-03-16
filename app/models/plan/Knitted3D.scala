@@ -18,16 +18,17 @@ case class Knitted3D private(ends: Map[YarnPiece, YarnFlow], stitches: Seq[Stitc
     }
   }
 
-  def add(stitch: Stitch3D, atBed: Bed, atNeedle: Needle) = {
-    require(!stitchPosition.contains(stitch), s"Duplicate stitch $stitch")
-    val ends2 = stitch.points.foldLeft(ends)(addFlow)
-    val pos = Vector3(atNeedle.number, yOffset, if (atBed == MainBed) -1 else 1)
-    copy(stitches = stitches :+ stitch,
-      stitchPosition = stitchPosition + (stitch -> pos),
-      ends = ends2)
+  def +(stitch: (Stitch3D, Bed, Needle)) = this ++ List(stitch)
+  def ++(toAdd: Traversable[(Stitch3D, Bed, Needle)]) = {
+    val newEnds = toAdd.flatMap(_._1.points).foldLeft(ends)(addFlow)
+    val positionsToAdd = toAdd.map {
+      case (stitch, atBed, atNeedle) => (stitch -> Vector3(atNeedle.number, yOffset, if (atBed == MainBed) -1 else 1))
+    }
+    copy(
+      stitches = stitches ++ toAdd.map(_._1),
+      stitchPosition = stitchPosition ++ positionsToAdd,
+      ends = newEnds)
   }
-  def +(stitch: (Stitch3D, Bed, Needle)) = (add _).tupled(stitch)
-  def ++(stitches: Traversable[(Stitch3D, Bed, Needle)]) = stitches.foldLeft(this)(_ + _)
 
   def pushDown = copy(yOffset = yOffset + 1)
 
@@ -80,5 +81,5 @@ case class Stitch3D(left: Set[YarnFlow], right: Set[YarnFlow], noose: Set[YarnFl
 }
 
 object Knitted3D {
-  val empty = Knitted3D(Map.empty, Seq.empty, Map.empty, 0)
+  val empty = Knitted3D(Map.empty, Vector.empty, Map.empty, 0)
 }
