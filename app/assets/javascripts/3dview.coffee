@@ -184,16 +184,10 @@ drawNodeEdge = (graph, scene, nodeSize) ->
       sbv.foreach((o) -> o.geometry.verticesNeedUpdate = true)
   sceneControl
 
-
-### Draws the graph as a mesh (surface between the stitches). ###
-drawMesh = (graph, scene) ->
-  nodeSbv = new StitchBasedVisibility()
-  for node,i in graph.nodes
-    node.data.vertice = i
-    nodeSbv.add(node, i)
-
+# finds circles in the graph that should be displayed as surfaces.
+findSurfaces = (graph, maxSize = 6) ->
   # Find circular paths in the graph (with max length of 8 edges)
-  circles = graph.findCircles(6)
+  circles = graph.findCircles(maxSize)
   # Reduce found circles by only keeping those that don't overlap
   byEdge = {}
   for c in circles
@@ -202,24 +196,37 @@ drawMesh = (graph, scene) ->
       if ecs? then ecs.push(c)
       else byEdge[e.index] = ecs = [c]
     c.badness = -c.length()
-  relevantCircles = []
+  surfaces = []
   circles.sort((a, b) -> a.length() - b.length())
   for c in circles
     # remove this from byEdge
     byEdge[e.index].splice(byEdge[e.index].indexOf(c), 1) for e in c.edges
     if c.badness < 1   # only keep if not too many common edges with already chosen
-      relevantCircles.push(c)
+      surfaces.push(c)
       # punish all others that have common edges with us
       ((o.badness++) for o in byEdge[e.index]) for e in c.edges
-  console.debug("Found #{circles.length} circles in the graph and reduced it to #{relevantCircles.length} faces.")
-  # Now prepare the faces
+  surfaces
+
+### Draws the graph as a mesh (surface between the stitches). ###
+drawMesh = (graph, scene) ->
+  nodeSbv = new StitchBasedVisibility()
+
+  #Vertices
+  for node,i in graph.nodes
+    node.data.vertice = i
+    nodeSbv.add(node, i)
+
+  #Faces
+  surfaces = findSurfaces(graph)
+  console.debug("Found #{surfaces.length} surfaces in the graph.")
   faceSbv = new StitchBasedVisibility()
-  for circle in relevantCircles
-    nodes = circle.nodes
+  for surface in surfaces
+    nodes = surface.nodes
     for i in [1..nodes.length - 2]
       face = new THREE.Face3(nodes[0].data.vertice, nodes[i].data.vertice, nodes[i + 1].data.vertice)
       faceSbv.add(face, nodes[0].id, nodes[i].id, nodes[i + 1].id)
 
+  #Materials
   material = new THREE.MeshLambertMaterial {
     color: 0x003090
     emissive: 0x404090
