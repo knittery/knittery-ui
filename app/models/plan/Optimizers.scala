@@ -29,7 +29,9 @@ object OptimizerSupport {
 
 ///** Optimizes away unused ChangeCarriageSetting steps. */
 object UnknittedSettingsOptimizer extends PlanOptimizer {
+
   import OptimizerSupport._
+
   override def apply(steps: Seq[Step]) = {
     steps.foldRight(List.empty[Step]) {
       case (step: ChangeCarriageSettings, processed) =>
@@ -41,15 +43,17 @@ object UnknittedSettingsOptimizer extends PlanOptimizer {
       case (step, processed) => step :: processed
     }
   }
-  private def changesSettings(c: Carriage) = (s: Step) => s match {
-    case s: ChangeCarriageSettings => s.carriage == c
-    case AddCarriage(`c`, _) => true
-    case _ => false
-  }
-  private def knitting(c: Carriage) = (s: Step) => s match {
-    case KnitRow(carriage, _, _) => c == carriage
-    case _ => false
-  }
+  private def changesSettings(c: Carriage) = (s: Step) =>
+    s match {
+      case s: ChangeCarriageSettings => s.carriage == c
+      case AddCarriage(`c`, _) => true
+      case _ => false
+    }
+  private def knitting(c: Carriage) = (s: Step) =>
+    s match {
+      case KnitRow(carriage, _, _) => c == carriage
+      case _ => false
+    }
 }
 
 /** Optimizes away steps without any effect. */
@@ -72,7 +76,7 @@ object OptimizePatternKnitting extends PlanOptimizer {
         //drop it because needles are already in the required position
         (processed, window)
 
-      case ((processed, (knit @ KnitRow(carriage, direction, _)) +: window), MoveNeedles(bed, pattern)) =>
+      case ((processed, (knit@KnitRow(carriage, direction, _)) +: window), MoveNeedles(bed, pattern)) =>
         //try to optimize
         def patternActions(n: Needle) = if (pattern(n) == NeedleD) NeedleToD else NeedleToB
         val modKnit = KnitRow(carriage, direction, patternActions)
@@ -85,7 +89,7 @@ object OptimizePatternKnitting extends PlanOptimizer {
             ((processed :+ modKnit) ++ window :+ MoveNeedles(bed, pattern), Vector.empty)
           }
         }.leftMap { _ =>
-          //Apparently cannot pattern knit with this knitter
+        //Apparently cannot pattern knit with this knitter
           (processed :+ knit :+ MoveNeedles(bed, pattern), Vector.empty)
         }.fold(identity, identity)
 
@@ -93,9 +97,9 @@ object OptimizePatternKnitting extends PlanOptimizer {
         //cannot optimize, because nothing is knitted before
         (processed :+ MoveNeedles(bed, pattern), empty)
 
-      case ((processed, window), knit @ KnitRow(KCarriage, _, _)) =>
+      case ((processed, window), knit@KnitRow(KCarriage, _, _)) =>
         (processed ++ window, Vector(knit))
-      case ((processed, window), knit @ KnitRow(LCarriage, _, _)) =>
+      case ((processed, window), knit@KnitRow(LCarriage, _, _)) =>
         (processed ++ window, Vector(knit))
       case ((processed, window), OptimizationBoundary(step)) =>
         (processed ++ window :+ step, Vector.empty)
