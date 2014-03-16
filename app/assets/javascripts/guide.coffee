@@ -112,8 +112,7 @@ makeKCarriage = (elem) ->
     
     ctx.fillStyle = "grey"
     ctx.strokeStyle="grey";
-    ctx.font="6px Arial";  
-
+    
     ctx.beginPath();
     ctx.lineWidth="1";
     ctx.rect(0,0,120,45); 
@@ -123,7 +122,15 @@ makeKCarriage = (elem) ->
     ctx.lineWidth="1";
     ctx.rect(10, 33, 15, 5); 
     ctx.stroke(); 
+
+    ctx.beginPath();
+    ctx.arc(60,20,13,0,2*Math.PI);
+    ctx.stroke();
     
+    ctx.font="18px Arial";  
+    ctx.fillText("6", 55, 26);
+    
+    ctx.font="6px Arial";
     if settings.holdingCamLever is "N"
       ctx.fillRect(10, 33, 5, 5)
       ctx.fillText("N", 10, 28);
@@ -137,30 +144,30 @@ makeKCarriage = (elem) ->
     if settings.tuckLeft
       ctx.fillRect(36, 46, 10, 3)
     else
-      drawButtons(36)
+      drawUnpressedButtonAt(36)
     if settings.tuckRight
       ctx.fillRect(48, 46, 10, 3)
     else
-      drawButtons(48)
+      drawUnpressedButtonAt(48)
 
     if settings.mc
-      drawButtons(60)
+      drawUnpressedButtonAt(60)
       ctx.fillRect(60, 46, 10, 3)
     else if settings.l
       ctx.fillRect(60, 46, 10, 3)
     else
-      drawButtons(60)
+      drawUnpressedButtonAt(60)
 
     if settings.partLeft
       ctx.fillRect(72, 46, 10, 3)
     else
-      drawButtons(72)
+      drawUnpressedButtonAt(72)
     if settings.partRight
       ctx.fillRect(84, 46, 10, 3)
     else
-      drawButtons(84)
+      drawUnpressedButtonAt(84)
 
-  drawButtons = (x) ->
+  drawUnpressedButtonAt = (x) ->
     ctx.beginPath();
     ctx.lineWidth="1";
     ctx.rect(x, 46, 10, 5); 
