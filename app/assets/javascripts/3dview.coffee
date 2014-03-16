@@ -184,6 +184,13 @@ drawNodeEdge = (graph, scene, nodeSize) ->
       sbv.foreach((o) -> o.geometry.verticesNeedUpdate = true)
   sceneControl
 
+usedColors = (graph) ->
+  colorMap = {}
+  (colorMap[e.data.color] = true) for e in graph.edges
+  colors = []
+  colors.push(c) for c of colorMap
+  colors
+
 # finds circles in the graph that should be displayed as surfaces.
 findSurfaces = (graph, maxSize = 6) ->
   # Find circular paths in the graph (with max length of 8 edges)
@@ -207,9 +214,30 @@ findSurfaces = (graph, maxSize = 6) ->
       ((o.badness++) for o in byEdge[e.index]) for e in c.edges
   surfaces
 
+surfaceColor = (surface) ->
+  colors = {}
+  for edge in surface.edges
+    if colors[edge.data.color]? then colors[edge.data.color]++
+    else colors[edge.data.color] = 1
+  best = undefined
+  bestCount = 0
+  for color, count of colors when count > bestCount
+    best = color
+    bestCount = count
+  best
+
 ### Draws the graph as a mesh (surface between the stitches). ###
 drawMesh = (graph, scene) ->
   nodeSbv = new StitchBasedVisibility()
+
+  #Materials
+  colors = usedColors(graph)
+  materials = for color in colors
+    new THREE.MeshLambertMaterial {
+      color: color
+      side: THREE.DoubleSide
+    }
+  material = new THREE.MeshFaceMaterial(materials)
 
   #Vertices
   for node,i in graph.nodes
@@ -222,16 +250,11 @@ drawMesh = (graph, scene) ->
   faceSbv = new StitchBasedVisibility()
   for surface in surfaces
     nodes = surface.nodes
+    colorIndex = colors.indexOf(surfaceColor(surface))
     for i in [1..nodes.length - 2]
       face = new THREE.Face3(nodes[0].data.vertice, nodes[i].data.vertice, nodes[i + 1].data.vertice)
+      face.materialIndex = colorIndex
       faceSbv.add(face, nodes[0].id, nodes[i].id, nodes[i + 1].id)
-
-  #Materials
-  material = new THREE.MeshLambertMaterial {
-    color: 0x003090
-    emissive: 0x404090
-    side: THREE.DoubleSide
-  }
 
   geo = undefined
   mesh = undefined
