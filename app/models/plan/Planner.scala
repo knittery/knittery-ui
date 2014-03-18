@@ -9,35 +9,46 @@ import utils._
 /** Monad to create a KnittingPlan. */
 sealed trait PlannerM[+A] {
   def plan(optimizer: PlanOptimizer = Optimizers.all) = {
-    run(KnittingState.initial).map {
-      case (_, plan) => Plan(optimizer(plan.steps))
+    val t = System.currentTimeMillis
+    println("Starting to create plan")
+    val p = buildPlan(KnittingState.initial).map {
+      case (_, plan) =>
+        println(s"got basic plan in ${System.currentTimeMillis - t} ms. Plan has ${plan.steps.size} steps.")
+        val cachedPlan = Plan(optimizer(plan.steps)).cache(KnittingState.initial)
+        cachedPlan.run
+        println("Called plan.run")
+        cachedPlan.run
+        println("Called plan.run again")
+        cachedPlan
     }
+    println(s"Plan created&optimized in ${System.currentTimeMillis - t} ms")
+    p
   }
 
-  protected[PlannerM] def run(state: KnittingState): Validation[String, (A, Plan)]
+  protected[PlannerM] def buildPlan(state: KnittingState): Validation[String, (A, Plan)]
 }
 object PlannerM {
   type Planner = PlannerM[Unit]
 
   def step(step: Step): Planner = new Planner {
-    override def run(state: KnittingState) = ((), Plan(step)).success
+    override def buildPlan(state: KnittingState) = ((), Plan(step)).success
   }
-  def validate[A](f: KnittingState => Validation[String, A]) = new PlannerM[A] {
-    override def run(state: KnittingState) = f(state).map((_, Monoid[Plan].zero))
+  def validate[A](f: KnittingState => Validation[String, A]): PlannerM[A] = new PlannerM[A] {
+    override def buildPlan(state: KnittingState) = f(state).map((_, Monoid[Plan].zero))
   }
 
   def plannerMonad: Monad[PlannerM] = new Monad[PlannerM] {
     override def point[A](a: => A) = new PlannerM[A] {
-      override def run(state: KnittingState) = (a, Monoid[Plan].zero).success
+      override def buildPlan(state: KnittingState) = (a, Monoid[Plan].zero).success
     }
     override def bind[A, B](pa: PlannerM[A])(fb: A => PlannerM[B]) = {
       new PlannerM[B] {
-        override def run(state: KnittingState) = for {
-          (a, planA) <- pa.run(state)
+        override def buildPlan(state: KnittingState) = for {
+          (a, planA) <- pa.buildPlan(state)
           cachedPlanA = planA.cache(state) // Performance improvement
           stateAfterA <- cachedPlanA.run(state).leftMap(_.toString)
           pb = fb(a)
-          (b, planB) <- pb.run(stateAfterA)
+          (b, planB) <- pb.buildPlan(stateAfterA)
         } yield (b, cachedPlanA |+| planB)
       }
     }
