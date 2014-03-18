@@ -196,10 +196,6 @@ makeDoubleBedCarriage = (elem) ->
     ctx.beginPath();
     ctx.rect(0,0,120,45); 
     ctx.stroke();
- 
-    ctx.beginPath();
-    ctx.rect(10, 33, 15, 5); 
-    ctx.stroke(); 
 
     ctx.beginPath();
     ctx.arc(60,25,13,0,2*Math.PI);
@@ -216,7 +212,52 @@ makeDoubleBedCarriage = (elem) ->
         ctx.beginPath();
         ctx.arc(76,33,1,0,2*Math.PI);
         ctx.stroke();
+        
+    ctx.beginPath();
+    ctx.arc(15,35,4,0,2*Math.PI);
+    ctx.stroke();
+        
+    ctx.beginPath();
+    ctx.arc(105,35,4,0,2*Math.PI);
+    ctx.stroke();
+    
+    drawLines(5)
+    drawLines(109)
+    
+    if(settings.knobLeft is "IiIi")
+      ctx.beginPath();
+      ctx.moveTo(15,35);
+      ctx.lineTo(13,33);
+      ctx.stroke();
+    else
+      ctx.beginPath();
+      ctx.moveTo(15,35);
+      ctx.lineTo(17,33);
+      ctx.stroke();
       
+    if(settings.knobRight is "IiIi")
+      ctx.beginPath();
+      ctx.moveTo(105,35);
+      ctx.lineTo(107,33);
+      ctx.stroke();
+    else
+      ctx.beginPath();
+      ctx.moveTo(105,35);
+      ctx.lineTo(103,33);
+      ctx.stroke();
+  
+  drawLines = (startX) ->  
+    ctx.beginPath();
+    ctx.moveTo(startX,25);
+    ctx.lineTo(startX,30);
+    ctx.moveTo(startX+2,27);
+    ctx.lineTo(startX+2,30);
+    ctx.moveTo(startX+4,25);
+    ctx.lineTo(startX+4,30);
+    ctx.moveTo(startX+6,27);
+    ctx.lineTo(startX+6,30);
+    ctx.stroke();  
+    
   guide.bind("currentStep:change", (_, step) ->
     if step? then drawDoubleBedCarriage($(".doublebedcarriage"), step.stateAfter.carriage.doubleBed)
   )
