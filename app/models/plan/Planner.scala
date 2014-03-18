@@ -20,7 +20,7 @@ object PlannerM {
   type Planner = PlannerM[Unit]
 
   def step(step: Step): Planner = new Planner {
-    override def run(state: KnittingState) = ((), Plan(step :: Nil)).success
+    override def run(state: KnittingState) = ((), Plan(step)).success
   }
   def validate[A](f: KnittingState => Validation[String, A]) = new PlannerM[A] {
     override def run(state: KnittingState) = f(state).map((_, Monoid[Plan].zero))
@@ -34,10 +34,11 @@ object PlannerM {
       new PlannerM[B] {
         override def run(state: KnittingState) = for {
           (a, planA) <- pa.run(state)
-          stateAfterA <- planA.run(state).leftMap(_.toString)
+          cachedPlanA = planA.cache(state) // Performance improvement
+          stateAfterA <- cachedPlanA.run(state).leftMap(_.toString)
           pb = fb(a)
           (b, planB) <- pb.run(stateAfterA)
-        } yield (b, planA |+| planB)
+        } yield (b, cachedPlanA |+| planB)
       }
     }
   }
