@@ -112,34 +112,34 @@ makeKCarriage = (elem) ->
     ctx.save()
     
     ctx.fillStyle = "grey"
-    ctx.strokeStyle="grey";
-    ctx.lineWidth="1";
+    ctx.strokeStyle="grey"
+    ctx.lineWidth="1"
     
-    ctx.beginPath();
-    ctx.rect(0,0,120,45); 
-    ctx.stroke();
+    ctx.beginPath()
+    ctx.rect(0,0,120,45) 
+    ctx.stroke()
  
-    ctx.beginPath();
-    ctx.rect(10, 33, 15, 5); 
-    ctx.stroke(); 
+    ctx.beginPath()
+    ctx.rect(10, 33, 15, 5) 
+    ctx.stroke() 
 
-    ctx.beginPath();
-    ctx.arc(60,20,13,0,2*Math.PI);
-    ctx.stroke();
+    ctx.beginPath()
+    ctx.arc(60,20,13,0,2*Math.PI)
+    ctx.stroke()
 
-    ctx.font="18px Arial";  
-    ctx.fillText(settings.tension.number, 55, 26);
+    ctx.font="18px Arial"  
+    ctx.fillText(settings.tension.number, 55, 26)
     
-    ctx.font="6px Arial";
+    ctx.font="6px Arial"
     if settings.holdingCamLever is "N"
       ctx.fillRect(10, 33, 5, 5)
-      ctx.fillText("N", 10, 28);
+      ctx.fillText("N", 10, 28)
     else if settings.holdingCamLever is "H"
       ctx.fillRect(15, 33, 5, 5)
-      ctx.fillText("H", 15, 28);
+      ctx.fillText("H", 15, 28)
     else
       ctx.fillRect(20, 33, 5, 5)
-      ctx.fillText("I", 15, 28);
+      ctx.fillText("I", 15, 28)
     
     if settings.tuckLeft
       ctx.fillRect(36, 46, 10, 3)
@@ -168,9 +168,9 @@ makeKCarriage = (elem) ->
       drawUnpressedButtonAt(84)
 
   drawUnpressedButtonAt = (x) ->
-    ctx.beginPath();
-    ctx.rect(x, 46, 10, 5); 
-    ctx.stroke();
+    ctx.beginPath()
+    ctx.rect(x, 46, 10, 5) 
+    ctx.stroke()
       
   guide.bind("currentStep:change", (_, step) ->
     if step? then drawKCarriage($(".kcarriage"), step.stateAfter.carriage.k)
@@ -190,73 +190,73 @@ makeDoubleBedCarriage = (elem) ->
       return
       
     ctx.fillStyle = "grey"
-    ctx.strokeStyle="grey";
-    ctx.lineWidth="1";
+    ctx.strokeStyle="grey"
+    ctx.lineWidth="1"
     
-    ctx.beginPath();
-    ctx.rect(0,0,120,45); 
-    ctx.stroke();
+    ctx.beginPath()
+    ctx.rect(0,0,120,45) 
+    ctx.stroke()
 
-    ctx.beginPath();
-    ctx.arc(60,25,13,0,2*Math.PI);
-    ctx.stroke();
+    ctx.beginPath()
+    ctx.arc(60,25,13,0,2*Math.PI)
+    ctx.stroke()
 
-    ctx.font="18px Arial";  
-    ctx.fillText(settings.tension.number, 55, 31);
+    ctx.font="18px Arial"  
+    ctx.fillText(settings.tension.number, 55, 31)
     
     if(settings.tension.thirds>=1)
-      ctx.beginPath();
-      ctx.arc(72,37,1,0,2*Math.PI);
-      ctx.stroke();
+      ctx.beginPath()
+      ctx.arc(72,37,1,0,2*Math.PI)
+      ctx.stroke()
       if(settings.tension.thirds is 2)
-        ctx.beginPath();
-        ctx.arc(76,33,1,0,2*Math.PI);
-        ctx.stroke();
+        ctx.beginPath()
+        ctx.arc(76,33,1,0,2*Math.PI)
+        ctx.stroke()
         
-    ctx.beginPath();
-    ctx.arc(15,35,4,0,2*Math.PI);
-    ctx.stroke();
+    ctx.beginPath()
+    ctx.arc(15,35,4,0,2*Math.PI)
+    ctx.stroke()
         
-    ctx.beginPath();
-    ctx.arc(105,35,4,0,2*Math.PI);
-    ctx.stroke();
+    ctx.beginPath()
+    ctx.arc(105,35,4,0,2*Math.PI)
+    ctx.stroke()
     
     drawLines(5)
     drawLines(109)
     
     if(settings.knobLeft is "IiIi")
-      ctx.beginPath();
-      ctx.moveTo(15,35);
-      ctx.lineTo(13,33);
-      ctx.stroke();
+      ctx.beginPath()
+      ctx.moveTo(15,35)
+      ctx.lineTo(13,33)
+      ctx.stroke()
     else
-      ctx.beginPath();
-      ctx.moveTo(15,35);
-      ctx.lineTo(17,33);
-      ctx.stroke();
+      ctx.beginPath()
+      ctx.moveTo(15,35)
+      ctx.lineTo(17,33)
+      ctx.stroke()
       
     if(settings.knobRight is "IiIi")
-      ctx.beginPath();
-      ctx.moveTo(105,35);
-      ctx.lineTo(107,33);
-      ctx.stroke();
+      ctx.beginPath()
+      ctx.moveTo(105,35)
+      ctx.lineTo(107,33)
+      ctx.stroke()
     else
-      ctx.beginPath();
-      ctx.moveTo(105,35);
-      ctx.lineTo(103,33);
-      ctx.stroke();
+      ctx.beginPath()
+      ctx.moveTo(105,35)
+      ctx.lineTo(103,33)
+      ctx.stroke()
   
   drawLines = (startX) ->  
-    ctx.beginPath();
-    ctx.moveTo(startX,25);
-    ctx.lineTo(startX,30);
-    ctx.moveTo(startX+2,27);
-    ctx.lineTo(startX+2,30);
-    ctx.moveTo(startX+4,25);
-    ctx.lineTo(startX+4,30);
-    ctx.moveTo(startX+6,27);
-    ctx.lineTo(startX+6,30);
-    ctx.stroke();  
+    ctx.beginPath()
+    ctx.moveTo(startX,25)
+    ctx.lineTo(startX,30)
+    ctx.moveTo(startX+2,27)
+    ctx.lineTo(startX+2,30)
+    ctx.moveTo(startX+4,25)
+    ctx.lineTo(startX+4,30)
+    ctx.moveTo(startX+6,27)
+    ctx.lineTo(startX+6,30)
+    ctx.stroke()  
     
   guide.bind("currentStep:change", (_, step) ->
     if step? then drawDoubleBedCarriage($(".doublebedcarriage"), step.stateAfter.carriage.doubleBed)
