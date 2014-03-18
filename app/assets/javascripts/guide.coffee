@@ -44,6 +44,7 @@ $(() ->
 
   makeOutput($(".output"))
   makeKCarriage($(".kcarriage"))
+  makeDoubleBedCarriage($(".doublebedcarriage"))
 
   $(".output-3d").knitted3d()
 
@@ -101,25 +102,24 @@ makeOutput = (elem) ->
 
 
 makeKCarriage = (elem) ->
-  canvasJ = $("<canvas style='width: 30; height: 30'></canvas>")
+  canvasJ = $("<canvas style='width: 130; height: 60'></canvas>")
   canvasJ.appendTo(elem)
   canvas = canvasJ.get(0)
   ctx = canvas.getContext("2d")
 
   drawKCarriage = (elem, settings) ->
-    ctx.clearRect(0, 0, 200, 100)
+    ctx.clearRect(0, 0, 130, 60)
     ctx.save()
     
     ctx.fillStyle = "grey"
     ctx.strokeStyle="grey";
+    ctx.lineWidth="1";
     
     ctx.beginPath();
-    ctx.lineWidth="1";
     ctx.rect(0,0,120,45); 
     ctx.stroke();
  
     ctx.beginPath();
-    ctx.lineWidth="1";
     ctx.rect(10, 33, 15, 5); 
     ctx.stroke(); 
 
@@ -169,10 +169,54 @@ makeKCarriage = (elem) ->
 
   drawUnpressedButtonAt = (x) ->
     ctx.beginPath();
-    ctx.lineWidth="1";
     ctx.rect(x, 46, 10, 5); 
     ctx.stroke();
       
   guide.bind("currentStep:change", (_, step) ->
     if step? then drawKCarriage($(".kcarriage"), step.stateAfter.carriage.k)
+  )
+  
+makeDoubleBedCarriage = (elem) ->
+  canvasJ = $("<canvas style='width: 130; height: 60'></canvas>")
+  canvasJ.appendTo(elem)
+  canvas = canvasJ.get(0)
+  ctx = canvas.getContext("2d")
+
+  drawDoubleBedCarriage = (elem, settings) ->
+    ctx.clearRect(0, 0, 130, 60)
+    ctx.save()
+    
+    if (not settings?)
+      return
+      
+    ctx.fillStyle = "grey"
+    ctx.strokeStyle="grey";
+    ctx.lineWidth="1";
+    
+    ctx.beginPath();
+    ctx.rect(0,0,120,45); 
+    ctx.stroke();
+ 
+    ctx.beginPath();
+    ctx.rect(10, 33, 15, 5); 
+    ctx.stroke(); 
+
+    ctx.beginPath();
+    ctx.arc(60,25,13,0,2*Math.PI);
+    ctx.stroke();
+
+    ctx.font="18px Arial";  
+    ctx.fillText(settings.tension.number, 55, 31);
+    
+    if(settings.tension.thirds>=1)
+      ctx.beginPath();
+      ctx.arc(72,37,1,0,2*Math.PI);
+      ctx.stroke();
+      if(settings.tension.thirds is 2)
+        ctx.beginPath();
+        ctx.arc(76,33,1,0,2*Math.PI);
+        ctx.stroke();
+      
+  guide.bind("currentStep:change", (_, step) ->
+    if step? then drawDoubleBedCarriage($(".doublebedcarriage"), step.stateAfter.carriage.doubleBed)
   )
