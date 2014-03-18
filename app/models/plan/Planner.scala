@@ -11,10 +11,11 @@ sealed trait PlannerM[+A] {
   def plan(optimizer: PlanOptimizer = Optimizers.all) = {
     val t = System.currentTimeMillis
     println("Starting to create plan")
-    val p = buildPlan(KnittingState.initial).map {
+    val p = buildPlan(StartPlan).map {
       case (_, plan) =>
         println(s"got basic plan in ${System.currentTimeMillis - t} ms. Plan has ${plan.steps.size} steps.")
-        val cachedPlan = Plan(optimizer(plan.steps)).cache(KnittingState.initial)
+        //val cachedPlan = Plan(optimizer(plan.steps)).cache(KnittingState.initial)
+        val cachedPlan = plan
         cachedPlan.run
         println("Called plan.run")
         cachedPlan.run
@@ -25,31 +26,29 @@ sealed trait PlannerM[+A] {
     p
   }
 
-  protected[PlannerM] def buildPlan(state: KnittingState): Validation[String, (A, Plan)]
+  protected[PlannerM] def buildPlan(before: Plan): Validation[String, (A, Plan)]
 }
 object PlannerM {
   type Planner = PlannerM[Unit]
 
   def step(step: Step): Planner = new Planner {
-    override def buildPlan(state: KnittingState) = ((), Plan(step)).success
+    override def buildPlan(before: Plan) = CompositePlan(before, step).map(p => ((), p)).leftMap(_.toString)
   }
   def validate[A](f: KnittingState => Validation[String, A]): PlannerM[A] = new PlannerM[A] {
-    override def buildPlan(state: KnittingState) = f(state).map((_, Monoid[Plan].zero))
+    override def buildPlan(before: Plan) = f(before.run).map((_, before))
   }
 
   def plannerMonad: Monad[PlannerM] = new Monad[PlannerM] {
     override def point[A](a: => A) = new PlannerM[A] {
-      override def buildPlan(state: KnittingState) = (a, Monoid[Plan].zero).success
+      override def buildPlan(before: Plan) = (a, before).success
     }
     override def bind[A, B](pa: PlannerM[A])(fb: A => PlannerM[B]) = {
       new PlannerM[B] {
-        override def buildPlan(state: KnittingState) = for {
-          (a, planA) <- pa.buildPlan(state)
-          cachedPlanA = planA.cache(state) // Performance improvement
-          stateAfterA <- cachedPlanA.run(state).leftMap(_.toString)
+        override def buildPlan(before: Plan) = for {
+          (a, planA) <- pa.buildPlan(before)
           pb = fb(a)
-          (b, planB) <- pb.buildPlan(stateAfterA)
-        } yield (b, cachedPlanA |+| planB)
+          (b, planB) <- pb.buildPlan(planA)
+        } yield (b, planB)
       }
     }
   }
