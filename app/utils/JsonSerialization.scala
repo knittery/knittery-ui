@@ -93,6 +93,13 @@ object JsonSerialization {
     }
   }
 
+  implicit object KRChangeKnobWrite extends Writes[KCarriage.KRChangeKnob] {
+    override def writes(knob: KCarriage.KRChangeKnob) = knob match {
+      case KCarriage.KRChangeKnobIiIi => JsString("IiIi")
+      case KCarriage.KRChangeKnobPlain => JsString("plain")
+    }
+  }
+
   implicit object KCarriageSettingWrite extends Writes[KCarriage.Settings] {
     override def writes(settings: KCarriage.Settings) = {
       Json.obj("tension" -> settings.tension,
@@ -110,6 +117,8 @@ object JsonSerialization {
     override def writes(settings: KCarriage.DoubleBedCarriage) = {
       Json.obj(
         "tension" -> settings.tension,
+        "knobLeft" -> settings.knobLeft,
+        "knobRight" -> settings.knobRight,
         "partLeft" -> settings.partLeft,
         "partRight" -> settings.partRight,
         "needleTakebackLeft" -> settings.needleTakebackLeft,

@@ -45,6 +45,8 @@ case object KCarriage extends Carriage {
     override def supportsYarnB = true
   }
   case class DoubleBedCarriage(tension: TensionDial = TensionDial.zero,
+                               //TODO slide Level
+                               knobLeft: KRChangeKnob = KRChangeKnobPlain, knobRight: KRChangeKnob = KRChangeKnobPlain,
                                partLeft: Boolean = false, partRight: Boolean = false,
                                needleTakebackLeft: Boolean = false, needleTakebackRight: Boolean = false)
     extends Assembly {
@@ -89,6 +91,12 @@ case object KCarriage extends Carriage {
     }
     val zero = apply(0, 0)
   }
+
+  sealed trait KRChangeKnob
+  /** Every second needle is selected. */
+  case object KRChangeKnobIiIi extends KRChangeKnob
+  /** Knit with all needles. */
+  case object KRChangeKnobPlain extends KRChangeKnob
 }
 
 /** Lace pattern carriage. */
