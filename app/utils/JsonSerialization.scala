@@ -100,6 +100,14 @@ object JsonSerialization {
     }
   }
 
+  implicit object SlideLeverWrite extends Writes[KCarriage.SlideLever] {
+    override def writes(lever: KCarriage.SlideLever) = lever match {
+      case KCarriage.SlideLeverI => JsString("I")
+      case KCarriage.SlideLeverII => JsString("II")
+      case KCarriage.SlideLeverIiIi => JsString("IiIi")
+    }
+  }
+
   implicit object KCarriageSettingWrite extends Writes[KCarriage.Settings] {
     override def writes(settings: KCarriage.Settings) = {
       Json.obj("tension" -> settings.tension,
@@ -117,6 +125,7 @@ object JsonSerialization {
     override def writes(settings: KCarriage.DoubleBedCarriage) = {
       Json.obj(
         "tension" -> settings.tension,
+        "slideLever" -> settings.slideLever,
         "knobLeft" -> settings.knobLeft,
         "knobRight" -> settings.knobRight,
         "partLeft" -> settings.partLeft,
