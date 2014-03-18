@@ -47,6 +47,7 @@ case object KCarriage extends Carriage {
   case class DoubleBedCarriage(tension: TensionDial = TensionDial.zero,
                                slideLever: SlideLever = SlideLeverII,
                                knobLeft: KRChangeKnob = KRChangeKnobPlain, knobRight: KRChangeKnob = KRChangeKnobPlain,
+                               tuckingLever: TuckingLever = TuckingLeverR,
                                partLeft: Boolean = false, partRight: Boolean = false,
                                needleTakebackLeft: Boolean = false, needleTakebackRight: Boolean = false)
     extends Assembly {
@@ -105,6 +106,12 @@ case object KCarriage extends Carriage {
   case object SlideLeverII extends SlideLever
   /** Use with KRChangeKnobIiIi. */
   case object SlideLeverIiIi extends SlideLever
+
+  sealed trait TuckingLever
+  /** Normal knitting. */
+  case object TuckingLeverR extends TuckingLever
+  /** English rib or racking patterns. */
+  case object TuckingLeverP extends TuckingLever
 }
 
 /** Lace pattern carriage. */
