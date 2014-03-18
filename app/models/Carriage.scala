@@ -1,4 +1,5 @@
 package models
+
 sealed trait Carriage {
   def name: String
   /** Needles the carriage is over if at the given position. */
@@ -27,10 +28,10 @@ case object KCarriage extends Carriage {
   override protected def width = 66
 
   case class State(assembly: Assembly = KCarriage.SinkerPlate(),
-    settings: Settings = Settings(),
-    yarnA: Option[YarnPiece] = None,
-    yarnB: Option[YarnPiece] = None,
-    position: CarriagePosition = CarriageRemoved) extends CarriageState {
+                   settings: Settings = Settings(),
+                   yarnA: Option[YarnPiece] = None,
+                   yarnB: Option[YarnPiece] = None,
+                   position: CarriagePosition = CarriageRemoved) extends CarriageState {
     require(yarnB.isEmpty || assembly.supportsYarnB, "No YarnB supported with this assembly")
     def yarns = (yarnA, yarnB)
   }
@@ -44,19 +45,20 @@ case object KCarriage extends Carriage {
     override def supportsYarnB = true
   }
   case class DoubleBedCarriage(tension: TensionDial = TensionDial.zero,
-    partLeft: Boolean = false, partRight: Boolean = false,
-    needleTakebackLeft: Boolean = false, needleTakebackRight: Boolean = false)
+                               partLeft: Boolean = false, partRight: Boolean = false,
+                               needleTakebackLeft: Boolean = false, needleTakebackRight: Boolean = false)
     extends Assembly {
     def part(direction: Direction) = if (direction == ToLeft) partLeft else partRight
     def needleTakeback(direction: Direction) = if (direction == ToLeft) needleTakebackLeft else needleTakebackRight
   }
 
   case class Settings(tension: TensionDial = TensionDial.zero,
-    mc: Boolean = false, l: Boolean = false,
-    partLeft: Boolean = false, partRight: Boolean = false,
-    tuckLeft: Boolean = false, tuckRight: Boolean = false,
-    holdingCamLever: HoldingCamLever = HoldingCamN) {
-    def knob = "KCII" //always use KC2 for assisted knitting
+                      mc: Boolean = false, l: Boolean = false,
+                      partLeft: Boolean = false, partRight: Boolean = false,
+                      tuckLeft: Boolean = false, tuckRight: Boolean = false,
+                      holdingCamLever: HoldingCamLever = HoldingCamN) {
+    def knob = "KCII"
+    //always use KC2 for assisted knitting
     def part(direction: Direction) = if (direction == ToLeft) partLeft else partRight
     def tuck(direction: Direction) = if (direction == ToLeft) tuckLeft else tuckRight
   }
@@ -95,8 +97,8 @@ case object LCarriage extends Carriage {
   override protected def width = 46
 
   case class State(
-    settings: Settings = Settings(),
-    position: CarriagePosition = CarriageRemoved) extends CarriageState
+                    settings: Settings = Settings(),
+                    position: CarriagePosition = CarriageRemoved) extends CarriageState
   def initialState = State()
 
   //TODO
@@ -109,9 +111,9 @@ case object GCarriage extends Carriage {
   override protected def width = 20
 
   case class State(
-    settings: Settings = Settings(),
-    yarn: Option[YarnPiece] = None,
-    position: CarriagePosition = CarriageRemoved) extends CarriageState
+                    settings: Settings = Settings(),
+                    yarn: Option[YarnPiece] = None,
+                    position: CarriagePosition = CarriageRemoved) extends CarriageState
   def initialState = State()
 
   //TODO
