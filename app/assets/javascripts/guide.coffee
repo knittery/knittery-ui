@@ -126,9 +126,9 @@ makeKCarriage = (elem) ->
     ctx.beginPath();
     ctx.arc(60,20,13,0,2*Math.PI);
     ctx.stroke();
-    
+
     ctx.font="18px Arial";  
-    ctx.fillText("6", 55, 26);
+    ctx.fillText(settings.tension.number, 55, 26);
     
     ctx.font="6px Arial";
     if settings.holdingCamLever is "N"
