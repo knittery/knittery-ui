@@ -174,5 +174,5 @@ makeKCarriage = (elem) ->
     ctx.stroke();
       
   guide.bind("currentStep:change", (_, step) ->
-    if step? then drawKCarriage($(".kcarriage"), step.stateAfter.kCarriageSetting)
+    if step? then drawKCarriage($(".kcarriage"), step.stateAfter.carriage.k)
   )

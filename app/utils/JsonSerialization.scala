@@ -84,25 +84,51 @@ object JsonSerialization {
       case KCarriage.HoldingCamN => "N"
     })
   }
-    
+
   implicit object KCarriageSettingWrite extends Writes[KCarriage.Settings] {
     override def writes(settings: KCarriage.Settings) = {
       Json.obj("mc" -> settings.mc,
-          "l" -> settings.l,
-          "partLeft" -> settings.partLeft,
-          "partRight" -> settings.partRight,
-          "tuckLeft" -> settings.tuckLeft,
-          "tuckRight" -> settings.tuckRight,
-          "holdingCamLever" -> settings.holdingCamLever)
+        "l" -> settings.l,
+        "partLeft" -> settings.partLeft,
+        "partRight" -> settings.partRight,
+        "tuckLeft" -> settings.tuckLeft,
+        "tuckRight" -> settings.tuckRight,
+        "holdingCamLever" -> settings.holdingCamLever)
     }
   }
-    
+
+  implicit object KCarriageDoubleBedWrite extends Writes[KCarriage.DoubleBedCarriage] {
+    override def writes(settings: KCarriage.DoubleBedCarriage) = {
+      Json.obj(
+        "partLeft" -> settings.partLeft,
+        "partRight" -> settings.partRight,
+        "needleTakebackLeft" -> settings.needleTakebackLeft,
+        "needleTakebackRight" -> settings.needleTakebackRight)
+    }
+  }
+
+  implicit object CarriageStatesWrite extends Writes[CarriageStates] {
+    override def writes(states: CarriageStates) = {
+      val base = Json.obj(
+        "k" -> states(KCarriage).settings
+      )
+      states(KCarriage).assembly match {
+        case dbc: KCarriage.DoubleBedCarriage =>
+          base deepMerge Json.obj("doubleBed" -> dbc)
+        case z: KCarriage.SinkerPlate =>
+          // TODO add to carriages / "k"
+          base
+        case _ => base
+      }
+    }
+  }
+
   implicit object KnittingStateWrite extends Writes[KnittingState] {
     override def writes(state: KnittingState) = {
       Json.obj("needles" -> state.needles(MainBed).pattern,
         "doubleBedNeedles" -> state.needles(DoubleBed).pattern,
         "output" -> state.output,
-        "kCarriageSetting" -> state.carriageState(KCarriage).settings)
+        "carriage" -> state.carriageState)
     }
   }
 
