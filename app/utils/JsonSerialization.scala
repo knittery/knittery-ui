@@ -85,9 +85,18 @@ object JsonSerialization {
     })
   }
 
+  implicit object TensionDialWrite extends Writes[KCarriage.TensionDial] {
+    override def writes(tension: KCarriage.TensionDial) = {
+      Json.obj("number" -> tension.number,
+        "thirds" -> tension.thirds,
+        "text" -> tension.text)
+    }
+  }
+
   implicit object KCarriageSettingWrite extends Writes[KCarriage.Settings] {
     override def writes(settings: KCarriage.Settings) = {
-      Json.obj("mc" -> settings.mc,
+      Json.obj("tension" -> settings.tension,
+        "mc" -> settings.mc,
         "l" -> settings.l,
         "partLeft" -> settings.partLeft,
         "partRight" -> settings.partRight,
@@ -100,6 +109,7 @@ object JsonSerialization {
   implicit object KCarriageDoubleBedWrite extends Writes[KCarriage.DoubleBedCarriage] {
     override def writes(settings: KCarriage.DoubleBedCarriage) = {
       Json.obj(
+        "tension" -> settings.tension,
         "partLeft" -> settings.partLeft,
         "partRight" -> settings.partRight,
         "needleTakebackLeft" -> settings.needleTakebackLeft,
