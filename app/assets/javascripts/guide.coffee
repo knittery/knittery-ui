@@ -198,19 +198,19 @@ makeDoubleBedCarriage = (elem) ->
     ctx.stroke()
 
     ctx.beginPath()
-    ctx.arc(60,25,13,0,2*Math.PI)
+    ctx.arc(60,22,13,0,2*Math.PI)
     ctx.stroke()
 
     ctx.font="18px Arial"  
-    ctx.fillText(settings.tension.number, 55, 31)
+    ctx.fillText(settings.tension.number, 55, 28)
     
     if(settings.tension.thirds>=1)
       ctx.beginPath()
-      ctx.arc(72,37,1,0,2*Math.PI)
+      ctx.arc(72,33,1,0,2*Math.PI)
       ctx.stroke()
       if(settings.tension.thirds is 2)
         ctx.beginPath()
-        ctx.arc(76,33,1,0,2*Math.PI)
+        ctx.arc(75,28,1,0,2*Math.PI)
         ctx.stroke()
         
     ctx.beginPath()
@@ -221,8 +221,8 @@ makeDoubleBedCarriage = (elem) ->
     ctx.arc(105,35,4,0,2*Math.PI)
     ctx.stroke()
     
-    drawLines(5)
-    drawLines(109)
+    drawLines(5, 25)
+    drawLines(109, 25)
     
     if(settings.knobLeft is "IiIi")
       ctx.beginPath()
@@ -245,17 +245,34 @@ makeDoubleBedCarriage = (elem) ->
       ctx.moveTo(105,35)
       ctx.lineTo(103,33)
       ctx.stroke()
-  
-  drawLines = (startX) ->  
+    
+    ctx.font="8px Arial"  
+    if (settings.slideLever is "I")
+      ctx.fillText("I", 47, 43)
+      ctx.beginPath()
+      ctx.arc(48,47,2,0,2*Math.PI)
+      ctx.stroke()
+    else if (settings.slideLever is "II")
+      ctx.fillText("II", 70, 43)
+      ctx.beginPath()
+      ctx.arc(73,47,2,0,2*Math.PI)
+      ctx.stroke()
+    else
+      drawLines(57, 38)
+      ctx.beginPath()
+      ctx.arc(60,47,2,0,2*Math.PI)
+      ctx.stroke()
+      
+  drawLines = (startX, offsetY) ->  
     ctx.beginPath()
-    ctx.moveTo(startX,25)
-    ctx.lineTo(startX,30)
-    ctx.moveTo(startX+2,27)
-    ctx.lineTo(startX+2,30)
-    ctx.moveTo(startX+4,25)
-    ctx.lineTo(startX+4,30)
-    ctx.moveTo(startX+6,27)
-    ctx.lineTo(startX+6,30)
+    ctx.moveTo(startX, offsetY)
+    ctx.lineTo(startX, offsetY+5)
+    ctx.moveTo(startX+2, offsetY+2)
+    ctx.lineTo(startX+2,offsetY+5)
+    ctx.moveTo(startX+4,offsetY)
+    ctx.lineTo(startX+4,offsetY+5)
+    ctx.moveTo(startX+6,offsetY+2)
+    ctx.lineTo(startX+6,offsetY+5)
     ctx.stroke()  
     
   guide.bind("currentStep:change", (_, step) ->
