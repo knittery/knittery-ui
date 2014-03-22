@@ -4,151 +4,124 @@ import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
 import models._
+import scala.util.Try
 
 object Optimizers {
   val list =
-    UnknittedSettingsOptimizer ::
-      NoEffectStepOptimizer ::
-      OptimizeStepWithNoEffect ::
+    NoEffectStepOptimizer ::
       OptimizePatternKnitting ::
-      OptimizeStepWithNoEffect ::
+      NoEffectStepOptimizer ::
+      OptimizeStepWithNoEffectOnFinalOutput ::
       Nil
   implicit val all = list.foldLeft(Monoid[PlanOptimizer].zero)(_ |+| _)
   implicit def no = Monoid[PlanOptimizer].zero
 }
 
-object OptimizerSupport {
-  implicit class RichBooleanFunction[A](val f: A => Boolean) extends AnyVal {
-    def or(g: A => Boolean): A => Boolean = a => f(a) || g(a)
-    def and(g: A => Boolean): A => Boolean = a => f(a) && g(a)
-    def not: A => Boolean = a => !f(a)
-  }
-}
 
-///** Optimizes away unused ChangeCarriageSetting steps. */
-object UnknittedSettingsOptimizer extends PlanOptimizer {
-
-  import OptimizerSupport._
-
-  override def apply(steps: Seq[Step]) = {
-    steps.foldRight(List.empty[Step]) {
-      case (step: ChangeCarriageSettings, processed) =>
-        val necessary = processed.
-          takeWhile(changesSettings(step.carriage).not).
-          exists(knitting(step.carriage))
-        if (necessary) step :: processed
-        else processed
-      case (step, processed) => step :: processed
-    }
-  }
-  private def changesSettings(c: Carriage) = (s: Step) =>
-    s match {
-      case s: ChangeCarriageSettings => s.carriage == c
-      case AddCarriage(`c`, _) => true
-      case _ => false
-    }
-  private def knitting(c: Carriage) = (s: Step) =>
-    s match {
-      case KnitRow(carriage, _, _) => c == carriage
-      case _ => false
-    }
-}
-
-/** Optimizes away steps without any effect. */
+/** Optimizes away steps that do have same input state as output. */
 object NoEffectStepOptimizer extends PlanOptimizer {
-  override def apply(steps: Seq[Step]) = {
-    steps.foldLeft((Vector.empty[Step], KnittingState.initial)) {
-      case ((processed, state), step) =>
-        val state2 = step(state).valueOr(e => throw new RuntimeException(e))
-        if (state == state2) (processed, state) //optimize it
-        else (processed :+ step, state2)
+  override def apply(plan: Plan): Plan = {
+    val stepStates = plan.stepStates.filterNot(s => s.before == s.after)
+    CompositePlan.fromStepStates(stepStates)
+  }
+}
+
+/** Optimizes away steps that have no impact on the result of the knitting. */
+object OptimizeStepWithNoEffectOnFinalOutput extends PlanOptimizer {
+  override def apply(plan: Plan): Plan = {
+    val expectedResult = plan.run
+    plan.steps.tails.foldLeft((StartPlan: Plan, plan)) {
+      case ((soFar, proposed), steps) if steps.size > 0 =>
+        makePlan(soFar, steps.tail) match {
+          case Success(withoutThisStep) if withoutThisStep.run == expectedResult =>
+            (soFar, withoutThisStep)
+          case differentResult =>
+            val next = proposed.stepStates.drop(soFar.stepStates.size).head
+            val withThisStep = CompositePlan.fromStepState(soFar, next)
+            assert(next.step == steps.head)
+            (withThisStep, proposed)
+        }
+      case (r, _) => r
     }._1
+  }
+  private def makePlan(previous: Plan, steps: Seq[Step]) = {
+    try {
+      CompositePlan(previous, steps)
+    }
+    catch {
+      case e: Error => "not implemented".fail[Plan]
+    }
   }
 }
 
 /** Optimizes away manual MoveNeedles steps. */
 object OptimizePatternKnitting extends PlanOptimizer {
-  override def apply(steps: Seq[Step]) = {
-    val (a, b) = steps.foldLeft((Processed(), Vector.empty[Step])) {
-      case ((processed, window), MoveNeedles(bed, pattern)) if processed.state.needles(bed).all == pattern.all =>
-        //drop it because needles are already in the required position
-        (processed, window)
-
-      case ((processed, (knit@KnitRow(carriage, direction, _)) +: window), MoveNeedles(bed, pattern)) =>
-        //try to optimize
-        def patternActions(n: Needle) = if (pattern(n) == NeedleD) NeedleToD else NeedleToB
-        val modKnit = KnitRow(carriage, direction, patternActions)
-        modKnit(processed.state).map { stateAfter =>
-          if (stateAfter.needles(bed).positions.all == pattern.all) {
-            //Yay, we optimized all work away, drop the MoveNeedles
-            (processed, modKnit +: window)
-          } else {
-            //Well, there still is some manual work left :(
-            ((processed :+ modKnit) ++ window :+ MoveNeedles(bed, pattern), Vector.empty)
-          }
-        }.leftMap { _ =>
-        //Apparently cannot pattern knit with this knitter
-          (processed :+ knit :+ MoveNeedles(bed, pattern), Vector.empty)
-        }.fold(identity, identity)
-
-      case ((processed, empty), MoveNeedles(bed, pattern)) =>
-        //cannot optimize, because nothing is knitted before
-        (processed :+ MoveNeedles(bed, pattern), empty)
-
-      case ((processed, window), knit@KnitRow(KCarriage, _, _)) =>
-        (processed ++ window, Vector(knit))
-      case ((processed, window), knit@KnitRow(LCarriage, _, _)) =>
-        (processed ++ window, Vector(knit))
-      case ((processed, window), OptimizationBoundary(step)) =>
-        (processed ++ window :+ step, Vector.empty)
-      case ((processed, window), other) =>
-        (processed, window :+ other)
-    }
-    a.steps ++ b
+  override def apply(plan: Plan) = {
+    plan.stepStates.foldLeft(Acc(StartPlan, None))(_ + _).result
   }
-  private case class Processed(steps: Vector[Step] = Vector.empty, state: KnittingState = KnittingState.initial) {
-    def :+(step: Step) = {
-      val state2 = step(state).valueOr(e => throw new RuntimeException("Plan is not valid: " + e))
-      Processed(steps :+ step, state2)
-    }
-    def ++(add: Traversable[Step]) = add.foldLeft(this)(_ :+ _)
-  }
-  private object OptimizationBoundary {
-    def unapply(s: Step) = s match {
-      case step: KnitRow => Some(step)
-      case step: ClosedCastOn => Some(step)
-      case step: ClosedCastOff => Some(step)
-      case _ => None
-    }
-  }
-}
 
-/** Optimizes away steps that have no impact on the result of the knitting. */
-object OptimizeStepWithNoEffect extends PlanOptimizer {
-  override def apply(steps: Seq[Step]) = {
-    def applyState(state: Validation[String, KnittingState], step: Step) = state.flatMap { s =>
-      try {
-        step.apply(s)
-      } catch {
-        case e: Exception => e.toString.fail
-        case e: NotImplementedError => e.toString.fail
+  private case class Acc(plan: Plan, window: Option[OptimizationWindow]) {
+    def +(step: StepState) = {
+      step.step match {
+        case knit: KnitRow =>
+          val pushed = pushWindow
+          val window = OptimizationWindow(knit, Vector.empty, appendToPlan(pushed.plan, step))
+          pushed.copy(window = Some(window))
+        case _: ClosedCastOn => pushWindow.append(step)
+        case _: ClosedCastOff => pushWindow.append(step)
+        case _ =>
+          window.map(w => copy(window = Some(w + step))).
+            getOrElse(append(step))
+
       }
     }
-    @tailrec
-    def check(checked: List[Step], state: KnittingState, remaining: List[Step]): Seq[Step] = remaining match {
-      case current :: tail =>
-        val withStep = remaining.foldLeft(state.success[String])(applyState)
-        val withoutStep = tail.foldLeft(state.success[String])(applyState)
-        if (withStep == withoutStep) {
-          // does not change the result, so get rid of it
-          check(checked, state, tail)
-        } else {
-          // keep it, because it changes to output
-          val state2 = current(state).valueOr(e => throw new RuntimeException(s"Invalid plan: $e"))
-          check(current :: checked, state2, tail)
-        }
-      case Nil => checked.reverse
+    def result = pushWindow.plan
+    private def pushWindow = window match {
+      case Some(window) => copy(plan = window.result, window = None)
+      case None => this
     }
-    check(Nil, KnittingState.initial, steps.toList)
+    private def appendToPlan(appendTo: Plan, step: StepState) = {
+      if (appendTo.run == step.before) CompositePlan.fromStepState(appendTo, step)
+      else CompositePlan(appendTo, step.step).valueOr(e => throw new RuntimeException(s"Invalid plan: $e"))
+    }
+    private def append(step: StepState) = {
+      assert(window.isEmpty)
+      copy(plan = appendToPlan(plan, step))
+    }
+  }
+  private case class OptimizationWindow(knit: KnitRow, optimizable: Seq[StepState], planAfterKnit: CompositePlan) {
+    def +(step: StepState) = copy(optimizable = optimizable :+ step)
+    def result: Plan = {
+      val (afterR, toOptimizeR) = optimizable.reverse.span(!isMoveNeedlesOnMainBed(_))
+      if (toOptimizeR.isEmpty) unoptimized
+      else {
+        //try to optimize
+        val moveNeedles = toOptimizeR.head.step.asInstanceOf[MoveNeedles]
+        val otherSteps = toOptimizeR.filterNot(isMoveNeedlesOnMainBed).reverse.map(_.step) ++ afterR.map(_.step).reverse
+        def patternActions(n: Needle) = if (moveNeedles.to(n) == NeedleD) NeedleToD else NeedleToB
+        val modKnit = knit.copy(pattern = patternActions)
+        modKnit(planAfterKnit.previous.run).flatMap { stateModKnit =>
+          val delta = movedNeedles(stateModKnit, toOptimizeR.head.after)
+          def moved = movedNeedles(toOptimizeR.head.before, toOptimizeR.head.after)
+          if (delta.isEmpty) {
+            //optimized it away, pattern knitting can do it for us
+            CompositePlan(planAfterKnit.previous, modKnit +: otherSteps)
+          } else if (delta.size < moved.size) {
+            // could not optimize completely, but it helps at least with some needles
+            CompositePlan(planAfterKnit.previous, modKnit +: otherSteps :+ moveNeedles)
+          } else {
+            // could not optimize
+            unoptimized.success
+          }
+        }.valueOr(_ => unoptimized)
+      }
+    }
+    private def unoptimized = CompositePlan.fromStepStates(planAfterKnit, optimizable)
+    private def movedNeedles(s1: KnittingState, s2: KnittingState) =
+      Needle.all.filterNot(n => s1.needles(MainBed)(n) == s2.needles(MainBed)(n))
+    private def isMoveNeedlesOnMainBed(s: StepState) = s match {
+      case StepState(MoveNeedles(MainBed, _), _, _) => true
+      case _ => false
+    }
   }
 }
