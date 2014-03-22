@@ -9,21 +9,9 @@ import utils._
 /** Monad to create a KnittingPlan. */
 sealed trait PlannerM[+A] {
   def plan(optimizer: PlanOptimizer = Optimizers.all) = {
-    val t = System.currentTimeMillis
-    println("Starting to create plan")
-    val p = buildPlan(StartPlan).map {
-      case (_, plan) =>
-        println(s"got basic plan in ${System.currentTimeMillis - t} ms. Plan has ${plan.steps.size} steps.")
-        //val cachedPlan = Plan(optimizer(plan.steps)).cache(KnittingState.initial)
-        val cachedPlan = plan
-        cachedPlan.run
-        println("Called plan.run")
-        cachedPlan.run
-        println("Called plan.run again")
-        cachedPlan
+    buildPlan(StartPlan).map {
+      case (_, plan) => optimizer(plan)
     }
-    println(s"Plan created&optimized in ${System.currentTimeMillis - t} ms")
-    p
   }
 
   protected[PlannerM] def buildPlan(before: Plan): Validation[String, (A, Plan)]
