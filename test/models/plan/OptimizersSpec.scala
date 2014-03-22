@@ -3,7 +3,7 @@ package models.plan
 import org.specs2.mutable.Specification
 import org.specs2._
 import models._
-import models.planners._
+
 
 class OptimizersSpec extends Specification {
   trait plans extends Yarns {
@@ -12,7 +12,10 @@ class OptimizersSpec extends Specification {
     val redPiece = YarnPiece(red)
     val greenPiece = YarnPiece(green)
 
-    val simpleLines = Plan(List(
+    def plan(steps: Step*) =
+      Plan(steps).valueOr(e => throw new RuntimeException(s"Invalid test-plan: $e"))
+
+    val simpleLines = plan(
       ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
       AddCarriage(KCarriage, Left),
       ThreadYarnK(Some(redPiece), None),
@@ -22,9 +25,9 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToLeft),
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
-      ClosedCastOff(MainBed, redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles))
 
-    val simpleLinesWithUnknittedSettings = Plan(List(
+    val simpleLinesWithUnknittedSettings = plan(
       ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
       AddCarriage(KCarriage, Left),
       ThreadYarnK(Some(redPiece), None),
@@ -35,9 +38,9 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToRight),
       KnitRow(KCarriage, ToLeft),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
-      ClosedCastOff(MainBed, redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles))
 
-    val simpleLinesWithDuplicateSettings = Plan(List(
+    val simpleLinesWithDuplicateSettings = plan(
       ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
       AddCarriage(KCarriage, Left),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
@@ -56,12 +59,13 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToRight),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       KnitRow(KCarriage, ToLeft),
-      ClosedCastOff(MainBed, redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles))
 
-    val simpleLinesWitUselessSettings = Plan(List(
+    val simpleLinesWitUselessSettings = plan(
       ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
-      ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       AddCarriage(KCarriage, Left),
+      AddCarriage(LCarriage, Right),
+      ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       ChangeLCarriageSettings(LCarriage.Settings()),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       ThreadYarnK(Some(redPiece), None),
@@ -80,13 +84,13 @@ class OptimizersSpec extends Specification {
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
       KnitRow(KCarriage, ToLeft),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
-      ClosedCastOff(MainBed, redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles))
 
     def evenOddPattern(n: Needle) = if (n.index % 2 == 0 || n.index >= 1 || n.index <= 40) NeedleToB else NeedleToD
     def oddEvenPattern(n: Needle) = if (n.index % 2 == 1 || n.index >= 1 || n.index <= 40) NeedleToB else NeedleToD
     def fourty(pos: NeedlePosition) = (n: Needle) => if (n.index >= 1 && n.index <= 40) pos else NeedleA
 
-    val patternLines = Plan(List(
+    val patternLines = plan(
       ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
       AddCarriage(KCarriage, Left),
       ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
@@ -101,11 +105,11 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToLeft, oddEvenPattern),
       KnitRow(KCarriage, ToRight, evenOddPattern),
       KnitRow(KCarriage, ToLeft),
-      ClosedCastOff(MainBed, redPiece, allNeedles)))
+      ClosedCastOff(MainBed, redPiece, allNeedles))
 
     val patternLinesWithManualNeedleSettings = {
       val line = fourty(NeedleB)
-      Plan(List(
+      plan(
         ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
         AddCarriage(KCarriage, Left),
         ChangeKCarriageSettings(KCarriage.Settings(), KCarriage.SinkerPlate()),
@@ -127,11 +131,11 @@ class OptimizersSpec extends Specification {
         KnitRow(KCarriage, ToRight),
         MoveNeedles(line, oddEvenPattern, true),
         KnitRow(KCarriage, ToLeft),
-        ClosedCastOff(MainBed, redPiece, allNeedles)))
+        ClosedCastOff(MainBed, redPiece, allNeedles))
     }
 
     val plainKnittingK = {
-      Plan(List(
+      plan(
         ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
         AddCarriage(KCarriage, Left),
         ThreadYarnK(Some(redPiece), None),
@@ -140,11 +144,11 @@ class OptimizersSpec extends Specification {
         KnitRow(KCarriage, ToRight, AllNeedlesToD),
         KnitRow(KCarriage, ToLeft),
         KnitRow(KCarriage, ToRight, AllNeedlesToD),
-        KnitRow(KCarriage, ToLeft)))
+        KnitRow(KCarriage, ToLeft))
     }
     val plainKnittingKManualMovements = {
       val line = fourty(NeedleB)
-      Plan(List(
+      plan(
         ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
         AddCarriage(KCarriage, Left),
         ThreadYarnK(Some(redPiece), None),
@@ -159,43 +163,40 @@ class OptimizersSpec extends Specification {
         MoveNeedles(MainBed, line),
         KnitRow(KCarriage, ToRight, AllNeedlesToD),
         MoveNeedles(MainBed, line),
-        KnitRow(KCarriage, ToLeft)))
+        KnitRow(KCarriage, ToLeft))
     }
 
-    val plainKnittingKWithEAndH = {
-      Plan(List(
-        ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
-        AddCarriage(KCarriage, Left),
-        ThreadYarnK(Some(redPiece), None),
-        ChangeKCarriageSettings(KCarriage.Settings(holdingCamLever = KCarriage.HoldingCamH), KCarriage.SinkerPlate()),
-        KnitRow(KCarriage, ToRight),
-        MoveNeedles(MainBed, fourty(NeedleE)),
-        KnitRow(KCarriage, ToLeft),
-        ClosedCastOff(MainBed, redPiece, allNeedles)))
-    }
-    val plainKnittingKWithEAndN_unoptimized = {
-      Plan(List(
-        ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
-        AddCarriage(KCarriage, Left),
-        ThreadYarnK(Some(redPiece), None),
-        KnitRow(KCarriage, ToRight),
-        MoveNeedles(MainBed, fourty(NeedleE)),
-        KnitRow(KCarriage, ToLeft),
-        ClosedCastOff(MainBed, redPiece, allNeedles)))
-    }
-    val plainKnittingKWithEAndN = {
-      Plan(List(
-        ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
-        AddCarriage(KCarriage, Left),
-        ThreadYarnK(Some(redPiece), None),
-        KnitRow(KCarriage, ToRight),
-        KnitRow(KCarriage, ToLeft),
-        ClosedCastOff(MainBed, redPiece, allNeedles)))
-    }
+    val plainKnittingKWithEAndH = plan(
+      ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
+      AddCarriage(KCarriage, Left),
+      ThreadYarnK(Some(redPiece), None),
+      ChangeKCarriageSettings(KCarriage.Settings(holdingCamLever = KCarriage.HoldingCamH), KCarriage.SinkerPlate()),
+      KnitRow(KCarriage, ToRight),
+      MoveNeedles(MainBed, fourty(NeedleE)),
+      KnitRow(KCarriage, ToLeft),
+      ClosedCastOff(MainBed, redPiece, allNeedles))
+
+    val plainKnittingKWithEAndN_unoptimized = plan(
+      ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
+      AddCarriage(KCarriage, Left),
+      ThreadYarnK(Some(redPiece), None),
+      KnitRow(KCarriage, ToRight),
+      MoveNeedles(MainBed, fourty(NeedleE)),
+      KnitRow(KCarriage, ToLeft),
+      ClosedCastOff(MainBed, redPiece, allNeedles))
+
+    val plainKnittingKWithEAndN = plan(
+      ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
+      AddCarriage(KCarriage, Left),
+      ThreadYarnK(Some(redPiece), None),
+      KnitRow(KCarriage, ToRight),
+      KnitRow(KCarriage, ToLeft),
+      ClosedCastOff(MainBed, redPiece, allNeedles))
 
     val plans = simpleLines ::
       simpleLinesWithUnknittedSettings ::
       simpleLinesWithDuplicateSettings ::
+      simpleLinesWitUselessSettings ::
       patternLines ::
       patternLinesWithManualNeedleSettings ::
       plainKnittingK ::
@@ -209,11 +210,9 @@ class OptimizersSpec extends Specification {
   "optimizers" should {
     def sameOutput(p: Plan) = {
       val unopt = p.run
-      val opt = Plan(Optimizers.all(p.steps)).run
-      ("Plan fails: " + unopt) <==> (unopt.isSuccess must beTrue)
-      opt.isSuccess must beTrue
-      unopt.map(_.output) must_== opt.map(_.output)
-      unopt.map(_.output3D) must_== opt.map(_.output3D)
+      val opt = Optimizers.all(p).run
+      (unopt.output must_== opt.output) and
+        (unopt.output3D must_== opt.output3D)
     }
 
     "not change result" in new plans {
@@ -221,60 +220,45 @@ class OptimizersSpec extends Specification {
     }
   }
 
-  "unknitted settings optimizer" should {
-    "not change already optimal" in new plans {
-      UnknittedSettingsOptimizer(simpleLines.steps) must containTheSameElementsAs(simpleLines.steps)
-    }
-    "remove unknitted change settings" in new plans {
-      UnknittedSettingsOptimizer(simpleLinesWithUnknittedSettings.steps) must
-        containTheSameElementsAs(simpleLines.steps)
-    }
-  }
   "no effect step optimizer" should {
     "not change already optimal" in new plans {
-      NoEffectStepOptimizer(simpleLines.steps) must containTheSameElementsAs(simpleLines.steps)
+      NoEffectStepOptimizer(simpleLines).steps must containTheSameElementsAs(simpleLines.steps)
     }
     "remove duplicate change settings" in new plans {
-      NoEffectStepOptimizer(simpleLinesWithDuplicateSettings.steps) must
+      NoEffectStepOptimizer(simpleLinesWithDuplicateSettings).steps must
         containTheSameElementsAs(simpleLines.steps)
     }
-  }
-  "settings optimizers" should {
-    "not change already optimal" in new plans {
-      NoEffectStepOptimizer(simpleLines.steps) must containTheSameElementsAs(simpleLines.steps)
-    }
     "remove useless change settings" in new plans {
-      NoEffectStepOptimizer(
-        UnknittedSettingsOptimizer(simpleLinesWithDuplicateSettings.steps)) must
+      NoEffectStepOptimizer(simpleLinesWithDuplicateSettings).steps must
         containTheSameElementsAs(simpleLines.steps)
     }
   }
 
   "pattern knitting optimizer" should {
     "not change already optimal" in new plans {
-      OptimizePatternKnitting(patternLines.steps) must containTheSameElementsAs(patternLines.steps)
+      OptimizePatternKnitting(patternLines).steps must containTheSameElementsAs(patternLines.steps)
     }
     "prevent manual needle movement" in new plans {
-      OptimizePatternKnitting(patternLinesWithManualNeedleSettings.steps) must
+      OptimizePatternKnitting(patternLinesWithManualNeedleSettings).steps must
         containTheSameElementsAs(patternLines.steps)
     }
   }
 
-  "useless move needles optimization" should {
+  "useless step optimization" should {
     "not change already optimal" in new plans {
-      OptimizeStepWithNoEffect(plainKnittingK.steps) must
+      OptimizeStepWithNoEffectOnFinalOutput(plainKnittingK).steps must
         containTheSameElementsAs(plainKnittingK.steps)
     }
     "remove useless move needles" in new plans {
-      OptimizeStepWithNoEffect(plainKnittingKManualMovements.steps) must
+      OptimizeStepWithNoEffectOnFinalOutput(plainKnittingKManualMovements).steps must
         containTheSameElementsAs(plainKnittingK.steps)
     }
     "not optimize away movements to E with HoldingCam H" in new plans {
-      OptimizeStepWithNoEffect(plainKnittingKWithEAndH.steps) must
+      OptimizeStepWithNoEffectOnFinalOutput(plainKnittingKWithEAndH).steps must
         containTheSameElementsAs(plainKnittingKWithEAndH.steps)
     }
     "optimize away movements to E with HoldingCam N" in new plans {
-      OptimizeStepWithNoEffect(plainKnittingKWithEAndN_unoptimized.steps) must
+      OptimizeStepWithNoEffectOnFinalOutput(plainKnittingKWithEAndN_unoptimized).steps must
         containTheSameElementsAs(plainKnittingKWithEAndN.steps)
     }
   }

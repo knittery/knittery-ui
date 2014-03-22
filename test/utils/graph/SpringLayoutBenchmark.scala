@@ -14,7 +14,7 @@ import models.plan.Optimizers
 object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
   case class Plan(name: String, planner: models.plan.PlannerM[_]) {
     val plan = planner.plan(Optimizers.no).valueOr(e => throw new RuntimeException(e))
-    val result = plan.run.valueOr(e => throw new RuntimeException(e.error))
+    val result = plan.run
     val graph = result.output3D.asGraph
     override def toString = s"$name (${graph.nodes.size})"
   }

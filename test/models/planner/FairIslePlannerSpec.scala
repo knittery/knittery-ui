@@ -29,7 +29,7 @@ class FairIslePlannerSpec extends Specification {
     planner.plan().valueOr(e => throw new RuntimeException("Could not build plan: " + e))
   }
   def runPlan(planner: Planner) = {
-    planFor(planner).run.valueOr(e => throw new RuntimeException("Could run plan: " + e))
+    planFor(planner).run
   }
 
   def knittedRow(stitch: Stitch*)(default: Stitch = EmptyStitch) = { (n: Needle) =>
