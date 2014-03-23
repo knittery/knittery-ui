@@ -194,7 +194,7 @@ makeDoubleBedCarriage = (elem) ->
     ctx.lineWidth="1"
     
     ctx.beginPath()
-    ctx.rect(0,0,120,45) 
+    ctx.rect(10,0,100,45) 
     ctx.stroke()
 
     ctx.beginPath()
@@ -214,36 +214,36 @@ makeDoubleBedCarriage = (elem) ->
         ctx.stroke()
         
     ctx.beginPath()
-    ctx.arc(15,35,4,0,2*Math.PI)
+    ctx.arc(20,36,4,0,2*Math.PI)
     ctx.stroke()
         
     ctx.beginPath()
-    ctx.arc(105,35,4,0,2*Math.PI)
+    ctx.arc(100,36,4,0,2*Math.PI)
     ctx.stroke()
     
-    drawLines(5, 25)
-    drawLines(109, 25)
+    drawLines(13, 25)
+    drawLines(101, 25)
     
     if(settings.knobLeft is "IiIi")
       ctx.beginPath()
-      ctx.moveTo(15,35)
-      ctx.lineTo(13,33)
+      ctx.moveTo(20,36)
+      ctx.lineTo(18,34)
       ctx.stroke()
     else
       ctx.beginPath()
-      ctx.moveTo(15,35)
-      ctx.lineTo(17,33)
+      ctx.moveTo(20,36)
+      ctx.lineTo(22,34)
       ctx.stroke()
       
     if(settings.knobRight is "IiIi")
       ctx.beginPath()
-      ctx.moveTo(105,35)
-      ctx.lineTo(107,33)
+      ctx.moveTo(100,36)
+      ctx.lineTo(102,34)
       ctx.stroke()
     else
       ctx.beginPath()
-      ctx.moveTo(105,35)
-      ctx.lineTo(103,33)
+      ctx.moveTo(100,36)
+      ctx.lineTo(98,34)
       ctx.stroke()
     
     ctx.font="8px Arial"  
