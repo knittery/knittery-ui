@@ -263,6 +263,32 @@ makeDoubleBedCarriage = (elem) ->
       ctx.arc(60,47,2,0,2*Math.PI)
       ctx.stroke()
       
+    if (settings.needleTakebackLeft is true)
+      ctx.fillText("N", 2, 17)
+      ctx.beginPath()
+      ctx.moveTo(1,3)
+      ctx.lineTo(8,8)
+      ctx.stroke()
+    else
+      ctx.fillText("H", 2, 8)
+      ctx.beginPath()
+      ctx.moveTo(1,15)
+      ctx.lineTo(8,10)
+      ctx.stroke()
+      
+    if (settings.needleTakebackRight is true)
+      ctx.fillText("N", 113, 17)
+      ctx.beginPath()
+      ctx.moveTo(119,3)
+      ctx.lineTo(112,8)
+      ctx.stroke()
+    else
+      ctx.fillText("H", 113, 8)
+      ctx.beginPath()
+      ctx.moveTo(119,15)
+      ctx.lineTo(112,10)
+      ctx.stroke()
+      
   drawLines = (startX, offsetY) ->  
     ctx.beginPath()
     ctx.moveTo(startX, offsetY)
