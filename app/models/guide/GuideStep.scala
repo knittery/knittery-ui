@@ -47,39 +47,58 @@ object GuideParser {
             before, after)
       }
       (GuideStep(
-        m("knitRow.title", direction, knittingSteps.size),
-        m("knitRow.description", direction, knittingSteps.size),
+        m("knitRow.title", direction, knittingSteps.size, carriage),
+        m("knitRow.description", direction, knittingSteps.size, carriage),
         instructions,
         knittingSteps.head.before, knittingSteps.last.after),
         tail)
 
     case ClosedCastOn(bed, from, to, yarn) =>
-      guideStep(steps, "closedCastOn", bed, from, to, yarn.yarn.name)
+      guideStep(steps, "closedCastOn", bed, from, to, yarn)
     case ClosedCastOff(bed, yarn, _) =>
-      guideStep(steps, "closedCastOff", bed, yarn.yarn.name)
+      guideStep(steps, "closedCastOff", bed, yarn)
+
+    case AddCarriage(carriage, at) =>
+      guideStep(steps, "addCarriage", carriage, at)
+
+    case ThreadYarnK(Some(yarn), None) =>
+      guideStep(steps, "threadYarn.k.A", yarn)
+    case ThreadYarnK(None, Some(yarn)) =>
+      guideStep(steps, "threadYarn.k.B", yarn)
+    case ThreadYarnK(None, None) =>
+      guideStep(steps, "threadYarn.k.none")
+    case ThreadYarnK(Some(yarnA), Some(yarnB)) =>
+      guideStep(steps, "threadYarn.k.both", yarnA, yarnB)
+
 
     //TODO Rest of the steps
   }
 
   private def guideStep(steps: Seq[StepState], key: String, args: Any*) = {
-    (GuideStep(m(s"$key.title", args), m(s"$key.description", args), steps.head),
+    (GuideStep(m(s"$key.title", args: _*), m(s"$key.description", args: _*), steps.head),
       steps.tail)
   }
 
-  private def m(key: String, args: Any*): Text = { implicit lang: Lang =>
-    val stringArgs = args map {
-      case t: Text => t(lang)
-      case i: Int => i.toString
-      case l: Long => l.toString
-      case n: Needle => n.index.toString
-      case MainBed => Messages("bed.mainBed")
-      case DoubleBed => Messages("bed.doubleBed")
-      case ToLeft => Messages("direction.toLeft")
-      case ToRight => Messages("direction.toRight")
-      case Left => Messages("leftRight.left")
-      case Right => Messages("leftRight.right")
+  private def m(key: String, args: Any*): Text = new Text {
+    override def apply(implicit lang: Lang) = {
+      val renderedArgs = args map render
+      Messages(s"guide.step.$key", renderedArgs: _*)
     }
-    Messages(s"guide.step.$key", stringArgs)
+  }
+  private def render(arg: Any)(implicit lang: Lang): Any = arg match {
+    case t: Text => t(lang)
+    case i: Int => i
+    case l: Long => l
+    case n: Needle => n.index
+    case MainBed => Messages("bed.mainBed")
+    case DoubleBed => Messages("bed.doubleBed")
+    case c: Carriage => c.name
+    case Yarn(name, _) => name
+    case piece: YarnPiece => render(piece.yarn)
+    case ToLeft => Messages("direction.toLeft")
+    case ToRight => Messages("direction.toRight")
+    case Left => Messages("leftRight.left")
+    case Right => Messages("leftRight.right")
   }
 }
 

@@ -6,12 +6,24 @@ bed.mainBed = main bed
 bed.doubleBed = double bed
 
 
-guide.step.knitRow.title = Knit with {0}
-guide.step.knitRow.description = Knit {1} {1,choice,1#row|1<rows} row with the {0} carriage.
+guide.step.knitRow.title = Knit {1} with {2}
+guide.step.knitRow.description = Knit {1} {1,choice,1#row|1<rows} with the {2}-carriage.
 guide.step.knitRow.instruction = Knit to {0} ({1,choice,0#last row|1#one row remaining|1<{1} rows remaining}).
 
 guide.step.closedCastOn.title = Cast on {0}
-guide.step.closedCastOn.description = Perform a closed cast on on the {0} with {3} on needles {1} until {2}
+guide.step.closedCastOn.description = Perform a closed cast on on the {0} with {3} yarn on needles {1} until {2}.
 
-guide.step.closedCastOn.title = Cast off {0}
-guide.step.closedCastOn.description = Perform a closed cast off on the {0} with {3} for the marked needles.
+guide.step.closedCastOff.title = Cast off {0}
+guide.step.closedCastOff.description = Perform a closed cast off on the {0} with {1} yarn for the marked needles.
+
+guide.step.addCarriage.title = Add {0}
+guide.step.addCarriage.description = Add {0}-carriage at the {1}.
+
+guide.step.threadYarn.k.A.title = Thread Yarn to K
+guide.step.threadYarn.k.A.description = Thread the {0} yarn into A on the K carriage.
+guide.step.threadYarn.k.B.title = Thread Yarn to K
+guide.step.threadYarn.k.B.description = Thread the {0} yarn into B on the K carriage.
+guide.step.threadYarn.k.none.title = Unthread from K
+guide.step.threadYarn.k.none.description = Unthread all yarns from the K carriage.
+guide.step.threadYarn.k.both.title = Thread Yarns to K
+guide.step.threadYarn.k.both.description = Thread the yarn {0} into A and {1} into B on the K carriage.

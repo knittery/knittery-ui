@@ -1,6 +1,9 @@
 package models.guide
 
 import org.specs2.mutable.Specification
+import org.specs2.matcher.Matcher
+import play.api.test.WithApplication
+import play.api.i18n.Lang
 import models._
 import models.plan._
 
@@ -24,17 +27,46 @@ class GuideParserSpec extends Specification {
       ClosedCastOff(MainBed, redPiece, allNeedles))
   }
 
+  implicit val lang = Lang("en")
+  def beText(value: String) = (be_==(value)) ^^ ((t: Text) => t(lang))
+
   "GuideParser(oneLinePlan)" should {
-    trait steps extends oneLinePlan {
+    trait steps extends WithApplication with oneLinePlan {
       val steps = GuideParser(oneLinePlan)
     }
     "have 6 steps" in new steps {
       steps.size must_== 5
     }
-    "have 1st step must be cast on" in new steps {
+    "have 1st step as cast on" in new steps {
       val step = steps(0)
-      step.title must_== "Cast on main bed"
-      step.description must_== "Perform a closed cast on on the main bed with red on needles 1 until 40"
+      step.title must beText("Cast on main bed")
+      step.description must beText("Perform a closed cast on on the main bed with red yarn on needles 1 until 40.")
+      step.instructions.size must_== 1
+    }
+    "have 2nd step as add carriage" in new steps {
+      val step = steps(1)
+      step.title must beText("Add K")
+      step.description must beText("Add K-carriage at the left.")
+      step.instructions.size must_== 1
+    }
+    "have 3rd step as thread yarn" in new steps {
+      val step = steps(2)
+      step.title must beText("Thread Yarn to K")
+      step.description must beText("Thread the red yarn into A on the K carriage.")
+      step.instructions.size must_== 1
+    }
+    "have 4th step as knit one row" in new steps {
+      val step = steps(3)
+      step.title must beText("Knit 1 with K")
+      step.description must beText("Knit 1 row with the K-carriage.")
+      step.instructions.size must_== 1
+      step.instructions(0).text must beText("Knit to right (last row).")
+    }
+    "have 5th step as cast off" in new steps {
+      val step = steps(4)
+      step.title must beText("Cast off main bed")
+      step.description must beText("Perform a closed cast off on the main bed with red yarn for the marked needles.")
+      step.instructions.size must_== 1
     }
   }
 
