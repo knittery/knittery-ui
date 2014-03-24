@@ -1,0 +1,17 @@
+direction.toLeft = left
+direction.toRight = right
+leftRight.left = left
+leftRight.right = right
+bed.mainBed = main bed
+bed.doubleBed = double bed
+
+
+guide.step.knitRow.title = Knit with {0}
+guide.step.knitRow.description = Knit {1} {1,choice,1#row|1<rows} row with the {0} carriage.
+guide.step.knitRow.instruction = Knit to {0} ({1,choice,0#last row|1#one row remaining|1<{1} rows remaining}).
+
+guide.step.closedCastOn.title = Cast on {0}
+guide.step.closedCastOn.description = Perform a closed cast on on the {0} with {3} on needles {1} until {2}
+
+guide.step.closedCastOn.title = Cast off {0}
+guide.step.closedCastOn.description = Perform a closed cast off on the {0} with {3} for the marked needles.
