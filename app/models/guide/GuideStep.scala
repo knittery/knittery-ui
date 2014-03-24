@@ -41,7 +41,7 @@ object GuideParser {
         case _ => false
       }
       val instructions = knittingSteps.zipWithIndex.map {
-        case (StepState(_, before, after), i) =>
+        case (StepState(KnitRow(_, direction, _), before, after), i) =>
           val remaining = knittingSteps.size - i - 1
           Instruction(m("knitRow.instruction", direction, remaining),
             before, after)
