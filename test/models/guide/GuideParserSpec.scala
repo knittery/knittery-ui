@@ -1,7 +1,6 @@
 package models.guide
 
 import org.specs2.mutable.Specification
-import org.specs2.matcher.Matcher
 import play.api.test.WithApplication
 import play.api.i18n.Lang
 import models._
