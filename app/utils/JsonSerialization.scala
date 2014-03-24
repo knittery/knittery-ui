@@ -77,11 +77,95 @@ object JsonSerialization {
     override def writes(knitted: Knitted) = Json.toJson(knitted.rows)
   }
 
+  implicit object HoldingCamLeverWrite extends Writes[KCarriage.HoldingCamLever] {
+    override def writes(holdingCamLever: KCarriage.HoldingCamLever) = JsString(holdingCamLever match {
+      case KCarriage.HoldingCamH => "H"
+      case KCarriage.HoldingCamI => "I"
+      case KCarriage.HoldingCamN => "N"
+    })
+  }
+
+  implicit object TensionDialWrite extends Writes[KCarriage.TensionDial] {
+    override def writes(tension: KCarriage.TensionDial) = {
+      Json.obj("number" -> tension.number,
+        "thirds" -> tension.thirds,
+        "text" -> tension.text)
+    }
+  }
+
+  implicit object KRChangeKnobWrite extends Writes[KCarriage.KRChangeKnob] {
+    override def writes(knob: KCarriage.KRChangeKnob) = knob match {
+      case KCarriage.KRChangeKnobIiIi => JsString("IiIi")
+      case KCarriage.KRChangeKnobPlain => JsString("plain")
+    }
+  }
+
+  implicit object SlideLeverWrite extends Writes[KCarriage.SlideLever] {
+    override def writes(lever: KCarriage.SlideLever) = lever match {
+      case KCarriage.SlideLeverI => JsString("I")
+      case KCarriage.SlideLeverII => JsString("II")
+      case KCarriage.SlideLeverIiIi => JsString("IiIi")
+    }
+  }
+
+  implicit object TuckingLeverWrite extends Writes[KCarriage.TuckingLever] {
+    override def writes(lever: KCarriage.TuckingLever) = lever match {
+      case KCarriage.TuckingLeverR => JsString("R")
+      case KCarriage.TuckingLeverP => JsString("P")
+    }
+  }
+
+
+  implicit object KCarriageSettingWrite extends Writes[KCarriage.Settings] {
+    override def writes(settings: KCarriage.Settings) = {
+      Json.obj("tension" -> settings.tension,
+        "mc" -> settings.mc,
+        "l" -> settings.l,
+        "partLeft" -> settings.partLeft,
+        "partRight" -> settings.partRight,
+        "tuckLeft" -> settings.tuckLeft,
+        "tuckRight" -> settings.tuckRight,
+        "holdingCamLever" -> settings.holdingCamLever)
+    }
+  }
+
+  implicit object KCarriageDoubleBedWrite extends Writes[KCarriage.DoubleBedCarriage] {
+    override def writes(settings: KCarriage.DoubleBedCarriage) = {
+      Json.obj(
+        "tension" -> settings.tension,
+        "slideLever" -> settings.slideLever,
+        "knobLeft" -> settings.knobLeft,
+        "knobRight" -> settings.knobRight,
+        "tuckingLever" -> settings.tuckingLever,
+        "partLeft" -> settings.partLeft,
+        "partRight" -> settings.partRight,
+        "needleTakebackLeft" -> settings.needleTakebackLeft,
+        "needleTakebackRight" -> settings.needleTakebackRight)
+    }
+  }
+
+  implicit object CarriageStatesWrite extends Writes[CarriageStates] {
+    override def writes(states: CarriageStates) = {
+      val base = Json.obj(
+        "k" -> states(KCarriage).settings
+      )
+      states(KCarriage).assembly match {
+        case dbc: KCarriage.DoubleBedCarriage =>
+          base deepMerge Json.obj("doubleBed" -> dbc)
+        case z: KCarriage.SinkerPlate =>
+          // TODO add to carriages / "k"
+          base
+        case _ => base
+      }
+    }
+  }
+
   implicit object KnittingStateWrite extends Writes[KnittingState] {
     override def writes(state: KnittingState) = {
       Json.obj("needles" -> state.needles(MainBed).pattern,
         "doubleBedNeedles" -> state.needles(DoubleBed).pattern,
         "output" -> state.output,
+        "carriage" -> state.carriageState,
         "visibleStitches3D" -> state.output3D.stitches.size)
     }
   }
