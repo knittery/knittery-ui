@@ -7,7 +7,6 @@ import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 import ch.inventsoft.graph.layout.Layout
 import models.plan._
-import models.machine._
 import utils.SubscriptionActor
 
 /** An instance of a plan execution. Keeps track of the current step. */
@@ -21,9 +20,13 @@ object Guider {
   case class LoadPlan(plan: Plan) extends Command
 
   /** Move to the next step. Answer: Command[Not]Executed. */
-  case object Next extends Command
+  case object NextStep extends Command
   /** Move to the previous step. Answer: Command[Not]Executed. */
-  case object Previous extends Command
+  case object PreviousStep extends Command
+  /** Move to the next instruction. Answer: Command[Not]Executed. */
+  case object NextInstruction extends Command
+  /** Move to the previous instruction. Answer: Command[Not]Executed. */
+  case object PreviousInstruction extends Command
   /** Move to the first step. Answer: Command[Not]Executed. */
   case object First extends Command
   /** Move to the last step. Answer: Command[Not]Executed. */
@@ -31,7 +34,7 @@ object Guider {
 
   /** Get the current step. Answer: CurrentStep. */
   case object QueryStep extends Command
-  case class CurrentStep(step: GuideStep) extends Event
+  case class CurrentStep(step: GuideStep, instruction: Instruction) extends Event
 
   /** Get 3D Layout as soon as ready. Answer: Knitted3DLayout. */
   case object GetKnitted3D extends Command
@@ -39,9 +42,14 @@ object Guider {
 
   /** Subscribe to ChangeEvent. Answer: Command[Not]Executed. */
   case object Subscribe extends Command
-  case class ChangeEvent(newStep: GuideStep) extends Event
   /** Unsubscribe from ChangeEvent. Answer: Command[Not]Executed. */
   case object Unsubscribe extends Command
+  /** Notification, receive when subscribed. */
+  sealed trait Notification extends Event
+  /** Notification sent whenever the current step/instruction changes. */
+  case class ChangeEvent(newStep: GuideStep, newInstruction: Instruction) extends Notification
+
+  private case object NotifyStepChange extends Command
 
   def props(machine: ActorRef) = Props(new Guider(machine))
 
@@ -55,92 +63,123 @@ object Guider {
     def unsubscribe = Unsubscribe
   })
 
+  /** Manages the loaded plan and subscriptions; delegates commands to the GuiderForPlan. */
   private class Guider(machine: ActorRef) extends Actor {
-    context.actorOf(Machine.subscription(machine))
-
-    override def receive = {
-      case cmd@LoadPlan(plan) =>
-        val step = GuideStep(plan)
-        val output3D = step.last.stateAfter.output3D
-        val layouter = context actorOf Layouter.props(output3D)
-        context become stepping(step, layouter)
-        sender ! CommandExecuted(cmd)
-    }
-
+    var current = Option.empty[ActorRef]
     var subscribers = Set.empty[ActorRef]
-    def notify(msg: Any) = subscribers.foreach(_ ! msg)
 
-    def changeStep(newStep: GuideStep, layouter: ActorRef) = {
-      notify(ChangeEvent(newStep))
-      newStep.step match {
-        case KnitRow(_, _, pattern) =>
-          machine ! Machine.LoadNeedlePattern(pattern)
-        case _ => ()
-      }
-      context become stepping(newStep, layouter)
+    override def receive = subscriptionHandling orElse {
+      case cmd@LoadPlan(plan) =>
+        current foreach (_ ! PoisonPill)
+        val newCurrent = context actorOf GuiderForPlan.props(plan)
+        newCurrent ! NotifyStepChange
+        current = Some(newCurrent)
+        sender ! CommandExecuted(cmd)
+
+      case cmd: Command =>
+        current
+          .map(_ forward cmd)
+          .getOrElse(sender ! CommandNotExecuted(cmd, "no plan is loaded"))
     }
 
-    private var row = 0
-
-    def stepping(step: GuideStep, layouter: ActorRef): Receive = receive orElse {
-      case QueryStep => sender ! CurrentStep(step)
-
-      case GetKnitted3D =>
-        implicit val timeout: Timeout = 10.minutes
-        (layouter ? Layouter.Get).map {
-          case layout: Layout[Stitch3D] =>
-            Knitted3DLayout(step.last.stateAfter.output3D, layout)
-        }.pipeTo(sender)
-
-      case Machine.PositionChanged(_, _, old) if old == row =>
-        ()
-      case Machine.PositionChanged(_, _, r) =>
-        row = r
-        if (!step.isLast) {
-          val newStep = step.allFromHere.tail.
-            find(_.isKnitting).getOrElse(step.last)
-          changeStep(newStep, layouter)
-        }
-
-      case cmd@Next =>
-        if (!step.isLast) {
-          changeStep(step.next, layouter)
-          sender ! CommandExecuted(cmd)
-        } else {
-          sender ! CommandNotExecuted(cmd, "Already at last step")
-        }
-      case cmd@Last =>
-        if (!step.isLast) {
-          changeStep(step.last, layouter)
-          sender ! CommandExecuted(cmd)
-        } else {
-          sender ! CommandNotExecuted(cmd, "Already at last step")
-        }
-      case cmd@Previous =>
-        if (!step.isFirst) {
-          changeStep(step.previous, layouter)
-          sender ! CommandExecuted(cmd)
-        } else {
-          sender ! CommandNotExecuted(cmd, "Already at first step")
-        }
-      case cmd@First =>
-        if (!step.isFirst) {
-          changeStep(step.first, layouter)
-          sender ! CommandExecuted(cmd)
-        } else {
-          sender ! CommandNotExecuted(cmd, "Already at first step")
-        }
-
+    def subscriptionHandling: Receive = {
       case cmd@Subscribe =>
-        subscribers = subscribers + sender
+        subscribers += sender
         context watch sender
         sender ! CommandExecuted(cmd)
       case cmd@Unsubscribe =>
-        subscribers = subscribers - sender
+        subscribers -= sender
         context unwatch sender
         sender ! CommandExecuted(cmd)
       case Terminated if subscribers.contains(sender) =>
-        subscribers = subscribers - sender
+        subscribers -= sender
+      case notification: Notification =>
+        subscribers foreach (_ ! notification)
     }
+
+    //TODO handle machine
+  }
+
+  /** Keeps track of the position within a plan and answers all commands. */
+  private class GuiderForPlan(plan: Plan) extends Actor {
+    val layouter = context actorOf Layouter.props(plan.run.output3D)
+    val steps = GuideParser(plan)
+    var stepIndex = 0
+    var instrIndex = 0
+
+    private def currentStep = steps(stepIndex)
+    private def currentInstruction = currentStep.instructions(instrIndex)
+    private def modStep(offset: Int) = {
+      val newIndex = stepIndex + offset
+      if (newIndex >= 0 && newIndex < steps.size) {
+        stepIndex = newIndex
+        instrIndex = 0
+        true
+      } else false
+    }
+    private def incrInstr() = {
+      if (instrIndex >= currentStep.instructions.size - 1) modStep(1)
+      else {
+        instrIndex += 1
+        true
+      }
+    }
+    private def decrInstr() = {
+      if (instrIndex < 1) modStep(-1)
+      else {
+        instrIndex -= 1
+        true
+      }
+    }
+
+    override def receive = {
+      case GetKnitted3D =>
+        implicit val timeout: Timeout = 10.minutes
+        (layouter ? Layouter.Get).map {
+          case layout: Layout[Stitch3D] => Knitted3DLayout(plan.run.output3D, layout)
+        }.pipeTo(sender)
+
+      case QueryStep =>
+        sender ! CurrentStep(currentStep, currentInstruction)
+
+      case cmd@First =>
+        stepIndex = 0
+        instrIndex = 0
+        self ! NotifyStepChange
+        sender ! CommandExecuted(cmd)
+      case cmd@Last =>
+        stepIndex = steps.size - 1
+        instrIndex = steps.last.instructions.size - 1
+        self ! NotifyStepChange
+        sender ! CommandExecuted(cmd)
+
+      case cmd@NextStep =>
+        if (modStep(1)) {
+          self ! NotifyStepChange
+          sender ! CommandExecuted(cmd)
+        } else sender ! CommandNotExecuted(cmd, "already at last")
+      case cmd@PreviousStep =>
+        if (modStep(-1)) {
+          self ! NotifyStepChange
+          sender ! CommandExecuted(cmd)
+        } else sender ! CommandNotExecuted(cmd, "already at first")
+
+      case cmd@NextInstruction =>
+        if (incrInstr()) {
+          self ! NotifyStepChange
+          sender ! CommandExecuted(cmd)
+        } else sender ! CommandNotExecuted(cmd, "already at last")
+      case cmd@PreviousInstruction =>
+        if (decrInstr()) {
+          self ! NotifyStepChange
+          sender ! CommandExecuted(cmd)
+        } else sender ! CommandNotExecuted(cmd, "already at first")
+
+      case NotifyStepChange =>
+        context.parent ! ChangeEvent(currentStep, currentInstruction)
+    }
+  }
+  private object GuiderForPlan {
+    def props(plan: Plan) = Props(new GuiderForPlan((plan)))
   }
 }
