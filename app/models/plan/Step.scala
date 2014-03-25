@@ -28,8 +28,8 @@ case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActi
       case GCarriage => ???
     }
   } yield state2.
-    moveCarriage(carriage, direction).
-    pushRow(_ => true)
+      moveCarriage(carriage, direction).
+      pushRow(_ => true)
 
   override def hashCode = carriage.hashCode ^ direction.hashCode ^ pattern.all.hashCode
   override def equals(o: Any) = o match {
@@ -96,7 +96,6 @@ case class ChangeGCarriageSettings(settings: GCarriage.Settings) extends ChangeC
 
 sealed trait ThreadYarn extends Step
 case class ThreadYarnK(yarnA: Option[YarnPiece], yarnB: Option[YarnPiece]) extends ThreadYarn {
-  import KCarriage._
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(KCarriage)
     require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active K-carriage")
@@ -105,7 +104,6 @@ case class ThreadYarnK(yarnA: Option[YarnPiece], yarnB: Option[YarnPiece]) exten
   }.toSuccess
 }
 case class ThreadYarnG(yarn: Option[YarnPiece]) extends ThreadYarn {
-  import KCarriage._
   override def apply(state: KnittingState) = Try {
     val cs = state.carriageState(GCarriage)
     require(cs.position != CarriageRemoved, "Cannot thread yarn on non-active G-carriage")
@@ -114,8 +112,8 @@ case class ThreadYarnG(yarn: Option[YarnPiece]) extends ThreadYarn {
 }
 
 /**
- *  Performs a closed cast on for the needles. The needles are then moved to D position.
- *  All other needles are not touched.
+ * Performs a closed cast on for the needles. The needles are then moved to D position.
+ * All other needles are not touched.
  */
 case class ClosedCastOn(bed: Bed, from: Needle, until: Needle, yarn: YarnPiece) extends Step {
   def needles = Needle.interval(from, until)
@@ -126,15 +124,15 @@ case class ClosedCastOn(bed: Bed, from: Needle, until: Needle, yarn: YarnPiece) 
     val needleYarn = needles.zip(yarnFlow).toMap
     state.
       modifyNeedles(bed, { n =>
-        val before = state.needles(bed)(n)
-        needleYarn.get(n).map { yarn =>
-          NeedleState(NeedleD, before.yarn + yarn)
-        }.getOrElse(before)
-      }).
+      val before = state.needles(bed)(n)
+      needleYarn.get(n).map { yarn =>
+        NeedleState(NeedleD, before.yarn + yarn)
+      }.getOrElse(before)
+    }).
       knit { n =>
-        if (needles.contains(n)) CastOnStitch(yarn.yarn)
-        else NoStitch
-      }.
+      if (needles.contains(n)) CastOnStitch(yarn.yarn)
+      else NoStitch
+    }.
       //TODO Knit2? we don't really have stitches..
       attachYarn(YarnAttachment(needleYarn(until), until, MainBed)).
       pushRow(needles.contains).
@@ -147,19 +145,19 @@ case class ClosedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolea
     val needles = state.needles(bed)
     state.
       knit { n =>
-        if (filter(n)) needles(n) match {
-          case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
-          case NeedleState(_, yarns) => PlainStitch(yarns.map(_.yarn).toList)
-        }
-        else NoStitch
-      }.
+      if (filter(n)) needles(n) match {
+        case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
+        case NeedleState(_, yarns) => PlainStitch(yarns.map(_.yarn).toList)
+      }
+      else NoStitch
+    }.
       knit { n =>
-        if (filter(n)) needles(n) match {
-          case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
-          case NeedleState(_, yarns) => CastOffStitch(withYarn.yarn)
-        }
-        else NoStitch
-      }.
+      if (filter(n)) needles(n) match {
+        case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
+        case NeedleState(_, yarns) => CastOffStitch(withYarn.yarn)
+      }
+      else NoStitch
+    }.
       //TODO implement .knit2
       modifyNeedles(bed, n => if (filter(n)) NeedleState(NeedleA) else needles(n)).
       pushRow(filter).
