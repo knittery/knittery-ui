@@ -1,15 +1,15 @@
 $(() ->
-  $("#next").link().disabled(guide, "currentStep", (s) -> s? && s.number == totalSteps())
+  $("#next").link().disabled(guide, "currentStep", (s) -> s? && s.last)
   $("#next").click(() ->
     jsRoutes.controllers.Guide.next().ajax()
     false
   )
-  $("#prev").link().disabled(guide, "currentStep", (s) -> s? && s.number == 1)
+  $("#prev").link().disabled(guide, "currentStep", (s) -> s? && s.first)
   $("#prev").click(() ->
     jsRoutes.controllers.Guide.previous().ajax()
     false
   )
-  $("#first").link().disabled(guide, "currentStep", (s) -> s? && s.number == 1)
+  $("#first").link().disabled(guide, "currentStep", (s) -> s? && s.first)
   $("#first").click(() ->
     jsRoutes.controllers.Guide.first().ajax()
     false
@@ -18,7 +18,7 @@ $(() ->
     jsRoutes.controllers.Guide.last().ajax()
     false
   )
-  $("#last").link().disabled(guide, "currentStep", (s) -> s? && s.number == totalSteps())
+  $("#last").link().disabled(guide, "currentStep", (s) -> s? && s.last)
 
 
   $(".graphical .carriage-type").link().text(machine, "carriage", (c) -> if c? then "Carriage #{c}" else "Carriage")
@@ -26,11 +26,9 @@ $(() ->
   $(".needles.main").needles(200)
   $(".needles.double").needles(200, "needles", false)
 
-  totalSteps = -> +$(".step-number-total").text()
-
   guide.bind("currentStep:change", (_, step) ->
     $(".step.active").removeClass("active")
-    active = $("#step-#{step.number}")
+    active = $("#step-#{step.index}")
     active.addClass("active").removeClass("future").removeClass("past")
     active.prevAll(".step").
     removeClass("future").
@@ -39,17 +37,17 @@ $(() ->
     removeClass("past").
     addClass("future")
   )
-  $(".current-step-number").link().text(guide, "currentStep", (s) -> if s? then s.number else "")
+  $(".current-step-number").link().text(guide, "currentStep", (s) -> if s? then s.index + 1 else "")
 
   $(".needles.main").link().data("needles")(guide, "currentStep", (s) ->
     if not s? then return ""
-    for c, i in s.stateAfter.needles
-      if s.manualNeedles.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
+#    for c, i in s.stateAfter.needles
+#      if s.markNeedlesMainBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
   $(".needles.double").link().data("needles")(guide, "currentStep", (s) ->
     if not s? then return ""
-    for c, i in s.stateAfter.doubleBedNeedles
-      if s.manualDoubleBedNeedles.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
+ #   for c, i in s.stateAfter.doubleBedNeedles
+ #     if s.markNeedlesDoubleBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
 
   makeOutput($(".output-2d"))
