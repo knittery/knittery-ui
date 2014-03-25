@@ -35,7 +35,7 @@ object GuideParser {
       (GuideStep(
         m("knitRow.title", direction, knittingSteps.size, carriage),
         m("knitRow.description", direction, knittingSteps.size, carriage),
-        instructions,
+        instructions, true,
         knittingSteps.head.before, knittingSteps.last.after),
         tail)
 
@@ -101,7 +101,7 @@ object GuideParser {
     (
       GuideStep(m(s"$key.title", args: _*), desc,
         Instruction(desc, step.before, step.after) :: Nil,
-        step.before, step.after),
+        false, step.before, step.after),
       steps.tail)
   }
 

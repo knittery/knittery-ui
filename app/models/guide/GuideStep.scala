@@ -5,12 +5,13 @@ import models.plan._
 
 case class GuideStep private(title: Text, description: Text,
                              instructions: Seq[Instruction],
+                             isKnitting: Boolean,
                              before: KnittingState, after: KnittingState,
                              position: Pos)
 object GuideStep {
-  def apply(title: Text, description: Text, instructions: Seq[Instruction],
+  def apply(title: Text, description: Text, instructions: Seq[Instruction], isKnitting: Boolean,
             before: KnittingState, after: KnittingState): GuideStep = {
-    GuideStep(title, description, Instruction.updatePos(instructions), before, after, Pos.only)
+    GuideStep(title, description, Instruction.updatePos(instructions), isKnitting, before, after, Pos.only)
   }
 
   private[guide] def updatePos(steps: Seq[GuideStep]) = {
