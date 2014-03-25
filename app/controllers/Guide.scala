@@ -1,6 +1,5 @@
 package controllers
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
 import java.awt.Color
 import scalaz._
@@ -13,9 +12,6 @@ import play.api.libs.json._
 import play.api.libs.iteratee._
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
-import models._
-import models.plan._
-import models.planners._
 import models.guide._
 import utils._
 import JsonSerialization._
@@ -27,18 +23,18 @@ object Guide extends Controller {
 
   def view = Action.async {
     for {
-      Guider.CurrentStep(step) <- guider ? Guider.QueryStep
-    } yield Ok(views.html.guide(step))
+      Guider.CurrentStep(step, instruction) <- guider ? Guider.QueryStep
+    } yield Ok(views.html.guide(step, instruction))
   }
 
   def next = Action.async { request =>
     for {
-      Guider.CommandExecuted(_) <- guider ? Guider.Next
+      Guider.CommandExecuted(_) <- guider ? Guider.NextStep
     } yield Redirect(routes.Guide.view)
   }
   def previous = Action.async { request =>
     for {
-      Guider.CommandExecuted(_) <- guider ? Guider.Previous
+      Guider.CommandExecuted(_) <- guider ? Guider.PreviousStep
     } yield Redirect(routes.Guide.view)
   }
   def first = Action.async { request =>
@@ -52,15 +48,19 @@ object Guide extends Controller {
     } yield Redirect(routes.Guide.view)
   }
 
-  def subscribe = WebSocket.async[JsValue] { request =>
+  def subscribe = WebSocket.async[JsValue] { implicit request =>
+    val loc = localized
+    import loc._
     for {
       actor <- guider.resolveOne()
-      Guider.CurrentStep(step) <- actor ? Guider.QueryStep
+      Guider.CurrentStep(step, instruction) <- actor ? Guider.QueryStep
       e = ActorEnumerator.enumerator(Guider.subscription(actor))
-      fst = Enumerator[Any](Guider.ChangeEvent(step))
+      fst = Enumerator[Any](Guider.ChangeEvent(step, instruction))
       json = (fst >>> e) &> Enumeratee.collect {
-        case Guider.ChangeEvent(step) =>
-          Json.obj("event" -> "change", "step" -> step): JsValue
+        case Guider.ChangeEvent(step, instruction) => Json.obj(
+          "event" -> "change",
+          "step" -> step,
+          "instruction" -> instruction): JsValue
       }
     } yield (Iteratee.ignore, json)
   }

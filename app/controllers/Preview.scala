@@ -40,7 +40,7 @@ object Preview extends Controller {
 
   def json = GuiderAction { req =>
     val knitted3D = req.knitted3d
-    val graph = req.finalState.output3D.asGraph
+    val graph = req.knitted3d.asGraph
     val layout = LayoutOps(req.layout, knitted3D.stitches).inside(Box3(3000))
 
     val nodeJson = knitted3D.stitches.map { node =>
@@ -67,26 +67,22 @@ object Preview extends Controller {
   }
 
   def dot = GuiderAction { req =>
-    val knitted3d = req.knitted3d
     val dotRoot = DotRootGraph(directed = false, id = None)
-    val dot = knitted3d.asGraph.toDot(dotRoot, e =>
+    val dot = req.knitted3d.asGraph.toDot(dotRoot, e =>
       Some((dotRoot, DotEdgeStmt(
-        "s-"+alias(e.edge._1.value, knitted3d),
-        "s-"+alias(e.edge._2.value, knitted3d), Nil)))
+        "s-" + alias(e.edge._1.value, req.knitted3d),
+        "s-" + alias(e.edge._2.value, req.knitted3d), Nil)))
     )
     Ok(dot).as("text/vnd.graphviz")
   }
 
-  class RequestWithStep[A](val step: GuideStep, val layout: Layout[Stitch3D], request: Request[A]) extends WrappedRequest[A](request) {
-    def finalState = step.last.stateAfter
-    def knitted3d = finalState.output3D
-  }
-  case object GuiderAction extends ActionBuilder[RequestWithStep] {
-    protected override def invokeBlock[A](request: Request[A], block: (RequestWithStep[A]) ⇒ Future[SimpleResult]) = {
+  class RequestWithLayout[A](val knitted3d: Knitted3D, val layout: Layout[Stitch3D], request: Request[A])
+    extends WrappedRequest[A](request)
+  case object GuiderAction extends ActionBuilder[RequestWithLayout] {
+    protected override def invokeBlock[A](request: Request[A], block: (RequestWithLayout[A]) ⇒ Future[SimpleResult]) = {
       for {
-        Guider.CurrentStep(step) <- guider ? Guider.QueryStep
         Guider.Knitted3DLayout(knitted, layout) <- guider ? Guider.GetKnitted3D
-        req = new RequestWithStep(step, layout, request)
+        req = new RequestWithLayout(knitted, layout, request)
         result <- block(req)
       } yield result
     }
