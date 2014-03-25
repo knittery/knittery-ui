@@ -162,6 +162,16 @@ makeKCarriage = (elem) ->
     ctx.fillText(settings.tension.number, 55, 26)
     
     ctx.font="6px Arial"
+    
+    ctx.fillText("KCII", 106, 12)
+    ctx.beginPath()
+    ctx.arc(97,15,7,0,2*Math.PI)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(97,15)
+    ctx.lineTo(102,12)
+    ctx.stroke()
+    
     if settings.holdingCamLever is "N"
       ctx.fillRect(10, 33, 5, 5)
       ctx.fillText("N", 10, 28)
