@@ -23,8 +23,8 @@ object Guide extends Controller {
 
   def view = Action.async {
     for {
-      Guider.CurrentStep(step, instruction) <- guider ? Guider.QueryStep
-    } yield Ok(views.html.guide(step, instruction))
+      Guider.CurrentStep(step, instruction, steps) <- guider ? Guider.QueryStep
+    } yield Ok(views.html.guide(steps, step, instruction))
   }
 
   def next = Action.async { request =>
@@ -53,7 +53,7 @@ object Guide extends Controller {
     import loc._
     for {
       actor <- guider.resolveOne()
-      Guider.CurrentStep(step, instruction) <- actor ? Guider.QueryStep
+      Guider.CurrentStep(step, instruction, _) <- actor ? Guider.QueryStep
       e = ActorEnumerator.enumerator(Guider.subscription(actor))
       fst = Enumerator[Any](Guider.ChangeEvent(step, instruction))
       json = (fst >>> e) &> Enumeratee.collect {

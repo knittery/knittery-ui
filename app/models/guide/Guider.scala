@@ -34,7 +34,7 @@ object Guider {
 
   /** Get the current step. Answer: CurrentStep. */
   case object QueryStep extends Command
-  case class CurrentStep(step: GuideStep, instruction: Instruction) extends Event
+  case class CurrentStep(step: GuideStep, instruction: Instruction, steps: Seq[GuideStep]) extends Event
 
   /** Get 3D Layout as soon as ready. Answer: Knitted3DLayout. */
   case object GetKnitted3D extends Command
@@ -140,7 +140,7 @@ object Guider {
         }.pipeTo(sender)
 
       case QueryStep =>
-        sender ! CurrentStep(currentStep, currentInstruction)
+        sender ! CurrentStep(currentStep, currentInstruction, steps)
 
       case cmd@First =>
         stepIndex = 0

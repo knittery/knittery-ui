@@ -1,4 +1,4 @@
-@(step: models.guide.GuideStep)
+@(steps: Seq[models.guide.GuideStep], step: models.guide.GuideStep, instruction: models.guide.Instruction)
 
 @import helper._
 
@@ -25,13 +25,13 @@
          </button>
       </span>
       <h2 class="panel-title text-center">
-        Step <span class="current-step-number">@step.stepNumber</span> of <span class="step-number-total">@step.all.size</span>
+        Step <span class="current-step-number">@step.stepNumber</span> of <span class="step-number-total">@steps.size</span>
       </h2>
 	  </div>
 	  <div class="panel-body">
-	    @step.all.map { s =>
+    @steps.map { s =>
 	    <div id="step-@s.stepNumber" class="panel panel-default step @if(s==step) {active} @if(s.isKnitting) {knitting} else {non-knitting}">
-	      <div class="panel-heading"><h4 class="panel-title">@s.name</h4></div>
+	      <div class="panel-heading"><h4 class="panel-title">@s.title</h4></div>
 	      <div class="panel-body">@s.description</div>
 	    </div>
 	    }
