@@ -77,7 +77,7 @@ class GuideParserSpec extends Specification {
     "have 2nd step as add carriage" in new steps {
       val step = steps(1)
       step.title must beText("Add K")
-      step.description must beText("Add K-carriage at the left.")
+      step.description must beText("Add K-carriage at the left. Be sure to check the settings.")
       step.instructions.size must_== 1
     }
     "have 3rd step as thread yarn" in new steps {

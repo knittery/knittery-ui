@@ -17,7 +17,7 @@ guide.step.closedCastOff.title = Cast off {0}
 guide.step.closedCastOff.description = Perform a closed cast off on the {0} with {1} yarn for the marked needles.
 
 guide.step.addCarriage.title = Add {0}
-guide.step.addCarriage.description = Add {0}-carriage at the {1}.
+guide.step.addCarriage.description = Add {0}-carriage at the {1}. Be sure to check the settings.
 
 guide.step.threadYarn.k.A.title = Thread Yarn to K
 guide.step.threadYarn.k.A.description = Thread the {0} yarn into A on the K carriage.
@@ -27,3 +27,36 @@ guide.step.threadYarn.k.none.title = Unthread from K
 guide.step.threadYarn.k.none.description = Unthread all yarns from the K carriage.
 guide.step.threadYarn.k.both.title = Thread Yarns to K
 guide.step.threadYarn.k.both.description = Thread the yarn {0} into A and {1} into B on the K carriage.
+
+guide.step.threadYarn.g.one.title = Thread Yarn to G
+guide.step.threadYarn.g.one.description = Thread the {0} yarn into A on the G carriage.
+guide.step.threadYarn.g.none.title = Unthread from G
+guide.step.threadYarn.g.none.description = Unthread all yarns from the G carriage.
+
+guide.step.moveNeedles.title = Move Needles
+guide.step.moveNeedles.description = Move the marked needles on the {0} to the displayed position.
+
+guide.step.moveToDoubleBed.noflip.title = Transfer to Double Bed
+guide.step.moveToDoubleBed.noflip.description = Take the yarn on the marked needles on the main bed and transfer it to the double bed.
+guide.step.moveToDoubleBed.flip.title = Flip to Double Bed
+guide.step.moveToDoubleBed.flip.description = Take the yarn on the marked needles on the main bed, flip it and transfer it to the double bed.
+
+guide.step.retireNeedle.title = Retire Needle
+guide.step.retireNeedle.description = Move the yarns on needle {0}  one needle to the {1} and put it into A position. Leave needle {3} at B position.
+
+guide.step.changeSettings.k.both.title = Change K Settings
+guide.step.changeSettings.k.both.description = Change the settings to the displayed values on the K and the double bed carriage.
+guide.step.changeSettings.k.double.title = Change K Settings
+guide.step.changeSettings.k.double.description = Change the settings to the displayed values on the double bed carriage.
+guide.step.changeSettings.k.addDouble.title = Add Double Bed
+guide.step.changeSettings.k.addDouble.description = Add the double bed carriage and check all settings.
+guide.step.changeSettings.k.removeDouble.title = Remove Double Bed
+guide.step.changeSettings.k.removeDouble.description = Remove the double bed carriage and check the settings on the K carriage.
+guide.step.changeSettings.k.main.title = Change K settings
+guide.step.changeSettings.k.main.description = Change the settings to the displayed values on the K carriage.
+
+guide.step.changeSettings.g.double.title = Change G Settings
+guide.step.changeSettings.g.double.description = Change the settings to the displayed values on the G carriage.
+
+guide.step.changeSettings.l.double.title = Change L Settings
+guide.step.changeSettings.l.double.description = Change the settings to the displayed values on the L carriage.

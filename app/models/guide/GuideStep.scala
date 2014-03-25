@@ -70,8 +70,43 @@ object GuideParser {
     case ThreadYarnK(Some(yarnA), Some(yarnB)) =>
       guideStep(steps, "threadYarn.k.both", yarnA, yarnB)
 
+    case ThreadYarnG(Some(yarn)) =>
+      guideStep(steps, "threadYarn.g.one", yarn)
+    case ThreadYarnG(None) =>
+      guideStep(steps, "threadYarn.g.none")
 
-    //TODO Rest of the steps
+    case MoveNeedles(bed, _) =>
+      guideStep(steps, "moveNeedles", bed)
+
+    case MoveToDoubleBed(_, offset, None) =>
+      guideStep(steps, "moveToDoubleBed.noflip", offset)
+    case MoveToDoubleBed(_, offset, Some(flip)) =>
+      guideStep(steps, "moveToDoubleBed.flip", offset, flip)
+
+    case s@RetireNeedle(bed, needle, direction) =>
+      guideStep(steps, "retireNeedle", needle, direction, s.target)
+
+    case ChangeKCarriageSettings(settings, assembly) =>
+      val assemblyBefore = steps.head.before.carriageState(KCarriage).assembly
+      def settingsBefore = steps.head.before.carriageState(KCarriage).settings
+      assembly match {
+        case db: KCarriage.DoubleBedCarriage =>
+          if (assemblyBefore.isInstanceOf[KCarriage.DoubleBedCarriage]) {
+            if (assembly == assemblyBefore) {
+              if (settings == settingsBefore) guideStep(steps, "changeSettings.k.double")
+              else guideStep(steps, "changeSettings.k.both")
+            } else guideStep(steps, "changeSettings.k.main")
+          } else guideStep(steps, "changeSettings.k.addDouble")
+        case sp: KCarriage.SinkerPlate =>
+          if (assemblyBefore.isInstanceOf[KCarriage.DoubleBedCarriage]) guideStep(steps, "changeSettings.k.removeDouble")
+          else guideStep(steps, "changeSettings.k.main")
+      }
+
+    case ChangeLCarriageSettings(settings) =>
+      guideStep(steps, "changeSettings.l")
+
+    case ChangeGCarriageSettings(settings) =>
+      guideStep(steps, "changeSettings.g")
   }
 
   private def guideStep(steps: Seq[StepState], key: String, args: Any*) = {

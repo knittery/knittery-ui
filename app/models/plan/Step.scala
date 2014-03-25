@@ -221,7 +221,3 @@ case class RetireNeedle(bed: Bed, at: Needle, direction: Direction) extends Step
   }.toSuccess
   lazy val target = at + (if (direction == ToLeft) -1 else 1)
 }
-
-case class Information(title: String, description: String) extends Step {
-  override def apply(state: KnittingState) = state.success
-}
