@@ -16,7 +16,8 @@ object GuideParser {
         parseRecursive(rest, acc :+ step)
       }
     }
-    parseRecursive(plan.stepStates, Vector.empty)
+    val steps = parseRecursive(plan.stepStates, Vector.empty)
+    GuideStep.updatePos(steps)
   }
 
   private def parse(steps: Seq[StepState]): (GuideStep, Seq[StepState]) = steps.head.step match {

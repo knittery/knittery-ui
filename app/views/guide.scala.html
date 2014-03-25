@@ -1,34 +1,33 @@
 @(steps: Seq[models.guide.GuideStep], step: models.guide.GuideStep, instruction: models.guide.Instruction)
-  @import helper._
   @main("Guide", "wide-container guide") {
     <div class="row">
       <div class="col-sm-3">
         <div class="panel panel-default step-listing">
           <div class="panel-heading">
             <span class="buttonbar left prev navbar-form">
-              <button type="button" @if(step.isLast) {disabled} id="first" class="btn btn-xs btn-default">
+              <button type="button" @if(step.position.first) {disabled} id="first" class="btn btn-xs btn-default">
               <span class="glyphicon glyphicon-fast-backward"></span>
               </button>
-              <button type="button" @if(step.isFirst) {disabled} id="prev" class="btn btn-xs btn-default">
+              <button type="button" @if(step.position.first) {disabled} id="prev" class="btn btn-xs btn-default">
               <span class="glyphicon glyphicon-chevron-left"></span>
               </button>
             </span>
             <span class="buttonbar right next navbar-form">
-              <button type="button" @if(step.isLast) {disabled} id="next" class="btn btn-xs btn-default">
+              <button type="button" @if(step.position.last) {disabled} id="next" class="btn btn-xs btn-default">
               <span class="glyphicon glyphicon-chevron-right"></span>
               </button>
-              <button type="button" @if(step.isLast) {disabled} id="last" class="btn btn-xs btn-default">
+              <button type="button" @if(step.position.last) {disabled} id="last" class="btn btn-xs btn-default">
               <span class="glyphicon glyphicon-fast-forward"></span>
               </button>
             </span>
             <h2 class="panel-title text-center">
-              Step <span class="current-step-number">@step.stepNumber</span>
+              Step <span class="current-step-number">@step.position.index<span>
               of <span class="step-number-total">@steps.size</span>
             </h2>
           </div>
           <div class="panel-body">
             @steps.map { s =>
-              <div id="step-@s.stepNumber" class="panel panel-default step @if(s == step) {active} @if(s.isKnitting) {knitting} else {non-knitting}">
+              <div id="step-@s.position.index" class="panel panel-default step @if(s == step) {active} @if(s.isKnitting) {knitting} else {non-knitting}">
                 <div class="panel-heading"><h4 class="panel-title">@s.title</h4></div>
                 <div class="panel-body">@s.description</div>
               </div>

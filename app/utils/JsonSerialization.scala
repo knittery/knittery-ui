@@ -91,6 +91,7 @@ object JsonSerialization {
     implicit object InstructionWrite extends Writes[Instruction] {
       override def writes(instr: Instruction) = {
         Json.obj("title" -> instr.text(lang),
+          "index" -> instr.position.index,
           "stateAfter" -> instr.after)
       }
     }
@@ -100,6 +101,7 @@ object JsonSerialization {
         Json.obj("title" -> step.title(lang),
           "description" -> step.description(lang),
           "instructions" -> step.instructions,
+          "index" -> step.position.index,
           "stateBefore" -> step.before,
           "stateAfter" -> step.after)
       }
