@@ -7,6 +7,7 @@ import models.machine.Machine._
 import models.guide._
 import models.plan._
 import ch.inventsoft.graph.layout.Position
+import play.api.i18n.Lang
 
 object JsonSerialization {
 
@@ -86,16 +87,22 @@ object JsonSerialization {
     }
   }
 
-  implicit object GuideStepWrite extends Writes[GuideStep] {
-    override def writes(step: GuideStep) = {
-      Json.obj("name" -> step.name,
-        "description" -> step.description,
-        "number" -> step.stepNumber,
-        "isKnitting" -> step.isKnitting,
-        "manualNeedles" -> step.manualNeedles(MainBed).map(_.index),
-        "manualDoubleBedNeedles" -> step.manualNeedles(DoubleBed).map(_.index),
-        "stateBefore" -> step.stateBefore,
-        "stateAfter" -> step.stateAfter)
+  def localized(implicit lang: Lang) = new Object {
+    implicit object InstructionWrite extends Writes[Instruction] {
+      override def writes(instr: Instruction) = {
+        Json.obj("title" -> instr.text(lang),
+          "stateAfter" -> instr.after)
+      }
+    }
+
+    implicit object GuideStepWrite extends Writes[GuideStep] {
+      override def writes(step: GuideStep) = {
+        Json.obj("title" -> step.title(lang),
+          "description" -> step.description(lang),
+          "instructions" -> step.instructions,
+          "stateBefore" -> step.before,
+          "stateAfter" -> step.after)
+      }
     }
   }
 }
