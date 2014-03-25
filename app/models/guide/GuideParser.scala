@@ -30,7 +30,7 @@ object GuideParser {
         case (StepState(KnitRow(_, direction, _), before, after), i) =>
           val remaining = knittingSteps.size - i - 1
           Instruction(m("knitRow.instruction", direction, remaining),
-            before, after)
+            Set.empty, before, after)
       }
       (GuideStep(
         m("knitRow.title", direction, knittingSteps.size, carriage),
@@ -39,10 +39,12 @@ object GuideParser {
         knittingSteps.head.before, knittingSteps.last.after),
         tail)
 
-    case ClosedCastOn(bed, from, to, yarn) =>
-      guideStep(steps, "closedCastOn", bed, from, to, yarn)
-    case ClosedCastOff(bed, yarn, _) =>
-      guideStep(steps, "closedCastOff", bed, yarn)
+    case c@ClosedCastOn(bed, from, to, yarn) =>
+      val affects = c.needles.map((bed, _)).toSet
+      guideStepWithMark(steps, "closedCastOn", affects, bed, from, to, yarn)
+    case ClosedCastOff(bed, yarn, filter) =>
+      val affects = Needle.all.filter(filter).map((bed, _)).toSet
+      guideStepWithMark(steps, "closedCastOff", affects, bed, yarn)
 
     case AddCarriage(carriage, at) =>
       guideStep(steps, "addCarriage", carriage, at)
@@ -61,8 +63,11 @@ object GuideParser {
     case ThreadYarnG(None) =>
       guideStep(steps, "threadYarn.g.none")
 
-    case MoveNeedles(bed, _) =>
-      guideStep(steps, "moveNeedles", bed)
+    case MoveNeedles(bed, to) =>
+      val affects = Needle.all.
+        filter(n => steps.head.before.needles(bed)(n).position != to(n)).
+        map((bed, _)).toSet
+      guideStepWithMark(steps, "moveNeedles", affects, bed)
 
     case MoveToDoubleBed(_, offset, None) =>
       guideStep(steps, "moveToDoubleBed.noflip", offset)
@@ -100,9 +105,13 @@ object GuideParser {
     val desc = m(s"$key.description", args: _*)
     (
       GuideStep(m(s"$key.title", args: _*), desc,
-        Instruction(desc, step.before, step.after) :: Nil,
+        Instruction(desc, Set.empty, step.before, step.after) :: Nil,
         false, step.before, step.after),
       steps.tail)
+  }
+  private def guideStepWithMark(steps: Seq[StepState], key: String, mark: Set[(Bed, Needle)], args: Any*) = {
+    val (base, tail) = guideStep(steps, key, args: _*)
+    (base.copy(instructions = base.instructions.head.copy(markNeedles = mark) :: Nil), tail)
   }
 
   private def m(key: String, args: Any*): Text = new Text {

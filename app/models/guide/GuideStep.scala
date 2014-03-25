@@ -1,5 +1,6 @@
 package models.guide
 
+import models.{Bed, Needle}
 import models.plan._
 
 
@@ -22,6 +23,7 @@ object GuideStep {
 }
 
 case class Instruction(text: Text,
+                       markNeedles: Set[(Bed, Needle)],
                        before: KnittingState, after: KnittingState,
                        position: Pos = Pos.only)
 object Instruction {
