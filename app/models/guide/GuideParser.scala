@@ -106,7 +106,8 @@ object GuideParser {
   }
 
   private def m(key: String, args: Any*): Text = new Text {
-    override def apply(implicit lang: Lang) = {
+    override def apply(lang: Lang) = {
+      implicit val l = lang
       val renderedArgs = args map render
       Messages(s"guide.step.$key", renderedArgs: _*)
     }
