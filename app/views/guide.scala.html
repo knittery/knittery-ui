@@ -1,83 +1,81 @@
 @(steps: Seq[models.guide.GuideStep], step: models.guide.GuideStep, instruction: models.guide.Instruction)
+  @import helper._
+  @main("Guide", "wide-container guide") {
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="panel panel-default step-listing">
+          <div class="panel-heading">
+            <span class="buttonbar left prev navbar-form">
+              <button type="button" @if(step.isLast) {disabled} id="first" class="btn btn-xs btn-default">
+              <span class="glyphicon glyphicon-fast-backward"></span>
+              </button>
+              <button type="button" @if(step.isFirst) {disabled} id="prev" class="btn btn-xs btn-default">
+              <span class="glyphicon glyphicon-chevron-left"></span>
+              </button>
+            </span>
+            <span class="buttonbar right next navbar-form">
+              <button type="button" @if(step.isLast) {disabled} id="next" class="btn btn-xs btn-default">
+              <span class="glyphicon glyphicon-chevron-right"></span>
+              </button>
+              <button type="button" @if(step.isLast) {disabled} id="last" class="btn btn-xs btn-default">
+              <span class="glyphicon glyphicon-fast-forward"></span>
+              </button>
+            </span>
+            <h2 class="panel-title text-center">
+              Step <span class="current-step-number">@step.stepNumber</span>
+              of <span class="step-number-total">@steps.size</span>
+            </h2>
+          </div>
+          <div class="panel-body">
+            @steps.map { s =>
+              <div id="step-@s.stepNumber" class="panel panel-default step @if(s == step) {active} @if(s.isKnitting) {knitting} else {non-knitting}">
+                <div class="panel-heading"><h4 class="panel-title">@s.title</h4></div>
+                <div class="panel-body">@s.description</div>
+              </div>
+            }
+            <div lass="panel panel-default step">
+              <div class="panel-heading"><h4 class="panel-title text-center">End</h4></div>
+              <div class="panel-body"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-@import helper._
+      <div class="col-sm-9">
+        <div class="panel panel-default graphical">
+          <div class="panel-heading">
+            <h3 class="panel-title carriage-type">Carriage</h3>
+          </div>
+          <div class="panel-body">
+            <div class="machine"></div>
+            <div class="needles main" data-needles=""></div>
+            <div id="bar" class="progress">
+              <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="199" style="width : 0 %">
+                <span class="sr-only"></span>
+              </div>
+            </div>
+            <div class="needles double" data-needles=""></div>
+            <div class="machine"></div>
+          </div>
+        </div>
 
-@main("Guide", "wide-container guide") {
-
-<div class="row">
-<div class="col-sm-3">  
-	<div class="panel panel-default step-listing">
-	  <div class="panel-heading">
-	    <span class="buttonbar left prev navbar-form">
-        <button type="button" @if(step.isLast){disabled} id="first" class="btn btn-xs btn-default">
-          <span class="glyphicon glyphicon-fast-backward"></span>
-        </button>
-        <button type="button" @if(step.isFirst){disabled} id="prev" class="btn btn-xs btn-default">
-          <span class="glyphicon glyphicon-chevron-left"></span>
-        </button>
-	    </span>
-      <span class="buttonbar right next navbar-form">
-        <button type="button" @if(step.isLast){disabled} id="next" class="btn btn-xs btn-default">
-          <span class="glyphicon glyphicon-chevron-right"></span>
-        </button>
-         <button type="button" @if(step.isLast){disabled} id="last" class="btn btn-xs btn-default">
-            <span class="glyphicon glyphicon-fast-forward"></span>
-         </button>
-      </span>
-      <h2 class="panel-title text-center">
-        Step <span class="current-step-number">@step.stepNumber</span> of <span class="step-number-total">@steps.size</span>
-      </h2>
-	  </div>
-	  <div class="panel-body">
-    @steps.map { s =>
-	    <div id="step-@s.stepNumber" class="panel panel-default step @if(s==step) {active} @if(s.isKnitting) {knitting} else {non-knitting}">
-	      <div class="panel-heading"><h4 class="panel-title">@s.title</h4></div>
-	      <div class="panel-body">@s.description</div>
-	    </div>
-	    }
-	    <div lass="panel panel-default step">
-	      <div class="panel-heading"><h4 class="panel-title text-center">End</h4></div>
-	      <div class="panel-body"></div>
-	    </div>
-	  </div>
-	</div>
-</div>
-
-<div class="col-sm-9">
-	<div class="panel panel-default graphical">
-	  <div class="panel-heading">
-	    <h3 class="panel-title carriage-type">Carriage</h3>
-	  </div>
-	  <div class="panel-body">
-	    <div class="machine"></div>
-	    <div class="needles main" data-needles=""></div>
-	    <div id="bar" class="progress">
-	      <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="199" style="width: 0%">
-	        <span class="sr-only"></span>
-	      </div>
-	    </div>
-      <div class="needles double" data-needles=""></div>
-      <div class="machine"></div>
-	  </div>
-	</div>
-
-  <div class="panel panel-default graphical">
-    <div class="panel-heading">
-      <span class="buttonbar right btn-group">
-        <button type="button" id="btn-output-3d" class="btn btn-xs">
-          <span class="glyphicon glyphicon-globe"></span>
-        </button>
-        <button type="button" id="btn-output-2d" class="btn btn-xs btn-default">
-          <span class="glyphicon glyphicon-picture"></span>
-        </button>
-      </span>
-      <h3 class="panel-title">Output</h3>
+        <div class="panel panel-default graphical">
+          <div class="panel-heading">
+            <span class="buttonbar right btn-group">
+              <button type="button" id="btn-output-3d" class="btn btn-xs">
+                <span class="glyphicon glyphicon-globe"></span>
+              </button>
+              <button type="button" id="btn-output-2d" class="btn btn-xs btn-default">
+                <span class="glyphicon glyphicon-picture"></span>
+              </button>
+            </span>
+            <h3 class="panel-title">Output</h3>
+          </div>
+          <div class="panel-body">
+            <div class="output-2d output"></div>
+            <div class="output-3d output"></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="panel-body">
-      <div class="output-2d output"></div>
-      <div class="output-3d output"></div>
-    </div>
-  </div>
-</div>
-</div>
-}(List("guide", "needles", "machine", "guide-model", "3dview"))
+  }(List("guide", "needles", "machine", "guide-model", "3dview"))
