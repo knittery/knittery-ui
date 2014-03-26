@@ -39,15 +39,15 @@ $(() ->
   )
   $(".current-step-number").link().text(guide, "currentStep", (s) -> if s? then s.index + 1 else "")
 
-  $(".needles.main").link().data("needles")(guide, "currentStep", (s) ->
-    if not s? then return ""
-#    for c, i in s.stateAfter.needles
-#      if s.markNeedlesMainBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
+  $(".needles.main").link().data("needles")(guide, "currentInstruction", (instruction) ->
+    if not instruction? then return ""
+    for c, i in instruction.stateAfter.needles
+      if instruction.markNeedlesMainBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
-  $(".needles.double").link().data("needles")(guide, "currentStep", (s) ->
-    if not s? then return ""
- #   for c, i in s.stateAfter.doubleBedNeedles
- #     if s.markNeedlesDoubleBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
+  $(".needles.double").link().data("needles")(guide, "currentInstruction", (instruction) ->
+    if not instruction? then return ""
+    for c, i in instruction.stateAfter.doubleBedNeedles
+      if instruction.markNeedlesDoubleBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
 
   makeOutput($(".output-2d"))
