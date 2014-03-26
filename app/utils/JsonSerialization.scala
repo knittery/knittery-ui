@@ -174,7 +174,7 @@ object JsonSerialization {
   def localized(implicit lang: Lang) = new Object {
     implicit object InstructionWrite extends Writes[Instruction] {
       override def writes(instr: Instruction) = {
-        Json.obj("title" -> instr.text(lang),
+        Json.obj("text" -> instr.text(lang),
           "index" -> instr.position.index,
           "first" -> instr.position.first,
           "last" -> instr.position.last,

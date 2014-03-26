@@ -50,6 +50,8 @@ $(() ->
       if instruction.markNeedlesDoubleBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
 
+  $("#instruction-text").link().text(guide, "currentInstruction", (i) -> if i? then i.text else "")
+
   makeOutput($(".output-2d"))
   makeKCarriage($(".kcarriage"))
   makeDoubleBedCarriage($(".doublebedcarriage"))
