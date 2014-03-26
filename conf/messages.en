@@ -42,7 +42,7 @@ guide.step.moveToDoubleBed.flip.title = Flip to Double Bed
 guide.step.moveToDoubleBed.flip.description = Take the yarn on the marked needles on the main bed, flip it and transfer it to the double bed.
 
 guide.step.retireNeedle.title = Retire Needle
-guide.step.retireNeedle.description = Move the yarns on needle {0}  one needle to the {1} and put it into A position. Leave needle {3} at B position.
+guide.step.retireNeedle.description = Move the yarns on needle {0}  one needle to the {1} and put it into A position. Leave needle {2} at B position.
 
 guide.step.changeSettings.k.both.title = Change K Settings
 guide.step.changeSettings.k.both.description = Change the settings to the displayed values on the K and the double bed carriage.
