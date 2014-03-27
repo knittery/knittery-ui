@@ -96,7 +96,7 @@ object Machine {
   case class Positions(positions: Map[Carriage, CarriagePosition], row: Int) extends Event
 
   case class LoadNeedlePattern(pattern: NeedleActionRow) extends Command
-  case class NeeldePatternLoaded(pattern: NeedleActionRow) extends Event
+  case class NeedlePatternLoaded(pattern: NeedleActionRow) extends Event
 
   /** Will be answered by a NeedlePatternUpdate. */
   case object GetNeedlePattern extends Command
