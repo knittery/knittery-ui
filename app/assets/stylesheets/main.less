@@ -11,7 +11,6 @@ body {
   width: 100%;
 }
 
-
 .serial-simulator {
   margin-top: 2em;
 
@@ -125,32 +124,46 @@ body {
   }
 }
 
-.carriage-displays {
-  float: left;
-}
-
 .guide {
-  .right-side {
-    margin-left: 31em;
+  .step-display {
+    .previous-steps {
+    }
+    .current-step {
+    }
+    .next-steps {
+    }
   }
 
-  .output {
-    height: 30em;
-    width: 100%;
-    display: none;
+  .machine-display {
+    .carriage-displays {
+      float: left;
+
+      .kcarriage {
+        height: 60px;
+        width: 130px;
+      }
+      .doublebedcarriage {
+        height: 60px;
+        width: 130px;
+      }
+    }
+
+    .beds {
+      margin-left: 150px;
+    }
   }
-  .output-3d {
-    display: block;
-  }
-   
-  .kcarriage {
-    height: 60px;
-    width: 130px;
-  }
-  
-  .doublebedcarriage {
-    height: 60px;
-    width: 130px;
+
+  .outputs {
+    margin-left: 150px;
+
+    .output {
+      height: 24em;
+      width: 100%;
+      display: none;
+    }
+    .output-3d {
+      display: block;
+    }
   }
 }
 
