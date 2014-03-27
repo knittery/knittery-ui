@@ -27,9 +27,9 @@ object GuideParser {
         case _ => false
       }
       val instructions = knittingSteps.zipWithIndex.map {
-        case (StepState(KnitRow(_, direction, _), before, after), i) =>
+        case (StepState(step@KnitRow(_, direction, _), before, after), i) =>
           val remaining = knittingSteps.size - i - 1
-          Instruction(m("knitRow.instruction", direction, remaining),
+          Instruction(m("knitRow.instruction", direction, remaining), step,
             Set.empty, before, after)
       }
       (GuideStep(
@@ -105,7 +105,7 @@ object GuideParser {
     val desc = m(s"$key.description", args: _*)
     (
       GuideStep(m(s"$key.title", args: _*), desc,
-        Instruction(desc, Set.empty, step.before, step.after) :: Nil,
+        Instruction(desc, step.step, Set.empty, step.before, step.after) :: Nil,
         false, step.before, step.after),
       steps.tail)
   }

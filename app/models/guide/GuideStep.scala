@@ -22,7 +22,7 @@ object GuideStep {
   }
 }
 
-case class Instruction(text: Text,
+case class Instruction(text: Text, step: Step,
                        markNeedles: Set[(Bed, Needle)],
                        before: KnittingState, after: KnittingState,
                        position: Pos = Pos.only)

@@ -7,6 +7,7 @@ import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 import ch.inventsoft.graph.layout.Layout
 import models.plan._
+import models.machine.Machine
 import utils.SubscriptionActor
 
 /** An instance of a plan execution. Keeps track of the current step. */
@@ -68,6 +69,8 @@ object Guider {
     var current = Option.empty[ActorRef]
     var subscribers = Set.empty[ActorRef]
 
+    context.actorOf(Machine.subscription(machine))
+
     override def receive = subscriptionHandling orElse {
       case cmd@LoadPlan(plan) =>
         current foreach (_ ! PoisonPill)
@@ -93,6 +96,11 @@ object Guider {
         sender ! CommandExecuted(cmd)
       case Terminated if subscribers.contains(sender) =>
         subscribers -= sender
+
+      case notification@ChangeEvent(step, Instruction(_, knit: KnitRow, _, _, _, _)) =>
+        machine ! Machine.LoadNeedlePattern(knit.pattern)
+        subscribers foreach (_ ! notification)
+
       case notification: Notification =>
         subscribers foreach (_ ! notification)
     }
