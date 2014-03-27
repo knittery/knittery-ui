@@ -175,8 +175,8 @@ object JsonSerialization {
       override def writes(instr: Instruction) = {
         Json.obj("text" -> instr.text(lang),
           "index" -> instr.position.index,
-          "first" -> instr.position.first,
-          "last" -> instr.position.last,
+          "first" -> instr.position.isFirst,
+          "last" -> instr.position.isLast,
           "markNeedlesMainBed" -> instr.markNeedles.filter(_._1 == MainBed).map(_._2.index),
           "markNeedlesDoubleBed" -> instr.markNeedles.filter(_._1 == DoubleBed).map(_._2.index),
           "stateAfter" -> instr.after)
@@ -189,8 +189,8 @@ object JsonSerialization {
           "description" -> step.description(lang),
           "instructions" -> step.instructions,
           "index" -> step.position.index,
-          "first" -> step.position.first,
-          "last" -> step.position.last,
+          "first" -> step.position.isFirst,
+          "last" -> step.position.isLast,
           "stateBefore" -> step.before,
           "stateAfter" -> step.after)
       }

@@ -5,18 +5,18 @@
       <div class="panel panel-default step-listing">
         <div class="panel-heading">
           <span class="buttonbar left prev navbar-form">
-            <button type="button" @if(step.position.first) {disabled} id="first" class="btn btn-xs btn-default">
+            <button type="button" @if(step.position.isFirst) {disabled} id="first" class="btn btn-xs btn-default">
             <span class="glyphicon glyphicon-fast-backward"></span>
             </button>
-            <button type="button" @if(step.position.first) {disabled} id="prev" class="btn btn-xs btn-default">
+            <button type="button" @if(step.position.isFirst) {disabled} id="prev" class="btn btn-xs btn-default">
             <span class="glyphicon glyphicon-chevron-left"></span>
             </button>
           </span>
           <span class="buttonbar right next navbar-form">
-            <button type="button" @if(step.position.last) {disabled} id="next" class="btn btn-xs btn-default">
+            <button type="button" @if(step.position.isLast) {disabled} id="next" class="btn btn-xs btn-default">
             <span class="glyphicon glyphicon-chevron-right"></span>
             </button>
-            <button type="button" @if(step.position.last) {disabled} id="last" class="btn btn-xs btn-default">
+            <button type="button" @if(step.position.isLast) {disabled} id="last" class="btn btn-xs btn-default">
             <span class="glyphicon glyphicon-fast-forward"></span>
             </button>
           </span>

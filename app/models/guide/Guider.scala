@@ -113,31 +113,28 @@ object Guider {
   private class GuiderForPlan(plan: Plan) extends Actor {
     val layouter = context actorOf Layouter.props(plan.run.output3D)
     val steps = GuideParser(plan)
-    var stepIndex = 0
-    var instrIndex = 0
+    var currentStep = steps.head
+    var currentInstruction = currentStep.instructions.head
 
-    private def currentStep = steps(stepIndex)
-    private def currentInstruction = currentStep.instructions(instrIndex)
     private def modStep(offset: Int) = {
-      val newIndex = stepIndex + offset
-      if (newIndex >= 0 && newIndex < steps.size) {
-        stepIndex = newIndex
-        instrIndex = 0
-        true
-      } else false
-    }
-    private def incrInstr() = {
-      if (instrIndex >= currentStep.instructions.size - 1) modStep(1)
-      else {
-        instrIndex += 1
-        true
+      val newPos = currentStep.position.shiftOption(offset)
+      newPos foreach { pos =>
+        currentStep = steps(pos.index)
+        currentInstruction = currentStep.instructions.head
       }
+      newPos.isDefined
     }
-    private def decrInstr() = {
-      if (instrIndex < 1) modStep(-1)
-      else {
-        instrIndex -= 1
+    private def modInstruction(offset: Int) = {
+      require(Math.abs(offset) == 1, "Can only mod by 1 or -1")
+      val newPos = currentInstruction.position.shiftOption(offset)
+      newPos.map { pos =>
+        currentInstruction = currentStep.instructions(pos.index)
         true
+      }.getOrElse {
+        if (modStep(offset)) {
+          if (offset == -1) currentInstruction = currentStep.instructions.last
+          true
+        } else false
       }
     }
 
@@ -155,13 +152,13 @@ object Guider {
         sender ! CurrentStep(currentStep, currentInstruction, steps)
 
       case cmd@First =>
-        stepIndex = 0
-        instrIndex = 0
+        currentStep = steps.head
+        currentInstruction = currentStep.instructions.head
         self ! NotifyStepChange
         sender ! CommandExecuted(cmd)
       case cmd@Last =>
-        stepIndex = steps.size - 1
-        instrIndex = steps.last.instructions.size - 1
+        currentStep = steps.last
+        currentInstruction = currentStep.instructions.last
         self ! NotifyStepChange
         sender ! CommandExecuted(cmd)
 
@@ -177,12 +174,12 @@ object Guider {
         } else sender ! CommandNotExecuted(cmd, "already at first")
 
       case cmd@NextInstruction =>
-        if (incrInstr()) {
+        if (modInstruction(1)) {
           self ! NotifyStepChange
           sender ! CommandExecuted(cmd)
         } else sender ! CommandNotExecuted(cmd, "already at last")
       case cmd@PreviousInstruction =>
-        if (decrInstr()) {
+        if (modInstruction(-1)) {
           self ! NotifyStepChange
           sender ! CommandExecuted(cmd)
         } else sender ! CommandNotExecuted(cmd, "already at first")
