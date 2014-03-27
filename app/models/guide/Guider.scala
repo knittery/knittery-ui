@@ -140,7 +140,10 @@ object Guider {
 
     override def receive = {
       case Machine.NextRow =>
-        self ! NextInstruction
+        //forward to next knitting step if we're not already at one
+        while (!currentStep.isKnitting) modInstruction(1)
+        modInstruction(1)
+        self ! NotifyStepChange
 
       case GetKnitted3D =>
         implicit val timeout: Timeout = 10.minutes
