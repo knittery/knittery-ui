@@ -32,8 +32,7 @@ object JsonSerialization {
     override def writes(event: PositionChanged) = {
       Json.obj("event" -> "positionChange",
         "carriage" -> event.carriage,
-        "position" -> event.position,
-        "row" -> event.row)
+        "position" -> event.position)
     }
   }
 

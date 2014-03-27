@@ -3,17 +3,16 @@ package models.machine
 import akka.actor._
 import models._
 import models.connector.Connector._
-import RowTracker.RowChanged
 import utils.SubscriptionActor
 
 /**
  * Actor representing the knitting machine.
  * - <i>connector</i> must send MachineEvents to the actor or crash if it loses the
- *   connection to the machine.
+ * connection to the machine.
  */
 class Machine(connectorProps: Props) extends Actor {
+
   import Machine._
-  import RowTracker._
 
   override def supervisorStrategy = OneForOneStrategy() {
     case _ => SupervisorStrategy.Restart
@@ -28,7 +27,6 @@ class Machine(connectorProps: Props) extends Actor {
 
   var positions = Map.empty[Carriage, CarriagePosition]
   var lastCarriage: Carriage = KCarriage
-  var row: Int = -1
   var pattern = AllNeedlesToB
 
   override def receive = {
@@ -40,7 +38,7 @@ class Machine(connectorProps: Props) extends Actor {
       subscribers -= sender
 
     case GetPositions =>
-      sender ! Positions(positions, row)
+      sender ! Positions(positions)
 
     case LoadNeedlePattern(patternRow) =>
       connector ! LoadPatternRow(patternRow)
@@ -50,16 +48,14 @@ class Machine(connectorProps: Props) extends Actor {
       sender ! NeedlePatternUpdate(pattern)
 
     //MachineEvents
-    case pu @ PositionUpdate(pos, direction, Some(carriage)) =>
+    case pu@PositionUpdate(pos, direction, Some(carriage)) =>
       rowTracker ! pu
-      notify(PositionChanged(carriage, pos, row))
+      notify(PositionChanged(carriage, pos))
       positions += carriage -> pos
 
     //Events from subactors
-    case event @ RowChanged(r) =>
-      row = r
-      notify(PositionChanged(lastCarriage, positions.get(lastCarriage).getOrElse(CarriageLeft(0)),
-        row))
+    case RowTracker.NextRow =>
+      notify(Machine.NextRow)
 
     case Terminated(`connector`) => //Connector crashed
       //TODO handle the crash
@@ -87,13 +83,15 @@ object Machine {
 
   case object Subscribe extends Command
   case object Unsubscribe extends Command
-
   case object Subscribed extends Event
-  case class PositionChanged(carriage: Carriage, position: CarriagePosition, row: Int) extends Event
-  case class NeedlePatternUpdate(currentRow: NeedleActionRow) extends Event
+  sealed trait Notification extends Event
+
+  case class PositionChanged(carriage: Carriage, position: CarriagePosition) extends Notification
+  case class NeedlePatternUpdate(currentRow: NeedleActionRow) extends Notification
+  case object NextRow extends Notification
 
   case object GetPositions extends Command
-  case class Positions(positions: Map[Carriage, CarriagePosition], row: Int) extends Event
+  case class Positions(positions: Map[Carriage, CarriagePosition]) extends Event with Notification
 
   case class LoadNeedlePattern(pattern: NeedleActionRow) extends Command
   case class NeedlePatternLoaded(pattern: NeedleActionRow) extends Event

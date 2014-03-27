@@ -34,10 +34,10 @@ object Display extends Controller {
     val pat = machine ? GetNeedlePattern
     for {
       machineRef <- r
-      Positions(data, row) <- pos
+      Positions(data) <- pos
       needlePattern @ NeedlePatternUpdate(_) <- pat
       e = ActorEnumerator.enumerator(Machine.subscription(machineRef))
-      fst = Enumerator.enumerate[Any](data.map(d => PositionChanged(d._1, d._2, row))) >>>
+      fst = Enumerator.enumerate[Any](data.map(d => PositionChanged(d._1, d._2))) >>>
         Enumerator[Any](needlePattern)
       json = Enumeratee.collect[Any] {
         case event: PositionChanged => Json.toJson(event)
