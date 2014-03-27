@@ -179,6 +179,7 @@ object JsonSerialization {
           "last" -> instr.position.isLast,
           "markNeedlesMainBed" -> instr.markNeedles.filter(_._1 == MainBed).map(_._2.index),
           "markNeedlesDoubleBed" -> instr.markNeedles.filter(_._1 == DoubleBed).map(_._2.index),
+          "stateBefore" -> instr.before,
           "stateAfter" -> instr.after)
       }
     }

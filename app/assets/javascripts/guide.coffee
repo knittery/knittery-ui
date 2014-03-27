@@ -57,8 +57,8 @@ $(() ->
   makeDoubleBedCarriage($(".doublebedcarriage"))
 
   $(".output-3d").knitted3d()
-  $(".output-3d").link().data("visibleStitches")(guide, "currentStep", (s) ->
-    if s? then s.stateBefore.visibleStitches3D
+  $(".output-3d").link().data("visibleStitches")(guide, "currentInstruction", (instruction) ->
+    if instruction? then instruction.stateBefore.visibleStitches3D
     else 0
   )
 
@@ -127,8 +127,8 @@ makeOutput = (elem) ->
     ctx.translate(0, -h)
     ctx.restore()
 
-  guide.bind("currentStep:change", (_, step) ->
-    if step? then drawOutput($(".output"), step.stateBefore.output)
+  guide.bind("currentInstruction:change", (_, instruction) ->
+    if instruction? then drawOutput($(".output"), instruction.stateBefore.output)
   )
 
 
