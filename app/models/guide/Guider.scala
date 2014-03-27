@@ -83,6 +83,9 @@ object Guider {
         current
           .map(_ forward cmd)
           .getOrElse(sender ! CommandNotExecuted(cmd, "no plan is loaded"))
+
+      case cmd: Machine.Notification =>
+        current.foreach(_ forward cmd)
     }
 
     def subscriptionHandling: Receive = {
@@ -104,8 +107,6 @@ object Guider {
       case notification: Notification =>
         subscribers foreach (_ ! notification)
     }
-
-    //TODO handle machine
   }
 
   /** Keeps track of the position within a plan and answers all commands. */
@@ -141,6 +142,9 @@ object Guider {
     }
 
     override def receive = {
+      case Machine.NextRow =>
+        self ! NextInstruction
+
       case GetKnitted3D =>
         implicit val timeout: Timeout = 10.minutes
         (layouter ? Layouter.Get).map {
