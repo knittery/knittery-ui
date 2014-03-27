@@ -88,7 +88,7 @@ class GuideParserSpec extends Specification {
     }
     "have 4th step as knit one row" in new steps {
       val step = steps(3)
-      step.title must beText("Knit 1 with K")
+      step.title must beText("Knit a Row with K")
       step.description must beText("Knit 1 row with the K-carriage.")
       step.instructions.size must_== 1
       step.instructions(0).text must beText("Knit to right (last row).")
@@ -110,12 +110,12 @@ class GuideParserSpec extends Specification {
     }
     "have 4th step as knit ten rows" in new steps {
       val step = steps(3)
-      step.title must beText("Knit 10 with K")
+      step.title must beText("Knit 10 Rows with K")
       step.description must beText("Knit 10 rows with the K-carriage.")
       step.instructions.size must_== 10
-      step.instructions(0).text must beText("Knit to right (9 rows remaining).")
-      step.instructions(1).text must beText("Knit to left (8 rows remaining).")
-      step.instructions(8).text must beText("Knit to right (one row remaining).")
+      step.instructions(0).text must beText("Knit to right (10 rows remaining).")
+      step.instructions(1).text must beText("Knit to left (9 rows remaining).")
+      step.instructions(8).text must beText("Knit to right (2 rows remaining).")
       step.instructions(9).text must beText("Knit to left (last row).")
     }
     "have 5th step as cast off" in new steps {
@@ -141,11 +141,11 @@ class GuideParserSpec extends Specification {
     }
     "have 4th step as knit three rows" in new steps {
       val step = steps(3)
-      step.title must beText("Knit 3 with K")
+      step.title must beText("Knit 3 Rows with K")
       step.description must beText("Knit 3 rows with the K-carriage.")
       step.instructions.size must_== 3
-      step.instructions(0).text must beText("Knit to right (2 rows remaining).")
-      step.instructions(1).text must beText("Knit to left (one row remaining).")
+      step.instructions(0).text must beText("Knit to right (3 rows remaining).")
+      step.instructions(1).text must beText("Knit to left (2 rows remaining).")
       step.instructions(2).text must beText("Knit to right (last row).")
     }
     "have 5th step as green thread yarn" in new steps {
@@ -156,11 +156,11 @@ class GuideParserSpec extends Specification {
     }
     "have 6th step as knit three rows" in new steps {
       val step = steps(5)
-      step.title must beText("Knit 3 with K")
+      step.title must beText("Knit 3 Rows with K")
       step.description must beText("Knit 3 rows with the K-carriage.")
       step.instructions.size must_== 3
-      step.instructions(0).text must beText("Knit to left (2 rows remaining).")
-      step.instructions(1).text must beText("Knit to right (one row remaining).")
+      step.instructions(0).text must beText("Knit to left (3 rows remaining).")
+      step.instructions(1).text must beText("Knit to right (2 rows remaining).")
       step.instructions(2).text must beText("Knit to left (last row).")
     }
     "have 7th step as cast off" in new steps {
