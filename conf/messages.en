@@ -52,7 +52,7 @@ guide.step.changeSettings.k.addDouble.title = Add Double Bed
 guide.step.changeSettings.k.addDouble.description = Add the double bed carriage and check all settings.
 guide.step.changeSettings.k.removeDouble.title = Remove Double Bed
 guide.step.changeSettings.k.removeDouble.description = Remove the double bed carriage and check the settings on the K carriage.
-guide.step.changeSettings.k.main.title = Change K settings
+guide.step.changeSettings.k.main.title = Change K Settings
 guide.step.changeSettings.k.main.description = Change the settings to the displayed values on the K carriage.
 
 guide.step.changeSettings.g.double.title = Change G Settings
