@@ -20,6 +20,17 @@ $(() ->
   )
   $("#last").link().disabled(guide, "step", (s) -> s? && s.last)
 
+  $("#nextInstruction").link().disabled(guide, "instruction", (i) -> i? && i.last)
+  $("#nextInstruction").click(() ->
+    jsRoutes.controllers.Guide.nextInstruction().ajax()
+    false
+  )
+  $("#prevInstruction").link().disabled(guide, "instruction", (i) -> i? && i.first)
+  $("#prevInstruction").click(() ->
+    jsRoutes.controllers.Guide.previousInstruction().ajax()
+    false
+  )
+
 
   $(".graphical .carriage-type").link().text(machine, "carriage", (c) -> if c? then "Carriage #{c}" else "Carriage")
   $("#bar .progress-bar").carriageBar()

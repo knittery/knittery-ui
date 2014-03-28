@@ -17,6 +17,8 @@ POST    /guide/next                 controllers.Guide.next
 POST    /guide/previous             controllers.Guide.previous
 POST    /guide/first                controllers.Guide.first
 POST    /guide/last                 controllers.Guide.last
+POST    /guide/instruction/next     controllers.Guide.nextInstruction
+POST    /guide/instruction/previous controllers.Guide.previousInstruction
 GET     /guide/subscribe            controllers.Guide.subscribe
 
 GET     /plans                      controllers.Plans.show

@@ -48,6 +48,17 @@ object Guide extends Controller {
     } yield Redirect(routes.Guide.view)
   }
 
+  def nextInstruction = Action.async { request =>
+    for {
+      Guider.CommandExecuted(_) <- guider ? Guider.NextInstruction
+    } yield Redirect(routes.Guide.view)
+  }
+  def previousInstruction = Action.async { request =>
+    for {
+      Guider.CommandExecuted(_) <- guider ? Guider.PreviousInstruction
+    } yield Redirect(routes.Guide.view)
+  }
+
   def subscribe = WebSocket.async[JsValue] { implicit request =>
     val loc = localized
     import loc._
