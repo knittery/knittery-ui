@@ -3,19 +3,6 @@
   <div class="step-display row">
     <div class="col-md-2">
       <div class="panel panel-default graphical">
-        <div class="panel-heading">
-          <span class="buttonbar left prev navbar-form">
-            <button type="button" @if(step.position.isFirst) {disabled} id="first" class="btn btn-xs btn-default">
-            <span class="glyphicon glyphicon-fast-backward"></span>
-            </button>
-            <button type="button" @if(step.position.isFirst) {disabled} id="prev" class="btn btn-xs btn-default">
-            <span class="glyphicon glyphicon-chevron-left"></span>
-            </button>
-          </span>
-          <h2 class="panel-title text-center">
-            knitted
-          </h2>
-        </div>
         <div class="panel-body previous-steps step-list">
           <ul>
           @steps.reverse.map { s =>
@@ -30,6 +17,20 @@
       <div class="panel panel-default graphical">
         <div class="panel-heading">
           <span class="buttonbar right">
+            <div class="navigation-buttons">
+              <button type="button" @if(step.position.isFirst) {disabled} id="first" class="btn btn-xs btn-default">
+              <span class="glyphicon glyphicon-fast-backward"></span>
+              </button>
+              <button type="button" @if(step.position.isFirst) {disabled} id="prev" class="btn btn-xs btn-default">
+              <span class="glyphicon glyphicon-chevron-left"></span>
+              </button>
+              <button type="button" @if(step.position.isLast) {disabled} id="next" class="btn btn-xs btn-default">
+              <span class="glyphicon glyphicon-chevron-right"></span>
+              </button>
+              <button type="button" @if(step.position.isLast) {disabled} id="last" class="btn btn-xs btn-default">
+              <span class="glyphicon glyphicon-fast-forward"></span>
+              </button>
+            </div>
             <div class="step-number-info">
               Step <span class="current-step-number">@(step.position.index + 1)</span>
               / <span class="step-number-total">@steps.size</span>
@@ -52,19 +53,6 @@
 
     <div class="col-md-2">
       <div class="panel panel-default graphical">
-        <div class="panel-heading">
-          <span class="buttonbar right next navbar-form">
-            <button type="button" @if(step.position.isLast) {disabled} id="next" class="btn btn-xs btn-default">
-            <span class="glyphicon glyphicon-chevron-right"></span>
-            </button>
-            <button type="button" @if(step.position.isLast) {disabled} id="last" class="btn btn-xs btn-default">
-            <span class="glyphicon glyphicon-fast-forward"></span>
-            </button>
-          </span>
-          <h2 class="panel-title text-center">
-            to knit
-          </h2>
-        </div>
         <div class="panel-body next-steps step-list">
           <ul>
           @steps.map { s =>
