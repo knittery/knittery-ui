@@ -188,7 +188,7 @@ object JsonSerialization {
       override def writes(step: GuideStep) = {
         Json.obj("title" -> step.title(lang),
           "description" -> step.description(lang),
-          "instructions" -> step.instructions,
+          "instructionCount" -> step.instructions.size,
           "index" -> step.position.index,
           "first" -> step.position.isFirst,
           "last" -> step.position.isLast,
