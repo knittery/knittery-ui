@@ -136,16 +136,24 @@ body {
     }
   }
 
-  .outputs {
-    margin-left: 150px;
-
-    .output {
-      height: 16em;
-      width: 100%;
-      display: none;
+  .output-display {
+    .output-selection {
+      position: absolute;
+      right: 2em;
+      z-index: 1000;
     }
-    .output-3d {
-      display: block;
+
+    .outputs {
+      margin-left: 150px;
+
+      .output {
+        height: 18em;
+        width: 100%;
+        display: none;
+      }
+      .output-3d {
+        display: block;
+      }
     }
   }
 }
