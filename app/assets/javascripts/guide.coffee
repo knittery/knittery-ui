@@ -26,6 +26,11 @@ $(() ->
   $(".needles.main").needles(200)
   $(".needles.double").needles(200, "needles", false)
 
+  stepbar = $("#step-bar .progress-bar")
+  stepbar.link().attr("aria-valuenow")(guide, "stepProgress")
+  stepbar.link().width(guide, "stepProgress", "%")
+  stepbar.find("span.sr-only").link().text(machine, "stepProgress")
+
   guide.bind("currentStep:change", (_, step) ->
     $(".previous-step").each(->
       c = $(this)
@@ -40,6 +45,7 @@ $(() ->
   )
 
   $(".current-step-number").link().text(guide, "currentStep", (s) -> if s? then s.index + 1 else "")
+  $(".step-number-total").link().text(guide, "planInfo", (p) -> if p? then p.totalSteps else "")
 
   $(".needles.main").link().data("needles")(guide, "currentInstruction", (instruction) ->
     if not instruction? then return ""

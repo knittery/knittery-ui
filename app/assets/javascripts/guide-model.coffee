@@ -1,6 +1,9 @@
 # Step { name, description, number }
 
-guide = $().model("currentStep", "currentInstruction")
+guide = $().model("currentStep", "currentInstruction", "planInfo")
+guide.derived("stepProgress", ["currentStep", "planInfo"], (s, p) ->
+  if s? and p? then s.index * 100 / p.totalSteps else 0
+)
 
 started = false
 
@@ -11,6 +14,7 @@ guide.start = (route) -> if (!started)
     parsed = $.parseJSON(msg.data)
     me.currentStep = parsed.step
     me.currentInstruction = parsed.instruction
+    me.planInfo = parsed.planInfo
   started = true
 
 window.guide = guide

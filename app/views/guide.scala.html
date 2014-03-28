@@ -30,11 +30,18 @@
       <div class="panel panel-default graphical">
         <div class="panel-heading">
           <span class="buttonbar right">
-            [TODO Progress bar]
+            <div class="step-number-info">
+              Step <span class="current-step-number">@(step.position.index + 1)</span>
+              / <span class="step-number-total">@steps.size</span>
+            </div>
+            <div id="step-bar" class="progress">
+              <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="199" style="width : 0 %">
+                <span class="sr-only"></span>
+              </div>
+            </div>
           </span>
           <h2 class="panel-title">
-            Current Step (<span class="current-step-number">@(step.position.index + 1)</span>
-            of <span class="step-number-total">@steps.size</span>)
+            Instruction
           </h2>
         </div>
         <div class="panel-body current-step">

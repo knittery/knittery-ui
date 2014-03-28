@@ -53,14 +53,18 @@ object Guide extends Controller {
     import loc._
     for {
       actor <- guider.resolveOne()
-      Guider.CurrentStep(step, instruction, _) <- actor ? Guider.QueryStep
+      Guider.CurrentStep(step, instruction, steps) <- actor ? Guider.QueryStep
       e = ActorEnumerator.enumerator(Guider.subscription(actor))
       fst = Enumerator[Any](Guider.ChangeEvent(step, instruction))
       json = (fst >>> e) &> Enumeratee.collect {
         case Guider.ChangeEvent(step, instruction) => Json.obj(
           "event" -> "change",
           "step" -> step,
-          "instruction" -> instruction): JsValue
+          "instruction" -> instruction,
+          "planInfo" -> Json.obj(
+            "totalSteps" -> steps.size,
+            "totalInstructions" -> steps.flatMap(_.instructions).size
+          )): JsValue
       }
     } yield (Iteratee.ignore, json)
   }
