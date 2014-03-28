@@ -27,16 +27,18 @@ $(() ->
   $(".needles.double").needles(200, "needles", false)
 
   guide.bind("currentStep:change", (_, step) ->
-    $(".step.active").removeClass("active")
-    active = $("#step-#{step.index}")
-    active.addClass("active").removeClass("future").removeClass("past")
-    active.prevAll(".step").
-    removeClass("future").
-    addClass("past")
-    active.nextAll(".step").
-    removeClass("past").
-    addClass("future")
+    $(".previous-step").each(->
+      c = $(this)
+      if (c.data("step") < step.index) then c.show()
+      else c.hide()
+    )
+    $(".next-step").each(->
+      c = $(this)
+      if (c.data("step") > step.index) then c.show()
+      else c.hide()
+    )
   )
+
   $(".current-step-number").link().text(guide, "currentStep", (s) -> if s? then s.index + 1 else "")
 
   $(".needles.main").link().data("needles")(guide, "currentInstruction", (instruction) ->

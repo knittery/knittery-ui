@@ -18,8 +18,8 @@
         </div>
         <div class="panel-body previous-steps step-list">
           <ul>
-          @steps.filter(_.position < step.position).reverse.map { s =>
-            <li>@s.title.value</li>
+          @steps.reverse.map { s =>
+            <li class="previous-step" data-step="@s.position.index" @if(s.position >= step.position) {style="display: none"}>@s.title.value</li>
           }
           </ul>
         </div>
@@ -60,8 +60,8 @@
         </div>
         <div class="panel-body next-steps step-list">
           <ul>
-          @steps.filter(_.position > step.position).map { s =>
-            <li>@s.title.value</li>
+          @steps.map { s =>
+            <li class="next-step" data-step="@s.position.index" @if(s.position >= step.position) {style="display: none"}>@s.title.value</li>
           }
           </ul>
         </div>
