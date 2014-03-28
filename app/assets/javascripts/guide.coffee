@@ -1,15 +1,15 @@
 $(() ->
-  $("#next").link().disabled(guide, "currentStep", (s) -> s? && s.last)
+  $("#next").link().disabled(guide, "step", (s) -> s? && s.last)
   $("#next").click(() ->
     jsRoutes.controllers.Guide.next().ajax()
     false
   )
-  $("#prev").link().disabled(guide, "currentStep", (s) -> s? && s.first)
+  $("#prev").link().disabled(guide, "step", (s) -> s? && s.first)
   $("#prev").click(() ->
     jsRoutes.controllers.Guide.previous().ajax()
     false
   )
-  $("#first").link().disabled(guide, "currentStep", (s) -> s? && s.first)
+  $("#first").link().disabled(guide, "step", (s) -> s? && s.first)
   $("#first").click(() ->
     jsRoutes.controllers.Guide.first().ajax()
     false
@@ -18,7 +18,7 @@ $(() ->
     jsRoutes.controllers.Guide.last().ajax()
     false
   )
-  $("#last").link().disabled(guide, "currentStep", (s) -> s? && s.last)
+  $("#last").link().disabled(guide, "step", (s) -> s? && s.last)
 
 
   $(".graphical .carriage-type").link().text(machine, "carriage", (c) -> if c? then "Carriage #{c}" else "Carriage")
@@ -31,7 +31,7 @@ $(() ->
   stepbar.link().width(guide, "stepProgress", "%")
   stepbar.find("span.sr-only").link().text(machine, "stepProgress")
 
-  guide.bind("currentStep:change", (_, step) ->
+  guide.bind("step:change", (_, step) ->
     $(".previous-step").each(->
       c = $(this)
       if (c.data("step") < step.index) then c.show()
@@ -44,28 +44,28 @@ $(() ->
     )
   )
 
-  $(".current-step-number").link().text(guide, "currentStep", (s) -> if s? then s.index + 1 else "")
+  $(".current-step-number").link().text(guide, "step", (s) -> if s? then s.index + 1 else "")
   $(".step-number-total").link().text(guide, "planInfo", (p) -> if p? then p.totalSteps else "")
 
-  $(".needles.main").link().data("needles")(guide, "currentInstruction", (instruction) ->
+  $(".needles.main").link().data("needles")(guide, "instruction", (instruction) ->
     if not instruction? then return ""
     for c, i in instruction.stateAfter.needles
       if instruction.markNeedlesMainBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
-  $(".needles.double").link().data("needles")(guide, "currentInstruction", (instruction) ->
+  $(".needles.double").link().data("needles")(guide, "instruction", (instruction) ->
     if not instruction? then return ""
     for c, i in instruction.stateAfter.doubleBedNeedles
       if instruction.markNeedlesDoubleBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
 
-  $("#instruction-text").link().text(guide, "currentInstruction", (i) -> if i? then i.text else "")
+  $("#instruction-text").link().text(guide, "instruction", (i) -> if i? then i.text else "")
 
   makeOutput($(".output-2d"))
   makeKCarriage($(".kcarriage"))
   makeDoubleBedCarriage($(".doublebedcarriage"))
 
   $(".output-3d").knitted3d()
-  $(".output-3d").link().data("visibleStitches")(guide, "currentInstruction", (instruction) ->
+  $(".output-3d").link().data("visibleStitches")(guide, "instruction", (instruction) ->
     if instruction? then instruction.stateBefore.visibleStitches3D
     else 0
   )
@@ -135,7 +135,7 @@ makeOutput = (elem) ->
     ctx.translate(0, -h)
     ctx.restore()
 
-  guide.bind("currentInstruction:change", (_, instruction) ->
+  guide.bind("instruction:change", (_, instruction) ->
     if instruction? then drawOutput($(".output"), instruction.stateBefore.output)
   )
 
@@ -221,7 +221,7 @@ makeKCarriage = (elem) ->
     ctx.rect(x, 46, 10, 5) 
     ctx.stroke()
       
-  guide.bind("currentStep:change", (_, step) ->
+  guide.bind("step:change", (_, step) ->
     if step? then drawKCarriage($(".kcarriage"), step.stateAfter.carriage.k)
   )
   
@@ -391,6 +391,6 @@ makeDoubleBedCarriage = (elem) ->
     ctx.lineTo(startX+6,offsetY+5)
     ctx.stroke()  
     
-  guide.bind("currentStep:change", (_, step) ->
+  guide.bind("step:change", (_, step) ->
     if step? then drawDoubleBedCarriage($(".doublebedcarriage"), step.stateAfter.carriage.doubleBed)
   )

@@ -1,7 +1,7 @@
 # Step { name, description, number }
 
-guide = $().model("currentStep", "currentInstruction", "planInfo")
-guide.derived("stepProgress", ["currentStep", "planInfo"], (s, p) ->
+guide = $().model("step", "instruction", "planInfo")
+guide.derived("stepProgress", ["step", "planInfo"], (s, p) ->
   if s? and p? then s.index * 100 / (p.totalSteps - 1) else 0
 )
 
@@ -12,8 +12,8 @@ guide.start = (route) -> if (!started)
   ws = new ReconnectingWebSocket(route.webSocketURL())
   ws.onmessage = (msg) ->
     parsed = $.parseJSON(msg.data)
-    me.currentStep = parsed.step
-    me.currentInstruction = parsed.instruction
+    me.step = parsed.step
+    me.instruction = parsed.instruction
     me.planInfo = parsed.planInfo
   started = true
 
