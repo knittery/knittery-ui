@@ -32,15 +32,16 @@ $(() ->
   stepbar.find("span.sr-only").link().text(machine, "stepProgress")
 
   guide.bind("step:change", (_, step) ->
+    speed = 200
     $(".previous-step").each(->
       c = $(this)
-      if (c.data("step") < step.index) then c.show()
-      else c.hide()
+      if (c.data("step") < step.index) then c.slideDown(speed)
+      else c.slideUp(speed)
     )
     $(".next-step").each(->
       c = $(this)
-      if (c.data("step") > step.index) then c.show()
-      else c.hide()
+      if (c.data("step") > step.index) then c.slideDown(speed)
+      else c.slideUp(speed)
     )
   )
 
