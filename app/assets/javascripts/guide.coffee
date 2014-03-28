@@ -78,7 +78,9 @@ $(() ->
 
   $("#instruction-text").link().text(guide, "instruction", (i) -> if i? then i.text else "")
 
-  makeOutput($(".output-2d"))
+  $(".output-2d").knitted2d("knitted", 80)
+  $(".output-2d").link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.output else undefined)
+
   makeKCarriage($(".kcarriage"))
   makeDoubleBedCarriage($(".doublebedcarriage"))
 
@@ -112,51 +114,6 @@ $(() ->
           jsRoutes.controllers.Guide.previous().ajax()
   )
 )
-
-makeOutput = (elem) ->
-  stitchHeight = 2
-  stitchWidth = 2
-  maxRows = 80
-
-  canvasJ = $("<canvas style='width: 100%; height: 100%'></canvas>")
-  canvasJ.appendTo(elem)
-  canvas = canvasJ.get(0)
-  w = canvas.width = stitchWidth * 200
-  h = canvas.height = stitchHeight * maxRows
-  ctx = canvas.getContext("2d")
-
-  drawOutput = (elem, output) ->
-    ctx.clearRect(0, 0, w, h)
-    ctx.save()
-    for row, i in output.reverse()
-      if i >= maxRows then break
-      for stitch in row
-        switch stitch.type
-          when "plain"
-            ctx.fillStyle = stitch.yarns[0].color
-            ctx.fillRect(0, 0, stitchWidth, stitchHeight)
-          when "purl"
-            ctx.fillStyle = stitch.yarns[0].color
-            ctx.fillRect(0, 0, stitchWidth, stitchHeight)
-          when "castOn"
-            ctx.fillStyle = stitch.yarns[0].color
-            ctx.fillRect(0, 0, stitchWidth, stitchHeight / 2)
-            ctx.fillStyle = "#000000"
-            ctx.fillRect(0, stitchHeight / 2, stitchWidth, stitchHeight / 2)
-          when "castOff"
-            ctx.fillStyle = "#000000"
-            ctx.fillRect(0, 0, stitchWidth, stitchHeight / 2)
-            ctx.fillStyle = stitch.yarns[0].color
-            ctx.fillRect(0, stitchHeight / 2, stitchWidth, stitchHeight / 2)
-        ctx.translate(stitchWidth, 0)
-      ctx.translate(-w, stitchHeight)
-    ctx.translate(0, -h)
-    ctx.restore()
-
-  guide.bind("instruction:change", (_, instruction) ->
-    if instruction? then drawOutput($(".output"), instruction.stateBefore.output)
-  )
-
 
 makeKCarriage = (elem) ->
   canvasJ = $("<canvas style='width: 130; height: 60'></canvas>")
