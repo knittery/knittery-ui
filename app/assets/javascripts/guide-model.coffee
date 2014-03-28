@@ -2,7 +2,7 @@
 
 guide = $().model("currentStep", "currentInstruction", "planInfo")
 guide.derived("stepProgress", ["currentStep", "planInfo"], (s, p) ->
-  if s? and p? then s.index * 100 / p.totalSteps else 0
+  if s? and p? then s.index * 100 / (p.totalSteps - 1) else 0
 )
 
 started = false
