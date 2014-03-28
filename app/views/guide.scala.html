@@ -8,6 +8,7 @@
           @steps.reverse.map { s =>
             <li class="previous-step" data-step="@s.position.index" @if(s.position >= step.position) {style="display: none"}>@s.title.value </li>
           }
+            <li class="previous-step special-step" data-step="-1">Start</li>
           </ul>
         </div>
       </div>
@@ -58,6 +59,7 @@
           @steps.map { s =>
             <li class="next-step" data-step="@s.position.index" @if(s.position >= step.position) {style="display: none"}>@s.title.value </li>
           }
+            <li class="next-step special-step" data-step="999999999">End</li>
           </ul>
         </div>
       </div>
