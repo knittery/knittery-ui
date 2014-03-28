@@ -98,7 +98,7 @@ $(() ->
 makeOutput = (elem) ->
   stitchHeight = 2
   stitchWidth = 2
-  maxRows = 200
+  maxRows = 80
 
   canvasJ = $("<canvas style='width: 100%; height: 100%'></canvas>")
   canvasJ.appendTo(elem)
