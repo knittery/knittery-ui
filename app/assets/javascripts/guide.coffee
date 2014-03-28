@@ -92,14 +92,26 @@ $(() ->
 
   $("#btn-output-3d").click(->
     $(".output-2d").hide()
+    $(".output-2d-dual").hide()
     $(".output-3d").show()
     $("#btn-output-2d").addClass("btn-default")
+    $("#btn-output-2d-dual").addClass("btn-default")
     $("#btn-output-3d").removeClass("btn-default")
   )
   $("#btn-output-2d").click(->
     $(".output-2d").show()
+    $(".output-2d-dual").hide()
     $(".output-3d").hide()
     $("#btn-output-2d").removeClass("btn-default")
+    $("#btn-output-2d-dual").addClass("btn-default")
+    $("#btn-output-3d").addClass("btn-default")
+  )
+  $("#btn-output-2d-dual").click(->
+    $(".output-2d").hide()
+    $(".output-2d-dual").show()
+    $(".output-3d").hide()
+    $("#btn-output-2d").addClass("btn-default")
+    $("#btn-output-2d-dual").removeClass("btn-default")
     $("#btn-output-3d").addClass("btn-default")
   )
 
