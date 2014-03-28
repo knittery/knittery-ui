@@ -4,6 +4,9 @@ guide = $().model("step", "instruction", "planInfo")
 guide.derived("stepProgress", ["step", "planInfo"], (s, p) ->
   if s? and p? then s.index * 100 / (p.totalSteps - 1) else 0
 )
+guide.derived("instructionsRemaining", ["step", "instruction"], (s, i) ->
+  if s? and i? then s.instructionCount - i.index else undefined
+)
 
 started = false
 

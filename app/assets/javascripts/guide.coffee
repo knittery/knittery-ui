@@ -29,7 +29,13 @@ $(() ->
   stepbar = $("#step-bar .progress-bar")
   stepbar.link().attr("aria-valuenow")(guide, "stepProgress")
   stepbar.link().width(guide, "stepProgress", "%")
-  stepbar.find("span.sr-only").link().text(machine, "stepProgress")
+  stepbar.find("span.sr-only").link().text(guide, "stepProgress")
+
+  $(".instruction-counter").link().switchClass("hidden")(guide, "step", (s) -> not (s? and s.instructionCount > 1))
+  $(".instruction-count").link().text(guide, "instructionsRemaining")
+  $(".instruction-count").link().switchClass("hidden")(guide, "instructionsRemaining", (r) -> r == 1)
+  $(".instruction-label").link().switchClass("hidden")(guide, "instructionsRemaining", (r) -> r == 1)
+  $(".instruction-last").link().switchClass("hidden")(guide, "instructionsRemaining", (r) -> r != 1)
 
   guide.bind("step:change", (_, step) ->
     speed = 200
