@@ -126,11 +126,25 @@ body {
 
 .guide {
   .step-display {
-    .previous-steps {
+    .step-list {
+      height: 12em;
+      overflow: scroll;
+      padding: 0.3em;
+      margin-bottom: 0.3em;
+
+      ul {
+        padding-left: 0;
+
+        li {
+          list-style: none;
+          background-color: #F3F3F3;
+          text-align: center;
+          margin-bottom: 1px;
+        }
+      }
     }
     .current-step {
-    }
-    .next-steps {
+      height: 12em;
     }
   }
 
@@ -157,7 +171,7 @@ body {
     margin-left: 150px;
 
     .output {
-      height: 24em;
+      height: 16em;
       width: 100%;
       display: none;
     }

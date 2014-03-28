@@ -16,10 +16,16 @@
             knitted
           </h2>
         </div>
-        <div class="panel-body previous-steps">
-          Previous steps...
-        </div></div>
+        <div class="panel-body previous-steps step-list">
+          <ul>
+          @steps.filter(_.position < step.position).reverse.map { s =>
+            <li>@s.title.value</li>
+          }
+          </ul>
+        </div>
+      </div>
     </div>
+
     <div class="col-md-8">
       <div class="panel panel-default graphical">
         <div class="panel-heading">
@@ -36,6 +42,7 @@
         </div>
       </div>
     </div>
+
     <div class="col-md-2">
       <div class="panel panel-default graphical">
         <div class="panel-heading">
@@ -51,8 +58,12 @@
             to knit
           </h2>
         </div>
-        <div class="panel-body next-steps">
-          Next
+        <div class="panel-body next-steps step-list">
+          <ul>
+          @steps.filter(_.position > step.position).map { s =>
+            <li>@s.title.value</li>
+          }
+          </ul>
         </div>
       </div>
     </div>

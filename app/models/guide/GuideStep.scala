@@ -34,7 +34,7 @@ object Instruction {
   }
 }
 
-case class Pos(index: Int, count: Int) {
+case class Pos(index: Int, count: Int) extends Ordered[Pos] {
   require(index < count && index >= 0, s"$index is not valid (count=$count)")
   def isFirst = index == 0
   def isLast = index >= count - 1
@@ -44,6 +44,7 @@ case class Pos(index: Int, count: Int) {
       filter(_ >= 0).filter(_ < count).
       map(copy(_))
   }
+  override def compare(that: Pos) = index - that.index
 }
 object Pos {
   val only = Pos(0, 1)
