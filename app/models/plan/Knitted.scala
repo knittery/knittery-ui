@@ -3,26 +3,36 @@ package models.plan
 import models._
 import utils._
 
-case class Knitted private (matrix: Matrix[Stitch]) {
-  def data = matrix
-  def height = matrix.height
-  def width = matrix.width
+case class Knitted private(mainBed: KnittedBed, doubleBed: KnittedBed) {
+  def height = mainBed.height
+  def width = mainBed.width
 
-  def rows = matrix.rows
+  def +(mainBedRow: Needle => Stitch, doubleBedRow: Needle => Stitch) =
+    new Knitted(mainBed + mainBedRow, doubleBed + doubleBedRow)
+}
+object Knitted {
+  val empty = new Knitted(KnittedBed.empty, KnittedBed.empty)
+}
 
-  def +(row: Needle => Stitch) = new Knitted(matrix :+ row.all)
+case class KnittedBed private(data: Matrix[Stitch]) {
+  def height = data.height
+  def width = data.width
+
+  def rows = data.rows
+
+  def +(row: Needle => Stitch) = new KnittedBed(data :+ row.all)
 
   private def emptyOrNo(s: Seq[Stitch]) = s.forall(s => s == NoStitch || s == EmptyStitch)
   def clean = {
-    matrix.rows.
+    data.rows.
       filterNot(_.forall(_ == NoStitch)). // Filter all rows containing no stitches
       transpose.
       // Remove empty columns at the side
       dropWhile(emptyOrNo).
       reverse.dropWhile(emptyOrNo).reverse.
       map { column =>
-        column
-      }.
+      column
+    }.
       transpose.
       //Remove top/bottom empty rows
       dropWhile(emptyOrNo).
@@ -34,10 +44,11 @@ case class Knitted private (matrix: Matrix[Stitch]) {
       map(_.map(_.patternString).mkString).
       mkString("\n")
   }
+
   override def toString = patternString
 }
-object Knitted {
-  def empty = new Knitted(IndexedSeq.empty)
+object KnittedBed {
+  val empty = new KnittedBed(IndexedSeq.empty)
 }
 
 sealed trait Stitch {

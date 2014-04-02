@@ -75,12 +75,12 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (n, NeedleE, ys)) if !takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.needle(n, NeedleE, ys).knit(n, NoStitch)
+      x.needle(n, NeedleE, ys).knit(n, MainBed, NoStitch)
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, MainBed).noose)
       x2.knit(Stitch3D(l, ys, r), MainBed, n).
-        knit(n, PlainStitch.orEmpty(ys.map(_.yarn))).
+        knit(n, MainBed, PlainStitch.orEmpty(ys.map(_.yarn))).
         needle(n, pattern(n).toPosition, t)
   }
 
@@ -91,16 +91,16 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (n, NeedleE, ys)) if !takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.needle(n, NeedleE, ys).knit(n, NoStitch)
+      x.needle(n, NeedleE, ys).knit(n, MainBed, NoStitch)
     case (x, (n, NeedleB, ys)) =>
       // don't knit B needles with part
       x.needle(n, pattern(n).toPosition, ys).
-        knit(n, NoStitch)
+        knit(n, MainBed, NoStitch)
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, MainBed).noose)
       x2.knit(Stitch3D(l, ys, r), MainBed, n).
-        knit(n, PlainStitch(ys.map(_.yarn).toList)).
+        knit(n, MainBed, PlainStitch(ys.map(_.yarn).toList)).
         needle(n, pattern(n).toPosition, t)
   }
 
@@ -111,19 +111,19 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (n, NeedleE, ys)) if !takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.needle(n, NeedleE, ys).knit(n, NoStitch)
+      x.needle(n, NeedleE, ys).knit(n, MainBed, NoStitch)
     case (x, (n, NeedleB, ys)) =>
       //knit yarnA
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, MainBed).noose)
       x2.knit(Stitch3D(l, ys, r), MainBed, n).
-        knit(n, PlainStitch.orEmpty(ys.map(_.yarn))).
+        knit(n, MainBed, PlainStitch.orEmpty(ys.map(_.yarn))).
         needle(n, pattern(n).toPosition, t)
     case (x, (n, _, ys)) =>
       //knit yarnB
       require(x.yarnB.isDefined, "MC knitting with needle at D without yarn in B")
       val (x2, (l, t, r)) = x.withYarnB(_.to(n, MainBed).noose)
       x2.knit(Stitch3D(l, ys, r), MainBed, n).
-        knit(n, PlainStitch.orEmpty(ys.map(_.yarn))).
+        knit(n, MainBed, PlainStitch.orEmpty(ys.map(_.yarn))).
         needle(n, pattern(n).toPosition, t)
   }
 }
@@ -139,12 +139,12 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
     case (x, (n, NeedleE, ys)) if !takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.doubleBedNeedle(n, NeedleE, ys).knit(n, NoStitch)
+      x.doubleBedNeedle(n, NeedleE, ys).knit(n, DoubleBed, NoStitch)
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, DoubleBed).noose)
       x2.knit(Stitch3D(r, ys, l), DoubleBed, n).
-        knit(n, PurlStitch.orEmpty(ys.map(_.yarn))).
+        knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
         doubleBedNeedle(n, NeedleB, t)
   }
 
@@ -155,7 +155,7 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
     case (x, (n, NeedleE, ys)) if !takeback =>
       //don't knit E needles if no needle pull back from E
       //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.doubleBedNeedle(n, NeedleE, ys).knit(n, NoStitch)
+      x.doubleBedNeedle(n, NeedleE, ys).knit(n, DoubleBed, NoStitch)
     case (x, (n, NeedleB, ys)) =>
       // don't knit B needles with part
       x.doubleBedNeedle(n, NeedleB, ys)
@@ -163,7 +163,7 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
       //knit normally
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, DoubleBed).noose)
       x2.knit(Stitch3D(r, ys, l), DoubleBed, n).
-        knit(n, PurlStitch.orEmpty(ys.map(_.yarn))).
+        knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
         doubleBedNeedle(n, NeedleB, t)
   }
 }

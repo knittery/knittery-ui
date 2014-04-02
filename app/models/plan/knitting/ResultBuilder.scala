@@ -9,7 +9,8 @@ private case class ResultBuilder(
   needles: Map[Needle, NeedleState] = Map.empty,
   doubleBedNeedles: Map[Needle, NeedleState] = Map.empty,
   outputs: Seq[(Stitch3D, Bed, Needle)] = Seq.empty,
-  stitches: Map[Needle, Stitch] = Map.empty) {
+  stitches: Map[Needle, Stitch] = Map.empty,
+  doubleBedStitches: Map[Needle, Stitch] = Map.empty) {
 
   def withYarnA[X](f: YarnFeeder => (YarnFeeder, X)): (ResultBuilder, X) = {
     require(yarnA.isDefined, "No yarn A")
@@ -32,7 +33,10 @@ private case class ResultBuilder(
     doubleBedNeedle(n, NeedleState(pos, ys))
 
   def knit(stitch: Stitch3D, bed: Bed, needle: Needle): ResultBuilder = copy(outputs = outputs :+ (stitch, bed, needle))
-  def knit(n: Needle, s: Stitch) = copy(stitches = stitches + (n -> s))
+  def knit(n: Needle, bed: Bed, s: Stitch) = bed match {
+    case MainBed => copy(stitches = stitches + (n -> s))
+    case DoubleBed => copy(doubleBedStitches = doubleBedStitches + (n -> s))
+  }
 
   val yarnMap = (yarnA.flatMap(_.attachment).toList ++
     yarnB.flatMap(_.attachment).toList).toMap
@@ -41,7 +45,7 @@ private case class ResultBuilder(
     yarnMap.values.foldLeft(state)(_.attachYarn(_)).
       modifyNeedles(MainBed, needles.withDefaultValue(NeedleState(NeedleA))).
       modifyNeedles(DoubleBed, doubleBedNeedles.withDefaultValue(NeedleState(NeedleA))).
-      knit(stitches.withDefaultValue(EmptyStitch)).
+      knit(stitches.withDefaultValue(EmptyStitch), doubleBedStitches.withDefaultValue(EmptyStitch)).
       knit2(_ ++ outputs)
   }
 }
