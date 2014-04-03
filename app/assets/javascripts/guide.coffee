@@ -81,9 +81,9 @@ $(() ->
   $(".output-2d").knitted2d("knitted", 80)
   $(".output-2d").link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.output else undefined)
 
-  $(".output-2d-front").knitted2d("knitted", 80)
+  $(".output-2d-front").knitted2d("knitted", 160)
   $(".output-2d-front").link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.output else undefined)
-  $(".output-2d-back").knitted2d("knitted", 80)
+  $(".output-2d-back").knitted2d("knitted", 160)
   $(".output-2d-back").link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.doubleBedOutput else undefined)
 
   makeKCarriage($(".kcarriage"))
