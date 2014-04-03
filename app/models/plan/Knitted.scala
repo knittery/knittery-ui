@@ -30,9 +30,6 @@ case class KnittedBed private(data: Matrix[Stitch]) {
       // Remove empty columns at the side
       dropWhile(emptyOrNo).
       reverse.dropWhile(emptyOrNo).reverse.
-      map { column =>
-      column
-    }.
       transpose.
       //Remove top/bottom empty rows
       dropWhile(emptyOrNo).
