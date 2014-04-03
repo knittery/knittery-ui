@@ -129,10 +129,16 @@ case class ClosedCastOn(bed: Bed, from: Needle, until: Needle, yarn: YarnPiece) 
         NeedleState(NeedleD, before.yarn + yarn)
       }.getOrElse(before)
     }).
-      knit { n =>
-      if (needles.contains(n)) CastOnStitch(yarn.yarn)
-      else NoStitch
-    }.
+      knit(
+        n => {
+          if (bed == MainBed && needles.contains(n)) CastOnStitch(yarn.yarn)
+          else NoStitch
+        },
+        n => {
+          if (bed == DoubleBed && needles.contains(n)) CastOnStitch(yarn.yarn)
+          else NoStitch
+        }
+      ).
       //TODO Knit2? we don't really have stitches..
       attachYarn(YarnAttachment(needleYarn(until), until, MainBed)).
       pushRow(needles.contains).
@@ -143,21 +149,31 @@ case class ClosedCastOn(bed: Bed, from: Needle, until: Needle, yarn: YarnPiece) 
 case class ClosedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolean) extends Step {
   override def apply(state: KnittingState) = {
     val needles = state.needles(bed)
-    state.
-      knit { n =>
+
+    def knitLast(n: Needle) = {
       if (filter(n)) needles(n) match {
         case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
         case NeedleState(_, yarns) => PlainStitch(yarns.map(_.yarn).toList)
       }
       else NoStitch
-    }.
-      knit { n =>
+    }
+    def knitCastOff(n: Needle) = {
       if (filter(n)) needles(n) match {
         case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
         case NeedleState(_, yarns) => CastOffStitch(withYarn.yarn)
       }
       else NoStitch
-    }.
+    }
+
+    state.
+      knit(
+        if (bed == MainBed) knitLast else _ => NoStitch,
+        if (bed == Double) knitLast else _ => NoStitch
+      ).
+      knit(
+        if (bed == MainBed) knitCastOff else _ => NoStitch,
+        if (bed == Double) knitCastOff else _ => NoStitch
+      ).
       //TODO implement .knit2
       modifyNeedles(bed, n => if (filter(n)) NeedleState(NeedleA) else needles(n)).
       pushRow(filter).

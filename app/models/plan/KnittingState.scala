@@ -48,7 +48,7 @@ case class KnittingState(
   def modifyNeedles(bed: Bed, newNeedles: NeedleStateRow) =
     copy(bedNeedles = bedNeedles + (bed -> newNeedles.toMap))
 
-  def knit(f: Needle => Stitch) = copy(output = output + f)
+  def knit(main: Needle => Stitch, double: Needle => Stitch) = copy(output = output + (main, double))
 
   def pushRow(forNeedles: Needle => Boolean) = {
     val changed = yarnAttachments.collect {

@@ -73,8 +73,8 @@ object JsonSerialization {
     }
   }
 
-  implicit object KnittedWrite extends Writes[Knitted] {
-    override def writes(knitted: Knitted) = Json.toJson(knitted.rows)
+  implicit object KnittedBedWrite extends Writes[KnittedBed] {
+    override def writes(knitted: KnittedBed) = Json.toJson(knitted.rows)
   }
 
   implicit object HoldingCamLeverWrite extends Writes[KCarriage.HoldingCamLever] {
@@ -164,7 +164,8 @@ object JsonSerialization {
     override def writes(state: KnittingState) = {
       Json.obj("needles" -> state.needles(MainBed).pattern,
         "doubleBedNeedles" -> state.needles(DoubleBed).pattern,
-        "output" -> state.output,
+        "output" -> state.output.mainBed,
+        "doubleBedOutput" -> state.output.doubleBed,
         "carriage" -> state.carriageState,
         "visibleStitches3D" -> state.output3D.stitches.size)
     }
