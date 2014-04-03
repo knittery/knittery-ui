@@ -9,7 +9,7 @@ import utils._
 class KKnitting(carriageState: State, state: KnittingState, direction: Direction) {
   def apply(pattern: NeedleActionRow) = Try {
     val main = mainBed(pattern)
-    val double = doubleBed.getOrElse(noop _)
+    val double = doubleBed.getOrElse(noop(DoubleBed) _)
     val initial = ResultBuilder(carriageState.yarnA, carriageState.yarnB, state.yarnAttachments)
     val needles = direction match {
       case ToRight => Needle.all
@@ -61,7 +61,7 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
     }
   }
 
-  private def noop(x: ResultBuilder, n: Needle) = x
+  private def noop(bed: Bed)(x: ResultBuilder, n: Needle) = x.knit(n, bed, NoStitch)
 }
 
 /** Knitting on the main bed of with the K-carriage. */
