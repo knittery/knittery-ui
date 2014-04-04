@@ -86,6 +86,11 @@ $(() ->
   $(".output-2d-back").knitted2d("knitted", 160)
   $(".output-2d-back").link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.doubleBedOutput else undefined)
 
+  jsRoutes.controllers.Guide.wiki("example-instruction").ajax {
+    success: (data) ->
+      $(".step-info").html(data)
+  }
+
   makeKCarriage($(".kcarriage"))
   makeDoubleBedCarriage($(".doublebedcarriage"))
 
