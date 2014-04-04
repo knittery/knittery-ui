@@ -49,3 +49,5 @@ case class Pos(index: Int, count: Int) extends Ordered[Pos] {
 object Pos {
   val only = Pos(0, 1)
 }
+
+case class WikiReference(id: String)

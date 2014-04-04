@@ -12,9 +12,12 @@ import play.api.libs.json._
 import play.api.libs.iteratee._
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.ws._
 import models.guide._
 import utils._
 import JsonSerialization._
+import play.utils.UriEncoding
+import java.util.concurrent.TimeoutException
 
 object Guide extends Controller {
   private implicit val timeout: Timeout = 100.millis
@@ -78,5 +81,23 @@ object Guide extends Controller {
           )): JsValue
       }
     } yield (Iteratee.ignore, json)
+  }
+
+  def wiki(refId: String) = Action.async { request =>
+    val id = UriEncoding.encodePathSegment(refId, "UTF-8")
+    WS.url(s"http://localhost/ms/wiki/$id.html").
+      withFollowRedirects(true).
+      withRequestTimeout(2000).
+      get().map { response =>
+      response.status match {
+        case OK =>
+            Ok(response.body)
+        case NOT_FOUND => NotFound(refId)
+        case _ => InternalServerError("")
+      }
+    }.recover {
+      case _: TimeoutException => GatewayTimeout("")
+      case _ => InternalServerError("")
+    }
   }
 }

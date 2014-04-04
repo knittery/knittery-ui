@@ -3,35 +3,36 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+GET         /                                     controllers.Application.index
 
-GET     /simulator                  controllers.SerialSimulator.show
-POST    /simulator/send             controllers.SerialSimulator.send
-GET     /simulator/subscribe        controllers.SerialSimulator.subscribe
+GET         /simulator                            controllers.SerialSimulator.show
+POST        /simulator/send                       controllers.SerialSimulator.send
+GET         /simulator/subscribe                  controllers.SerialSimulator.subscribe
 
-GET     /display                    controllers.Display.show
-GET     /display/subscribe          controllers.Display.subscribe
+GET         /display                              controllers.Display.show
+GET         /display/subscribe                    controllers.Display.subscribe
 
-GET     /guide                      controllers.Guide.view
-POST    /guide/next                 controllers.Guide.next
-POST    /guide/previous             controllers.Guide.previous
-POST    /guide/first                controllers.Guide.first
-POST    /guide/last                 controllers.Guide.last
-POST    /guide/instruction/next     controllers.Guide.nextInstruction
-POST    /guide/instruction/previous controllers.Guide.previousInstruction
-GET     /guide/subscribe            controllers.Guide.subscribe
+GET         /guide                                controllers.Guide.view
+POST        /guide/next                           controllers.Guide.next
+POST        /guide/previous                       controllers.Guide.previous
+POST        /guide/first                          controllers.Guide.first
+POST        /guide/last                           controllers.Guide.last
+POST        /guide/instruction/next               controllers.Guide.nextInstruction
+POST        /guide/instruction/previous           controllers.Guide.previousInstruction
+GET         /guide/subscribe                      controllers.Guide.subscribe
+GET         /guide/wiki/:ref                      controllers.Guide.wiki(ref: String)
 
-GET     /plans                      controllers.Plans.show
-POST    /plans/load/imageplan        controllers.Plans.loadImagePlan
-POST    /plans/load/imagedoublebedplan         controllers.Plans.loadImageDoubleBedPlan
-POST    /plans/load/patternplan		controllers.Plans.loadPatternPlan
-POST    /plans/load/sock     		controllers.Plans.loadSock
+GET         /plans                                controllers.Plans.show
+POST        /plans/load/imageplan                 controllers.Plans.loadImagePlan
+POST        /plans/load/imagedoublebedplan        controllers.Plans.loadImageDoubleBedPlan
+POST        /plans/load/patternplan               controllers.Plans.loadPatternPlan
+POST        /plans/load/sock                      controllers.Plans.loadSock
 
-GET     /preview                    controllers.Preview.show
-GET     /preview/dot                controllers.Preview.dot
-GET     /preview/json               controllers.Preview.json
+GET         /preview                              controllers.Preview.show
+GET         /preview/dot                          controllers.Preview.dot
+GET         /preview/json                         controllers.Preview.json
 
 # Assets
-GET     /assets/javascripts/routes.js   controllers.Application.javascriptRoutes()
-GET     /assets/*file                   controllers.Assets.at(path="/public", file)
-GET     /libraries/*file                controllers.WebJarAssets.at(file)
+GET         /assets/javascripts/routes.js         controllers.Application.javascriptRoutes()
+GET         /assets/*file                         controllers.Assets.at(path="/public", file)
+GET         /libraries/*file                      controllers.WebJarAssets.at(file)
