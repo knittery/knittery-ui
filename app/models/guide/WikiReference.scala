@@ -3,7 +3,7 @@ package models.guide
 import java.net.URI
 
 case class WikiReference(id: String) {
-  def apply(implicit wiki: WikiResolver) = wiki.resolve(id)
+  def apply()(implicit resolver: WikiResolver) = resolver.resolve(id)
 }
 
 trait WikiResolver {
