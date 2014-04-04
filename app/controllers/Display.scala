@@ -5,17 +5,11 @@ import play.api.Play._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.iteratee._
-import Concurrent.Channel
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
-import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import models._
 import models.machine.Machine._
-import utils.JsonSerialization._
-import utils.SubscriptionActor
-import utils.SubscribeFailed
 import utils.ActorEnumerator
 import models.machine.Machine
 
