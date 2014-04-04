@@ -1,7 +1,7 @@
 package controllers
 
 import scala.concurrent.duration._
-import java.awt.Color
+import java.net.URI
 import scalaz._
 import Scalaz._
 import akka.util._
@@ -15,11 +15,19 @@ import play.api.libs.concurrent.Execution.Implicits._
 import models.guide._
 import utils._
 import JsonSerialization._
+import play.utils.UriEncoding
 
 object Guide extends Controller {
   private implicit val timeout: Timeout = 100.millis
   private implicit def system = Akka.system
   protected def guider = system.actorSelection(Akka.system / "guider")
+
+  private implicit object localWikiResolver extends WikiResolver {
+    override def resolve(id: String) = {
+      val path = UriEncoding.encodePathSegment(id, "UTF-8")
+      URI.create(s"http://localhost/ms/wiki/$path.html")
+    }
+  }
 
   def view = Action.async {
     for {
