@@ -35,6 +35,7 @@ object GuideParser {
       (GuideStep(
         m("knitRow.title", direction, knittingSteps.size, carriage),
         m("knitRow.description", direction, knittingSteps.size, carriage),
+        WikiReference("knitRow"),
         instructions, true,
         knittingSteps.head.before, knittingSteps.last.after),
         tail)
@@ -104,7 +105,7 @@ object GuideParser {
     val step = steps.head
     val desc = m(s"$key.description", args: _*)
     (
-      GuideStep(m(s"$key.title", args: _*), desc,
+      GuideStep(m(s"$key.title", args: _*), desc, WikiReference(key),
         Instruction(desc, step.step, Set.empty, step.before, step.after) :: Nil,
         false, step.before, step.after),
       steps.tail)
