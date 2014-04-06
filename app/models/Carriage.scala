@@ -49,7 +49,7 @@ case object KCarriage extends Carriage {
                                knobLeft: KRChangeKnob = KRChangeKnobPlain, knobRight: KRChangeKnob = KRChangeKnobPlain,
                                tuckingLever: TuckingLever = TuckingLeverR,
                                partLeft: Boolean = false, partRight: Boolean = false,
-                               needleTakebackLeft: Boolean = false, needleTakebackRight: Boolean = false)
+                               needleTakebackLeft: Boolean = true, needleTakebackRight: Boolean = true)
     extends Assembly {
     def part(direction: Direction) = if (direction == ToLeft) partLeft else partRight
     def needleTakeback(direction: Direction) = if (direction == ToLeft) needleTakebackLeft else needleTakebackRight
