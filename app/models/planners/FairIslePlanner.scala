@@ -46,9 +46,9 @@ object FairIslePlanner {
   }
 
   /**
-   *  Knit the pattern as a single bed fair isle pattern (row 0 in matrix is knitted first).
-   *  Does not change the working position of the needles, at least one needle (or better all for the
-   *  pattern) must be in working position.
+   * Knit the pattern as a single bed fair isle pattern (row 0 in matrix is knitted first).
+   * Does not change the working position of the needles, at least one needle (or better all for the
+   * pattern) must be in working position.
    */
   def singleBed(pattern: Matrix[Yarn], startNeedle: Option[Needle] = None) = for {
     workingNeedles <- Planner.state(_.workingNeedles)
