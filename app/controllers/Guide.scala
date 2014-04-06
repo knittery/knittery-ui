@@ -68,8 +68,6 @@ object Guide extends Controller {
   }
 
   def subscribe = WebSocket.async[JsValue] { implicit request =>
-    val loc = localized
-    import loc._
     for {
       actor <- guider.resolveOne()
       Guider.CurrentStep(step, instruction, steps) <- actor ? Guider.QueryStep

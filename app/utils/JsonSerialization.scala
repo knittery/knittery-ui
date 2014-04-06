@@ -10,7 +10,6 @@ import ch.inventsoft.graph.layout.Position
 import play.api.i18n.Lang
 
 object JsonSerialization {
-
   implicit object CarriageTypeWrite extends Writes[Carriage] {
     override def writes(carriage: Carriage) = JsString(carriage match {
       case KCarriage => "K"
@@ -171,31 +170,30 @@ object JsonSerialization {
     }
   }
 
-  def localized(implicit lang: Lang) = new Object {
-    implicit object InstructionWrite extends Writes[Instruction] {
-      override def writes(instr: Instruction) = {
-        Json.obj("text" -> instr.text(lang),
-          "index" -> instr.position.index,
-          "first" -> instr.position.isFirst,
-          "last" -> instr.position.isLast,
-          "markNeedlesMainBed" -> instr.markNeedles.filter(_._1 == MainBed).map(_._2.index),
-          "markNeedlesDoubleBed" -> instr.markNeedles.filter(_._1 == DoubleBed).map(_._2.index),
-          "stateBefore" -> instr.before,
-          "stateAfter" -> instr.after)
-      }
+  implicit def instructionWrite(implicit lang: Lang): Writes[Instruction] = new Writes[Instruction] {
+    override def writes(instr: Instruction) = {
+      Json.obj("text" -> instr.text(lang),
+        "index" -> instr.position.index,
+        "first" -> instr.position.isFirst,
+        "last" -> instr.position.isLast,
+        "markNeedlesMainBed" -> instr.markNeedles.filter(_._1 == MainBed).map(_._2.index),
+        "markNeedlesDoubleBed" -> instr.markNeedles.filter(_._1 == DoubleBed).map(_._2.index),
+        "stateBefore" -> instr.before,
+        "stateAfter" -> instr.after)
     }
+  }
 
-    implicit object GuideStepWrite extends Writes[GuideStep] {
-      override def writes(step: GuideStep) = {
-        Json.obj("title" -> step.title(lang),
-          "description" -> step.description(lang),
-          "instructionCount" -> step.instructions.size,
-          "index" -> step.position.index,
-          "first" -> step.position.isFirst,
-          "last" -> step.position.isLast,
-          "stateBefore" -> step.before,
-          "stateAfter" -> step.after)
-      }
+  implicit def guideStepWrite(implicit lang: Lang, wiki: WikiResolver): Writes[GuideStep] = new Writes[GuideStep] {
+    override def writes(step: GuideStep) = {
+      Json.obj("title" -> step.title(lang),
+        "description" -> step.description(lang),
+        "wikiUrl" -> step.wiki().toString,
+        "instructionCount" -> step.instructions.size,
+        "index" -> step.position.index,
+        "first" -> step.position.isFirst,
+        "last" -> step.position.isLast,
+        "stateBefore" -> step.before,
+        "stateAfter" -> step.after)
     }
   }
 }

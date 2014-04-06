@@ -11,6 +11,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import models.machine.Machine._
 import utils.ActorEnumerator
+import utils.JsonSerialization._
 import models.machine.Machine
 
 object Display extends Controller {
