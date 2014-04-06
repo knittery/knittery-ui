@@ -336,7 +336,7 @@ makeDoubleBedCarriage = (elem) ->
 
     ctx.font = "6px Arial"
 
-    if (settings.partLeft is true)
+    if (settings.partLeft is false)
       ctx.fillText("N", 20, 21)
       ctx.fillRect(18, 10, 11, 3)
       ctx.stroke()
@@ -349,7 +349,7 @@ makeDoubleBedCarriage = (elem) ->
     ctx.rect(87, 5, 11, 9)
     ctx.stroke()
 
-    if (settings.partRight is true)
+    if (settings.partRight is false)
       ctx.fillText("N", 89, 21)
       ctx.fillRect(87, 10, 11, 3)
       ctx.stroke()
@@ -364,11 +364,11 @@ makeDoubleBedCarriage = (elem) ->
 
     if (settings.tuckingLever is "R")
       ctx.fillText("R", 37, 18)
-      ctx.fillRect(35, 5, 8, 3)
+      ctx.fillRect(35, 8, 8, 3)
       ctx.stroke()
     else
       ctx.fillText("P", 37, 18)
-      ctx.fillRect(35, 8, 8, 3)
+      ctx.fillRect(35, 5, 8, 3)
       ctx.stroke()
 
   drawLines = (startX, offsetY) ->
