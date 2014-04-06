@@ -5,6 +5,7 @@ import Scalaz._
 import models._
 import models.plan._
 import utils._
+import models.KCarriage.{SlideLeverIiIi, KRChangeKnobIiIi}
 
 /**
  * Knits a fair isle pattern (aka Norwegermuster).
@@ -26,12 +27,13 @@ object FairIslePlanner {
     yarnA <- Planner.state(_.carriageState(KCarriage).yarnA.getOrElse(row.head))
     yarnB = (row.toSet - yarnA).headOption
     settings = KCarriage.Settings(partLeft = true, partRight = true)
+    dbSettings = KCarriage.DoubleBedCarriage(knobLeft = KRChangeKnobIiIi, knobRight = KRChangeKnobIiIi, slideLever = SlideLeverIiIi)
     //TODO background yarn...
     //with A
-    _ <- Basics.knitRowWithK(settings, KCarriage.SinkerPlate(), Some(yarnA), None,
+    _ <- Basics.knitRowWithK(settings, dbSettings, Some(yarnA), None,
       knitActionDoubleBed(row, startNeedle, Some(yarnA), knitBackground = false))
     //with B
-    _ <- Basics.knitRowWithK(settings, KCarriage.SinkerPlate(),yarnB, None,
+    _ <- Basics.knitRowWithK(settings, dbSettings, yarnB.orElse(Some(yarnA)), None,
       knitActionDoubleBed(row, startNeedle, yarnB, knitBackground = false))
   } yield ()
 
@@ -57,16 +59,18 @@ object FairIslePlanner {
     _ <- Basics.needCarriage(KCarriage)
     pattern2 <- patternToYarnPiece(pattern)
     //Knit the pattern rows
-    _ <- pattern2.rows.toVector.traverse(row => for {
-      yarns <- optimizeYarn(row.toSet)
-      actionRow = knitActions(row, needle0, yarns) _
-      _ <- Basics.knitRowWithK(settings, KCarriage.SinkerPlate(), yarns._1, yarns._2, actionRow)
-    } yield ())
+    _ <- pattern2.rows.toVector.traverse(row =>
+      for {
+        yarns <- optimizeYarn(row.toSet)
+        actionRow = knitActions(row, needle0, yarns) _
+        _ <- Basics.knitRowWithK(settings, KCarriage.SinkerPlate(), yarns._1, yarns._2, actionRow)
+      } yield ())
   } yield ()
 
   private def checkPattern(pattern: Matrix[Yarn]) = Planner.precondidtions { _ =>
     pattern.validate()
     require(pattern.height > 0, "Empty pattern")
+    require(pattern.width % 2 == 0, "Patter with non-even width")
     pattern.rows.map(_.toSet).zipWithIndex.foreach {
       case (yarns, index) =>
         require(yarns.size <= 2,
