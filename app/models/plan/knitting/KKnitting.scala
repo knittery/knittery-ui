@@ -58,8 +58,11 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
           bed.plain _
         case (true, TuckingLeverR, slideLever, KRChangeKnobPlain) if slideLever != SlideLeverIiIi =>
           bed.part _
-        case (false, TuckingLeverR, SlideLeverIiIi, KRChangeKnobIiIi) =>
-          bed.IiIi _
+        case (true, TuckingLeverR, SlideLeverIiIi, KRChangeKnobIiIi) =>
+          val working = state.workingNeedles(DoubleBed)
+          val first = if (direction == ToRight) working.headOption else working.reverse.headOption
+          val evens = first.map(_.index % 2 == 0).getOrElse(true)
+          bed.IiIi(evens) _
         case (_, TuckingLeverP, slideLever, KRChangeKnobPlain) if slideLever != SlideLeverIiIi =>
           throw new NotImplementedError("english rib knitting / tucking pattern not yet implemented")
         case _ =>
@@ -174,15 +177,25 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
         doubleBedNeedle(n, NeedleB, t)
   }
 
-  def IiIi(x: ResultBuilder, n: Needle): ResultBuilder = (x, (n, needles(n).position, needles(n).yarn)) match {
-    case (x, (_, NeedleA, _)) =>
-      //don't knit A needles
-      x
-    case (x, (n, NeedleE, ys)) if !takeback =>
-      //don't knit E needles if no needle pull back from E
-      //TODO do we need to "prevent" falling down of yarn in the yarn feeder
-      x.doubleBedNeedle(n, NeedleE, ys).knit(n, DoubleBed, NoStitch)
-    case (x, (n, _, ys)) =>
-      ??? //TODO
+  def IiIi(selectEven: Boolean)(x: ResultBuilder, n: Needle): ResultBuilder = {
+    def position = if (n.index % 2 == 0 ^ selectEven) NeedleD else NeedleB
+    (x, (n, needles(n).position, needles(n).yarn)) match {
+      case (x, (_, NeedleA, _)) =>
+        //don't knit A needles
+        x
+      case (x, (n, NeedleE, ys)) if !takeback =>
+        //don't knit E needles if no needle pull back from E
+        //TODO do we need to "prevent" falling down of yarn in the yarn feeder
+        x.doubleBedNeedle(n, NeedleE, ys).knit(n, DoubleBed, NoStitch)
+      case (x, (n, NeedleB, ys)) =>
+        // don't knit B needles with part
+        x.doubleBedNeedle(n, position, ys)
+      case (x, (n, _, ys)) =>
+        //knit normally
+        val (x2, (l, t, r)) = x.withYarnA(_.to(n, DoubleBed).noose)
+        x2.knit(Stitch3D(r, ys, l), DoubleBed, n).
+          knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
+          doubleBedNeedle(n, position, t)
+    }
   }
 }
