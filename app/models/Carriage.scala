@@ -82,6 +82,7 @@ case object KCarriage extends Carriage {
     def tension: Double = number + thirds.toDouble / 3
     /** Format: 5 1/3 */
     def text: String = number.toString + (if (thirds != 0) s"$thirds/3" else "")
+    override def toString = text
   }
   object TensionDial {
     def apply(number: Int, thirds: Int) = {

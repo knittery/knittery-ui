@@ -33,17 +33,15 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
       case (false, false, true, false, Some(yarn), None) =>
         bed.part _
       case (false, false, false, true, Some(yarn), None) =>
-        ??? //tuck
+        throw new NotImplementedError("tuck knitting not yet implemented")
       case (true, false, false, false, Some(yarnA), _) =>
         bed.mc _
       case (_, true, false, false, Some(yarn), Some(yarnB)) =>
-        ??? //l
+        throw new NotImplementedError("L knitting not yet implemented")
       case (_, _, false, false, None, None) =>
-        ??? //throw yarn
-      case (false, false, _, _, None, None) =>
-        ??? //throw yarn on D's
+        throw new NotImplementedError("main-bed knitting with no yarn not yet implemented")
       case _ =>
-        throw new IllegalStateException(s"Illegal settings for K (main bed): $carriageState")
+        throw new IllegalStateException(s"Illegal settings for K (main bed). Settings: ${carriageState.settings}, yarns: ${carriageState.yarns}")
     }
   }
 
