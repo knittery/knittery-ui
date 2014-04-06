@@ -62,6 +62,10 @@ $(() ->
     )
   )
 
+  guide.bind("step:change", (_, step) ->
+    $("#step-wiki").attr("src", step.wikiUrl)
+  )
+
   $(".current-step-number").link().text(guide, "step", (s) -> if s? then s.index + 1 else "")
   $(".step-number-total").link().text(guide, "planInfo", (p) -> if p? then p.totalSteps else "")
 
