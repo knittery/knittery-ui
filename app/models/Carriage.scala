@@ -53,6 +53,7 @@ case object KCarriage extends Carriage {
     extends Assembly {
     def part(direction: Direction) = if (direction == ToLeft) partLeft else partRight
     def needleTakeback(direction: Direction) = if (direction == ToLeft) needleTakebackLeft else needleTakebackRight
+    def knob(direction: Direction) = if (direction == ToLeft) knobLeft else knobRight
   }
 
   case class Settings(tension: TensionDial = TensionDial.zero,

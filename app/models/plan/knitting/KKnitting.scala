@@ -52,9 +52,18 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
       require(!settings.l, "L not supported with double bed assembly.")
       val bed = new KDoubleBed(dbc.needleTakeback(direction), state.needles(DoubleBed))
       val part = dbc.part(direction)
-      part match {
-        case (false) => bed.plain _
-        case (true) => bed.part _
+      val knob = dbc.knob(direction)
+      (part, dbc.tuckingLever, dbc.slideLever, knob) match {
+        case (false, TuckingLeverR, slideLever, KRChangeKnobPlain) if slideLever != SlideLeverIiIi =>
+          bed.plain _
+        case (true, TuckingLeverR, slideLever, KRChangeKnobPlain) if slideLever != SlideLeverIiIi =>
+          bed.part _
+        case (false, TuckingLeverR, SlideLeverIiIi, KRChangeKnobIiIi) =>
+          bed.IiIi _
+        case (_, TuckingLeverP, slideLever, KRChangeKnobPlain) if slideLever != SlideLeverIiIi =>
+          throw new NotImplementedError("english rib knitting / tucking pattern not yet implemented")
+        case _ =>
+          throw new IllegalStateException(s"Illegal settings for K (double bed). Settings: $dbc")
       }
     }
   }
@@ -163,5 +172,17 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
       x2.knit(Stitch3D(r, ys, l), DoubleBed, n).
         knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
         doubleBedNeedle(n, NeedleB, t)
+  }
+
+  def IiIi(x: ResultBuilder, n: Needle): ResultBuilder = (x, (n, needles(n).position, needles(n).yarn)) match {
+    case (x, (_, NeedleA, _)) =>
+      //don't knit A needles
+      x
+    case (x, (n, NeedleE, ys)) if !takeback =>
+      //don't knit E needles if no needle pull back from E
+      //TODO do we need to "prevent" falling down of yarn in the yarn feeder
+      x.doubleBedNeedle(n, NeedleE, ys).knit(n, DoubleBed, NoStitch)
+    case (x, (n, _, ys)) =>
+      ??? //TODO
   }
 }
