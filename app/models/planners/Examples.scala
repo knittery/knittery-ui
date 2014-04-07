@@ -41,8 +41,8 @@ object Examples {
 
   private def colorsToYarns(colors: Set[Color]) = {
     colors.zipWithIndex.map {
-      case (c @ Color.white, i) => c -> Yarn(s"White", new Color(0xf4f4f4))
-      case (c @ Color.black, i) => c -> Yarn(s"Black", c)
+      case (c@Color.white, i) => c -> Yarn(s"White", new Color(0xf4f4f4))
+      case (c@Color.black, i) => c -> Yarn(s"Black", c)
       case (color, i) => color -> Yarn(s"Yarn $i", color)
     }.toMap
   }
@@ -83,7 +83,7 @@ object Examples {
   }
 
   def sock(width: Int, shaftHeight: Int, footLength: Int, yarn: YarnPiece) = {
-    import KCarriage.{ Settings, HoldingCamH, DoubleBedCarriage }
+    import KCarriage.{Settings, HoldingCamH, DoubleBedCarriage}
     for {
       _ <- Cast.onClosedRound(Needle.middle - width / 2, Needle.middle + width / 2, yarn)
       _ <- (1 to shaftHeight).toVector.traverse { _ =>
@@ -120,20 +120,22 @@ object Examples {
     } yield ()
   }
   private def reduceHeel() = for {
-    working <- Planner.state(s => Needle.all.filter { n =>
-      val pos = s.needles(MainBed)(n).position
-      pos.isWorking && pos != NeedleE
-    })
+    working <- Planner.state(s =>
+      Needle.all.filter { n =>
+        val pos = s.needles(MainBed)(n).position
+        pos.isWorking && pos != NeedleE
+      })
     dir <- Planner.validate(_.nextDirection(KCarriage))
     needle = if (dir == ToLeft) working.last else working.head
     needles <- Planner.state(_.needles(MainBed))
     _ <- Basics.moveNeedles(MainBed, _ == needle, NeedleE)
   } yield ()
   private def extendHeel() = for {
-    working <- Planner.state(s => Needle.all.filter { n =>
-      val pos = s.needles(MainBed)(n).position
-      pos.isWorking && pos != NeedleE
-    })
+    working <- Planner.state(s =>
+      Needle.all.filter { n =>
+        val pos = s.needles(MainBed)(n).position
+        pos.isWorking && pos != NeedleE
+      })
     dir <- Planner.validate(_.nextDirection(KCarriage))
     needle = if (dir == ToLeft) working.last + 1 else working.head - 1
     needles <- Planner.state(_.needles(MainBed))

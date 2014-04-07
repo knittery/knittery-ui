@@ -67,7 +67,7 @@ object Basics {
 
   /** Knit a row with the K-Carriage. */
   def knitRowWithK(settings: KCarriage.Settings = KCarriage.Settings(), assembly: KCarriage.Assembly = KCarriage.SinkerPlate(),
-    yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+                   yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
     _ <- carriageSettings(settings, assembly)
     needlesBefore <- Planner.state(_.needles(MainBed).positions)
     _ <- MoveNeedles(needlesBefore, pattern, settings.holdingCamLever == KCarriage.HoldingCamN)
