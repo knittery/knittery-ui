@@ -47,6 +47,10 @@ object Examples {
     colors.zipWithIndex.map {
       case (c@Color.white, i) => c -> Yarn(s"White", new Color(0xf4f4f4))
       case (c@Color.black, i) => c -> Yarn(s"Black", c)
+      case (c@Color.yellow, i) => c -> Yarn(s"Yellow", c)
+      case (c@Color.red, i) => c -> Yarn(s"Red", c)
+      case (c@Color.green, i) => c -> Yarn(s"Green", c)
+      case (c@Color.blue, i) => c -> Yarn(s"Blue", c)
       case (color, i) => color -> Yarn(s"Yarn $i", color)
     }.toMap
   }
