@@ -19,8 +19,11 @@ object FairIslePlanner {
     needle0 = startNeedle.getOrElse(workingNeedles.head)
     doubleBedNeedles = (n: Needle) => n >= needle0 && n < (needle0 + pattern.width)
     pattern2 <- patternToYarnPiece(pattern)
-    _ <- Basics.needCarriage(KCarriage, Right)
+    _ <- Basics.needCarriage(KCarriage, Left)
     _ <- Basics.moveNeedles(DoubleBed, doubleBedNeedles, NeedleB)
+    _ <- Basics.knitRowWithK(yarnA = Some(pattern2.head.head),
+      assembly = KCarriage.DoubleBedCarriage(knobLeft = KRChangeKnobIiIi, knobRight = KRChangeKnobIiIi, slideLever = SlideLeverIiIi,
+        partLeft = true, partRight = true))
     _ <- pattern2.rows.toVector.traverse(row => knitDoubleBedRow(row, needle0))
   } yield ()
 
