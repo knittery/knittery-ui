@@ -24,8 +24,10 @@ case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActi
       case KCarriage =>
         val knitting = new KKnitting(state.carriageState(KCarriage), state, direction)
         knitting(pattern)
-      case LCarriage => ???
-      case GCarriage => ???
+      case LCarriage =>
+        throw new NotImplementedError("LCarriage knitting not yet implemented")
+      case GCarriage =>
+        throw new NotImplementedError("GCarriage knitting not yet implemented")
     }
   } yield state2.
       moveCarriage(carriage, direction).

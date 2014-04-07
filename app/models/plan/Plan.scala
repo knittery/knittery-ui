@@ -31,7 +31,7 @@ private object CompositePlan {
       step(previous.run).map(state => CompositePlan(previous, step, state))
         .leftMap(e => PlanError(step, previous.steps.size + 2, e))
     } catch {
-      case e: NotImplementedError => PlanError(step, previous.steps.size + 2, "not implemented").fail[CompositePlan]
+      case e: NotImplementedError => PlanError(step, previous.steps.size + 2, s"not implemented: $e").fail[CompositePlan]
     }
   }
   def apply(previous: Plan, steps: Seq[Step]): Validation[PlanError, Plan] = {
