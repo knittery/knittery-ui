@@ -18,12 +18,13 @@ object Basics {
   /** Change K-carriage settings (incl. assembly). */
   def carriageSettings(settings: KCarriage.Settings, assembly: KCarriage.Assembly) = for {
     _ <- needCarriage(KCarriage)
-    current <- Planner.state(_.carriageState(KCarriage).settings)
+    currentSetting <- Planner.state(_.carriageState(KCarriage).settings)
+    currentAssembly <- Planner.state(_.carriageState(KCarriage).assembly)
     _ <- {
-      if (current == settings) Planner.noop
+      if (currentSetting == settings && currentAssembly == assembly) Planner.noop
       else Planner.step(ChangeKCarriageSettings(settings, assembly))
     }
-  } yield current
+  } yield (currentSetting, currentAssembly)
 
   /** Change L-carriage settings. */
   def carriageSettings(settings: LCarriage.Settings) = for {
