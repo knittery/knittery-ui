@@ -164,8 +164,8 @@ object JsonSerialization {
     override def writes(state: KnittingState) = {
       Json.obj("needles" -> state.needles(MainBed).pattern,
         "doubleBedNeedles" -> state.needles(DoubleBed).pattern,
-        "output" -> state.output.mainBed,
-        "doubleBedOutput" -> state.output.doubleBed,
+        "output" -> state.output.mainBed.collapse,
+        "doubleBedOutput" -> state.output.doubleBed.collapse,
         "carriage" -> state.carriageState,
         "visibleStitches3D" -> state.output3D.stitches.size)
     }

@@ -36,6 +36,31 @@ case class KnittedBed private(data: Matrix[Stitch]) {
       reverse.dropWhile(emptyOrNo).reverse
   }
 
+  def collapse = {
+    data.rows.dropWhile(emptyOrNo)
+      .reverse.dropWhile(emptyOrNo).reverse
+      .foldLeft(Seq.empty[Seq[Stitch]])(collapseFun)
+  }
+  private def noOverlap(a: Seq[Stitch], b: Seq[Stitch]) = {
+    a.zip(b).forall {
+      case (NoStitch, _) => true
+      case (_, NoStitch) => true
+      case (EmptyStitch, EmptyStitch) => true
+      case _ => false
+    }
+  }
+  private def merge(a: Seq[Stitch], b: Seq[Stitch]) = {
+    a.zip(b).map {
+      case (NoStitch, s) => s
+      case (s, _) => s
+    }
+  }
+  private def collapseFun(acc: Seq[Seq[Stitch]], b: Seq[Stitch]) = {
+    if (acc.isEmpty) Seq(b)
+    else if (noOverlap(acc.last, b)) acc.dropRight(1) :+ merge(acc.last, b)
+    else acc :+ b
+  }
+
   def patternString = {
     clean.reverse.
       map(_.map(_.patternString).mkString).
