@@ -30,9 +30,13 @@ object Examples {
 
     val yarn1 = YarnPiece(bg.getOrElse(pattern(0)(0)))
     val zero = 100 - w / 2
+    val firstNeedle = Needle.atIndex(zero)
+    val lastNeedle = Needle.atIndex(zero + w - 1)
 
-    Cast.onClosed(MainBed, Needle.atIndex(zero), Needle.atIndex(zero + w - 1), yarn1) >>
-      Basics.knitRowWithK(yarnA = Some(yarn1)) >>
+    Cast.onClosed(MainBed, firstNeedle, lastNeedle, yarn1) >>
+      Basics.moveNeedles(DoubleBed, n => n >= firstNeedle && n <= lastNeedle, NeedleB) >>
+      Basics.knitRowWithK(yarnA = Some(yarn1), assembly = KCarriage.DoubleBedCarriage()) >>
+      Basics.knitRowWithK(yarnA = Some(yarn1), assembly = KCarriage.DoubleBedCarriage()) >>
       FairIslePlanner.doubleBed(pattern) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
