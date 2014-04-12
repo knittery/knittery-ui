@@ -161,6 +161,14 @@ makeKCarriage = (elem) ->
     ctx.font = "18px Arial"
     ctx.fillText(settings.tension.number, 55, 26)
 
+    if(settings.tension.thirds >= 1)
+      ctx.beginPath()
+      ctx.arc(72, 31, 1, 0, 2 * Math.PI)
+      ctx.stroke()
+      if(settings.tension.thirds is 2)
+        ctx.beginPath()
+        ctx.arc(75, 26, 1, 0, 2 * Math.PI)
+        ctx.stroke()
     ctx.font = "6px Arial"
 
     ctx.fillText("KCII", 106, 12)
