@@ -246,3 +246,7 @@ case class RetireNeedle(bed: Bed, at: Needle, direction: Direction) extends Step
   }.toSuccess
   lazy val target = at + (if (direction == ToLeft) -1 else 1)
 }
+
+case class HangOnCastOnComb() extends Step with NonOptimizable {
+  override def apply(state: KnittingState) = state.success
+}

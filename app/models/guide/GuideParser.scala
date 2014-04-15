@@ -77,6 +77,9 @@ object GuideParser {
     case s@RetireNeedle(bed, needle, direction) =>
       guideStep(steps, "retireNeedle", needle, direction, s.target)
 
+    case HangOnCastOnComb() =>
+      guideStep(steps, "hangOnCastOnComb")
+
     case ChangeKCarriageSettings(settings, assembly) =>
       val assemblyBefore = steps.head.before.carriageState(KCarriage).assembly
       def settingsBefore = steps.head.before.carriageState(KCarriage).settings
