@@ -67,12 +67,22 @@ $(() ->
 
   $(".needles.main").link().data("needles")(guide, "instruction", (instruction) ->
     if not instruction? then return ""
-    for c, i in instruction.stateAfter.needles
+    state =
+      if instruction.markNeedlesMainBed.length > 0 || instruction.markNeedlesDoubleBed.length > 0
+        instruction.stateAfter
+      else
+        instruction.stateBefore
+    for c, i in state.needles
       if instruction.markNeedlesMainBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
   $(".needles.double").link().data("needles")(guide, "instruction", (instruction) ->
     if not instruction? then return ""
-    for c, i in instruction.stateAfter.doubleBedNeedles
+    state =
+      if instruction.markNeedlesMainBed.length > 0 || instruction.markNeedlesDoubleBed.length > 0
+        instruction.stateAfter
+      else
+        instruction.stateBefore
+    for c, i in state.doubleBedNeedles
       if instruction.markNeedlesDoubleBed.indexOf(i) == -1 then c.toUpperCase() else c.toLowerCase()
   )
 
