@@ -9,6 +9,9 @@ sealed trait Needle extends Ordered[Needle] {
   def +(i: Int) = Needle.atIndex(index + i)
   def -(i: Int) = this + (-i)
   def distanceTo(other: Needle) = (index - other.index).abs
+
+  def safeAdd(i: Int) = Needle.atIndex((index + i) min (Needle.count - 1) max 0)
+  def safeSubtract(i: Int) = safeAdd(-i)
 }
 
 object Needle {

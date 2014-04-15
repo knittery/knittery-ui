@@ -47,6 +47,10 @@ class Machine(connectorProps: Props) extends Actor {
     case GetNeedlePattern =>
       sender ! NeedlePatternUpdate(pattern)
 
+    case SetWorkingZone(from, until) =>
+      rowTracker ! RowTracker.WorkingZone(from, until)
+      sender ! WorkingZoneSet(from, until)
+
     //MachineEvents
     case pu@PositionUpdate(pos, direction, Some(carriage)) =>
       rowTracker ! pu
@@ -95,6 +99,9 @@ object Machine {
 
   case class LoadNeedlePattern(pattern: NeedleActionRow) extends Command
   case class NeedlePatternLoaded(pattern: NeedleActionRow) extends Event
+
+  case class SetWorkingZone(from: Needle, until: Needle) extends Command
+  case class WorkingZoneSet(from: Needle, until: Needle) extends Event
 
   /** Will be answered by a NeedlePatternUpdate. */
   case object GetNeedlePattern extends Command

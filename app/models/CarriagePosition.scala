@@ -37,21 +37,27 @@ case object CarriageRemoved extends CarriagePosition {
 /** Direction of movement */
 sealed trait Direction {
   def reverse: Direction
+  def towards: LeftRight
 }
 case object ToLeft extends Direction {
   override def reverse = ToRight
+  def towards = Left
 }
 case object ToRight extends Direction {
   override def reverse = ToLeft
+  def towards = Right
 }
 
 /** Left or right. */
 sealed trait LeftRight {
   def reverse: LeftRight
+  def direction: Direction
 }
 case object Left extends LeftRight {
   override def reverse = Right
+  def direction = ToLeft
 }
 case object Right extends LeftRight {
   override def reverse = Left
+  def direction = ToRight
 }

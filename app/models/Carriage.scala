@@ -12,7 +12,7 @@ sealed trait Carriage {
     case CarriageRemoved => Seq.empty
   }
   /** Width of the carriage in needles. */
-  protected def width: Int
+  def width: Int
 
   type State <: CarriageState
   def initialState: State
@@ -25,7 +25,7 @@ sealed trait CarriageState {
 /** Normal carriage. */
 case object KCarriage extends Carriage {
   override def name = "K"
-  override protected def width = 66
+  override def width = 66
 
   case class State(assembly: Assembly = KCarriage.SinkerPlate(),
                    settings: Settings = Settings(),
@@ -119,7 +119,7 @@ case object KCarriage extends Carriage {
 /** Lace pattern carriage. */
 case object LCarriage extends Carriage {
   override def name = "L"
-  override protected def width = 46
+  override def width = 46
 
   case class State(
                     settings: Settings = Settings(),
@@ -133,7 +133,7 @@ case object LCarriage extends Carriage {
 /** Electronic carriage. */
 case object GCarriage extends Carriage {
   override def name = "G"
-  override protected def width = 20
+  override def width = 20
 
   case class State(
                     settings: Settings = Settings(),

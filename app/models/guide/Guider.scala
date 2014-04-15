@@ -52,7 +52,7 @@ object Guider {
   case class ChangeEvent(newStep: GuideStep, newInstruction: Instruction) extends Notification
 
   private case object NotifyStepChange extends Command
-  private case class SetPattern(pattern: NeedleActionRow) extends Event
+  private case class SetPattern(pattern: NeedleActionRow, workingFrom: Needle, workingUntil: Needle) extends Event
 
   def props(machine: ActorRef) = Props(new Guider(machine))
 
@@ -86,7 +86,8 @@ object Guider {
           .map(_ forward cmd)
           .getOrElse(sender ! CommandNotExecuted(cmd, "no plan is loaded"))
 
-      case SetPattern(pattern) =>
+      case SetPattern(pattern, from, until) =>
+        machine ! Machine.SetWorkingZone(from, until)
         machine ! Machine.LoadNeedlePattern(pattern)
 
       case cmd: Machine.Notification =>
@@ -144,7 +145,7 @@ object Guider {
           if (step.position.isLast) AllNeedlesToB
           else {
             val nextStep = steps(step.position.shift(1).index)
-            nextPattern(nextStep, nextStep.instructions.last)
+            nextPattern(nextStep, nextStep.instructions.head)
           }
         } else nextPattern(step, step.instructions(instruction.position.shift(1).index))
     }
@@ -200,7 +201,10 @@ object Guider {
 
       case NotifyStepChange =>
         val pattern = nextPattern(currentStep, currentInstruction)
-        context.parent ! SetPattern(pattern)
+        val workings = currentInstruction.before.workingNeedles
+        val margin = KCarriage.width / 2 - 8
+        val working = workings.headOption.map(first => (first, workings.last)).getOrElse((Needle.middle - 1, Needle.middle + 1))
+        context.parent ! SetPattern(pattern, working._1 safeSubtract margin, working._2 safeAdd margin)
         context.parent ! ChangeEvent(currentStep, currentInstruction)
     }
   }

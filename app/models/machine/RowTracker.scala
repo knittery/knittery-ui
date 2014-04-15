@@ -7,33 +7,54 @@ import models.connector.Connector.PositionUpdate
 /** Keeps track of the current row number. */
 private object RowTracker {
   case object NextRow
+  case class WorkingZone(from: Needle, until: Needle) {
+    private[RowTracker] def contains(pos: CarriagePosition) = pos match {
+      case CarriageOverNeedles(n) => n >= from && n <= until
+      case _ => false
+    }
+    private[RowTracker] def relative(pos: CarriagePosition) = pos match {
+      case CarriageOverNeedles(n) => if (n < from) Left else Right
+      case CarriageLeft(_) => Left
+      case CarriageRight(_) => Right
+    }
+  }
 
   def props(commander: ActorRef) = Props(new RowTracker(commander))
 
+  private object Position {
+    def unapply(msg: Any): Option[(CarriagePosition, Direction)] = msg match {
+      case PositionUpdate(pos, direction, _) => Some(pos, direction)
+      case _ => None
+    }
+  }
+
   private class RowTracker(commander: ActorRef) extends Actor {
+    var workingZone = WorkingZone(Needle.middle - 1, Needle.middle + 1)
+    var lastPos: CarriagePosition = CarriageLeft(0)
     context watch commander
 
-    override def receive = {
-      case PositionUpdate(CarriageOverNeedles(needle), direction, _) =>
-        context.become(verifyDirection(direction, needle), discardOld = false)
+    def receive = {
+      case Position(pos, dir) if workingZone.contains(pos) =>
+        lastPos = pos
+        context become track(dir)
+      case Position(pos, _) =>
+        lastPos = pos
+        context become track(workingZone.relative(pos).direction.reverse)
+      case w: WorkingZone =>
+        workingZone = w
     }
 
-    def knitting(direction: Direction): Receive = {
-      case PositionUpdate(CarriageOverNeedles(needle), dir, _) if dir != direction =>
-        context.become(verifyDirection(dir, needle), discardOld = false)
-    }
-
-    def verifyDirection(candidate: Direction, startAt: Needle): Receive = {
-      case PositionUpdate(CarriageOverNeedles(needle), `candidate`, _) =>
-        val distance = (needle.index - startAt.index) * (if (candidate == ToLeft) -1 else 1)
-        if (distance < 0 || distance > 30) context.unbecome()
-        else if (distance > 5) {
-          context.unbecome() // so we don't leak memory
-          commander ! NextRow
-          context become knitting(candidate)
-        }
-      case PositionUpdate(CarriageOverNeedles(_), _, _) =>
-        context.unbecome()
+    def track(direction: Direction): Receive = {
+      case Position(pos, _) if !workingZone.contains(pos) && workingZone.relative(pos) == direction.towards =>
+        commander ! NextRow
+        lastPos = pos
+        context become track(direction.reverse)
+      case Position(pos, _) =>
+        lastPos = pos
+      case w: WorkingZone if workingZone != w =>
+        workingZone = w
+        if (!w.contains(lastPos))
+          context become track(w.relative(lastPos).direction.reverse)
     }
   }
 }
