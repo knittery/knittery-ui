@@ -17,11 +17,10 @@ object Optimizers {
   implicit def no = Monoid[PlanOptimizer].zero
 }
 
-
 /** Optimizes away steps that do have same input state as output. */
 object NoEffectStepOptimizer extends PlanOptimizer {
   override def apply(plan: Plan): Plan = {
-    val stepStates = plan.stepStates.filterNot(s => s.before == s.after)
+    val stepStates = plan.stepStates.filterNot(s => s.before == s.after && !NonOptimizable(s.step))
     CompositePlan.fromStepStates(stepStates)
   }
 }
@@ -33,7 +32,7 @@ object OptimizeStepWithNoEffectOnFinalOutput extends PlanOptimizer {
     plan.steps.tails.foldLeft((StartPlan: Plan, plan)) {
       case ((soFar, proposed), steps) if steps.size > 0 =>
         makePlan(soFar, steps.tail) match {
-          case Success(withoutThisStep) if withoutThisStep.run == expectedResult =>
+          case Success(withoutThisStep) if withoutThisStep.run == expectedResult && !NonOptimizable(steps.head)=>
             (soFar, withoutThisStep)
           case differentResult =>
             val next = proposed.stepStates.drop(soFar.stepStates.size).head

@@ -12,6 +12,15 @@ sealed trait Step {
   def apply(on: KnittingState): Validation[String, KnittingState]
 }
 
+/** Steps that must not be optimized. */
+trait NonOptimizable
+object NonOptimizable {
+  def apply(step: Step) = step match {
+    case _: NonOptimizable => true
+    case _ => false
+  }
+}
+
 /** Knits a row using a carriage. */
 case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActionRow = AllNeedlesToB) extends Step {
   override def apply(state: KnittingState) = for {
@@ -148,7 +157,7 @@ case class ClosedCastOn(bed: Bed, from: Needle, until: Needle, yarn: YarnPiece) 
   }
 }
 
-case class ClosedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolean) extends Step {
+case class ClosedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolean) extends Step with NonOptimizable {
   override def apply(state: KnittingState) = {
     val needles = state.needles(bed)
 
