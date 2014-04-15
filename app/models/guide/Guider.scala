@@ -6,6 +6,7 @@ import akka.actor._
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 import ch.inventsoft.graph.layout.Layout
+import models._
 import models.plan._
 import models.machine.Machine
 import utils.SubscriptionActor
@@ -51,6 +52,7 @@ object Guider {
   case class ChangeEvent(newStep: GuideStep, newInstruction: Instruction) extends Notification
 
   private case object NotifyStepChange extends Command
+  private case class SetPattern(pattern: NeedleActionRow) extends Event
 
   def props(machine: ActorRef) = Props(new Guider(machine))
 
@@ -84,6 +86,9 @@ object Guider {
           .map(_ forward cmd)
           .getOrElse(sender ! CommandNotExecuted(cmd, "no plan is loaded"))
 
+      case SetPattern(pattern) =>
+        machine ! Machine.LoadNeedlePattern(pattern)
+
       case cmd: Machine.Notification =>
         current.foreach(_ forward cmd)
     }
@@ -99,11 +104,6 @@ object Guider {
         sender ! CommandExecuted(cmd)
       case Terminated if subscribers.contains(sender) =>
         subscribers -= sender
-
-      case notification@ChangeEvent(step, Instruction(_, knit: KnitRow, _, _, _, _)) =>
-        machine ! Machine.LoadNeedlePattern(knit.pattern)
-        subscribers foreach (_ ! notification)
-
       case notification: Notification =>
         subscribers foreach (_ ! notification)
     }
@@ -136,6 +136,17 @@ object Guider {
           true
         } else false
       }
+    }
+    private def nextPattern(step: GuideStep, instruction: Instruction): NeedleActionRow = instruction.step match {
+      case knit: KnitRow => knit.pattern
+      case _ =>
+        if (instruction.position.isLast) {
+          if (step.position.isLast) AllNeedlesToB
+          else {
+            val nextStep = steps(step.position.shift(1).index)
+            nextPattern(nextStep, nextStep.instructions.last)
+          }
+        } else nextPattern(step, step.instructions(instruction.position.shift(1).index))
     }
 
     override def receive = {
@@ -188,6 +199,8 @@ object Guider {
         } else sender ! CommandNotExecuted(cmd, "already at first")
 
       case NotifyStepChange =>
+        val pattern = nextPattern(currentStep, currentInstruction)
+        context.parent ! SetPattern(pattern)
         context.parent ! ChangeEvent(currentStep, currentInstruction)
     }
   }
