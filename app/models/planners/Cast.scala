@@ -40,7 +40,7 @@ object Cast {
       assembly = DoubleBedCarriage(tension = TensionDial(1, 0), partRight = true), yarnA = Some(withYarn))
     _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = TensionDial(1, 0), partLeft = true),
       assembly = DoubleBedCarriage(tension = TensionDial(1, 0), partRight = true), yarnA = Some(withYarn))
-    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = TensionDial(2, 0), partLeft = true),
+    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = TensionDial(2, 0)),
       assembly = DoubleBedCarriage(tension = TensionDial(2, 0)), yarnA = Some(withYarn))
     _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = TensionDial(2, 0)),
       assembly = DoubleBedCarriage(tension = TensionDial(2, 0)), yarnA = Some(withYarn))
