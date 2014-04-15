@@ -30,9 +30,9 @@ object FairIslePlanner {
   private def knitDoubleBedRow(row: Seq[YarnPiece], startNeedle: Needle, tension: KCarriage.TensionDial = KCarriage.TensionDial.apply(1, 1)) = for {
     yarnA <- Planner.state(_.carriageState(KCarriage).yarnA.getOrElse(row.head))
     yarnB = (row.toSet - yarnA).headOption
-    settings = KCarriage.Settings(tension=tension, partLeft = true, partRight = true)
+    settings = KCarriage.Settings(tension = tension, partLeft = true, partRight = true)
     dbSettings = KCarriage.DoubleBedCarriage(knobLeft = KRChangeKnobIiIi, knobRight = KRChangeKnobIiIi,
-      partLeft = true, partRight = true,
+      tension = tension, partLeft = true, partRight = true,
       slideLever = SlideLeverIiIi)
     //TODO background yarn...
     //with A
