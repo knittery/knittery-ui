@@ -4,6 +4,7 @@ import scalaz._
 import Scalaz._
 import models._
 import models.plan._
+import models.KCarriage.{DoubleBedCarriage, TensionDial}
 
 object Cast {
   def onClosed(bed: Bed, from: Needle, until: Needle, withYarn: Yarn): PlannerM[YarnPiece] =
@@ -28,6 +29,22 @@ object Cast {
     _ <- MoveToDoubleBed(n => n >= until && n <= until2, -1, Some(until))
     _ <- MoveNeedles(MainBed, (n: Needle) => if (n >= from && n < until) NeedleB else NeedleA)
   } yield yarn
+
+  def onDoubleBed(from: Needle, until: Needle, withYarn: YarnPiece): Planner = for {
+    _ <- MoveNeedles(MainBed, (n: Needle) => if (n >= from && n < until) NeedleB else NeedleA)
+    _ <- MoveNeedles(DoubleBed, (n: Needle) => if (n >= from && n < until - 1) NeedleB else NeedleA)
+    _ <- Basics.needCarriage(KCarriage, Right)
+    _ <- Basics.knitRowWithK(assembly = DoubleBedCarriage(), yarnA = Some(withYarn))
+    _ <- HangOnCastOnComb()
+    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = TensionDial(1, 0), partLeft = true),
+      assembly = DoubleBedCarriage(tension = TensionDial(1, 0), partRight = true), yarnA = Some(withYarn))
+    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = TensionDial(1, 0), partLeft = true),
+      assembly = DoubleBedCarriage(tension = TensionDial(1, 0), partRight = true), yarnA = Some(withYarn))
+    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = TensionDial(2, 0), partLeft = true),
+      assembly = DoubleBedCarriage(tension = TensionDial(2, 0)), yarnA = Some(withYarn))
+    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = TensionDial(2, 0)),
+      assembly = DoubleBedCarriage(tension = TensionDial(2, 0)), yarnA = Some(withYarn))
+  } yield ()
 
   def offClosed(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolean = _ => true): Planner = for {
     needleState <- Planner.state(_.needles(bed))
