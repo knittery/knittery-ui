@@ -21,9 +21,9 @@ object FairIslePlanner {
     pattern2 <- patternToYarnPiece(pattern)
     _ <- Basics.needCarriage(KCarriage, Left)
     _ <- Basics.moveNeedles(DoubleBed, doubleBedNeedles, NeedleB)
-    _ <- Basics.knitRowWithK(yarnA = Some(pattern2.head.head),
+    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = tension), yarnA = Some(pattern2.head.head),
       assembly = KCarriage.DoubleBedCarriage(knobLeft = KRChangeKnobIiIi, knobRight = KRChangeKnobIiIi, slideLever = SlideLeverIiIi,
-        partLeft = true, partRight = true))
+        partLeft = true, partRight = true, tension = tension))
     _ <- pattern2.rows.toVector.traverse(row => knitDoubleBedRow(row, needle0, tension))
   } yield ()
 
