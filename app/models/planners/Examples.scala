@@ -11,21 +11,22 @@ import models.KCarriage.TensionDial
 
 object Examples {
 
-  def handyHuelle(width: Int, height: Int, yarn: Yarn, tension: TensionDial): Planner = for {
+  def handyHuelle(img: BufferedImage, background: Yarn, tension: TensionDial): Planner = for {
+    width <- Planner.precondidtions(_ => img.getWidth)
+    height <- Planner.precondidtions(_ => img.getHeight)
     first <- Planner.precondidtions { _ =>
       require(width <= Needle.count - 1)
       Needle.middle - (width / 2)
     }
     last = first + width
-    yarnPiece = YarnPiece(yarn)
-    _ <- Cast.onDoubleBed(first, last, yarnPiece)
-    matrix = (1 until height).map(_ => (1 until width).map(_ => yarn))
+    backgroundPiece = YarnPiece(background)
+    _ <- Cast.onDoubleBed(first, last, backgroundPiece)
+    matrix = imageToPattern(img, width)
     _ <- FairIslePlanner.doubleBed(matrix, tension, Some(first))
     //TODO move all yarn to single bed
-    //TODO knit a row
     _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = tension),
-      assembly = KCarriage.DoubleBedCarriage(tension = tension), yarnA = Some(yarnPiece))
-    _ <- Cast.offClosed(MainBed, yarnPiece)
+      assembly = KCarriage.DoubleBedCarriage(tension = tension), yarnA = Some(backgroundPiece))
+    _ <- Cast.offClosed(MainBed, backgroundPiece)
   } yield ()
 
 

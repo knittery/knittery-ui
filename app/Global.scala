@@ -12,7 +12,7 @@ import akka.util.Timeout
 import akka.io.IO
 import rxtxio.Serial
 import models._
-import models.connector.{ BrotherConnector, SerialPortMock }
+import models.connector.{BrotherConnector, SerialPortMock}
 import models.machine.Machine
 import models.plan._
 import models.planners._
@@ -40,7 +40,8 @@ object Global extends GlobalSettings {
     //    val plan = examplePlan
     //    val plan = tubePlan
     //    val plan = decreasingTubePlan
-    val plan = sockPlan
+    //    val plan = sockPlan
+    val plan = handyPlan
     Logger.info("Initial plan loaded.")
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
@@ -50,6 +51,12 @@ object Global extends GlobalSettings {
 
   @volatile private var _guider: Option[ActorRef] = None
   def guider = _guider.getOrElse(throw new IllegalStateException("not started"))
+
+  private def handyPlan = {
+    val bg = Yarn("white", Color.white)
+    val img = ImageIO.read(new File("pattern/handyhuelle_berner_baer.png"))
+    Examples.handyHuelle(img, bg, KCarriage.TensionDial(8, 1)).plan()
+  }
 
   private def examplePlan = {
     val yarn1 = Yarn("red", Color.red)
