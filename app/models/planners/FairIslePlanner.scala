@@ -76,7 +76,7 @@ object FairIslePlanner {
   private def checkPattern(pattern: Matrix[Yarn]) = Planner.precondidtions { _ =>
     pattern.validate()
     require(pattern.height > 0, "Empty pattern")
-    require(pattern.width % 2 == 0, "Patter with non-even width")
+    require(pattern.width % 2 == 0, "Pattern with non-even width")
     pattern.rows.map(_.toSet).zipWithIndex.foreach {
       case (yarns, index) =>
         require(yarns.size <= 2,
