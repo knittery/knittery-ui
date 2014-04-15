@@ -6,9 +6,28 @@ import scalaz._
 import Scalaz._
 import models._
 import utils._
-import models.plan.Planner
+import models.plan._
+import models.KCarriage.TensionDial
 
 object Examples {
+
+  def handyHuelle(width: Int, height: Int, yarn: Yarn, tension: TensionDial): Planner = for {
+    first <- Planner.precondidtions { _ =>
+      require(width <= Needle.count - 1)
+      Needle.middle - (width / 2)
+    }
+    last = first + width
+    yarnPiece = YarnPiece(yarn)
+    _ <- Cast.onDoubleBed(first, last, yarnPiece)
+    matrix = (1 until height).map(_ => (1 until width).map(_ => yarn))
+    _ <- FairIslePlanner.doubleBed(matrix, tension, Some(first))
+    //TODO move all yarn to single bed
+    //TODO knit a row
+    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = tension),
+      assembly = KCarriage.DoubleBedCarriage(tension = tension), yarnA = Some(yarnPiece))
+    _ <- Cast.offClosed(MainBed, yarnPiece)
+  } yield ()
+
 
   def imageRag(img: BufferedImage, bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)
