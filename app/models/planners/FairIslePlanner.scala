@@ -12,7 +12,7 @@ import models.KCarriage.{SlideLeverIiIi, KRChangeKnobIiIi}
  */
 object FairIslePlanner {
 
-  def doubleBed(pattern: Matrix[Yarn], startNeedle: Option[Needle] = None) = for {
+  def doubleBed(pattern: Matrix[Yarn], tension: KCarriage.TensionDial = KCarriage.TensionDial.apply(1, 1), startNeedle: Option[Needle] = None) = for {
     workingNeedles <- Planner.state(_.workingNeedles)
     _ <- Planner.precondidtions(_ => require(workingNeedles.nonEmpty, "No working needles"))
     _ <- checkPattern(pattern)
@@ -24,13 +24,13 @@ object FairIslePlanner {
     _ <- Basics.knitRowWithK(yarnA = Some(pattern2.head.head),
       assembly = KCarriage.DoubleBedCarriage(knobLeft = KRChangeKnobIiIi, knobRight = KRChangeKnobIiIi, slideLever = SlideLeverIiIi,
         partLeft = true, partRight = true))
-    _ <- pattern2.rows.toVector.traverse(row => knitDoubleBedRow(row, needle0))
+    _ <- pattern2.rows.toVector.traverse(row => knitDoubleBedRow(row, needle0, tension))
   } yield ()
 
-  private def knitDoubleBedRow(row: Seq[YarnPiece], startNeedle: Needle) = for {
+  private def knitDoubleBedRow(row: Seq[YarnPiece], startNeedle: Needle, tension: KCarriage.TensionDial = KCarriage.TensionDial.apply(1, 1)) = for {
     yarnA <- Planner.state(_.carriageState(KCarriage).yarnA.getOrElse(row.head))
     yarnB = (row.toSet - yarnA).headOption
-    settings = KCarriage.Settings(partLeft = true, partRight = true)
+    settings = KCarriage.Settings(tension=tension, partLeft = true, partRight = true)
     dbSettings = KCarriage.DoubleBedCarriage(knobLeft = KRChangeKnobIiIi, knobRight = KRChangeKnobIiIi,
       partLeft = true, partRight = true,
       slideLever = SlideLeverIiIi)

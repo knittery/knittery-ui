@@ -24,7 +24,7 @@ object Examples {
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Cast.offClosed(MainBed, yarn1)
   }
-  def imageRagDoubleBed(img: BufferedImage, bg: Option[Yarn] = None) = {
+  def imageRagDoubleBed(img: BufferedImage, tension: KCarriage.TensionDial = KCarriage.TensionDial.apply(0, 0), bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)
     val pattern = imageToPattern(img, w)
 
@@ -37,7 +37,7 @@ object Examples {
       Basics.moveNeedles(DoubleBed, n => n >= firstNeedle && n <= lastNeedle, NeedleB) >>
       Basics.knitRowWithK(yarnA = Some(yarn1), assembly = KCarriage.DoubleBedCarriage()) >>
       Basics.knitRowWithK(yarnA = Some(yarn1), assembly = KCarriage.DoubleBedCarriage()) >>
-      FairIslePlanner.doubleBed(pattern) >>
+      FairIslePlanner.doubleBed(pattern, tension) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Cast.offClosed(MainBed, yarn1)

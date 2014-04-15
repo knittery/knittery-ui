@@ -46,6 +46,11 @@ object Plans extends Controller {
     "shaft" -> number,
     "foot" -> number)(SockFormData.apply)(SockFormData.unapply))
 
+  case class TensionFormData(tension: Int, thirds: Int)
+  val tensionForm = Form(mapping(
+    "tension" -> number,
+    "thirds" -> number)(TensionFormData.apply)(TensionFormData.unapply))
+    
   def show = Action {
     Ok(views.html.plans())
   }
@@ -64,9 +69,12 @@ object Plans extends Controller {
   }
 
   def loadImageDoubleBedPlan = Action(parse.multipartFormData) { implicit request =>
-    request.body.file("imgDoubleBed").map { patternFile =>
+  	val form = tensionForm.bindFromRequest.get
+  	val tension = KCarriage.TensionDial.apply(form.tension, form.thirds)
+  	
+  	request.body.file("imgDoubleBed").map { patternFile =>
       val image = ImageIO.read(patternFile.ref.file)
-      val planner = Examples.imageRagDoubleBed(image)
+      val planner = Examples.imageRagDoubleBed(image, tension)
       val plan = planner.plan().valueOr(e => throw new RuntimeException(e))
       guider ! Guider.LoadPlan(plan)
       Redirect(routes.Plans.show())
