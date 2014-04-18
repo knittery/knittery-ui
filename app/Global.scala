@@ -54,7 +54,7 @@ object Global extends GlobalSettings {
 
   private def handyPlan = {
     val bg = Yarn("white", Color.white)
-    val img = ImageIO.read(new File("pattern/handyhuelle_berner_baer.png"))
+    val img = ImageIO.read(new File("pattern/mobile_sleeve_kid_koala.png"))
     Examples.handyHuelle(img, bg, KCarriage.TensionDial(8, 1)).plan()
   }
 
