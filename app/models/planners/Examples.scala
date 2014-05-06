@@ -29,6 +29,49 @@ object Examples {
     _ <- Cast.offClosed(MainBed, backgroundPiece)
   } yield ()
 
+  /**
+   * Width/Height: Size of the laptop
+   * Gauge: 10cm/10cm stitches (columns, rows)
+   */
+  def laptopHuelle(widthCm: Double, heightCm: Double, gauge: (Double, Double), yarnA: Yarn, yarnB: Yarn): Planner = for {
+    _ <- Planner.precondidtions(_ => true)
+    thickness = 2 // per side
+    border = 4 // per side
+
+    width = (widthCm / 10 * gauge._1).round.toInt
+    totalWidth = if (width + thickness % 2 != 0) width + thickness + 1 else width + thickness
+    patternWidth = totalWidth - (border * 2)
+
+    height = (heightCm / 10 * gauge._2).round.toInt
+    patternHeight = height - (border * 2) + thickness
+    borderRow = IndexedSeq.fill(totalWidth)(yarnA)
+    borderRows = IndexedSeq.fill(border)(borderRow)
+    borderAtSide = IndexedSeq.fill(border)(yarnA)
+
+    first <- Planner.precondidtions { _ =>
+      require(totalWidth <= Needle.count - 1)
+      Needle.middle - (totalWidth / 2)
+    }
+    last = first + totalWidth
+    yarnAPiece <- Cast.onClosed(MainBed, first, last, yarnA)
+
+    patternFront = IndexedSeq.tabulate(patternHeight, patternWidth) { (c, r) =>
+      if (c % 2 == r % 2) yarnA
+      else yarnB
+    }
+    pf = borderRows ++ patternFront.map(r => borderAtSide ++ r ++ borderAtSide) ++ borderRows
+    _ <- FairIslePlanner.singleBed(pf, Some(first))
+
+    patternBack = IndexedSeq.tabulate(patternHeight, patternWidth) { (c, r) =>
+      if (c % 4 == r % 4 || c % 3 == r % 3) yarnA
+      else yarnB
+    }
+    pb = borderRows ++ patternBack.map(r => borderAtSide ++ r ++ borderAtSide) ++ borderRows
+    _ <- FairIslePlanner.singleBed(pb, Some(first))
+
+    _ <- Cast.offClosed(MainBed, yarnAPiece)
+  } yield ()
+
 
   def imageRag(img: BufferedImage, bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)

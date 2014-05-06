@@ -41,7 +41,8 @@ object Global extends GlobalSettings {
     //    val plan = tubePlan
     //    val plan = decreasingTubePlan
     //    val plan = sockPlan
-    val plan = handyPlan
+    //    val plan = handyPlan
+    val plan = laptopPlan
     Logger.info("Initial plan loaded.")
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
@@ -51,6 +52,12 @@ object Global extends GlobalSettings {
 
   @volatile private var _guider: Option[ActorRef] = None
   def guider = _guider.getOrElse(throw new IllegalStateException("not started"))
+
+  private def laptopPlan = {
+    val bg = Yarn("black", Color.black)
+    val fg = Yarn("white", Color.white)
+    Examples.laptopHuelle(25, 10, (26, 50), bg, fg).plan()
+  }
 
   private def handyPlan = {
     val bg = Yarn("white", Color.white)

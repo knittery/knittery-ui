@@ -18,7 +18,7 @@ package object utils {
     def matrixMap[B](f: A => B): Matrix[B] = matrix.map(_.map(f))
     def reverseBoth = matrix.columns.reverse.transpose.reverse
     def validate() = {
-      if (matrix.nonEmpty) matrix.foreach(r => require(r.size == width, "row widths are non-equal"))
+      if (matrix.nonEmpty) matrix.foreach(r => require(r.size == width, s"row widths are non-equal: ${r.size} != $width"))
     }
   }
   private object RichMatrix {
