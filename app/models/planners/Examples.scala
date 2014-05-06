@@ -8,6 +8,8 @@ import models._
 import utils._
 import models.plan._
 import models.KCarriage.TensionDial
+import javax.imageio.ImageIO
+import java.io.File
 
 object Examples {
 
@@ -52,7 +54,7 @@ object Examples {
       require(totalWidth <= Needle.count - 1)
       Needle.middle - (totalWidth / 2)
     }
-    last = first + totalWidth
+    last = first + totalWidth - 1
     yarnAPiece <- Cast.onClosed(MainBed, first, last, yarnA)
 
     patternFront = IndexedSeq.tabulate(patternHeight, patternWidth) { (c, r) =>
@@ -62,10 +64,10 @@ object Examples {
     pf = borderRows ++ patternFront.map(r => borderAtSide ++ r ++ borderAtSide) ++ borderRows
     _ <- FairIslePlanner.singleBed(pf, Some(first))
 
-    patternBack = IndexedSeq.tabulate(patternHeight, patternWidth) { (c, r) =>
-      if (c % 4 == r % 4 || c % 3 == r % 3) yarnA
-      else yarnB
-    }
+    rauteImg = ImageIO.read(new File("pattern/muster_raute.png"))
+    raute = imageToPattern(rauteImg, rauteImg.getWidth)
+    rauteRow = raute.map(one => Stream.continually(one).flatten.drop(3).take(patternWidth))
+    patternBack = Stream.continually(rauteRow).flatten.take(patternHeight)
     pb = borderRows ++ patternBack.map(r => borderAtSide ++ r ++ borderAtSide) ++ borderRows
     _ <- FairIslePlanner.singleBed(pb, Some(first))
 

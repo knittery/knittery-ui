@@ -54,9 +54,9 @@ object Global extends GlobalSettings {
   def guider = _guider.getOrElse(throw new IllegalStateException("not started"))
 
   private def laptopPlan = {
-    val bg = Yarn("black", Color.black)
-    val fg = Yarn("white", Color.white)
-    Examples.laptopHuelle(25, 10, (26, 50), bg, fg).plan()
+    val bg = Yarn("Black", Color.black)
+    val fg = Yarn("White", Color.white)
+    Examples.laptopHuelle(25, 36, (26, 50), bg, fg).plan()
   }
 
   private def handyPlan = {
