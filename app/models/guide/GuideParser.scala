@@ -128,7 +128,7 @@ object GuideParser {
     case t: Text => t(lang)
     case i: Int => i
     case l: Long => l
-    case n: Needle => n.index
+    case n: Needle => n.number
     case MainBed => Messages("bed.mainBed")
     case DoubleBed => Messages("bed.doubleBed")
     case c: Carriage => c.name
