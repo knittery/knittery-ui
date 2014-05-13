@@ -10,7 +10,7 @@ object Basics {
   def needCarriage(carriage: Carriage, at: LeftRight = Left) = for {
     position <- Planner.state(_.carriageState(carriage).position)
     _ <- {
-      if (position == CarriageRemoved) Planner.step(AddCarriage(KCarriage, at))
+      if (position == CarriageRemoved) Planner.step(AddCarriage(carriage, at))
       else Planner.noop
     }
   } yield ()
@@ -98,6 +98,6 @@ object Basics {
     _ <- carriageSettings(settings)
     _ <- ThreadYarnG(yarn)
     dir <- nextDirection(GCarriage)
-    _ <- KnitRow(LCarriage, dir, pattern)
+    _ <- KnitRow(GCarriage, dir, pattern)
   } yield ()
 }
