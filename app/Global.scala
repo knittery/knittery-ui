@@ -56,7 +56,10 @@ object Global extends GlobalSettings {
   private def laptopPlan = {
     val bg = Yarn("Black", Color.black)
     val fg = Yarn("White", Color.white)
-    Examples.laptopHuelle(25, 36, (26, 50), bg, fg).plan()
+
+    //stitch width: 7
+    //size of dell laptop
+    Examples.laptopHuelle(23.1d, 33.7d, 2.1d, (29, 46), bg, fg, 7).plan()
   }
 
   private def handyPlan = {

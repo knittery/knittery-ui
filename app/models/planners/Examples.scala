@@ -35,9 +35,9 @@ object Examples {
    * Width/Height: Size of the laptop
    * Gauge: 10cm/10cm stitches (columns, rows)
    */
-  def laptopHuelle(widthCm: Double, heightCm: Double, gauge: (Double, Double), yarnA: Yarn, yarnB: Yarn): Planner = for {
+  def laptopHuelle(widthCm: Double, heightCm: Double, thicknessCm: Double, gauge: (Double, Double), yarnA: Yarn, yarnB: Yarn, xOffset: Int = 0): Planner = for {
     _ <- Planner.precondidtions(_ => true)
-    thickness = 2 // per side
+    thickness = (thicknessCm / 10 * gauge._1).round.toInt //per side
     border = 4 // per side
 
     width = (widthCm / 10 * gauge._1).round.toInt
@@ -66,7 +66,7 @@ object Examples {
 
     rauteImg = ImageIO.read(new File("pattern/muster_raute.png"))
     raute = imageToPattern(rauteImg, rauteImg.getWidth)
-    rauteRow = raute.map(one => Stream.continually(one).flatten.drop(3).take(patternWidth))
+    rauteRow = raute.map(one => Stream.continually(one).flatten.drop((rauteImg.getWidth - xOffset).abs).take(patternWidth))
     patternBack = Stream.continually(rauteRow).flatten.take(patternHeight)
     pb = borderRows ++ patternBack.map(r => borderAtSide ++ r ++ borderAtSide) ++ borderRows
     _ <- FairIslePlanner.singleBed(pb, Some(first))
