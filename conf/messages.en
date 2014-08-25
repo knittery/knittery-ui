@@ -34,7 +34,7 @@ guide.step.threadYarn.g.none.title = Unthread from G
 guide.step.threadYarn.g.none.description = Unthread all yarns from the G carriage.
 
 guide.step.moveNeedles.title = Move Needles
-guide.step.moveNeedles.description = Move the marked needles on the {0} to the displayed position.
+guide.step.moveNeedles.description = Move the {3} needles that are highlighted in red on the {0} to the displayed position. The first needle to move is {1} and the last one is {2}.
 
 guide.step.moveToDoubleBed.noflip.title = Transfer to Double Bed
 guide.step.moveToDoubleBed.noflip.description = Take the yarn on the marked needles on the main bed and transfer it to the double bed.

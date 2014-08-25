@@ -67,7 +67,10 @@ object GuideParser {
       val affects = Needle.all.
         filter(n => steps.head.before.needles(bed)(n).position != to(n)).
         map((bed, _)).toSet
-      guideStepWithMark(steps, "moveNeedles", affects, bed)
+      val sorted = affects.toSeq.map(_._2).sorted
+      val first = sorted.head
+      val last = sorted.last
+      guideStepWithMark(steps, "moveNeedles", affects, bed, first, last, affects.size)
 
     case MoveToDoubleBed(_, offset, None) =>
       guideStep(steps, "moveToDoubleBed.noflip", offset)
@@ -129,7 +132,8 @@ object GuideParser {
     case t: Text => t(lang)
     case i: Int => i
     case l: Long => l
-    case n: Needle => n.number
+    case s: String => s
+    case n: Needle => n.numberString
     case MainBed => Messages("bed.mainBed")
     case DoubleBed => Messages("bed.doubleBed")
     case c: Carriage => c.name
