@@ -119,9 +119,10 @@ object GuideParser {
 
   private def m(key: String, args: Any*): Text = new Text {
     override def apply(lang: Lang) = {
-      implicit val l = lang
       val renderedArgs = args map render
-      Messages(s"guide.step.$key", renderedArgs: _*)
+      val msgKey = s"guide.step.$key"
+      val l = if (Messages.isDefinedAt(msgKey)(lang)) lang else Lang.defaultLang
+      Messages(msgKey, renderedArgs: _*)(l)
     }
   }
   private def render(arg: Any)(implicit lang: Lang): Any = arg match {
