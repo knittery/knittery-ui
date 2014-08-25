@@ -179,11 +179,11 @@ case class ClosedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolea
     state.
       knit(
         if (bed == MainBed) knitLast else _ => NoStitch,
-        if (bed == Double) knitLast else _ => NoStitch
+        if (bed == DoubleBed) knitLast else _ => NoStitch
       ).
       knit(
         if (bed == MainBed) knitCastOff else _ => NoStitch,
-        if (bed == Double) knitCastOff else _ => NoStitch
+        if (bed == DoubleBed) knitCastOff else _ => NoStitch
       ).
       //TODO implement .knit2
       modifyNeedles(bed, n => if (filter(n)) NeedleState(NeedleA) else needles(n)).
