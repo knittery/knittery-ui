@@ -1,4 +1,30 @@
 jQuery.fn.extend({
+  ### Shows needle labels using 2d-canvas ###
+  needleLabels: (needleCount) -> this.each(->
+    root = $(this)
+    canvasJ = $("<canvas style='width: 100%; height: 100%'></canvas>")
+    canvasJ.appendTo(root)
+    canvas = canvasJ.get(0)
+    ctx = canvas.getContext("2d")
+
+    width = canvas.width =  canvasJ.width() * 2
+    height = canvas.height = canvasJ.height() * 2
+    factor = 0.85
+    baseline = 1
+    needleWidth = width / needleCount
+    position = (index) -> needleWidth * index + (needleWidth / 2)
+    draw = (index) ->
+      nr = if (index < 100) then -100 + index else index - 99
+      ctx.fillText(nr, position(index), baseline, needleWidth)
+
+    ctx.font = Math.floor(height * factor) + "px Arial"
+    ctx.fillStyle = "#000000"
+    ctx.textAlign = "center"
+    ctx.textBaseline = "hanging"
+    for n in [0..needleCount] when (n <= 100 && n%10 == 0) or (n >= 100 && (n + 1) % 10 == 0)
+      draw(n)
+  )
+
   ### Shows a needle board using 2d-canvas. ###
   needles: (needleCount, dataName = "needles", downwards = true) -> this.each(->
     root = $(this)

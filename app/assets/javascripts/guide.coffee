@@ -34,6 +34,7 @@ $(() ->
 
   $(".graphical .carriage-type").link().text(machine, "carriage", (c) -> if c? then "Carriage #{c}" else "Carriage")
   $("#bar .progress-bar").carriageBar()
+  $(".needle-labels").needleLabels(200)
   $(".needles.main").needles(200)
   $(".needles.double").needles(200, "needles", false)
 
