@@ -88,47 +88,52 @@ $(() ->
 
   $("#instruction-text").link().text(guide, "instruction", (i) -> if i? then i.text else "")
 
-  $(".output-2d").knitted2d("knitted", 80)
-  $(".output-2d").link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.output else undefined)
-
-  $(".output-2d-front").knitted2d("knitted", 160)
-  $(".output-2d-front").link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.output else undefined)
-  $(".output-2d-back").knitted2d("knitted", 160)
-  $(".output-2d-back").link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.doubleBedOutput else undefined)
-
   makeKCarriage($(".kcarriage"))
   makeDoubleBedCarriage($(".doublebedcarriage"))
 
-  $(".output-3d").knitted3d()
-  $(".output-3d").link().data("visibleStitches")(guide, "instruction", (instruction) ->
-    if instruction? then instruction.stateBefore.visibleStitches3D
-    else 0
-  )
-
   $("#btn-output-3d").click(->
-    $(".output-2d").hide()
-    $(".output-2d-dual").hide()
-    $(".output-3d").show()
     $("#btn-output-2d").addClass("btn-default")
     $("#btn-output-2d-dual").addClass("btn-default")
     $("#btn-output-3d").removeClass("btn-default")
+
+    $(".outputs").empty()
+    output = $("<div></div>").appendTo($(".outputs"))
+    output.addClass("output-3d").addClass("output")
+    output.knitted3d()
+    output.link().data("visibleStitches")(guide, "instruction", (instruction) ->
+      if instruction? then instruction.stateBefore.visibleStitches3D
+      else 0
+    )
   )
   $("#btn-output-2d").click(->
-    $(".output-2d").show()
-    $(".output-2d-dual").hide()
-    $(".output-3d").hide()
     $("#btn-output-2d").removeClass("btn-default")
     $("#btn-output-2d-dual").addClass("btn-default")
     $("#btn-output-3d").addClass("btn-default")
+
+    $(".outputs").empty()
+    output = $("<div></div>").appendTo($(".outputs"))
+    output.addClass("output-2d").addClass("output")
+    output.knitted2d("knitted", 80)
+    output.link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.output else undefined)
   )
   $("#btn-output-2d-dual").click(->
-    $(".output-2d").hide()
-    $(".output-2d-dual").show()
-    $(".output-3d").hide()
     $("#btn-output-2d").addClass("btn-default")
     $("#btn-output-2d-dual").removeClass("btn-default")
     $("#btn-output-3d").addClass("btn-default")
+
+    $(".outputs").empty()
+    output = $("<div></div>").appendTo($(".outputs"))
+    output.addClass("output-2d-dual").addClass("output")
+    front = $("<div></div>").appendTo(output)
+    front.addClass("output-2d-front")
+    front.knitted2d("knitted", 160)
+    front.link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.output else undefined)
+    back = $("<div></div>").appendTo(output)
+    back.addClass("output-2d-back")
+    back.knitted2d("knitted", 160)
+    back.link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.doubleBedOutput else undefined)
   )
+  $("#btn-output-2d").click()
 
   Leap.loop({enableGestures: true}, (frame) ->
     for gesture in frame.gestures
