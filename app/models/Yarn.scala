@@ -9,6 +9,9 @@ case class Yarn(name: String, color: Color) {
   def consoleColor = ConsoleColors.closest(color)
   override def toString = name
 }
+object Yarn {
+  val contrastYarn = Yarn("Contrast", Color.cyan)
+}
 
 sealed trait YarnFlow {
   def yarn: Yarn

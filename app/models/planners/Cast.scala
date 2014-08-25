@@ -7,6 +7,17 @@ import models.plan._
 import models.KCarriage.{DoubleBedCarriage, TensionDial}
 
 object Cast {
+  def onOpen(from: Needle, until: Needle, withYarn: YarnPiece): PlannerM[YarnPiece] = for {
+    _ <- Planner.precondidtions(_ => require(from < until))
+    needles = Needle.interval(from, until)
+    castOnNeedles = needles.filter(_.index % 2 == 0)
+    _ <- MoveNeedles(MainBed, n => if (castOnNeedles.contains(n)) NeedleB else NeedleA)
+    _ <- Basics.knitRowWithK(yarnA = Some(withYarn))
+    _ <- HangOnCastOnComb()
+    _ <- MoveNeedles(MainBed, n => if (needles.contains(n)) NeedleB else NeedleA)
+    _ <- Basics.knitRowWithK(yarnA = Some(withYarn))
+  } yield withYarn
+
   def onClosed(bed: Bed, from: Needle, until: Needle, withYarn: Yarn): PlannerM[YarnPiece] =
     onClosed(bed, from, until, YarnPiece(withYarn))
   def onClosed(bed: Bed, from: Needle, until: Needle, withYarn: YarnPiece): PlannerM[YarnPiece] = {
@@ -21,8 +32,9 @@ object Cast {
       require(u2 < Needle.count, "Needle bed not wide enough")
       Needle.atIndex(u2)
     }
-    //TODO basically we'd need to knit with contrast yarn first in order to
-    // be able to move the yarn properly..
+    contrastYarn = YarnPiece(Yarn.contrastYarn)
+    _ <- onOpen(from, until2, contrastYarn)
+    _ <- (1 to 25).toVector.traverse(_ => Basics.knitRowWithK(yarnA = Some(contrastYarn)))
     _ <- onClosed(MainBed, from, until2, yarn)
     _ <- Basics.needCarriage(KCarriage, Right)
     _ <- Basics.knitRowWithK(yarnA = Some(yarn))
