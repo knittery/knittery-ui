@@ -16,6 +16,7 @@ object FairIslePlanner {
     workingNeedles <- Planner.state(_.workingNeedles)
     _ <- Planner.precondidtions(_ => require(workingNeedles.nonEmpty, "No working needles"))
     _ <- checkPattern(pattern)
+    _ <- Planner.precondidtions(_ => require(pattern.width % 2 == 0, "Pattern with non-even width"))
     needle0 = startNeedle.getOrElse(workingNeedles.head)
     doubleBedNeedles = (n: Needle) => n >= needle0 && n < (needle0 + pattern.width)
     pattern2 <- patternToYarnPiece(pattern)
@@ -76,7 +77,6 @@ object FairIslePlanner {
   private def checkPattern(pattern: Matrix[Yarn]) = Planner.precondidtions { _ =>
     pattern.validate()
     require(pattern.height > 0, "Empty pattern")
-    require(pattern.width % 2 == 0, "Pattern with non-even width")
     pattern.rows.map(_.toSet).zipWithIndex.foreach {
       case (yarns, index) =>
         require(yarns.size <= 2,
