@@ -42,7 +42,8 @@ object Global extends GlobalSettings {
     //    val plan = decreasingTubePlan
     //    val plan = sockPlan
     //    val plan = handyPlan
-    val plan = laptopPlan2
+    //    val plan = laptopPlan2
+    val plan = laptopPlan3
     Logger.info("Initial plan loaded.")
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
@@ -70,6 +71,15 @@ object Global extends GlobalSettings {
     Examples.laptopHuelleRandom(widthCm = 25.0d, heightCm = 36.0d, gapCm = 2.0, thicknessCm = 1.5d, lashCm = 22.24,
       gauge = (34, 42),
       yarnBG = bg, yarnFront = contrast, yarnBack = contrast, yarnLash = lash).plan()
+  }
+
+  private def laptopPlan3 = {
+    import Examples._
+
+    val yarnA = Yarn("Cyan", Color.cyan)
+    val yarnB = Yarn("Orange", Color.orange)
+    val gauge = StandardGauge(34, 42)
+    Examples.laptopRndCheckerboard(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, gauge, yarnA, yarnB).plan()
   }
 
   private def handyPlan = {

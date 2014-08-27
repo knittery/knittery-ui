@@ -117,6 +117,133 @@ object Examples {
     _ <- FairIslePlanner.singleBed(lashPattern, Some(first))
   } yield ()
 
+  case class Dimension(width: Int, height: Int)
+  type Pattern = Matrix[Yarn]
+
+  //TODO implement
+  trait Distance {
+    def toMm: Double
+    def toCm = toMm / 10
+    def /(other: Distance): Double = toMm / other.toMm
+    def /(factor: Double): Distance = (toMm / factor).mm
+    def +(other: Distance): Distance = (toMm + other.toMm).mm
+    def -(other: Distance): Distance = (toMm - other.toMm).mm
+  }
+  implicit class DistanceDouble(value: Double) {
+    def cm = new Distance() {
+      def toMm = value * 10
+    }
+    def mm = new Distance() {
+      def toMm = value
+    }
+  }
+
+  trait Gauge {
+    def rowsFor(d: Distance): Int
+    def stichesFor(d: Distance): Int
+  }
+  case class StandardGauge(stitchesFor10Cm: Int, rowsFor10cm: Int) extends Gauge {
+    def rowsFor(d: Distance) = (d / 10.cm * rowsFor10cm).round.toInt
+    def stichesFor(d: Distance) = (d / 10.cm * stitchesFor10Cm).round.toInt
+  }
+
+  case class Patterns(front: Pattern, back: Pattern, lash: Pattern)
+
+  def laptopBase(width: Distance, height: Distance, topGap: Distance, lash: Distance, thickness: Distance,
+    gauge: Gauge, patterns: (Dimension, Dimension, Dimension) => Patterns): Planner = for {
+    _ <- Planner.precondidtions(_ => true)
+    border = 2 //stitches used to the parts sew together
+
+    widthBody = gauge.stichesFor(width + thickness) + border
+    heightFront = gauge.rowsFor(height + thickness / 2 - topGap) - 1
+    heightBack = gauge.rowsFor(height + thickness)
+    lashWidth = widthBody - ((widthBody - gauge.stichesFor(width)) / 2 * 2)
+    lashHeight = gauge.rowsFor(lash)
+
+    frontDim = Dimension(widthBody, heightFront)
+    backDim = Dimension(widthBody, heightBack)
+    lashDim = Dimension(lashWidth, lashHeight)
+
+    ps <- Planner.precondidtions { _ =>
+      val ps = patterns(frontDim, backDim, lashDim)
+      require(ps.front.size == frontDim.height, "Wrong front height")
+      require(ps.front.head.size == frontDim.width, "Wrong front width")
+      require(ps.back.size == backDim.height, "Wrong back height")
+      require(ps.back.head.size == backDim.width, "Wrong back width")
+      require(ps.lash.size == lashDim.height, "Wrong lash height")
+      require(ps.lash.head.size == lashDim.width, "Wrong lash width")
+      ps
+    }
+    first <- Planner.precondidtions { _ =>
+      require(widthBody <= Needle.count - 1)
+      Needle.middle - (widthBody / 2)
+    }
+    last = first + widthBody - 1
+    toDecrease = (widthBody - lashWidth) / 2
+    firstLash = first + toDecrease
+
+
+    bg <- Cast.onClosed(MainBed, first, last, ps.front(0)(0))
+    _ <- Basics.knitRowWithK(yarnA = Some(bg))
+    _ <- FairIslePlanner.singleBed(ps.front, Some(first))
+    _ <- FairIslePlanner.singleBed(ps.back.reverse, Some(first))
+    _ <- FairIslePlanner.singleBed(ps.lash.take(1), Some(firstLash))
+    _ <- (1 to toDecrease).toVector.traverse { i =>
+      FormGiving.raglanDecrease(MainBed, Left) >>
+        FormGiving.raglanDecrease(MainBed, Right) >>
+        FairIslePlanner.singleBed(ps.lash.drop(i).take(1), Some(firstLash))
+    }
+    _ <- FairIslePlanner.singleBed(ps.lash.drop(toDecrease + 1), Some(firstLash))
+    _ <- Cast.offClosed(MainBed, bg)
+  } yield ()
+
+  def laptopRndCheckerboard(width: Distance, height: Distance, topGap: Distance, lash: Distance, thickness: Distance,
+    gauge: Gauge, yarnA: Yarn, yarnB: Yarn) = {
+    val squareSize = 2.cm
+    val squareWidth = gauge.stichesFor(squareSize)
+    val squareHeight = gauge.rowsFor(squareSize)
+
+    def checkerboard(w: Int) = {
+      val offset = (w % squareWidth) / 2
+      val lineA = Stream.continually(Stream.fill(squareWidth)(yarnA) ++ Stream.fill(squareWidth)(yarnB)).flatten.drop(offset)
+      val lineB = lineA.drop(squareWidth)
+      val a = lineA.take(w).toIndexedSeq
+      val b = lineB.take(w).toIndexedSeq
+      Stream.continually(Stream.fill(squareHeight)(a) ++ Stream.fill(squareHeight)(b)).flatten
+    }
+
+    val rnd = new Random(0)
+    def randomize(pattern: Matrix[Yarn], prob: Int => Double, yarn: Yarn) = {
+      pattern.zipWithIndex.map {
+        case (row, i) =>
+          val p = prob(i)
+          row.map { y =>
+            if (rnd.nextDouble() < p) yarn
+            else y
+          }
+      }
+    }
+
+    def rf(count: Int, offset: Int)(i: Int) = {
+      val sector = (i + offset) / squareHeight
+      val sectors = count / squareHeight
+      Math.pow((sectors - sector - 1).toDouble / sectors, 1.5)
+    }
+
+    def pattern(frontDim: Dimension, backDim: Dimension, lashDim: Dimension) = {
+      require(frontDim.width == backDim.width)
+
+      val frontOffset = squareHeight - (frontDim.height % squareHeight)
+      val front = randomize(checkerboard(frontDim.width).drop(frontOffset).take(frontDim.height).toIndexedSeq, rf(frontDim.height, frontOffset), yarnB)
+      val backOffset = squareHeight - (backDim.height % squareHeight)
+      val back = randomize(checkerboard(frontDim.width).drop(backOffset).take(backDim.height).toIndexedSeq, rf(backDim.height, backOffset), yarnA)
+      val lash = IndexedSeq.fill(lashDim.height, lashDim.width)(yarnA)
+      Patterns(front, back, lash)
+    }
+
+    laptopBase(width, height, topGap, lash, thickness, gauge, pattern)
+  }
+
 
   def imageRag(img: BufferedImage, bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)
