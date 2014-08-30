@@ -44,8 +44,8 @@ object Global extends GlobalSettings {
     //    val plan = sockPlan
     //    val plan = handyPlan
     //    val plan = laptopPlan2
-    //    val plan = laptopPlan3
-    val plan = laptopPlan4
+    //    val plan = laptopPlan4
+    val plan = laptopPlan5
     Logger.info("Initial plan loaded.")
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
@@ -75,19 +75,21 @@ object Global extends GlobalSettings {
       yarnBG = bg, yarnFront = contrast, yarnBack = contrast, yarnLash = lash).plan()
   }
 
-  private def laptopPlan3 = {
-    val yarnA = Yarn("Cyan", Color.cyan)
-    val yarnB = Yarn("Orange", Color.orange)
-    val gauge = StandardGauge(34, 42)
-    Examples.laptopRndCheckerboard(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, gauge, yarnA, yarnB).plan()
-  }
-
   private def laptopPlan4 = {
     val yarnA = Yarn("Cyan", Color.cyan)
     val yarnB = Yarn("Orange", Color.orange)
     implicit val gauge = StandardGauge(34, 42)
 
     val patterns = LaptopCase.checkerboardPattern(yarnA, yarnB, 2.cm)
+    LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns).plan()
+  }
+
+  private def laptopPlan5 = {
+    val yarnA = Yarn("Cyan", Color.cyan)
+    val yarnB = Yarn("Orange", Color.orange)
+    implicit val gauge = StandardGauge(34, 42)
+
+    val patterns = LaptopCase.dissolvingCheckerboardPattern(yarnA, yarnB, 2.cm)
     LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns).plan()
   }
 
