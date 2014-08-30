@@ -20,6 +20,15 @@ $(() ->
   )
   $("#last").link().disabled(guide, "step", (s) -> s? && s.last)
 
+  $(document).keydown((e) -> switch e.which
+    when 37 #left
+      jsRoutes.controllers.Guide.previousInstruction().ajax()
+      e.preventDefault()
+    when 39 #right
+      jsRoutes.controllers.Guide.nextInstruction().ajax()
+      e.preventDefault()
+  )
+
   $("#nextInstruction").link().disabled(guide, "instruction", (i) -> i? && i.last)
   $("#nextInstruction").click(() ->
     jsRoutes.controllers.Guide.nextInstruction().ajax()
