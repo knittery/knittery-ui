@@ -1,16 +1,16 @@
 import java.awt.Color
 import java.io.File
 import javax.imageio.ImageIO
-import scala.concurrent.Await
-import scala.concurrent.duration._
+import models.gauge.StandardGauge
+
 import scalaz._
 import Scalaz._
 import play.api._
 import play.api.libs.concurrent.Akka
 import akka.actor._
-import akka.util.Timeout
 import akka.io.IO
 import rxtxio.Serial
+import squants.space.LengthConversions._
 import models._
 import models.connector.{BrotherConnector, SerialPortMock}
 import models.machine.Machine

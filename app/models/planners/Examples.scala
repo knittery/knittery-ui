@@ -2,15 +2,18 @@ package models.planners
 
 import java.awt.Color
 import java.awt.image.BufferedImage
-import scalaz._
-import Scalaz._
-import models._
-import utils._
-import models.plan._
-import models.KCarriage.TensionDial
 import javax.imageio.ImageIO
 import java.io.File
 import scala.util.Random
+import scalaz._
+import Scalaz._
+import squants.space.Length
+import squants.space.LengthConversions._
+import utils._
+import models.gauge.Gauge
+import models._
+import models.plan._
+import models.KCarriage.TensionDial
 
 object Examples {
 
@@ -121,43 +124,19 @@ object Examples {
   type Pattern = Matrix[Yarn]
 
   //TODO implement
-  trait Distance {
-    def toMm: Double
-    def toCm = toMm / 10
-    def /(other: Distance): Double = toMm / other.toMm
-    def /(factor: Double): Distance = (toMm / factor).mm
-    def +(other: Distance): Distance = (toMm + other.toMm).mm
-    def -(other: Distance): Distance = (toMm - other.toMm).mm
-  }
-  implicit class DistanceDouble(value: Double) {
-    def cm = new Distance() {
-      def toMm = value * 10
-    }
-    def mm = new Distance() {
-      def toMm = value
-    }
-  }
 
-  trait Gauge {
-    def rowsFor(d: Distance): Int
-    def stichesFor(d: Distance): Int
-  }
-  case class StandardGauge(stitchesFor10Cm: Int, rowsFor10cm: Int) extends Gauge {
-    def rowsFor(d: Distance) = (d / 10.cm * rowsFor10cm).round.toInt
-    def stichesFor(d: Distance) = (d / 10.cm * stitchesFor10Cm).round.toInt
-  }
 
   case class Patterns(front: Pattern, back: Pattern, lash: Pattern)
 
-  def laptopBase(width: Distance, height: Distance, topGap: Distance, lash: Distance, thickness: Distance,
+  def laptopBase(width: Length, height: Length, topGap: Length, lash: Length, thickness: Length,
     gauge: Gauge, patterns: (Dimension, Dimension, Dimension) => Patterns): Planner = for {
     _ <- Planner.precondidtions(_ => true)
     border = 2 //stitches used to the parts sew together
 
-    widthBody = gauge.stichesFor(width + thickness) + border
+    widthBody = gauge.stitchesFor(width + thickness) + border
     heightFront = gauge.rowsFor(height + thickness / 2 - topGap) - 1
     heightBack = gauge.rowsFor(height + thickness)
-    lashWidth = widthBody - ((widthBody - gauge.stichesFor(width)) / 2 * 2)
+    lashWidth = widthBody - ((widthBody - gauge.stitchesFor(width)) / 2 * 2)
     lashHeight = gauge.rowsFor(lash)
 
     frontDim = Dimension(widthBody, heightFront)
@@ -197,10 +176,10 @@ object Examples {
     _ <- Cast.offClosed(MainBed, bg)
   } yield ()
 
-  def laptopRndCheckerboard(width: Distance, height: Distance, topGap: Distance, lash: Distance, thickness: Distance,
+  def laptopRndCheckerboard(width: Length, height: Length, topGap: Length, lash: Length, thickness: Length,
     gauge: Gauge, yarnA: Yarn, yarnB: Yarn) = {
     val squareSize = 2.cm
-    val squareWidth = gauge.stichesFor(squareSize)
+    val squareWidth = gauge.stitchesFor(squareSize)
     val squareHeight = gauge.rowsFor(squareSize)
 
     def checkerboard(w: Int) = {
