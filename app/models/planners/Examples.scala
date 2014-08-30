@@ -79,48 +79,6 @@ object Examples {
   } yield ()
 
 
-  def laptopHuelleRandom(widthCm: Double, heightCm: Double, gapCm: Double, lashCm: Double, thicknessCm: Double, gauge: (Double, Double),
-    yarnBG: Yarn, yarnFront: Yarn, yarnBack: Yarn, yarnLash: Yarn, seed: Long = 0): Planner = for {
-    _ <- Planner.precondidtions(_ => true)
-    thickness = (thicknessCm / 10 * gauge._1).round.toInt //per side
-    border = 1 // per side
-
-    width = (widthCm / 10 * gauge._1).round.toInt + thickness + 2 * border
-    patternWidth = width - 2 * border
-    height = (heightCm / 10 * gauge._2).round.toInt + thickness
-    lashHeight = (lashCm / 10 * gauge._2).round.toInt
-    frontHeight = height - 1 - (gapCm / 10 * gauge._2).round.toInt
-
-    rnd = new Random(seed)
-    borderAtSide = IndexedSeq.fill(border)(yarnBG)
-
-    frontPattern = (0 until frontHeight).map(_.toDouble / height).map { pA =>
-      IndexedSeq.tabulate(patternWidth)(_ => if (rnd.nextDouble() < pA) yarnFront else yarnBG)
-    }.map(borderAtSide ++ _ ++ borderAtSide)
-
-    backPattern = (0 until height).map(_.toDouble / height).map { pB =>
-      IndexedSeq.tabulate(patternWidth)(_ => if (rnd.nextDouble() > pB) yarnBack else yarnBG)
-    }.map(borderAtSide ++ _ ++ borderAtSide)
-
-    lashPattern = IndexedSeq.tabulate(lashHeight - 1, patternWidth) { (c, r) =>
-      if (c % 2 == r % 2) yarnBG
-      else yarnLash
-    }.map(borderAtSide ++ _ ++ borderAtSide) :+ IndexedSeq.fill(width)(yarnBG)
-
-
-    first <- Planner.precondidtions { _ =>
-      require(width <= Needle.count - 1)
-      Needle.middle - (width / 2)
-    }
-    last = first + width - 1
-    bg <- Cast.onClosed(MainBed, first, last, yarnBG)
-    _ <- Basics.knitRowWithK(yarnA = Some(bg))
-    _ <- FairIslePlanner.singleBed(frontPattern, Some(first))
-    _ <- FairIslePlanner.singleBed(backPattern, Some(first))
-    _ <- FairIslePlanner.singleBed(lashPattern, Some(first))
-  } yield ()
-
-
   def imageRag(img: BufferedImage, bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)
     val pattern = imageToPattern(img, w)
