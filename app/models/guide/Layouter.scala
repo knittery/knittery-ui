@@ -29,14 +29,10 @@ private object Layouter {
   private class Layouter(initial: IncrementalLayout[Stitch3D], limit: Int, size: Int) extends Actor with ActorLogging {
     var stepNr = 0
     var layout: IncrementalLayout[Stitch3D] = initial
+    var startedLayouting = false
 
     private val startTime = System.currentTimeMillis
     def since = (System.currentTimeMillis - startTime).millis
-
-    override def preStart() = {
-      log.debug(s"Will layout $size nodes..")
-      self ! Improve
-    }
 
     override def receive = {
       case Improve =>
@@ -50,6 +46,11 @@ private object Layouter {
         }
 
       case Get =>
+        if (!startedLayouting) {
+          log.debug(s"will start to layout $size nodes..")
+          self ! Improve
+          startedLayouting = true
+        }
         sender ! layout
       case Abort =>
         sender ! layout
