@@ -10,6 +10,13 @@ import models.plan.knitting._
 /** Step to perform during knitting. */
 sealed trait Step {
   def apply(on: KnittingState): Validation[String, KnittingState]
+
+  def andThen(next: Step): Step = {
+    val first = this
+    new Step {
+      def apply(on: KnittingState) = first(on).flatMap(next.apply)
+    }
+  }
 }
 
 /** Steps that must not be optimized. */
@@ -245,6 +252,46 @@ case class RetireNeedle(bed: Bed, at: Needle, direction: Direction) extends Step
     } else state
   }.toSuccess
   lazy val target = at + (if (direction == ToLeft) -1 else 1)
+}
+
+/** Retire needles with the double decker. */
+case class RetireWithDouble(bed: Bed, leftmost: Needle, direction: Direction) extends Step {
+  override def apply(state: KnittingState) = {
+    val composite = direction match {
+      case ToLeft =>
+        RetireNeedle(bed, leftmost, ToLeft) andThen
+          RetireNeedle(bed, leftmost + 1, ToLeft)
+      case ToRight =>
+        RetireNeedle(bed, leftmost + 1, ToRight) andThen
+          RetireNeedle(bed, leftmost, ToRight)
+    }
+    composite(state)
+  }
+  def affectedNeedles = direction match {
+    case ToLeft => Set(leftmost, leftmost + 1, leftmost - 1)
+    case ToRight => Set(leftmost, leftmost + 1, leftmost + 2)
+  }
+}
+
+/** Retire needles with the triple decker. */
+case class RetireWithTriple(bed: Bed, leftmost: Needle, direction: Direction) extends Step {
+  override def apply(state: KnittingState) = {
+    val composite = direction match {
+      case ToLeft =>
+        RetireNeedle(bed, leftmost, ToLeft) andThen
+          RetireNeedle(bed, leftmost + 1, ToLeft) andThen
+          RetireNeedle(bed, leftmost + 2, ToLeft)
+      case ToRight =>
+        RetireNeedle(bed, leftmost + 2, ToRight) andThen
+          RetireNeedle(bed, leftmost + 1, ToRight) andThen
+          RetireNeedle(bed, leftmost, ToRight)
+    }
+    composite(state)
+  }
+  def affectedNeedles = direction match {
+    case ToLeft => Set(leftmost, leftmost + 1, leftmost + 2, leftmost - 1)
+    case ToRight => Set(leftmost, leftmost + 1, leftmost + 2, leftmost + 3)
+  }
 }
 
 case class HangOnCastOnComb() extends Step with NonOptimizable {

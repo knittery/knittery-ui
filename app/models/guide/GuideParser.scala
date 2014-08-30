@@ -78,7 +78,11 @@ object GuideParser {
       guideStep(steps, "moveToDoubleBed.flip", offset, flip)
 
     case s@RetireNeedle(bed, needle, direction) =>
-      guideStep(steps, "retireNeedle", needle, direction, s.target)
+      guideStepWithMark(steps, "retireNeedle", Set((bed, needle)), needle, direction, s.target)
+    case s@RetireWithDouble(bed, leftmost, direction) =>
+      guideStepWithMark(steps, "retireDouble", s.affectedNeedles.map((bed, _)), leftmost, leftmost + 1, direction)
+    case s@RetireWithTriple(bed, leftmost, direction) =>
+      guideStepWithMark(steps, "retireTriple", s.affectedNeedles.map((bed, _)), leftmost, leftmost + 2, direction)
 
     case HangOnCastOnComb() =>
       guideStep(steps, "hangOnCastOnComb")

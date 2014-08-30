@@ -12,6 +12,7 @@ object Optimizers {
       OptimizePatternKnitting ::
       NoEffectStepOptimizer ::
       OptimizeStepWithNoEffectOnFinalOutput ::
+      OptimizeRetires ::
       Nil
   implicit val all = list.foldLeft(Monoid[PlanOptimizer].zero)(_ |+| _)
   implicit def no = Monoid[PlanOptimizer].zero
@@ -32,7 +33,7 @@ object OptimizeStepWithNoEffectOnFinalOutput extends PlanOptimizer {
     plan.steps.tails.foldLeft((StartPlan: Plan, plan)) {
       case ((soFar, proposed), steps) if steps.size > 0 =>
         makePlan(soFar, steps.tail) match {
-          case Success(withoutThisStep) if withoutThisStep.run == expectedResult && !NonOptimizable(steps.head)=>
+          case Success(withoutThisStep) if withoutThisStep.run == expectedResult && !NonOptimizable(steps.head) =>
             (soFar, withoutThisStep)
           case differentResult =>
             val next = proposed.stepStates.drop(soFar.stepStates.size).head
@@ -122,5 +123,78 @@ object OptimizePatternKnitting extends PlanOptimizer {
       case StepState(MoveNeedles(MainBed, _), _, _) => true
       case _ => false
     }
+  }
+}
+
+/** Optimize needle retirement by making use on the double and triple decker. */
+object OptimizeRetires extends PlanOptimizer {
+  def apply(plan: Plan) = {
+    val segmented = plan.stepStates.foldLeft[List[Segment]](Nil) {
+      case (RetireSegment(retires, before) :: acc, StepState(step: RetireNeedle, _, _)) =>
+        RetireSegment(retires :+ step, before) :: acc
+      case (acc, StepState(step: RetireNeedle, before, _)) =>
+        RetireSegment(Seq(step), before) :: acc
+      case (acc, otherStep) => OtherSegment(otherStep) :: acc
+    }.reverse
+    CompositePlan.fromStepStates(segmented.flatMap(_.optimize))
+  }
+
+  private sealed trait Segment {
+    def optimize: Seq[StepState]
+  }
+  private case class RetireSegment(retires: Seq[RetireNeedle], before: KnittingState) extends Segment {
+    def optimize: Seq[StepState] = {
+      opt(retires, before, Seq.empty)
+    }
+    private def overlap(a: RetireNeedle)(b: RetireNeedle): Boolean = {
+      a.at == b.target && a.bed == b.bed
+    }
+    private def stepState(step: Step, before: KnittingState) = {
+      val after = step.apply(before).getOrElse(throw new RuntimeException("Unexpected plan error"))
+      StepState(step, before, after)
+    }
+    @tailrec
+    private def opt(todo: Seq[RetireNeedle], state: KnittingState, result: Seq[StepState]): Seq[StepState] = todo match {
+      case Seq(step@RetireNeedle(bed, at, ToLeft), rest@_*) =>
+        val (l, r) = rest.span(s => !(s.bed == bed && s.at == at + 1))
+        val (step2, rest2) = if (r.nonEmpty && !l.exists(overlap(step))) {
+          //try to find third
+          val (l2, r2) = r.drop(1).span(s => !(s.bed == bed && s.at == at + 2))
+          if (r2.nonEmpty && !l2.exists(overlap(step)) && !l2.exists(overlap(r.head))) {
+            //can use triple-decker
+            (RetireWithTriple(bed, at, ToLeft), l ++ l2.drop(1) ++ r2.drop(1))
+          } else {
+            //can use double-decker
+            (RetireWithDouble(bed, at, ToLeft), l ++ r.drop(1))
+          }
+        } else {
+          (step, rest)
+        }
+        val ss = stepState(step2, state)
+        opt(rest2, ss.after, result :+ ss)
+
+      case Seq(step@RetireNeedle(bed, at, ToRight), rest@_*) =>
+        val (l, r) = rest.span(s => !(s.bed == bed && s.at == at - 1))
+        val (step2, rest2) = if (r.nonEmpty && !l.exists(overlap(step))) {
+          //try to find third
+          val (l2, r2) = r.drop(1).span(s => !(s.bed == bed && s.at == at - 2))
+          if (r2.nonEmpty && !l2.exists(overlap(step)) && !l2.exists(overlap(r.head))) {
+            //can use triple-decker
+            (RetireWithTriple(bed, r2.head.at, ToRight), l ++ l2.drop(1) ++ r2.drop(1))
+          } else {
+            //can use double-decker
+            (RetireWithDouble(bed, r.head.at, ToRight), l ++ r.drop(1))
+          }
+        } else {
+          (step, rest)
+        }
+        val ss = stepState(step2, state)
+        opt(rest2, ss.after, result :+ ss)
+
+      case Seq() => result
+    }
+  }
+  private case class OtherSegment(step: StepState) extends Segment {
+    def optimize = Seq(step)
   }
 }

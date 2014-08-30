@@ -1,7 +1,6 @@
 package models.plan
 
 import org.specs2.mutable.Specification
-import org.specs2._
 import models._
 
 
@@ -193,6 +192,23 @@ class OptimizersSpec extends Specification {
       KnitRow(KCarriage, ToLeft),
       ClosedCastOff(MainBed, redPiece, allNeedles))
 
+    val basePlan = Seq(
+      ClosedCastOn(MainBed, Needle.atIndex(1), Needle.atIndex(40), redPiece),
+      AddCarriage(KCarriage, Left),
+      ThreadYarnK(Some(redPiece), None),
+      KnitRow(KCarriage, ToRight),
+      KnitRow(KCarriage, ToLeft))
+
+    val endOfPlan = Seq(
+      KnitRow(KCarriage, ToRight),
+      KnitRow(KCarriage, ToLeft),
+      ClosedCastOff(MainBed, redPiece, _ => true))
+
+    def wrapInPlan(steps: Step*) = {
+      plan(basePlan ++ steps ++ endOfPlan: _*)
+    }
+
+
     val plans = simpleLines ::
       simpleLinesWithUnknittedSettings ::
       simpleLinesWithDuplicateSettings ::
@@ -260,6 +276,77 @@ class OptimizersSpec extends Specification {
     "optimize away movements to E with HoldingCam N" in new plans {
       OptimizeStepWithNoEffectOnFinalOutput(plainKnittingKWithEAndN_unoptimized).steps must
         containTheSameElementsAs(plainKnittingKWithEAndN.steps)
+    }
+  }
+
+  "triple decker optimization" should {
+    def toLeft(i: Int) = RetireNeedle(MainBed, Needle.atIndex(i), ToLeft)
+    def toRight(i: Int) = RetireNeedle(MainBed, Needle.atIndex(i), ToRight)
+    def withDouble(i: Int, dir: Direction) = RetireWithDouble(MainBed, Needle.atIndex(i), dir)
+    def withTriple(i: Int, dir: Direction) = RetireWithTriple(MainBed, Needle.atIndex(i), dir)
+
+    "merge together two adjunct retires to left when started with left" in new plans {
+      val unopt = wrapInPlan(toLeft(39), toLeft(40))
+      val opt = wrapInPlan(withDouble(39, ToLeft))
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+    "not merge together two adjunct retires to left when started with right" in new plans {
+      val unopt = wrapInPlan(toLeft(40), toLeft(39))
+      val opt = unopt
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+
+    "merge together three adjunct retires to left when started with left" in new plans {
+      val unopt = wrapInPlan(toLeft(38), toLeft(39), toLeft(40))
+      val opt = wrapInPlan(withTriple(38, ToLeft))
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+    "not merge together three adjunct retires to left when started with right" in new plans {
+      val unopt = wrapInPlan(toLeft(40), toLeft(39), toLeft(38))
+      val opt = unopt
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+    "not merge together three adjunct retires to left when started with middle then right (only two)" in new plans {
+      val unopt = wrapInPlan(toLeft(39), toLeft(40), toLeft(38))
+      val opt = wrapInPlan(withDouble(39, ToLeft), toLeft(38))
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+    "not merge together three adjunct retires to left when started with middle then left (only two)" in new plans {
+      val unopt = wrapInPlan(toLeft(39), toLeft(38), toLeft(40))
+      val opt = wrapInPlan(withDouble(39, ToLeft), toLeft(38))
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+
+    "merge together two adjunct retires to right when started with right" in new plans {
+      val unopt = wrapInPlan(toRight(2), toRight(1))
+      val opt = wrapInPlan(withDouble(1, ToRight))
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+    "not merge together two adjunct retires to right when started with left" in new plans {
+      val unopt = wrapInPlan(toRight(1), toRight(2))
+      val opt = unopt
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+
+    "merge together three adjunct retires to right when started with right" in new plans {
+      val unopt = wrapInPlan(toRight(3), toRight(2), toRight(1))
+      val opt = wrapInPlan(withTriple(1, ToRight))
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+    "not merge together three adjunct retires to right when started with left" in new plans {
+      val unopt = wrapInPlan(toRight(1), toRight(2), toRight(3))
+      val opt = unopt
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+    "not merge together three adjunct retires to right when started with middle then left (only two)" in new plans {
+      val unopt = wrapInPlan(toRight(2), toRight(1), toRight(3))
+      val opt = wrapInPlan(withDouble(1, ToRight), toRight(3))
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
+    }
+    "not merge together three adjunct retires to right when started with middle then right (only two)" in new plans {
+      val unopt = wrapInPlan(toRight(2), toRight(3), toRight(1))
+      val opt = wrapInPlan(withDouble(1, ToRight), toRight(3))
+      OptimizeRetires(unopt).steps must containTheSameElementsAs(opt.steps)
     }
   }
 }

@@ -44,6 +44,12 @@ guide.step.moveToDoubleBed.flip.description = Take the yarn on the marked needle
 guide.step.retireNeedle.title = Retire Needle
 guide.step.retireNeedle.description = Move the yarns on needle {0}  one needle to the {1} and put it into A position. Leave needle {2} at B position.
 
+guide.step.retireDouble.title = Double Decker
+guide.step.retireDouble.description = Take the yarns on the needles {0} and {1} with the double decker and move it one needle to the {2}.
+
+guide.step.retireTriple.title = Triple Decker
+guide.step.retireTriple.description = Take the yarns on the needles {0} to {1} with the triple decker and move it one needle to the {2}.
+
 guide.step.hangOnCastOnComb.title = Cast-on Comb
 guide.step.hangOnCastOnComb.description = Hang on the cast-on comb.
 
