@@ -52,16 +52,20 @@ object LaptopCase {
     toDecrease = (bodyWidth - dims.lashWidth).approx / 2
     firstLash = first + toDecrease
 
-
     bg <- Cast.onClosed(MainBed, first, last, ps.front(0)(0))
     _ <- Basics.knitRowWithK(yarnA = Some(bg))
     _ <- FairIslePlanner.singleBed(ps.front, Some(first))
     _ <- FairIslePlanner.singleBed(ps.back.reverse, Some(first))
-    _ <- FairIslePlanner.singleBed(ps.lash.take(1), Some(firstLash))
-    _ <- (1 to toDecrease).toVector.traverse { i =>
-      FormGiving.raglanDecrease(MainBed, Left) >>
-        FormGiving.raglanDecrease(MainBed, Right) >>
-        FairIslePlanner.singleBed(ps.lash.drop(i).take(1), Some(firstLash))
+    _ <- (0 until toDecrease).toVector.traverse { i =>
+      for {
+        working <- Planner.state(_.workingNeedles(MainBed).size)
+        patternLine = ps.lash.drop(i).head
+        delta = (working - patternLine.size) / 2
+        line = IndexedSeq.fill(delta)(patternLine.head) ++ patternLine ++ IndexedSeq.fill(delta)(patternLine.last)
+        _ <- FairIslePlanner.singleBed(IndexedSeq(line), Some(firstLash - delta))
+        _ <- FormGiving.raglanDecrease(MainBed, Left)
+        _ <- FormGiving.raglanDecrease(MainBed, Right)
+      } yield ()
     }
     _ <- FairIslePlanner.singleBed(ps.lash.drop(toDecrease + 1), Some(firstLash))
     _ <- Cast.offClosed(MainBed, bg)
