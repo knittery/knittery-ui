@@ -43,10 +43,10 @@ object Global extends GlobalSettings {
     //    val plan = decreasingTubePlan
     //    val plan = sockPlan
     //    val plan = handyPlan
-    //    val plan = laptopPlan2
-    val plan = laptopPlanGradient
+    //    val plan = laptopPlan
+    //    val plan = laptopPlanGradient
     //    val plan = laptopPlanCheckerboard
-    //    val plan = laptopPlanDissolvingCheckerboard
+    val plan = laptopPlanDissolvingCheckerboard
     Logger.info("Initial plan loaded.")
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
@@ -58,8 +58,8 @@ object Global extends GlobalSettings {
   def guider = _guider.getOrElse(throw new IllegalStateException("not started"))
 
   private def laptopPlan = {
-    val bg = Yarn("Black", Color.black)
-    val fg = Yarn("White", Color.white)
+    val bg = Yarn("black", Color.black)
+    val fg = Yarn("white", Color.white)
 
     //stitch width: 7
     //size of dell laptop
@@ -67,8 +67,8 @@ object Global extends GlobalSettings {
   }
 
   private def laptopPlanGradient = {
-    val top = Yarn("Weiss", Color.white)
-    val bottom = Yarn("Blau", Color.cyan)
+    val top = Yarn("white", Color.white)
+    val bottom = Yarn("blue", Color.cyan)
     implicit val gauge = StandardGauge(34, 42)
 
     val patterns = LaptopCase.gradient(top, bottom, bottom)
@@ -76,8 +76,8 @@ object Global extends GlobalSettings {
   }
 
   private def laptopPlanCheckerboard = {
-    val yarnA = Yarn("Cyan", Color.cyan)
-    val yarnB = Yarn("Orange", Color.orange)
+    val yarnA = Yarn("cyan", Color.cyan)
+    val yarnB = Yarn("orange", Color.orange)
     implicit val gauge = StandardGauge(34, 42)
 
     val patterns = LaptopCase.checkerboardPattern(yarnA, yarnB, 2.cm)
@@ -85,8 +85,8 @@ object Global extends GlobalSettings {
   }
 
   private def laptopPlanDissolvingCheckerboard = {
-    val yarnA = Yarn("Cyan", Color.cyan)
-    val yarnB = Yarn("Orange", Color.orange)
+    val yarnA = Yarn("cyan", Color.cyan)
+    val yarnB = Yarn("orange", Color.orange)
     implicit val gauge = StandardGauge(34, 42)
 
     val patterns = LaptopCase.dissolvingCheckerboardPattern(yarnA, yarnB, 2.cm)
