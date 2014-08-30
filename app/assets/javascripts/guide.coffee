@@ -38,6 +38,13 @@ $(() ->
     jsRoutes.controllers.Guide.jumpTo($(this).attr("href").substr(1)).ajax()
     false
   )
+  $(".instruction-count").click(() ->
+    target = prompt("Jump to instruction", guide.instruction.index)
+    if (target?)
+      if (target < 0) then target = 0
+      else if (target >= guide.step.instructionCount) then target = guide.step.instructionCount - 1
+      jsRoutes.controllers.Guide.jumpTo(guide.step.index, target).ajax()
+  )
 
   $(".graphical .carriage-type").link().text(machine, "carriage", (c) -> if c? then "Carriage #{c}" else "Carriage")
   $("#bar .progress-bar").carriageBar()
