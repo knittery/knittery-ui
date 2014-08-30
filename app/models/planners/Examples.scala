@@ -10,7 +10,7 @@ import Scalaz._
 import squants.space.Length
 import squants.space.LengthConversions._
 import utils._
-import models.gauge.Gauge
+import models.units._
 import models._
 import models.plan._
 import models.KCarriage.TensionDial
@@ -120,10 +120,8 @@ object Examples {
     _ <- FairIslePlanner.singleBed(lashPattern, Some(first))
   } yield ()
 
-  case class Dimension(width: Int, height: Int)
+  case class Dimension(width: Stitches, height: Rows)
   type Pattern = Matrix[Yarn]
-
-  //TODO implement
 
 
   case class Patterns(front: Pattern, back: Pattern, lash: Pattern)
@@ -131,10 +129,10 @@ object Examples {
   def laptopBase(width: Length, height: Length, topGap: Length, lash: Length, thickness: Length,
     gauge: Gauge, patterns: (Dimension, Dimension, Dimension) => Patterns): Planner = for {
     _ <- Planner.precondidtions(_ => true)
-    border = 2 //stitches used to the parts sew together
+    border = 2.stitches //stitches used to the parts sew together
 
     widthBody = gauge.stitchesFor(width + thickness) + border
-    heightFront = gauge.rowsFor(height + thickness / 2 - topGap) - 1
+    heightFront = gauge.rowsFor(height + thickness / 2 - topGap) - 1.rows
     heightBack = gauge.rowsFor(height + thickness)
     lashWidth = widthBody - ((widthBody - gauge.stitchesFor(width)) / 2 * 2)
     lashHeight = gauge.rowsFor(lash)
@@ -154,11 +152,11 @@ object Examples {
       ps
     }
     first <- Planner.precondidtions { _ =>
-      require(widthBody <= Needle.count - 1)
-      Needle.middle - (widthBody / 2)
+      require(widthBody.approx <= Needle.count - 1)
+      Needle.middle - (widthBody / 2).approx
     }
-    last = first + widthBody - 1
-    toDecrease = (widthBody - lashWidth) / 2
+    last = first + widthBody.approx - 1
+    toDecrease = ((widthBody - lashWidth) / 2).approx
     firstLash = first + toDecrease
 
 
@@ -179,8 +177,8 @@ object Examples {
   def laptopRndCheckerboard(width: Length, height: Length, topGap: Length, lash: Length, thickness: Length,
     gauge: Gauge, yarnA: Yarn, yarnB: Yarn) = {
     val squareSize = 2.cm
-    val squareWidth = gauge.stitchesFor(squareSize)
-    val squareHeight = gauge.rowsFor(squareSize)
+    val squareWidth = gauge.stitchesFor(squareSize).approx
+    val squareHeight = gauge.rowsFor(squareSize).approx
 
     def checkerboard(w: Int) = {
       val offset = (w % squareWidth) / 2
@@ -212,11 +210,11 @@ object Examples {
     def pattern(frontDim: Dimension, backDim: Dimension, lashDim: Dimension) = {
       require(frontDim.width == backDim.width)
 
-      val frontOffset = squareHeight - (frontDim.height % squareHeight)
-      val front = randomize(checkerboard(frontDim.width).drop(frontOffset).take(frontDim.height).toIndexedSeq, rf(frontDim.height, frontOffset), yarnB)
-      val backOffset = squareHeight - (backDim.height % squareHeight)
-      val back = randomize(checkerboard(frontDim.width).drop(backOffset).take(backDim.height).toIndexedSeq, rf(backDim.height, backOffset), yarnA)
-      val lash = IndexedSeq.fill(lashDim.height, lashDim.width)(yarnA)
+      val frontOffset = squareHeight - (frontDim.height.approx % squareHeight)
+      val front = randomize(checkerboard(frontDim.width.approx).drop(frontOffset).take(frontDim.height.approx).toIndexedSeq, rf(frontDim.height.approx, frontOffset), yarnB)
+      val backOffset = squareHeight - (backDim.height.approx % squareHeight)
+      val back = randomize(checkerboard(frontDim.width.approx).drop(backOffset).take(backDim.height.approx).toIndexedSeq, rf(backDim.height.approx, backOffset), yarnA)
+      val lash = IndexedSeq.fill(lashDim.height.approx, lashDim.width.approx)(yarnA)
       Patterns(front, back, lash)
     }
 

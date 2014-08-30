@@ -1,8 +1,6 @@
 import java.awt.Color
 import java.io.File
 import javax.imageio.ImageIO
-import models.gauge.StandardGauge
-
 import scalaz._
 import Scalaz._
 import play.api._
@@ -12,6 +10,7 @@ import akka.io.IO
 import rxtxio.Serial
 import squants.space.LengthConversions._
 import models._
+import models.gauge.StandardGauge
 import models.connector.{BrotherConnector, SerialPortMock}
 import models.machine.Machine
 import models.plan._
@@ -74,8 +73,6 @@ object Global extends GlobalSettings {
   }
 
   private def laptopPlan3 = {
-    import Examples._
-
     val yarnA = Yarn("Cyan", Color.cyan)
     val yarnB = Yarn("Orange", Color.orange)
     val gauge = StandardGauge(34, 42)
