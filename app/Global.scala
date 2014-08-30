@@ -17,7 +17,7 @@ import models.plan._
 import models.planners._
 import models.guide._
 import utils._
-import knittings.LaptopCase
+import knittings._
 
 
 object Global extends GlobalSettings {
@@ -41,12 +41,12 @@ object Global extends GlobalSettings {
     //    val plan = examplePlan
     //    val plan = tubePlan
     //    val plan = decreasingTubePlan
-    //    val plan = sockPlan
+    val plan = sockPlan
     //    val plan = handyPlan
     //    val plan = laptopPlan
     //    val plan = laptopPlanGradient
     //    val plan = laptopPlanCheckerboard
-    val plan = laptopPlanDissolvingCheckerboard
+    //    val plan = laptopPlanDissolvingCheckerboard
     Logger.info("Initial plan loaded.")
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
@@ -133,7 +133,7 @@ object Global extends GlobalSettings {
 
   private def tubePlan = Examples.tube(10, 40, YarnPiece(Yarn("red", Color.red))).plan()
   private def decreasingTubePlan = Examples.decreasingTube(20, 60, YarnPiece(Yarn("red", Color.red))).plan()
-  private def sockPlan = Examples.sock(12, 20, 15, YarnPiece(Yarn("red", Color.red))).plan()
+  private def sockPlan = Sock(12, 20, 15, YarnPiece(Yarn("red", Color.red))).plan()
 
   private def imagePlan = {
     val img = ImageIO.read(new File("example.png"))

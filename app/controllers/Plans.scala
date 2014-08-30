@@ -1,29 +1,18 @@
 package controllers
 
-import scala.concurrent.duration._
+import java.io.File
+import java.awt.Color
+import javax.imageio.ImageIO
 import play.api.Play._
 import play.api.mvc._
-import play.api.libs.json._
-import play.api.libs.iteratee._
-import play.api.libs.concurrent.Akka
-import play.api.libs.concurrent.Execution.Implicits._
-import akka.actor._
-import akka.pattern.ask
-import akka.util.Timeout
-import models._
-import models.machine.Machine._
-import utils.JsonSerialization._
-import java.io.File
-import javax.imageio.ImageIO
-import models.machine.Machine
-import ch.knittery.pattern._
 import play.api.data._
 import play.api.data.Forms._
-import play.api.data.format.Formats._
-import java.awt.image.BufferedImage
+import play.api.libs.concurrent.Akka
+import models._
+import ch.knittery.pattern._
 import models.guide._
 import models.planners._
-import java.awt.Color
+import knittings._
 
 object Plans extends Controller {
 
@@ -50,7 +39,7 @@ object Plans extends Controller {
   val tensionForm = Form(mapping(
     "tension" -> number,
     "thirds" -> number)(TensionFormData.apply)(TensionFormData.unapply))
-    
+
   def show = Action {
     Ok(views.html.plans())
   }
@@ -69,10 +58,10 @@ object Plans extends Controller {
   }
 
   def loadImageDoubleBedPlan = Action(parse.multipartFormData) { implicit request =>
-  	val form = tensionForm.bindFromRequest.get
-  	val tension = KCarriage.TensionDial.apply(form.tension, form.thirds)
-  	
-  	request.body.file("imgDoubleBed").map { patternFile =>
+    val form = tensionForm.bindFromRequest.get
+    val tension = KCarriage.TensionDial.apply(form.tension, form.thirds)
+
+    request.body.file("imgDoubleBed").map { patternFile =>
       val image = ImageIO.read(patternFile.ref.file)
       val planner = Examples.imageRagDoubleBed(image, tension)
       val plan = planner.plan().valueOr(e => throw new RuntimeException(e))
@@ -114,7 +103,7 @@ object Plans extends Controller {
 
   def loadSock = Action { implicit request =>
     val form = sockForm.bindFromRequest.get
-    val plan = Examples.sock(form.width, form.shaft, form.foot, YarnPiece(Yarn("red", Color.red)))
+    val plan = Sock(form.width, form.shaft, form.foot, YarnPiece(Yarn("red", Color.red)))
       .plan().valueOr(e => throw new RuntimeException(s"Invalid Plan: $e"))
     guider ! Guider.LoadPlan(plan)
     Redirect(routes.Plans.show())
