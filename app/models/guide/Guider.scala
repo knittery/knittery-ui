@@ -33,6 +33,8 @@ object Guider {
   case object First extends Command
   /** Move to the last step. Answer: Command[Not]Executed. */
   case object Last extends Command
+  /** Move to a specific step */
+  case class JumpTo(step: Int, instruction: Int) extends Command
 
   /** Get the current step. Answer: CurrentStep. */
   case object QueryStep extends Command
@@ -176,7 +178,6 @@ object Guider {
         currentInstruction = currentStep.instructions.last
         self ! NotifyStepChange
         sender ! CommandExecuted(cmd)
-
       case cmd@NextStep =>
         if (modStep(1)) {
           self ! NotifyStepChange
@@ -198,6 +199,18 @@ object Guider {
           self ! NotifyStepChange
           sender ! CommandExecuted(cmd)
         } else sender ! CommandNotExecuted(cmd, "already at first")
+
+      case cmd@JumpTo(s, i) =>
+        val res = for {
+          step <- steps.find(_.position.index == s)
+          instruction <- step.instructions.find(_.position.index == i)
+        } yield {
+          currentStep = step
+          currentInstruction = instruction
+          self ! NotifyStepChange
+          CommandExecuted(cmd)
+        }
+        sender ! res.getOrElse(CommandNotExecuted(cmd, "step/instruction does not exist"))
 
       case NotifyStepChange =>
         val pattern = nextPattern(currentStep, currentInstruction)

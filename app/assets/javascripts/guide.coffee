@@ -30,7 +30,14 @@ $(() ->
     jsRoutes.controllers.Guide.previousInstruction().ajax()
     false
   )
-
+  $(".step-list li:not(.special-step)").each(() ->
+    url = "#" + $(this).data("step")
+    $(this).wrapInner("<a href=" + url + ">")
+  )
+  $(".step-list li a").click(() ->
+    jsRoutes.controllers.Guide.jumpTo($(this).attr("href").substr(1)).ajax()
+    false
+  )
 
   $(".graphical .carriage-type").link().text(machine, "carriage", (c) -> if c? then "Carriage #{c}" else "Carriage")
   $("#bar .progress-bar").carriageBar()

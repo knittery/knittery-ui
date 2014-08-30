@@ -47,6 +47,11 @@ object Guide extends Controller {
       Guider.CommandExecuted(_) <- guider ? Guider.Last
     } yield Redirect(routes.Guide.view)
   }
+  def jumpTo(step: Int, instruction: Int) = Action.async { request =>
+    for {
+      Guider.CommandExecuted(_) <- guider ? Guider.JumpTo(step, instruction)
+    } yield Redirect(routes.Guide.view)
+  }
 
   def nextInstruction = Action.async { request =>
     for {
