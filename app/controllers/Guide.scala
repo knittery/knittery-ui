@@ -1,7 +1,7 @@
 package controllers
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
-import java.awt.Color
 import scalaz._
 import Scalaz._
 import akka.util._
@@ -27,42 +27,20 @@ object Guide extends Controller {
     } yield Ok(views.html.guide(steps, step, instruction))
   }
 
-  def next = Action.async { request =>
-    for {
-      Guider.CommandExecuted(_) <- guider ? Guider.NextStep
-    } yield Redirect(routes.Guide.view)
-  }
-  def previous = Action.async { request =>
-    for {
-      Guider.CommandExecuted(_) <- guider ? Guider.PreviousStep
-    } yield Redirect(routes.Guide.view)
-  }
-  def first = Action.async { request =>
-    for {
-      Guider.CommandExecuted(_) <- guider ? Guider.First
-    } yield Redirect(routes.Guide.view)
-  }
-  def last = Action.async { request =>
-    for {
-      Guider.CommandExecuted(_) <- guider ? Guider.Last
-    } yield Redirect(routes.Guide.view)
-  }
-  def jumpTo(step: Int, instruction: Int) = Action.async { request =>
-    for {
-      Guider.CommandExecuted(_) <- guider ? Guider.JumpTo(step, instruction)
-    } yield Redirect(routes.Guide.view)
+  private def execute(command: Guider.Command) = Action.async { request =>
+    (guider ? command) map (_ match {
+      case Guider.CommandExecuted(_) => Ok("executed")
+      case Guider.CommandNotExecuted(_, reason) => InternalServerError(reason)
+    })
   }
 
-  def nextInstruction = Action.async { request =>
-    for {
-      Guider.CommandExecuted(_) <- guider ? Guider.NextInstruction
-    } yield Redirect(routes.Guide.view)
-  }
-  def previousInstruction = Action.async { request =>
-    for {
-      Guider.CommandExecuted(_) <- guider ? Guider.PreviousInstruction
-    } yield Redirect(routes.Guide.view)
-  }
+  def next = execute(Guider.NextStep)
+  def previous = execute(Guider.PreviousStep)
+  def first = execute(Guider.First)
+  def last = execute(Guider.Last)
+  def jumpTo(step: Int, instruction: Int) = execute(Guider.JumpTo(step, instruction))
+  def nextInstruction = execute(Guider.NextInstruction)
+  def previousInstruction = execute(Guider.PreviousInstruction)
 
   def subscribe = WebSocket.async[JsValue] { implicit request =>
     val loc = localized
