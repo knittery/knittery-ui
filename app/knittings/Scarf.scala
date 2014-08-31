@@ -17,8 +17,9 @@ object Scarf {
 
   def rectangular(length: Length, width: Length, pattern: Dimensions => Pattern)(implicit gauge: Gauge) = for {
     _ <- Planner.precondidtions(_ => require(width <= length, "width greater than length"))
-    (first, last) = Helper.center(width.toStitches)
-    p = pattern(Dimensions(width.toStitches, length.toRows))
+    stitchWidth = (width.toStitches / 2).discardPartials * 2
+    (first, last) = Helper.center(stitchWidth)
+    p = pattern(Dimensions(stitchWidth, length.toRows))
 
     startColor = mostFrequent(p.head)
     _ <- Cast.onDoubleBed(first, last, YarnPiece(startColor))

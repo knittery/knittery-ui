@@ -12,7 +12,7 @@ import rxtxio.Serial
 import gnu.io.CommPortIdentifier
 import squants.space.LengthConversions._
 import models._
-import models.gauge.StandardGauge
+import models.gauge.{MeasuredGauge, StandardGauge}
 import models.connector.{BrotherConnector, SerialPortMock}
 import models.machine.Machine
 import models.plan._
@@ -68,6 +68,30 @@ object Global extends GlobalSettings {
 
   @volatile private var _guider: Option[ActorRef] = None
   def guider = _guider.getOrElse(throw new IllegalStateException("not started"))
+
+  private def rigaScarfPlan = {
+    val yarnA = Yarn("white", Color.white)
+    val yarnB = Yarn("grey", Color.gray)
+    implicit val gauge = MeasuredGauge(48 stitches, 14.5 cm, 96 rows, 27.6 cm, 6 tension)
+
+    val img = ImageIO.read(new File("pattern/riga-pattern.png"))
+    val tile = Helper.monochromeToPattern(img, yarnA, yarnB).transpose
+    Scarf.rectangular(1.35 meters, 33 cm, dims => {
+      tile.tile(dims.width.approx, dims.height.approx)
+    }).plan()
+  }
+
+  private def scarfGauge = {
+    val yarnA = Yarn("red", Color.red)
+    val yarnB = Yarn("blue", Color.blue)
+
+    implicit val gauge = StandardGauge(10, 10, 6 tension)
+    val img = ImageIO.read(new File("pattern/riga-pattern.png"))
+    val tile = Helper.monochromeToPattern(img, yarnB, yarnA).transpose
+    Scarf.rectangular(100 cm, 48 cm, dims => {
+      tile.tile(dims.width.approx, dims.height.approx)
+    }).plan()
+  }
 
   private def laptopPlan = {
     val bg = Yarn("black", Color.black)
