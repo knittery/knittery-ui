@@ -32,13 +32,13 @@ object LaptopCase {
     _ <- Planner.precondidtions(_ => true)
     border = 2.stitches //used sew together front and back
 
-    bodyWidth = gauge.stitchesFor(width + thickness).discardPartials + border
+    bodyWidth = (width + thickness).toStitches.discardPartials + border
     dims = Dimensions(
       bodyWidth = bodyWidth,
-      frontHeight = gauge.rowsFor(height + thickness / 2 - topGap).discardPartials - 1.rows,
-      backHeight = gauge.rowsFor(height + thickness).discardPartials,
-      lashWidth = bodyWidth - ((bodyWidth - gauge.stitchesFor(width)) / 2).discardPartials * 2,
-      lashHeight = gauge.rowsFor(lash).discardPartials
+      frontHeight = (height + thickness / 2 - topGap).toRows.discardPartials - 1.rows,
+      backHeight = (height + thickness).toRows.discardPartials,
+      lashWidth = bodyWidth - ((bodyWidth - width.toStitches) / 2).discardPartials * 2,
+      lashHeight = lash.toRows.discardPartials
     )
 
     ps <- Planner.precondidtions { _ =>
@@ -72,10 +72,10 @@ object LaptopCase {
   } yield ()
 
 
-  /** Checkerboard on front and back. It starts at the bottom (front/back are inversed). Lash is plain with yarnA. */
+  /** Checkerboard on front and back. It starts at the bottom (front/back are inverted). Lash is plain with yarnA. */
   def checkerboardPattern(yarnA: Yarn, yarnB: Yarn, squareSize: Length)(implicit gauge: Gauge) = {
-    val squareWidth = gauge.stitchesFor(squareSize).approx
-    val squareHeight = gauge.rowsFor(squareSize).approx
+    val squareWidth = squareSize.toStitches.approx
+    val squareHeight = squareSize.toRows.approx
 
     def checkerboard(w: Int) = {
       val offset = (w % squareWidth) / 2
@@ -103,8 +103,8 @@ object LaptopCase {
   /** Dissolving checkerboard on front and back. Top is dissolved, bottom is checkerboard.
     * Checkerboard starts at the bottom (front/back are inversed). Lash is plain with yarnA. */
   def dissolvingCheckerboardPattern(yarnA: Yarn, yarnB: Yarn, squareSize: Length, exponent: Double = 1.5, seed: Long = 0)(implicit gauge: Gauge) = {
-    val squareWidth = gauge.stitchesFor(squareSize).approx
-    val squareHeight = gauge.rowsFor(squareSize).approx
+    val squareWidth = squareSize.toStitches.approx
+    val squareHeight = squareSize.toRows.approx
     val random = new Random(seed)
 
     def dissolve(pattern: Matrix[Yarn], prob: Int => Double, yarn: Yarn) = pattern.zipWithIndex.map {
