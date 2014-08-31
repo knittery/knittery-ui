@@ -1,6 +1,7 @@
 import java.awt.Color
 import java.io.File
 import javax.imageio.ImageIO
+import scala.collection.JavaConversions._
 import scalaz._
 import Scalaz._
 import play.api._
@@ -8,6 +9,7 @@ import play.api.libs.concurrent.Akka
 import akka.actor._
 import akka.io.IO
 import rxtxio.Serial
+import gnu.io.CommPortIdentifier
 import squants.space.LengthConversions._
 import models._
 import models.gauge.StandardGauge
@@ -26,7 +28,16 @@ object Global extends GlobalSettings {
   override def onStart(app: Application) {
     implicit val system = Akka.system(app)
 
-    val port = app.configuration.getString("serial.port").getOrElse("SerialSimulator")
+    val port = app.configuration.getString("serial.port").getOrElse {
+      val ports = CommPortIdentifier.getPortIdentifiers.toList.map(_.asInstanceOf[CommPortIdentifier])
+      val likelyPorts = ports.
+        filter(_.getPortType == CommPortIdentifier.PORT_SERIAL).
+        filterNot(_.getName.toLowerCase.contains("bluetooth"))
+      println(s"ports = ${ports.map(_.getName)}")
+      println(s"probable ports = ${likelyPorts.map(_.getName)}")
+      likelyPorts.map(_.getName).
+        headOption.getOrElse("SerialSimulator")
+    }
     def serialManager = {
       if (port == "SerialSimulator") system.actorOf(SerialPortMock.props, "SerialPortManager")
       else IO(Serial)
