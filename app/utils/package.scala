@@ -20,6 +20,15 @@ package object utils {
     def validate() = {
       if (matrix.nonEmpty) matrix.foreach(r => require(r.size == width, s"row widths are non-equal: ${r.size} != $width"))
     }
+
+    def takeWidth(width: Int) = matrix.map(_.take(width))
+    def repeat: Stream[Stream[A]] = Stream.continually(matrix.map(a => Stream.continually(a).flatten)).flatten
+    def tile(width: Int, height: Int, xOffset: Int = 0, yOffset: Int = 0): Matrix[A] = {
+      matrix.repeat.
+        map(_.drop(xOffset).take(width).toIndexedSeq).
+        drop(yOffset).take(height).
+        toIndexedSeq
+    }
   }
   private object RichMatrix {
     private class TransposedMatrix[A](val matrix: Matrix[A]) extends IndexedSeq[IndexedSeq[A]] {

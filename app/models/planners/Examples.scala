@@ -27,7 +27,7 @@ object Examples {
     last = first + width
     backgroundPiece = YarnPiece(background)
     _ <- Cast.onDoubleBed(first, last, backgroundPiece)
-    matrix = imageToPattern(img, width)
+    matrix = Helper.imageToPattern(img).takeWidth(width)
     _ <- FairIslePlanner.doubleBed(matrix, tension, Some(first))
     //TODO move all yarn to single bed
     tensionDial = KCarriage.TensionDial(tension)
@@ -70,7 +70,7 @@ object Examples {
     _ <- FairIslePlanner.singleBed(pf, Some(first))
 
     rauteImg = ImageIO.read(new File("pattern/muster_raute.png"))
-    raute = imageToPattern(rauteImg, rauteImg.getWidth)
+    raute = Helper.imageToPattern(rauteImg)
     rauteRow = raute.map(one => Stream.continually(one).flatten.drop((rauteImg.getWidth - xOffset).abs).take(patternWidth))
     patternBack = Stream.continually(rauteRow).flatten.take(patternHeight)
     pb = borderRows ++ patternBack.map(r => borderAtSide ++ r ++ borderAtSide) ++ borderRows
@@ -82,7 +82,7 @@ object Examples {
 
   def imageRag(img: BufferedImage, bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)
-    val pattern = imageToPattern(img, w)
+    val pattern = Helper.imageToPattern(img).takeWidth(w)
 
     val yarn1 = YarnPiece(bg.getOrElse(pattern(0)(0)))
     val zero = 100 - w / 2
@@ -96,7 +96,7 @@ object Examples {
   }
   def imageRagDoubleBed(img: BufferedImage, tension: Tension, bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)
-    val pattern = imageToPattern(img, w)
+    val pattern = Helper.imageToPattern(img).takeWidth(w)
 
     val yarn1 = YarnPiece(bg.getOrElse(pattern(0)(0)))
     val zero = 100 - w / 2
@@ -111,29 +111,6 @@ object Examples {
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Cast.offClosed(MainBed, yarn1)
-  }
-
-  private def colorsToYarns(colors: Set[Color]) = {
-    colors.zipWithIndex.map {
-      case (c@Color.white, i) => c -> Yarn(s"White", new Color(0xf4f4f4))
-      case (c@Color.black, i) => c -> Yarn(s"Black", c)
-      case (c@Color.yellow, i) => c -> Yarn(s"Yellow", c)
-      case (c@Color.red, i) => c -> Yarn(s"Red", c)
-      case (c@Color.green, i) => c -> Yarn(s"Green", c)
-      case (c@Color.blue, i) => c -> Yarn(s"Blue", c)
-      case (color, i) => color -> Yarn(s"Yarn $i", color)
-    }.toMap
-  }
-
-  private def imageToPattern(img: java.awt.image.BufferedImage, w: Int): IndexedSeq[IndexedSeq[models.Yarn]] = {
-    val rgbs = (0 until img.getHeight).map { y =>
-      (0 until w).map { x =>
-        new Color(img.getRGB(x, y))
-      }
-    }
-    val yarns = colorsToYarns(rgbs.flatten.toSet)
-    val pattern = rgbs.matrixMap(yarns).reverseBoth
-    pattern
   }
 
   def tube(width: Int, height: Int, yarn: YarnPiece) = {
