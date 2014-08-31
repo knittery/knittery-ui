@@ -16,6 +16,7 @@ import models.machine.Machine
 import models.plan._
 import models.planners._
 import models.guide._
+import models.units._
 import utils._
 import knittings._
 
@@ -133,7 +134,15 @@ object Global extends GlobalSettings {
 
   private def tubePlan = Examples.tube(10, 40, YarnPiece(Yarn("red", Color.red))).plan()
   private def decreasingTubePlan = Examples.decreasingTube(20, 60, YarnPiece(Yarn("red", Color.red))).plan()
-  private def sockPlan = Sock(12, 20, 15, YarnPiece(Yarn("red", Color.red))).plan()
+
+  private def sockPlan = {
+    implicit val gauge = StandardGauge(36, 44)
+    Sock.europeanSize(37, Yarn("red", Color.red)).plan()
+  }
+
+  private def littleSockPlan = {
+    Sock(12.stitches, 20.rows, 15.rows, Yarn("red", Color.red)).plan()
+  }
 
   private def imagePlan = {
     val img = ImageIO.read(new File("example.png"))

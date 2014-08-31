@@ -10,6 +10,7 @@ import play.api.data.Forms._
 import play.api.libs.concurrent.Akka
 import models._
 import ch.knittery.pattern._
+import models.units.{NumericStitchesConverter, NumericRowsConverter}
 import models.guide._
 import models.planners._
 import knittings._
@@ -103,7 +104,7 @@ object Plans extends Controller {
 
   def loadSock = Action { implicit request =>
     val form = sockForm.bindFromRequest.get
-    val plan = Sock(form.width, form.shaft, form.foot, YarnPiece(Yarn("red", Color.red)))
+    val plan = Sock(form.width.stitches, form.shaft.rows, form.foot.rows, Yarn("red", Color.red))
       .plan().valueOr(e => throw new RuntimeException(s"Invalid Plan: $e"))
     guider ! Guider.LoadPlan(plan)
     Redirect(routes.Plans.show())

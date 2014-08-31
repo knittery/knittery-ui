@@ -1,5 +1,7 @@
 package models
 
+import squants.space.Length
+
 package object units {
   implicit def stitchesNumeric = Stitches.NumericStitches
   implicit class NumericStitchesConverter[A](n: A)(implicit num: scala.Numeric[A]) {
@@ -11,10 +13,8 @@ package object units {
   }
 
 
-  val a = 10.stitches
-  val b = 3.stitches
-
-  val d = 4.rows
-
-  val c = a + b
+  implicit class LengthConverter(len: Length)(implicit gauge: Gauge) {
+    def toStitches = gauge.stitchesFor(len)
+    def toRows = gauge.rowsFor(len)
+  }
 }
