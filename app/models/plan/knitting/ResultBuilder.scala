@@ -8,7 +8,7 @@ private case class ResultBuilder(
   yarnB: Option[YarnFeeder] = None,
   needles: Map[Needle, NeedleState] = Map.empty,
   doubleBedNeedles: Map[Needle, NeedleState] = Map.empty,
-  outputs: Seq[(Stitch3D, Bed, Needle)] = Seq.empty,
+  outputs: Seq[(Stitch3D, Bed, Needle)] = Vector.empty,
   stitches: Map[Needle, Stitch] = Map.empty,
   doubleBedStitches: Map[Needle, Stitch] = Map.empty) {
 
