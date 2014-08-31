@@ -64,7 +64,7 @@ object Plans extends Controller {
 
     request.body.file("imgDoubleBed").map { patternFile =>
       val image = ImageIO.read(patternFile.ref.file)
-      val planner = Examples.imageRagDoubleBed(image, tension)
+      val planner = Examples.imageRagDoubleBed(image, tension.tension)
       val plan = planner.plan().valueOr(e => throw new RuntimeException(e))
       guider ! Guider.LoadPlan(plan)
       Redirect(routes.Plans.show())

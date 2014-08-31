@@ -1,6 +1,7 @@
 package models.units
 
 import squants.space.LengthConversions._
+import models._
 import models.gauge.StandardGauge
 import org.specs2.mutable.Specification
 
@@ -29,7 +30,7 @@ class RowsSpec extends Specification {
 
 
      "convertable to length" in {
-       implicit val g = StandardGauge(33, 20)
+       implicit val g = StandardGauge(33, 20, 5 tension)
        val a = 124.rows
        a.toLength must_== 62.cm
      }

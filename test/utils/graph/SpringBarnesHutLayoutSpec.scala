@@ -7,15 +7,16 @@ import ch.inventsoft.graph.vector._
 import ch.inventsoft.graph.layout._
 import ch.inventsoft.graph.layout.spring._
 import models._
+import models.units._
 import models.plan._
-import models.planners.Examples
+import knittings.Sock
 
 class SpringBarnesHutLayoutSpec extends Specification {
   val boundaries = Box3(2000)
   val baseEpsilon = boundaries.size / 10000d
 
   object P extends Yarns {
-    def planner = Examples.sock(12, 20, 20, YarnPiece(red))
+    def planner = Sock(12.stitches, 20.rows, 20.rows, red)
     def plan = planner.plan(Optimizers.no).valueOr(e => throw new RuntimeException(s"Invalid plan: $e"))
     def finalState = plan.run
     val graph = finalState.output3D.asGraph

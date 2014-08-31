@@ -70,7 +70,7 @@ object Global extends GlobalSettings {
   private def laptopPlanGradient = {
     val top = Yarn("white", Color.white)
     val bottom = Yarn("blue", Color.cyan)
-    implicit val gauge = StandardGauge(34, 42)
+    implicit val gauge = StandardGauge(34, 42, 5.tension)
 
     val patterns = LaptopCase.gradient(top, bottom, bottom)
     LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns).plan()
@@ -79,7 +79,7 @@ object Global extends GlobalSettings {
   private def laptopPlanCheckerboard = {
     val yarnA = Yarn("cyan", Color.cyan)
     val yarnB = Yarn("orange", Color.orange)
-    implicit val gauge = StandardGauge(34, 42)
+    implicit val gauge = StandardGauge(34, 42, 5.tension)
 
     val patterns = LaptopCase.checkerboardPattern(yarnA, yarnB, 2.cm)
     LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns).plan()
@@ -88,7 +88,7 @@ object Global extends GlobalSettings {
   private def laptopPlanDissolvingCheckerboard = {
     val yarnA = Yarn("cyan", Color.cyan)
     val yarnB = Yarn("orange", Color.orange)
-    implicit val gauge = StandardGauge(34, 42)
+    implicit val gauge = StandardGauge(34, 42, 5.tension)
 
     val patterns = LaptopCase.dissolvingCheckerboardPattern(yarnA, yarnB, 2.cm)
     LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns).plan()
@@ -97,7 +97,7 @@ object Global extends GlobalSettings {
   private def handyPlan = {
     val bg = Yarn("white", Color.white)
     val img = ImageIO.read(new File("pattern/mobile_sleeve_kid_koala.png"))
-    Examples.handyHuelle(img, bg, KCarriage.TensionDial(8, 1)).plan()
+    Examples.handyHuelle(img, bg, 8.3 tension).plan()
   }
 
   private def examplePlan = {
@@ -136,7 +136,7 @@ object Global extends GlobalSettings {
   private def decreasingTubePlan = Examples.decreasingTube(20, 60, YarnPiece(Yarn("red", Color.red))).plan()
 
   private def sockPlan = {
-    implicit val gauge = StandardGauge(36, 44)
+    implicit val gauge = StandardGauge(36, 44, 7.tension)
     Sock.europeanSize(37, Yarn("red", Color.red)).plan()
   }
 
@@ -146,7 +146,7 @@ object Global extends GlobalSettings {
 
   private def imagePlan = {
     val img = ImageIO.read(new File("example.png"))
-    val planner = Examples.imageRagDoubleBed(img)
+    val planner = Examples.imageRagDoubleBed(img, 7 tension)
     planner.plan()
   }
 

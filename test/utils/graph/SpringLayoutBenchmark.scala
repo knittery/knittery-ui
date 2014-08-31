@@ -1,15 +1,13 @@
 package utils.graph
 
-import javax.imageio.ImageIO
-import java.io.File
-import scalaz.Validation
 import org.scalameter.api._
 import ch.inventsoft.graph.vector._
 import ch.inventsoft.graph.layout._
 import ch.inventsoft.graph.layout.spring._
 import models._
-import models.planners.Examples
+import models.units._
 import models.plan.Optimizers
+import knittings.Sock
 
 object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
   case class Plan(name: String, planner: models.plan.PlannerM[_]) {
@@ -20,16 +18,16 @@ object SpringLayoutBenchmark extends PerformanceTest.Quickbenchmark with Yarns {
   }
 
   val smallPlans = Gen.enumeration("Plans")(
-    Plan("smallSock", Examples.sock(20, 25, 20, YarnPiece(red))),
-    Plan("smallerSock", Examples.sock(12, 20, 15, YarnPiece(red))),
-    Plan("tinySock", Examples.sock(10, 10, 10, YarnPiece(red))))
+    Plan("smallSock", Sock(20.stitches, 25.rows, 20.rows, red)),
+    Plan("smallerSock", Sock(12.stitches, 20.rows, 15.rows, red)),
+    Plan("tinySock", Sock(10.stitches, 10.rows, 10.rows, red)))
 
   val allPlans = Gen.enumeration("Plans")(
-    Plan("bigSock", Examples.sock(40, 100, 60, YarnPiece(red))),
-    Plan("normalSock", Examples.sock(30, 60, 40, YarnPiece(red))),
-    Plan("smallSock", Examples.sock(20, 25, 20, YarnPiece(red))),
-    Plan("smallerSock", Examples.sock(12, 20, 15, YarnPiece(red))),
-    Plan("tinySock", Examples.sock(10, 10, 10, YarnPiece(red))))
+    Plan("bigSock", Sock(40.stitches, 100.rows, 60.rows, red)),
+    Plan("normalSock", Sock(30.stitches, 60.rows, 40.rows, red)),
+    Plan("smallSock", Sock(20.stitches, 25.rows, 20.rows, red)),
+    Plan("smallerSock", Sock(12.stitches, 20.rows, 15.rows, red)),
+    Plan("tinySock", Sock(10.stitches, 10.rows, 10.rows, red)))
 
   val atStep = Gen.enumeration("atStep")(1)
 

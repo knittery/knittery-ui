@@ -17,7 +17,7 @@ import models.KCarriage.TensionDial
 
 object Examples {
 
-  def handyHuelle(img: BufferedImage, background: Yarn, tension: TensionDial): Planner = for {
+  def handyHuelle(img: BufferedImage, background: Yarn, tension: Tension): Planner = for {
     width <- Planner.precondidtions(_ => img.getWidth)
     height <- Planner.precondidtions(_ => img.getHeight)
     first <- Planner.precondidtions { _ =>
@@ -30,8 +30,9 @@ object Examples {
     matrix = imageToPattern(img, width)
     _ <- FairIslePlanner.doubleBed(matrix, tension, Some(first))
     //TODO move all yarn to single bed
-    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = tension),
-      assembly = KCarriage.DoubleBedCarriage(tension = tension), yarnA = Some(backgroundPiece))
+    tensionDial = KCarriage.TensionDial(tension)
+    _ <- Basics.knitRowWithK(settings = KCarriage.Settings(tension = tensionDial),
+      assembly = KCarriage.DoubleBedCarriage(tension = tensionDial), yarnA = Some(backgroundPiece))
     _ <- Cast.offClosed(MainBed, backgroundPiece)
   } yield ()
 
@@ -93,7 +94,7 @@ object Examples {
       Basics.knitRowWithK(yarnA = Some(yarn1)) >>
       Cast.offClosed(MainBed, yarn1)
   }
-  def imageRagDoubleBed(img: BufferedImage, tension: KCarriage.TensionDial = KCarriage.TensionDial.apply(0, 0), bg: Option[Yarn] = None) = {
+  def imageRagDoubleBed(img: BufferedImage, tension: Tension, bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)
     val pattern = imageToPattern(img, w)
 

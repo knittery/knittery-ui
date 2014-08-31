@@ -1,10 +1,12 @@
 package models.units
 
+import models.Tension
 import squants.space.Length
 import squants.space.LengthConversions._
 
 /** Maps stitch and row count to metric length. */
 trait Gauge {
+  def tension: Tension
   def rowsFor(d: Length): Rows
   def stitchesFor(d: Length): Stitches
 

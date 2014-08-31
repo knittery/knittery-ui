@@ -8,6 +8,11 @@ package object models {
     val all = Set(MainBed, DoubleBed)
   }
 
+  case class Tension(value: Double) extends AnyVal
+  implicit class TensionNumeric[A](v: A)(implicit n: Numeric[A]) {
+    def tension = Tension(n.toDouble(v))
+  }
+
   type NeedlePatternRow = Needle => NeedlePosition
   implicit class RichNeedlePatternRow(val row: NeedlePatternRow) extends AnyVal {
     def all = Needle.all.map(row)

@@ -80,7 +80,7 @@ case object KCarriage extends Carriage {
   }
 
   class TensionDial private(val number: Int, val thirds: Int) {
-    def tension: Double = number + thirds.toDouble / 3
+    def tension: Tension = Tension(number + thirds.toDouble / 3)
     /** Format: 5 1/3 */
     def text: String = number.toString + (if (thirds != 0) s"$thirds/3" else "")
     override def toString = text
@@ -89,8 +89,14 @@ case object KCarriage extends Carriage {
     def apply(number: Int, thirds: Int) = {
       require(thirds >= 0 && thirds <= 3, s"Thirds must be [0,3] but is $thirds")
       val value = new TensionDial(number, thirds)
-      require(value.tension > -0.01 && value.tension < 10.01, s"Only tensions between 0 and 10 are valid")
+      require(value.tension.value > -0.01 && value.tension.value < 10.01, s"Only tensions between 0 and 10 are valid")
       value
+    }
+    def apply(tension: Tension): TensionDial = {
+      val thirds = ((tension.value % 1) * 3 / 3).round.toInt
+      val whole = tension.value.toInt
+      if (whole.toDouble + (thirds.toDouble / 3) - tension.value < -0.5) apply(whole + 1, thirds)
+      else apply(whole, thirds)
     }
     val zero = apply(0, 0)
   }

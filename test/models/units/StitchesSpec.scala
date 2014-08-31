@@ -1,6 +1,7 @@
 package models.units
 
 import squants.space.LengthConversions._
+import models._
 import models.gauge.StandardGauge
 import org.specs2.mutable.Specification
 
@@ -28,7 +29,7 @@ class StitchesSpec extends Specification {
     }
 
     "convertable to length" in {
-      implicit val g = StandardGauge(10, 33)
+      implicit val g = StandardGauge(10, 33, 5 tension)
       val a = 123.stitches
       a.toLength must_== 123.cm
     }
