@@ -228,6 +228,20 @@ case class MoveToDoubleBed(filter: Needle => Boolean, offset: Int = 0, flip: Opt
   }
 }
 
+/** Transfer the yarn from the double bed to the main bed. Affected needles are moved to B position. */
+case class MoveToMainBed(filter: Needle => Boolean, offset: Int = 0) extends Step {
+  override def apply(state: KnittingState) = {
+    val (nm, nd) = Needle.all.filter(filter).foldLeft(((state.needles(MainBed).toMap, state.needles(DoubleBed).toMap))) {
+      case ((main, double), doubleNeedle) =>
+        val mainNeedle = doubleNeedle + offset
+        val m = main(mainNeedle)
+        (main + (mainNeedle -> NeedleState(NeedleB, m.yarn ++ double(doubleNeedle).yarn)),
+          double + (doubleNeedle -> NeedleState(NeedleB)))
+    }
+    state.modifyNeedles(MainBed, nm).modifyNeedles(DoubleBed, nd).success
+  }
+}
+
 case class AddCarriage(carriage: Carriage, at: LeftRight = Left) extends Step {
   override def apply(state: KnittingState) = Try {
     require(state.carriageState(carriage).position == CarriageRemoved,

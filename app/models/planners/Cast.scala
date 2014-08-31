@@ -62,4 +62,11 @@ object Cast {
     needleState <- Planner.state(_.needles(bed))
     _ <- ClosedCastOff(bed, withYarn, n => filter(n) && needleState(n).yarn.nonEmpty)
   } yield ()
+
+  def offDoubleBed(withYarn: YarnPiece, filter: Needle => Boolean = _ => true): Planner = for {
+    _ <- MoveToMainBed(filter)
+    _ <- MoveNeedles(DoubleBed, _ => NeedleA)
+    _ <- Basics.knitRowWithK(yarnA = Some(withYarn))
+    _ <- offClosed(MainBed, withYarn, filter)
+  } yield ()
 }

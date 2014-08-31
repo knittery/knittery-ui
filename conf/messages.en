@@ -41,6 +41,9 @@ guide.step.moveToDoubleBed.noflip.description = Take the yarn on the marked need
 guide.step.moveToDoubleBed.flip.title = Flip to Double Bed
 guide.step.moveToDoubleBed.flip.description = Take the yarn on the marked needles on the main bed, flip it and transfer it to the double bed.
 
+guide.step.moveToMainBed.noflip.title = Transfer to Main Bed
+guide.step.moveToMainBed.noflip.description = Take the yarn on the marked needles on the double bed and transfer it to the main bed.
+
 guide.step.retireNeedle.title = Retire Needle
 guide.step.retireNeedle.description = Move the yarns on needle {0}  one needle to the {1} and put it into A position. Leave needle {2} at B position.
 
