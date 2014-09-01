@@ -42,7 +42,7 @@ object Guide extends Controller {
   def nextInstruction = execute(Guider.NextInstruction)
   def previousInstruction = execute(Guider.PreviousInstruction)
 
-  def subscribe = WebSocket.async[JsValue] { implicit request =>
+  def subscribe = WebSocket.tryAccept[JsValue] { implicit request =>
     val loc = localized
     import loc._
     for {
@@ -60,6 +60,6 @@ object Guide extends Controller {
             "totalInstructions" -> steps.flatMap(_.instructions).size
           )): JsValue
       }
-    } yield (Iteratee.ignore, json)
+    } yield Right(Iteratee.ignore, json)
   }
 }

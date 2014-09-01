@@ -28,7 +28,7 @@ object Display extends Controller {
     Ok(views.html.display())
   }
 
-  def subscribe = WebSocket.async[JsValue] { req =>
+  def subscribe = WebSocket.tryAccept[JsValue] { req =>
     val r = machine.resolveOne
     val pos = machine ? GetPositions
     val pat = machine ? GetNeedlePattern
@@ -46,6 +46,6 @@ object Display extends Controller {
             "event" -> "needlePatternUpdate",
             "patternRow" -> row.andThen(_.toPosition)))
       }
-    } yield (Iteratee.ignore, fst >>> e &> json)
+    } yield scala.Right((Iteratee.ignore, fst >>> e &> json))
   }
 }

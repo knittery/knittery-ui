@@ -79,7 +79,7 @@ object Preview extends Controller {
   class RequestWithLayout[A](val knitted3d: Knitted3D, val layout: Layout[Stitch3D], request: Request[A])
     extends WrappedRequest[A](request)
   case object GuiderAction extends ActionBuilder[RequestWithLayout] {
-    override def invokeBlock[A](request: Request[A], block: (RequestWithLayout[A]) ⇒ Future[SimpleResult]) = {
+    override def invokeBlock[A](request: Request[A], block: (RequestWithLayout[A]) ⇒ Future[Result]) = {
       for {
         Guider.Knitted3DLayout(knitted, layout) <- guider ? Guider.GetKnitted3D
         req = new RequestWithLayout(knitted, layout, request)
