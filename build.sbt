@@ -25,6 +25,16 @@ libraryDependencies ++= Seq(
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
 
+
+mappings in Universal ++= Seq(
+  file("librxtxSerial.jnilib") -> "librxtxSerial.jnilib",
+  file("librxtxSerial32.jnilib") -> "librxtxSerial32.jnilib",
+  file("librxtxSerial.so") -> "librxtxSerial.so")
+
+
+
+NativePackagerKeys.bashScriptExtraDefines += """addJava "-Djava.awt.headless=true""""
+
 initialize ~= { _ =>
   System.setProperty("java.awt.headless", "true")
 }
