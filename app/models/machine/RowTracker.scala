@@ -16,6 +16,7 @@ private object RowTracker {
       case CarriageOverNeedles(n) => if (n < from) Left else Right
       case CarriageLeft(_) => Left
       case CarriageRight(_) => Right
+      case CarriageRemoved => throw new IllegalStateException("carriage is removed")
     }
   }
 
