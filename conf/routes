@@ -35,4 +35,3 @@ GET         /preview/json                         controllers.Preview.json
 # Assets
 GET         /assets/javascripts/routes.js         controllers.Application.javascriptRoutes()
 GET         /assets/*file                         controllers.Assets.at(path="/public", file)
-GET         /libraries/*file                      controllers.WebJarAssets.at(file)

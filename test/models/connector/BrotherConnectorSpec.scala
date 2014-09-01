@@ -1,11 +1,16 @@
 package models.connector
 
+import scala.collection.immutable.IndexedSeq
 import org.specs2.mutable.Specification
 import org.specs2.matcher._
+import org.specs2.execute._
 import models._
 import Connector._
 
 class BrotherConnectorSpec extends Specification {
+  private implicit def matchResultIndexedSeqAsResult[T]: AsResult[IndexedSeq[MatchResult[T]]] = new AsResult[IndexedSeq[MatchResult[T]]] {
+    def asResult(t: => IndexedSeq[MatchResult[T]]): Result = t.foldLeft(StandardResults.success: Result)(_ and _.toResult)
+  }
 
   "brother parser" should {
     import BrotherConnector._

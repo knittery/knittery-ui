@@ -9,7 +9,7 @@
 
     @min = @{ if (play.Play.isProd) ".min" else ""}
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-    <link rel='stylesheet' href="@routes.WebJarAssets.at(WebJarAssets.locate("css/bootstrap"+min+".css"))">
+    <link rel='stylesheet' href="@routes.Assets.at("lib/bootstrap/css/bootstrap"+min+".css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main"+min+".css")">
   </head>
   <body>
@@ -42,10 +42,10 @@
 
       @content
 
-      <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery"+min+".js"))'></script>
-      <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("js/bootstrap"+min+".js"))'></script>
-      <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("three"+min+".js"))'></script>
-      <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("leap"+min+".js"))'></script>
+      <script type='text/javascript' src='@routes.Assets.at("lib/jquery/jquery"+min+".js")'></script>
+      <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap/js/bootstrap"+min+".js")'></script>
+      <script type='text/javascript' src='@routes.Assets.at("lib/three.js/three"+min+".js")'></script>
+      <script type='text/javascript' src='@routes.Assets.at("lib/leapjs/leap"+min+".js")'></script>
       <script type='text/javascript' src='@routes.Assets.at("javascripts/lib/reconnecting-websocket"+min+".js")'></script>
       <script type='text/javascript' src='@routes.Assets.at("javascripts/lib/trackball-controls"+min+".js")'></script>
       <script type='text/javascript' src='@routes.Assets.at("javascripts/lib/LeapCameraControls"+min+".js")'></script>

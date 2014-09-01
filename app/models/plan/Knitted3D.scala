@@ -53,7 +53,7 @@ case class Knitted3D private(ends: Map[YarnPiece, YarnFlow], stitches: Seq[Stitc
       }.toTraversable
     }
 
-    Graph.fromStream(edges = edges)
+    Graph.from(edges = edges)
   }
 
   def asLayout: Layout[Stitch3D] = stitchPosition
