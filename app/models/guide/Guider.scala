@@ -40,6 +40,10 @@ object Guider {
   case object QueryStep extends Command
   case class CurrentStep(step: GuideStep, instruction: Instruction, steps: Seq[GuideStep]) extends Event
 
+  /** Get the final state of the plan (after last step). */
+  case object GetFinalState extends Command
+  case class FinalState(state: KnittingState) extends Event
+
   /** Get 3D Layout as soon as ready. Answer: Knitted3DLayout. */
   case object GetKnitted3D extends Command
   case class Knitted3DLayout(knitted: Knitted3D, layout: Layout[Stitch3D]) extends Event
@@ -164,6 +168,9 @@ object Guider {
         (layouter ? Layouter.Get).map {
           case layout: Layout[Stitch3D] => Knitted3DLayout(plan.run.output3D, layout)
         }.pipeTo(sender)
+
+      case GetFinalState =>
+        sender ! FinalState(steps.last.after)
 
       case QueryStep =>
         sender ! CurrentStep(currentStep, currentInstruction, steps)

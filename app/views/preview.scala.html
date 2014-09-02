@@ -4,13 +4,17 @@
 
 	Preview of the knitting result.
 	
-	<ul>
-	 <li><a href="@routes.Preview.dot()">Graphviz Graph (.dot)</a></li>
-	 <li><a href="@routes.Preview.json()">JSON Graph</a></li>
-	</ul>
-	
-	<div id="preview-canvas">
-	</div>
-	
+  <div class="preview-display">
+    <div class="output-selection btn-group">
+      <button type="button" id="btn-output-3d" class="btn btn-xs btn-default">
+        <span class="glyphicon glyphicon-globe"></span>
+      </button>
+      <button type="button" id="btn-output-2d" class="btn btn-xs btn-default">
+        <span class="glyphicon glyphicon-picture"></span>
+      </button>
+    </div>
 
-}(List("3dview", "preview"))
+    <div class="previews"></div>
+  </div>
+
+}(List("3dview", "2dview", "preview"))

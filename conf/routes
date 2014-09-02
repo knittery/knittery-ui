@@ -31,6 +31,7 @@ POST        /plans/load/sock                      controllers.Plans.loadSock
 GET         /preview                              controllers.Preview.show
 GET         /preview/dot                          controllers.Preview.dot
 GET         /preview/json                         controllers.Preview.json
+GET         /preview/planInfo                     controllers.Preview.planInfo
 
 # Assets
 GET         /assets/javascripts/routes.js         controllers.Application.javascriptRoutes()

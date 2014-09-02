@@ -15,7 +15,7 @@ object Application extends Controller {
       Routes.javascriptRouter("jsRoutes")(
         SerialSimulator.send, SerialSimulator.subscribe, //
         Display.subscribe,
-        Preview.json,
+        Preview.json, Preview.planInfo,
         Guide.subscribe, Guide.next, Guide.previous, Guide.first, Guide.last,
         Guide.nextInstruction, Guide.previousInstruction, Guide.jumpTo)). //
       as("text/javascript")

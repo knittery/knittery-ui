@@ -76,6 +76,15 @@ object Preview extends Controller {
     Ok(dot).as("text/vnd.graphviz")
   }
 
+  def planInfo = Action.async {
+    for {
+      Guider.FinalState(state) <- guider ? Guider.GetFinalState
+      json = Json.obj(
+        "finalState" -> state)
+    } yield Ok(json)
+  }
+
+
   class RequestWithLayout[A](val knitted3d: Knitted3D, val layout: Layout[Stitch3D], request: Request[A])
     extends WrappedRequest[A](request)
   case object GuiderAction extends ActionBuilder[RequestWithLayout] {
