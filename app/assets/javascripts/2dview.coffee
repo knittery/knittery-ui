@@ -63,15 +63,15 @@ renderKnitted = (knitted) ->
           drawPurlStitch(stitch.yarns[0].color, ctx)
           ctx.restore()
         when "castOn"
-          ctx.fillStyle = stitch.yarns[0].color
-          ctx.fillRect(0, 0, stitchWidth, stitchHeight / 2)
-          ctx.fillStyle = "#000000"
-          ctx.fillRect(0, stitchHeight / 2, stitchWidth, stitchHeight / 2)
+          ctx.save()
+          ctx.scale(stitchWidth / 10, stitchHeight / 10)
+          drawCastOnStitch(stitch.yarns[0].color, ctx)
+          ctx.restore()
         when "castOff"
-          ctx.fillStyle = "#000000"
-          ctx.fillRect(0, 0, stitchWidth, stitchHeight / 2)
-          ctx.fillStyle = stitch.yarns[0].color
-          ctx.fillRect(0, stitchHeight / 2, stitchWidth, stitchHeight / 2)
+          ctx.save()
+          ctx.scale(stitchWidth / 10, stitchHeight / 10)
+          drawCastOffStitch(stitch.yarns[0].color, ctx)
+          ctx.restore()
         when "no"
           ctx.lineWidth = stitchWidth / 10
           ctx.strokeStyle = "#000000"
@@ -133,6 +133,7 @@ drawStitch = (color, ctx) ->
   ctx.closePath()
   ctx.restore()
 
+
 drawPurlStitch = (color, ctx) ->
   bg = changeLuminance(color, -0.3)
   darker = changeLuminance(color, -0.1)
@@ -165,6 +166,38 @@ drawPurlStitch = (color, ctx) ->
   ctx.fill()
   ctx.closePath()
 
+  ctx.restore()
+
+
+drawCastOnStitch = (color, ctx) ->
+  darker = changeLuminance(color, -0.1)
+  brighter = changeLuminance(color, 0.1)
+  ctx.save()
+  g = ctx.createLinearGradient(-5, 0, 5, 0)
+  g.addColorStop(0, darker)
+  g.addColorStop(0.5, brighter)
+  g.addColorStop(1, darker)
+  ctx.fillStyle = g
+  ctx.beginPath()
+  ctx.arc(0, -2, 5, 0, Math.PI, false)
+  ctx.fill()
+  ctx.closePath()
+  ctx.restore()
+
+
+drawCastOffStitch = (color, ctx) ->
+  darker = changeLuminance(color, -0.1)
+  brighter = changeLuminance(color, 0.1)
+  ctx.save()
+  g = ctx.createLinearGradient(0, 0, 10, 0)
+  g.addColorStop(0, darker)
+  g.addColorStop(0.5, brighter)
+  g.addColorStop(1, darker)
+  ctx.fillStyle = g
+  ctx.beginPath()
+  ctx.arc(5, 8, 5.5, Math.PI, Math.PI * 2, false)
+  ctx.fill()
+  ctx.closePath()
   ctx.restore()
 
 
