@@ -1,6 +1,6 @@
 ### Shows a two dimensional view of the knitted output using 2d-canvas. ###
 jQuery.fn.extend({
-  knitted2d: (dataName = "knitted", mode = "topLeft") -> this.each(->
+  knitted2d: (dataName = "knitted", fit = "knitted") -> this.each(->
     root = $(this)
     canvasJ = $("<canvas style='width: 100%; height: 100%'></canvas>")
     canvasJ.appendTo(root)
@@ -10,13 +10,14 @@ jQuery.fn.extend({
 
     draw = () ->
       output = if root.data(dataName)? then root.data(dataName) else []
-      image = renderKnitted(output)
       canvas.width = canvasJ.width() * oversampling
       canvas.height = canvasJ.height() * oversampling
-      switch mode
-        when "topLeft"
-          ctx.drawImage(image, 0, 0)
-        when "scale"
+      switch fit
+        when "full-width"
+          image = renderKnitted(output)
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.width * image.height / image.width)
+        when "knitted"
+          image = renderKnitted(reduceToKnitted(output))
           [w, h] = scaleToFit(image, {width: canvas.width * 0.95, height: canvas.height * 0.95})
           ctx.translate((canvas.width - w) / 2, (canvas.height - h) / 2)
           ctx.drawImage(image, 0, 0, w, h)
@@ -34,9 +35,9 @@ renderKnitted = (knitted) ->
   canvas = document.createElement("canvas")
   ctx = canvas.getContext("2d")
 
-  columns = 200
   relevantRows = (r for r in knitted when not emptyRow(r))
   rows = relevantRows.length
+  columns = if rows > 0 then relevantRows[0].length else 200
 
   stitchWidth = 20
   stitchAspectRatio = 0.8
@@ -180,6 +181,17 @@ changeLuminance = (color, luminance) ->
     rgb += ("00" + comp).substr(comp.length)
   rgb
 
+
+reduceToKnitted = (knitting) ->
+  first = 200
+  last = 0
+  rows = for row in knitting when !emptyRow(row)
+    for stitch, i in row
+      if not (stitch.type == "no" or stitch.type == "empty")
+        first = Math.min(first, i)
+        last = Math.max(last, i)
+    row
+  row.slice(first, last) for row in rows
 
 emptyRow = (row) ->
   stitches = (s for s in row when s.type != "no" and s.type != "empty")

@@ -27,7 +27,7 @@ init2dPreview = (elem) ->
   jsRoutes.controllers.Preview.planInfo().ajax {
     success: (data) ->
       elem.data("knitted", data.finalState.output)
-      elem.knitted2d("knitted", mode = "scale")
+      elem.knitted2d("knitted", "knitted")
   }
   Leap.loop(() ->)
 
