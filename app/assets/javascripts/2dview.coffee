@@ -103,7 +103,7 @@ knittingRenderer = (knitted) ->
       fromRenderedRow = knitted.originalRowToRow(fromRow)
       toRenderedRow = knitted.originalRowToRow(toRow)
       count = toRenderedRow - fromRenderedRow + 1
-      toCtx.drawImage(canvas, 0, fromRenderedRow * stitchHeight, canvas.width, count * stitchHeight
+      toCtx.drawImage(canvas, 0, (rowCount - toRenderedRow - 1) * stitchHeight, canvas.width, count * stitchHeight
         @xOffset, 0, @width, count)
     fullWidth: knitted.originalStitches / stitchAspectRatio
     width: knitted.stitches / stitchAspectRatio
