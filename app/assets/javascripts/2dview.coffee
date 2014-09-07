@@ -1,6 +1,6 @@
-### Shows a two dimensional view of the knitted output using 2d-canvas. ###
 jQuery.fn.extend({
-  knitted2d: (dataName = "knitted", fit = "knitted") -> this.each(->
+  knitted2d: (dataName = "knitted") -> this.each(->
+    # Shows a two dimensional view of the knitted output using 2d-canvas.
     root = $(this)
     canvasJ = $("<canvas style='width: 100%; height: 100%'></canvas>")
     canvasJ.appendTo(root)
@@ -8,49 +8,62 @@ jQuery.fn.extend({
     ctx = canvas.getContext("2d")
     oversampling = 2
 
-    draw = () ->
+    createImage = () ->
       output = if root.data(dataName)? then root.data(dataName) else []
-      canvas.width = canvasJ.width() * oversampling
-      canvas.height = canvasJ.height() * oversampling
-      switch fit
-        when "full-width"
-          image = renderKnitted(output)
-          ctx.drawImage(image, 0, 0, canvas.width, canvas.width * image.height / image.width)
-        when "knitted"
-          image = renderKnitted(reduceToKnitted(output))
-          [w, h] = scaleToFit(image, {width: canvas.width * 0.95, height: canvas.height * 0.95})
-          ctx.translate((canvas.width - w) / 2, (canvas.height - h) / 2)
-          ctx.drawImage(image, 0, 0, w, h)
+      renderer = knittingRenderer(output)
 
-    root.bind("changed", () -> draw())
-    root.bind("updated", () -> draw())
-    root.bind(dataName + ":data", () -> draw())
-    draw()
+      updateImage = () ->
+        fromRow = root.attr("fromRow")
+        fromRow = if (fromRow?) then fromRow else 0
+        toRow = root.attr("toRow")
+        toRow = if (toRow?) then toRow else output.length
+        fit = root.attr("fit")
+        fit = if (fit?) then fit else "full-width"
+        canvas.width = canvasJ.width() * oversampling
+        canvas.height = canvasJ.height() * oversampling
+
+        switch fit
+          when "full-width"
+            factor = canvas.width / renderer.fullWidth
+            ctx.scale(factor, factor)
+          when "knitted"
+            rh = renderer.height(fromRow, toRow)
+            factor = Math.min(canvas.width / renderer.width, canvas.height / rh)
+            ctx.scale(factor, factor)
+            ctx.translate((canvas.width / factor - renderer.width) / 2 - renderer.xOffset,
+                (canvas.height / factor - rh) / 2)
+        renderer.draw(ctx, fromRow, toRow)
+
+      root.bind("fromRow:change", updateImage)
+      root.bind("toRow:change", updateImage)
+      root.bind("fit:change", updateImage)
+      updateImage()
+
+    root.bind(dataName + ":data", () -> createImage())
+    createImage()
     root
   )
 })
 
 
-renderKnitted = (knitted) ->
+knittingRenderer = (knitted) ->
   canvas = document.createElement("canvas")
   ctx = canvas.getContext("2d")
 
-  relevantRows = (r for r in knitted when not emptyRow(r))
-  rows = relevantRows.length
-  columns = if rows > 0 then relevantRows[0].length else 200
+  knitted = reduceToKnitted(knitted)
+  relevantRows = knitted.rows
+  rowCount = relevantRows.length
 
   stitchWidth = 20
   stitchAspectRatio = 0.8
   stitchHeight = stitchWidth * stitchAspectRatio
-  canvas.width = columns * stitchWidth
-  canvas.height = rows * stitchHeight
+  canvas.width = knitted.stitches * stitchWidth
+  canvas.height = rowCount * stitchHeight
 
-  ctx.translate(0, (rows - 1) * stitchHeight)
+  ctx.translate(0, (rowCount - 1) * stitchHeight)
   for row in relevantRows
-    i = i + 1
-    if i >= rows then break
     ctx.save()
-    for stitch in row
+    for stitch in row.data
       switch stitch.type
         when "plain"
           ctx.save()
@@ -84,8 +97,23 @@ renderKnitted = (knitted) ->
       ctx.translate(stitchWidth, 0)
     ctx.restore()
     ctx.translate(0, -stitchHeight)
+  renderer =
+    draw: (toCtx, fromRow = 0, toRow = 9999999) ->
+      # draws at 0, 0 with a row height of 1, use toCtx.scale/translate before.
+      fromRenderedRow = knitted.originalRowToRow(fromRow)
+      toRenderedRow = knitted.originalRowToRow(toRow)
+      count = toRenderedRow - fromRenderedRow + 1
+      toCtx.drawImage(canvas, 0, fromRenderedRow * stitchHeight, canvas.width, count * stitchHeight
+        @xOffset, 0, @width, count)
+    fullWidth: knitted.originalStitches / stitchAspectRatio
+    width: knitted.stitches / stitchAspectRatio
+    xOffset: knitted.stitchOffset / stitchAspectRatio
+    height: (fromRow = 0, toRow = 9999999) ->
+      fromRenderedRow = knitted.originalRowToRow(fromRow)
+      toRenderedRow = knitted.originalRowToRow(toRow)
+      toRenderedRow - fromRenderedRow + 1
+  renderer
 
-  canvas
 
 drawStitch = (color, ctx) ->
   darker = changeLuminance(color, -0.1)
@@ -218,18 +246,27 @@ changeLuminance = (color, luminance) ->
 reduceToKnitted = (knitting) ->
   first = 200
   last = 0
-  rows = for row in knitting when !emptyRow(row)
-    for stitch, i in row
+  for row, i in knitting
+    for stitch, j in row
       if not (stitch.type == "no" or stitch.type == "empty")
-        first = Math.min(first, i)
-        last = Math.max(last, i)
-    row
-  row.slice(first, last) for row in rows
+        first = Math.min(first, j)
+        last = Math.max(last, j)
+  last = Math.max(first, last)
+  result =
+    rows: for row, i in knitting when !emptyRow(row)
+      {index: i, data: row.slice(first, last)}
+    stitchOffset: first
+    stitches: last - first + 1
+    originalRowToRow: (index) ->
+      i = 0
+      for r, i in @rows when r.index > index
+        return i - 1
+      return @rows.length - 1
+    originalRows: knitting.length
+    originalStitches: 200
+  result
+
 
 emptyRow = (row) ->
   stitches = (s for s in row when s.type != "no" and s.type != "empty")
   stitches.length == 0
-
-scaleToFit = (toScale, container) ->
-  scale = Math.min(container.width / toScale.width, container.height / toScale.height)
-  [toScale.width * scale, toScale.height * scale]
