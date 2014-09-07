@@ -14,7 +14,7 @@ jQuery.fn.extend({
     render = () -> renderer.render(scene, camera)
     controls.addEventListener("change", render)
 
-    jsRoutes.controllers.Preview.json().ajax {
+    jsRoutes.controllers.KnittingResult.json3d().ajax {
       success: (data) ->
         console.debug("Received 3d data from server. Loading now..")
         graph = new Graph()

@@ -26,9 +26,9 @@ $(() ->
 init2dPreview = (elem) ->
   elem.attr("fit", "knitted")
   elem.knitted2d()
-  jsRoutes.controllers.Preview.planInfo().ajax {
+  jsRoutes.controllers.KnittingResult.mainBed().ajax {
     success: (data) ->
-      elem.data("knitted", data.finalState.output)
+      elem.data("knitted", data.output)
       elem.trigger("knitted:data")
   }
   Leap.loop(() ->)

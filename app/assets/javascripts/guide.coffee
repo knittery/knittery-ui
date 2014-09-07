@@ -138,7 +138,12 @@ $(() ->
     output = $("<div fit='full-width'></div>").appendTo($(".outputs"))
     output.addClass("output-2d").addClass("output")
     output.knitted2d()
-    output.link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.output else undefined)
+    jsRoutes.controllers.KnittingResult.mainBed().ajax {
+        success: (data) ->
+          output.data("knitted", data.output)
+          output.trigger("knitted:data")
+      }
+    output.link().attr("to-row")(guide, "instruction", (i) -> if i? then i.stateBefore.outputRow - 1 else 0)
   )
   $("#btn-output-2d-dual").click(->
     $("#btn-output-2d").addClass("btn-default")
@@ -151,11 +156,22 @@ $(() ->
     front = $("<div fit='full-width'></div>").appendTo(output)
     front.addClass("output-2d-front")
     front.knitted2d()
-    front.link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.output else undefined)
+    jsRoutes.controllers.KnittingResult.mainBed().ajax {
+      success: (data) ->
+        front.data("knitted", data.output)
+        front.trigger("knitted:data")
+    }
+    front.link().attr("to-row")(guide, "instruction", (i) -> if i? then i.stateBefore.outputRow - 1 else 0)
+
     back = $("<div fit='full-width'></div>").appendTo(output)
     back.addClass("output-2d-back")
     back.knitted2d()
-    back.link().data("knitted")(guide, "instruction", (i) -> if i? then i.stateBefore.doubleBedOutput else undefined)
+    jsRoutes.controllers.KnittingResult.doubleBed().ajax {
+      success: (data) ->
+        back.data("knitted", data.output)
+        back.trigger("knitted:data")
+    }
+    back.link().attr("to-row")(guide, "instruction", (i) -> if i? then i.stateBefore.doubleBedOutputRow - 1 else 0)
   )
   $("#btn-output-2d").click()
 
