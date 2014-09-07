@@ -63,12 +63,14 @@ object Global extends GlobalSettings {
     //    val plan = examplePlan
     //    val plan = tubePlan
     //    val plan = decreasingTubePlan
-    val plan = sockPlan
+    //    val plan = sockPlan
     //    val plan = handyPlan
     //    val plan = laptopPlan
     //    val plan = laptopPlanGradient
     //    val plan = laptopPlanCheckerboard
-    //    val plan = laptopPlanDissolvingCheckerboard
+    val plan = laptopPlanDissolvingCheckerboard
+    //    val plan = rigaScarfPlan
+    //    val plan = scarfGauge
     Logger.info("Initial plan loaded.")
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
   }
