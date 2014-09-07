@@ -27,7 +27,7 @@ jQuery.fn.extend({
       width: (to, property, unit = "", transform = undefinedToEmpty) ->
         linkFun(to, property, (v) -> me.width(transform(v) + unit))
       attr: (attr) -> (to, property, transform = undefinedToEmpty) ->
-        linkFun(to, property, (v) -> me.attr(attr, transform(v)))
+        linkFun(to, property, (v) -> me.attr(attr, transform(v)); me.trigger(attr + ":attr"))
       data: (data) -> (to, property, transform = undefinedToEmpty) ->
         linkFun(to, property, (v) -> me.data(data, transform(v)); me.trigger(data + ":data"))
       switchClass: (className) -> (to, property, f = (v) -> v) ->

@@ -13,9 +13,9 @@ jQuery.fn.extend({
       renderer = knittingRenderer(output)
 
       updateImage = () ->
-        fromRow = root.attr("fromRow")
+        fromRow = root.attr("from-row")
         fromRow = if (fromRow?) then fromRow else 0
-        toRow = root.attr("toRow")
+        toRow = root.attr("to-row")
         toRow = if (toRow?) then toRow else output.length
         fit = root.attr("fit")
         fit = if (fit?) then fit else "full-width"
@@ -34,9 +34,9 @@ jQuery.fn.extend({
                 (canvas.height / factor - rh) / 2)
         renderer.draw(ctx, fromRow, toRow)
 
-      root.bind("fromRow:change", updateImage)
-      root.bind("toRow:change", updateImage)
-      root.bind("fit:change", updateImage)
+      root.bind("from-row:attr", updateImage)
+      root.bind("to-row:attr", updateImage)
+      root.bind("fit:attr", updateImage)
       updateImage()
 
     root.bind(dataName + ":data", () -> createImage())
