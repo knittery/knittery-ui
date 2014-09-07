@@ -2,6 +2,7 @@ import java.awt.Color
 import java.io.File
 import javax.imageio.ImageIO
 import scala.collection.JavaConversions._
+import scala.util.Try
 import scalaz._
 import Scalaz._
 import play.api._
@@ -29,7 +30,16 @@ object Global extends GlobalSettings {
     implicit val system = Akka.system(app)
 
     val port = app.configuration.getString("serial.port").getOrElse {
-      val ports = CommPortIdentifier.getPortIdentifiers.toList.map(_.asInstanceOf[CommPortIdentifier])
+      val ports = {
+        try {
+          CommPortIdentifier.getPortIdentifiers.toList.map(_.asInstanceOf[CommPortIdentifier])
+        }
+        catch {
+          case e =>
+            Logger.warn("cannot list serial ports", e)
+            Nil
+        }
+      }
       val likelyPorts = ports.
         filter(_.getPortType == CommPortIdentifier.PORT_SERIAL).
         filterNot(_.getName.toLowerCase.contains("bluetooth"))
