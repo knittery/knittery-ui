@@ -38,4 +38,5 @@ GET         /result/3d/json                       controllers.KnittingResult.jso
 
 # Assets
 GET         /assets/javascripts/routes.js         controllers.Application.javascriptRoutes()
+GET         /webjars/*file                        controllers.WebJarAssets.at(file)
 GET         /assets/*file                         controllers.Assets.at(path="/public", file)

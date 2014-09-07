@@ -1,5 +1,5 @@
 @(steps: Seq[models.guide.GuideStep], step: models.guide.GuideStep, instruction: models.guide.Instruction)
-@main("Guide", "wide-container guide") {
+@main("Guide", "guide", "wide-container guide") {
   <div class="step-display row">
     <div class="col-md-2">
       <div class="panel panel-default graphical">
@@ -129,5 +129,4 @@
     </div>
   </div>
   </div>
-
-}(List("guide", "needles", "machine", "guide-model", "2dview", "3dview"))
+}

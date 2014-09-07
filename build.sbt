@@ -6,6 +6,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.2"
 
+pipelineStages := Seq(rjs, digest, gzip)
+
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.0.6",
   "com.squants" %% "squants" % "0.4.2",
@@ -14,10 +16,12 @@ libraryDependencies ++= Seq(
   "com.assembla.scala-incubator" %% "graph-json" % "1.9.1",
   "ch.inventsoft.akka" %% "rxtx-akka-io" % "1.0.4",
   "ch.inventsoft.graph" %% "graph-layout" % "1.0.2",
+  "org.webjars" %% "webjars-play" % "2.3.0",
   "org.webjars" % "jquery" % "2.1.1",
   "org.webjars" % "bootstrap" % "3.2.0",
-  "org.webjars" % "three.js" % "r66",
-  "org.webjars" % "leapjs" % "0.4.1")
+  "org.webjars" % "three.js" % "r68-SNAPSHOT",
+  "org.webjars" % "leapjs" % "0.6.2-SNAPSHOT",
+  "org.webjars" % "reconnecting-websocket" % "23d2fbc")
 
 libraryDependencies ++= Seq(
   "com.storm-enroute" %% "scalameter" % "0.6" % "test")

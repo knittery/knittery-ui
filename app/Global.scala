@@ -35,7 +35,7 @@ object Global extends GlobalSettings {
           CommPortIdentifier.getPortIdentifiers.toList.map(_.asInstanceOf[CommPortIdentifier])
         }
         catch {
-          case e =>
+          case e: Throwable =>
             Logger.warn("cannot list serial ports", e)
             Nil
         }
