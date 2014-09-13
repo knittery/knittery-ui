@@ -9,7 +9,7 @@
 
   Usage: $(".knitting").knitted2d()
 ###
-define(["jquery", "canvas-manipulation"], ($, CanvasManipulation) ->
+define(["jquery", "underscorejs", "canvas-manipulation"], ($, _, CanvasManipulation) ->
   knittingRenderer = (knitted) ->
     canvas = document.createElement("canvas")
     ctx = canvas.getContext("2d")
@@ -210,15 +210,30 @@ define(["jquery", "canvas-manipulation"], ($, CanvasManipulation) ->
   reduceToKnitted = (knitting) ->
     first = 200
     last = 0
-    for row, i in knitting
+    rows = for row, i in knitting
       for stitch, j in row
         if not (stitch.type == "no" or stitch.type == "empty")
           first = Math.min(first, j)
           last = Math.max(last, j)
+      {index: i, data: row}
     last = Math.max(first, last)
+
+    rows = _.reject(rows, (r) -> emptyRow(r.data))
+    rows = _.reduce(rows, (m, r) ->
+      if m.length == 0 then [r]
+      else if noOverlap(_.last(m).data, r.data)
+        r2 = m.pop()
+        merged = {index: r.index, data: mergeRows(r2.data, r.data)}
+        m.push(merged)
+        m
+      else
+        m.push(r)
+        m
+    , [])
+    row.data = row.data.slice(first, last) for row in rows
+
     result =
-      rows: for row, i in knitting when !emptyRow(row)
-        {index: i, data: row.slice(first, last)}
+      rows: rows
       stitchOffset: first
       stitches: last - first + 1
       originalRowToRow: (index) ->
@@ -234,6 +249,18 @@ define(["jquery", "canvas-manipulation"], ($, CanvasManipulation) ->
     stitches = (s for s in row when s.type != "no" and s.type != "empty")
     stitches.length == 0
 
+  noOverlap = (row1, row2) ->
+    zipped = _.zip(row1, row2)
+    _.every(zipped, (a) ->
+      a[0].type == "no" or a[1].type == "no" or (a[0].type == "empty" and a[1].type == "empty")
+    )
+
+  mergeRows = (row1, row2) ->
+    zipped = _.zip(row1, row2)
+    _.map(zipped, (r) ->
+      if r[0].type == "no" then r[1]
+      else r[0]
+    )
 
   $.fn.extend({
     knitted2d: (allowZoom = false, dataName = "knitted") -> this.each(->
@@ -247,7 +274,8 @@ define(["jquery", "canvas-manipulation"], ($, CanvasManipulation) ->
       createImage = () ->
         output = if root.data(dataName)? then root.data(dataName) else []
         renderer = knittingRenderer(output)
-        control = new CanvasManipulation(canvas, () -> )
+        console.debug("created 2d knitting with size #{renderer.width} x #{renderer.height()})")
+        control = new CanvasManipulation(canvas, () ->)
 
         updateImage = () ->
           fromRow = root.attr("from-row")
@@ -270,6 +298,7 @@ define(["jquery", "canvas-manipulation"], ($, CanvasManipulation) ->
           switch fit
             when "full-width"
               factor = canvas.width / renderer.fullWidth
+              console.debug("scale of knitting is #{factor}")
               control.scale(factor, factor)
             when "knitted"
               fromRow = root.attr("from-row")
@@ -278,9 +307,11 @@ define(["jquery", "canvas-manipulation"], ($, CanvasManipulation) ->
               toRow = if (toRow?) then toRow else output.length
               rh = renderer.height(fromRow, toRow)
               factor = Math.min(canvas.width / renderer.width, canvas.height / rh)
+              xOffset = (canvas.width / factor - renderer.width) / 2 - renderer.xOffset
+              yOffset = (canvas.height / factor - rh) / 2
               control.scale(factor, factor)
-              control.move((canvas.width / factor - renderer.width) / 2 - renderer.xOffset,
-                  (canvas.height / factor - rh) / 2)
+              control.move(xOffset, yOffset)
+              console.debug("scale of knitting is #{factor} with offset (#{xOffset}, #{yOffset})")
           updateImage()
 
         control.repaint = updateImage

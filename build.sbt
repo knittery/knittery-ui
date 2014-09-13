@@ -19,7 +19,8 @@ libraryDependencies ++= Seq(
   "org.webjars" % "bootstrap" % "3.2.0",
   "org.webjars" % "three.js" % "r68-SNAPSHOT",
   "org.webjars" % "leapjs" % "0.6.2-SNAPSHOT",
-  "org.webjars" % "reconnecting-websocket" % "23d2fbc")
+  "org.webjars" % "reconnecting-websocket" % "23d2fbc",
+  "org.webjars" % "underscorejs" % "1.6.0-3")
 
 libraryDependencies ++= Seq(
   "com.storm-enroute" %% "scalameter" % "0.6" % "test")
