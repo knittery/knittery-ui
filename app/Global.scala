@@ -65,11 +65,11 @@ object Global extends GlobalSettings {
     //    val planner = decreasingTubePlan
     //    val planner = sockPlan
     //    val planner = handyPlan
-    //    val planner = laptopPlan
     //    val planner = laptopPlanGradient
     //    val planner = laptopPlanCheckerboard
     //    val planner = laptopPlanDissolvingCheckerboard
-    val planner = rigaScarfPlan
+    val planner = laptopPlanDiamond
+    //    val planner = rigaScarfPlan
     //    val planner = scarfGauge
 
     def optimizer(plan: Plan) = {
@@ -115,15 +115,6 @@ object Global extends GlobalSettings {
     })
   }
 
-  private def laptopPlan = {
-    val bg = Yarn("black", Color.black)
-    val fg = Yarn("white", Color.white)
-
-    //stitch width: 7
-    //size of dell laptop
-    Examples.laptopHuelle(23.1d, 33.7d, 2.1d, (29, 46), bg, fg, 7)
-  }
-
   private def laptopPlanGradient = {
     val top = Yarn("white", Color.white)
     val bottom = Yarn("blue", Color.cyan)
@@ -150,6 +141,16 @@ object Global extends GlobalSettings {
     val patterns = LaptopCase.dissolvingCheckerboardPattern(yarnA, yarnB, 2.cm)
     LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns)
   }
+
+  private def laptopPlanDiamond = {
+    val yarnA = Yarn("white", Color.white)
+    val yarnB = Yarn("blue", new Color(0, 0, 155))
+    implicit val gauge = StandardGauge(34, 42, 5.tension)
+
+    val patterns = LaptopCase.diamond(yarnA, yarnB)
+    LaptopCase.form(25.cm, 36.cm, 2.cm, 15.cm, 1.5.cm, patterns)
+  }
+
 
   private def handyPlan = {
     val bg = Yarn("white", Color.white)

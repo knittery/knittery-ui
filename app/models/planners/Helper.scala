@@ -17,7 +17,7 @@ object Helper {
   def monochromeToPattern(img: BufferedImage, yarnWhite: Yarn, yarnBlack: Yarn): Matrix[Yarn] = {
     val rgbs = IndexedSeq.tabulate(img.getHeight, img.getWidth)((y, x) => new Color(img.getRGB(x, y)))
     val colors = rgbs.flatten.toSet.toSeq
-    require(colors.size > 2, "not monochrome")
+    require(colors.size <= 2, s"not monochrome: ${colors.toList}")
     val white =
       if (colors.size > 1 && colors(0).getRGB > colors(1).getRGB) colors(1)
       else colors(0)

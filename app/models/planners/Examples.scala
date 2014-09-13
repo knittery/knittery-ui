@@ -36,50 +36,6 @@ object Examples {
     _ <- Cast.offClosed(MainBed, backgroundPiece)
   } yield ()
 
-  /**
-   * Width/Height: Size of the laptop
-   * Gauge: 10cm/10cm stitches (columns, rows)
-   */
-  def laptopHuelle(widthCm: Double, heightCm: Double, thicknessCm: Double, gauge: (Double, Double), yarnA: Yarn, yarnB: Yarn, xOffset: Int = 0): Planner = for {
-    _ <- Planner.precondidtions(_ => true)
-    thickness = (thicknessCm / 10 * gauge._1).round.toInt //per side
-    border = 4 // per side
-
-    width = (widthCm / 10 * gauge._1).round.toInt
-    totalWidth = if (width + thickness % 2 != 0) width + thickness + 1 else width + thickness
-    patternWidth = totalWidth - (border * 2)
-
-    height = (heightCm / 10 * gauge._2).round.toInt
-    patternHeight = height - (border * 2) + thickness
-    borderRow = IndexedSeq.fill(totalWidth)(yarnA)
-    borderRows = IndexedSeq.fill(border)(borderRow)
-    borderAtSide = IndexedSeq.fill(border)(yarnA)
-
-    first <- Planner.precondidtions { _ =>
-      require(totalWidth <= Needle.count - 1)
-      Needle.middle - (totalWidth / 2)
-    }
-    last = first + totalWidth - 1
-    yarnAPiece <- Cast.onClosed(MainBed, first, last, yarnA)
-
-    patternFront = IndexedSeq.tabulate(patternHeight, patternWidth) { (c, r) =>
-      if (c % 2 == r % 2) yarnA
-      else yarnB
-    }
-    pf = borderRows ++ patternFront.map(r => borderAtSide ++ r ++ borderAtSide) ++ borderRows
-    _ <- FairIslePlanner.singleBed(pf, Some(first))
-
-    rauteImg = ImageIO.read(new File("pattern/muster_raute.png"))
-    raute = Helper.imageToPattern(rauteImg)
-    rauteRow = raute.map(one => Stream.continually(one).flatten.drop((rauteImg.getWidth - xOffset).abs).take(patternWidth))
-    patternBack = Stream.continually(rauteRow).flatten.take(patternHeight)
-    pb = borderRows ++ patternBack.map(r => borderAtSide ++ r ++ borderAtSide) ++ borderRows
-    _ <- FairIslePlanner.singleBed(pb, Some(first))
-
-    _ <- Cast.offClosed(MainBed, yarnAPiece)
-  } yield ()
-
-
   def imageRag(img: BufferedImage, bg: Option[Yarn] = None) = {
     val w = img.getWidth.min(200)
     val pattern = Helper.imageToPattern(img).takeWidth(w)

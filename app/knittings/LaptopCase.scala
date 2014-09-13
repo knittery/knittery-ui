@@ -1,5 +1,7 @@
 package knittings
 
+import java.io.File
+import javax.imageio.ImageIO
 import scala.util.Random
 import scalaz._
 import Scalaz._
@@ -8,7 +10,7 @@ import utils._
 import models._
 import models.plan._
 import models.units._
-import models.planners.{FormGiving, FairIslePlanner, Basics, Cast}
+import models.planners._
 
 /**
  * Laptop case that wraps the laptop in a rectangular enclosure and has a square lash over the small side.
@@ -21,8 +23,8 @@ object LaptopCase {
       require(ps.front.head.size == bodyWidth.approx, "wrong front width")
       require(ps.back.size == backHeight.approx, "wrong back height")
       require(ps.back.head.size == bodyWidth.approx, "wrong back width")
-      require(ps.lash.size == lashHeight.approx, "wrong lash height")
-      require(ps.lash.head.size == lashWidth.approx, "wrong lash width")
+      require(ps.lash.size == lashHeight.approx, s"wrong lash height: ${ps.lash.size} instead of ${lashHeight.approx}")
+      require(ps.lash.head.size == lashWidth.approx, s"wrong lash width: ${ps.lash.head.size} instead of ${lashWidth.approx}")
       ps
     }
   }
@@ -131,7 +133,7 @@ object LaptopCase {
     }
   }
 
-  def gradient(yarnTop: Yarn, yarnBottom: Yarn, yarnForLash: Yarn, seed: Long = 0)(implicit gauge: Gauge) = (dims: Dimensions) => {
+  def gradient(yarnTop: Yarn, yarnBottom: Yarn, yarnForLash: Yarn, seed: Long = 0) = (dims: Dimensions) => {
     val random = new Random(seed)
     val border = 2.stitches
 
@@ -150,5 +152,20 @@ object LaptopCase {
     val back = addBorder(gradientPattern(width.approx, dims.backHeight.approx, yarnTop, yarnBottom))
     val lash = IndexedSeq.fill(dims.lashHeight.approx, dims.lashWidth.approx)(yarnForLash)
     Patterns(front, back, lash)
+  }
+
+  def diamond(yarnA: Yarn, yarnB: Yarn, xOffset: Int = 0, yOffset: Int = 0) = (dims: Dimensions) => {
+    val fh = dims.frontHeight.approx
+
+    val diamondImg = ImageIO.read(new File("pattern/muster_raute.png"))
+    val diamond = Helper.monochromeToPattern(diamondImg, yarnA, yarnB).
+      tile(dims.bodyWidth.approx, fh + dims.backHeight.approx, xOffset, yOffset)
+
+    val lash = IndexedSeq.tabulate(dims.lashHeight.approx, dims.lashWidth.approx) { (c, r) =>
+      if (c % 2 == r % 2) yarnA
+      else yarnB
+    }
+
+    Patterns(diamond.take(fh), diamond.drop(fh), lash)
   }
 }
