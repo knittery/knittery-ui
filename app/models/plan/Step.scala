@@ -170,16 +170,16 @@ case class ClosedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolea
 
     def knitLast(n: Needle) = {
       if (filter(n)) needles(n) match {
-        case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
+        case NeedleState(_, yarns) if yarns.isEmpty => EmptyStitch
         case NeedleState(_, yarns) => PlainStitch(yarns.map(_.yarn).toList)
-      }
+      } else if (needles(n).yarn.isEmpty) EmptyStitch
       else NoStitch
     }
     def knitCastOff(n: Needle) = {
       if (filter(n)) needles(n) match {
-        case NeedleState(_, yarns) if yarns.isEmpty => NoStitch
+        case NeedleState(_, yarns) if yarns.isEmpty => EmptyStitch
         case NeedleState(_, yarns) => CastOffStitch(withYarn.yarn)
-      }
+      } else if (needles(n).yarn.isEmpty) EmptyStitch
       else NoStitch
     }
 
