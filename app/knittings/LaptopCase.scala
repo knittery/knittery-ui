@@ -69,7 +69,7 @@ object LaptopCase {
         _ <- FormGiving.raglanDecrease(MainBed, Right)
       } yield ()
     }
-    _ <- FairIslePlanner.singleBed(ps.lash.drop(toDecrease + 1), Some(firstLash))
+    _ <- FairIslePlanner.singleBed(ps.lash.drop(toDecrease), Some(firstLash))
     _ <- Cast.offClosed(MainBed, bg)
   } yield ()
 
