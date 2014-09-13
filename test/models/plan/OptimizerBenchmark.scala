@@ -8,7 +8,6 @@ import knittings.{Scarf, LaptopCase, Sock}
 import models._
 
 class OptimizerBenchmark extends PerformanceTest.Quickbenchmark {
-
   implicit val gauge = StandardGauge(34, 42, 5.tension)
 
   val tinyScarf = {
@@ -25,7 +24,7 @@ class OptimizerBenchmark extends PerformanceTest.Quickbenchmark {
     LaptopCase.form(10 cm, 20 cm, 0.5 cm, 5 cm, 1 cm, pattern)
   }
 
-  val planners = Gen.enumeration("plans")(tinyScarf, smallScarf, sock, laptop)
+  val planners = Gen.enumeration("plans")(tinyScarf, smallScarf, laptop, sock)
 
   performance of "NoEffectStepOptimizer" in {
     measure method "apply" in {
