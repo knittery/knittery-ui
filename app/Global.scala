@@ -82,8 +82,8 @@ object Global extends GlobalSettings {
   def guider = _guider.getOrElse(throw new IllegalStateException("not started"))
 
   private def rigaScarfPlan = {
-    val yarnA = Yarn("white", Color.white)
-    val yarnB = Yarn("grey", Color.gray)
+    val yarnA = Yarn("black", Color.black)
+    val yarnB = Yarn("gray", Color.gray)
     implicit val gauge = MeasuredGauge(48 stitches, 14.5 cm, 96 rows, 27.6 cm, 6 tension)
 
     val img = ImageIO.read(new File("pattern/riga-pattern.png"))
@@ -94,8 +94,8 @@ object Global extends GlobalSettings {
   }
 
   private def scarfGauge = {
-    val yarnA = Yarn("red", Color.red)
-    val yarnB = Yarn("blue", Color.blue)
+    val yarnA = Yarn("blue", Color.blue)
+    val yarnB = Yarn("red", Color.red)
 
     implicit val gauge = StandardGauge(10, 10, 6 tension)
     val img = ImageIO.read(new File("pattern/riga-pattern.png"))
