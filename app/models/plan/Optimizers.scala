@@ -28,29 +28,42 @@ object NoEffectStepOptimizer extends PlanOptimizer {
 
 /** Optimizes away steps that have no impact on the result of the knitting. */
 object OptimizeStepWithNoEffectOnFinalOutput extends PlanOptimizer {
-  override def apply(plan: Plan): Plan = {
-    val expectedResult = plan.run
-    plan.steps.tails.foldLeft((StartPlan: Plan, plan)) {
-      case ((soFar, proposed), steps) if steps.size > 0 =>
-        makePlan(soFar, steps.tail) match {
-          case Success(withoutThisStep) if withoutThisStep.run == expectedResult && !NonOptimizable(steps.head) =>
-            (soFar, withoutThisStep)
-          case differentResult =>
-            val next = proposed.stepStates.drop(soFar.stepStates.size).head
-            val withThisStep = CompositePlan.fromStepState(soFar, next)
-            assert(next.step == steps.head)
-            (withThisStep, proposed)
-        }
-      case (r, _) => r
-    }._1
+  /** if the state is still different after this amount of steps it is considered non optimizable. */
+  val maxDepth = 20
+
+  override def apply(originalPlan: Plan) = optimize(StartPlan, originalPlan.stepStates.toStream, originalPlan.steps)
+
+  @tailrec
+  private def optimize(plan: Plan, stepStates: Stream[StepState], steps: Seq[Step]): Plan = stepStates match {
+    case Stream.Empty => plan
+
+    case step #:: Stream.Empty if NonOptimizable(step.step) =>
+      CompositePlan.fromStepState(plan, step)
+    case step #:: Stream.Empty =>
+      if (step.before.sameOutput(step.after)) plan
+      else CompositePlan.fromStepState(plan, step)
+
+    case step #:: rest if NonOptimizable(step.step) =>
+      optimize(CompositePlan.fromStepState(plan, step), rest, steps.tail)
+    case step #:: rest =>
+      val withoutThis = StepState.stream(step.before, steps.tail)
+      if (withoutThis.nonEmpty && noEffect(withoutThis, rest)) {
+        val newPlan = CompositePlan.fromStepState(plan, withoutThis.head)
+        optimize(newPlan, withoutThis.tail, steps.tail.tail)
+      } else {
+        val newPlan = CompositePlan.fromStepState(plan, step)
+        optimize(newPlan, rest, steps.tail)
+      }
   }
-  private def makePlan(previous: Plan, steps: Seq[Step]) = {
-    try {
-      CompositePlan(previous, steps)
-    }
-    catch {
-      case e: Error => "not implemented".fail[Plan]
-    }
+
+  private def noEffect(as: Stream[StepState], bs: Stream[StepState]): Boolean = {
+    as.zip(bs).take(maxDepth).flatMap {
+      case (a, b) =>
+        assert(a.step == b.step, s"one of the following steps ${a.step} != ${b.step}")
+        if (!a.isValid || !a.after.sameOutput(b.after)) Some(false)
+        else if (a.after.sameState(b.after)) Some(true)
+        else None
+    }.headOption.getOrElse(false)
   }
 }
 
