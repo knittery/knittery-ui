@@ -202,7 +202,7 @@ object Global extends GlobalSettings {
   }
 
   private def imagePlan = {
-    val img = ImageIO.read(new File("example.png"))
+    val img = ImageIO.read(new File("pattern/example.png"))
     Examples.imageRagDoubleBed(img, 7 tension)
   }
 
