@@ -2,7 +2,7 @@ import java.awt.Color
 import java.io.File
 import javax.imageio.ImageIO
 import scala.collection.JavaConversions._
-import scala.util.Try
+import scala.concurrent.duration._
 import scalaz._
 import Scalaz._
 import play.api._
@@ -59,20 +59,30 @@ object Global extends GlobalSettings {
     _guider = Some(system.actorOf(Guider.props(machine), "guider"))
 
     Logger.info("Loading initial plan...")
-    //    val plan = imagePlan
-    //    val plan = examplePlan
-    //    val plan = tubePlan
-    //    val plan = decreasingTubePlan
-    //    val plan = sockPlan
-    //    val plan = handyPlan
-    //    val plan = laptopPlan
-    //    val plan = laptopPlanGradient
-    //    val plan = laptopPlanCheckerboard
-    val plan = laptopPlanDissolvingCheckerboard
-    //    val plan = rigaScarfPlan
-    //    val plan = scarfGauge
-    Logger.info("Initial plan loaded.")
+    //    val planner = imagePlan
+    //    val planner = examplePlan
+    //    val planner = tubePlan
+    //    val planner = decreasingTubePlan
+    //    val planner = sockPlan
+    //    val planner = handyPlan
+    //    val planner = laptopPlan
+    //    val planner = laptopPlanGradient
+    //    val planner = laptopPlanCheckerboard
+    //    val planner = laptopPlanDissolvingCheckerboard
+    val planner = rigaScarfPlan
+    //    val planner = scarfGauge
+
+    def optimizer(plan: Plan) = {
+      val t0 = System.currentTimeMillis
+      val result = Optimizers.all(plan)
+      val time = (System.currentTimeMillis - t0) millis
+      val percentage = (1 - result.steps.size.toDouble / plan.steps.size) * 100
+      Logger.info(s"plan optimized in $time (${plan.steps.size} steps reduced by ${percentage.round.toInt}%)")
+      result
+    }
+    val plan = planner.plan(optimizer)
     guider ! Guider.LoadPlan(plan.valueOr(e => throw new RuntimeException(e)))
+    Logger.info("initial plan loaded.")
   }
 
   @volatile private var _machine: Option[ActorRef] = None
@@ -90,7 +100,7 @@ object Global extends GlobalSettings {
     val tile = Helper.monochromeToPattern(img, yarnA, yarnB).transpose
     Scarf.rectangular(1.35 meters, 33 cm, dims => {
       tile.tile(dims.width.approx, dims.height.approx)
-    }).plan()
+    })
   }
 
   private def scarfGauge = {
@@ -102,7 +112,7 @@ object Global extends GlobalSettings {
     val tile = Helper.monochromeToPattern(img, yarnB, yarnA).transpose
     Scarf.rectangular(100 cm, 48 cm, dims => {
       tile.tile(dims.width.approx, dims.height.approx)
-    }).plan()
+    })
   }
 
   private def laptopPlan = {
@@ -111,7 +121,7 @@ object Global extends GlobalSettings {
 
     //stitch width: 7
     //size of dell laptop
-    Examples.laptopHuelle(23.1d, 33.7d, 2.1d, (29, 46), bg, fg, 7).plan()
+    Examples.laptopHuelle(23.1d, 33.7d, 2.1d, (29, 46), bg, fg, 7)
   }
 
   private def laptopPlanGradient = {
@@ -120,7 +130,7 @@ object Global extends GlobalSettings {
     implicit val gauge = StandardGauge(34, 42, 5.tension)
 
     val patterns = LaptopCase.gradient(top, bottom, bottom)
-    LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns).plan()
+    LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns)
   }
 
   private def laptopPlanCheckerboard = {
@@ -129,7 +139,7 @@ object Global extends GlobalSettings {
     implicit val gauge = StandardGauge(34, 42, 5.tension)
 
     val patterns = LaptopCase.checkerboardPattern(yarnA, yarnB, 2.cm)
-    LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns).plan()
+    LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns)
   }
 
   private def laptopPlanDissolvingCheckerboard = {
@@ -138,13 +148,13 @@ object Global extends GlobalSettings {
     implicit val gauge = StandardGauge(34, 42, 5.tension)
 
     val patterns = LaptopCase.dissolvingCheckerboardPattern(yarnA, yarnB, 2.cm)
-    LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns).plan()
+    LaptopCase.form(25.cm, 36.cm, 2.cm, 10.cm, 1.5.cm, patterns)
   }
 
   private def handyPlan = {
     val bg = Yarn("white", Color.white)
     val img = ImageIO.read(new File("pattern/mobile_sleeve_kid_koala.png"))
-    Examples.handyHuelle(img, bg, 8.3 tension).plan()
+    Examples.handyHuelle(img, bg, 8.3 tension)
   }
 
   private def examplePlan = {
@@ -176,25 +186,24 @@ object Global extends GlobalSettings {
       Basics.knitRowWithK(yarnA = Some(bg)) >>
       Basics.knitRowWithK(yarnA = Some(last)) >>
       Cast.offClosed(MainBed, last)
-    planner.plan()
+    planner
   }
 
-  private def tubePlan = Examples.tube(10, 40, YarnPiece(Yarn("red", Color.red))).plan()
-  private def decreasingTubePlan = Examples.decreasingTube(20, 60, YarnPiece(Yarn("red", Color.red))).plan()
+  private def tubePlan = Examples.tube(10, 40, YarnPiece(Yarn("red", Color.red)))
+  private def decreasingTubePlan = Examples.decreasingTube(20, 60, YarnPiece(Yarn("red", Color.red)))
 
   private def sockPlan = {
     implicit val gauge = StandardGauge(36, 44, 7.tension)
-    Sock.europeanSize(37, Yarn("red", Color.red)).plan()
+    Sock.europeanSize(37, Yarn("red", Color.red))
   }
 
   private def littleSockPlan = {
-    Sock(12.stitches, 20.rows, 15.rows, Yarn("red", Color.red)).plan()
+    Sock(12.stitches, 20.rows, 15.rows, Yarn("red", Color.red))
   }
 
   private def imagePlan = {
     val img = ImageIO.read(new File("example.png"))
-    val planner = Examples.imageRagDoubleBed(img, 7 tension)
-    planner.plan()
+    Examples.imageRagDoubleBed(img, 7 tension)
   }
 
 }
