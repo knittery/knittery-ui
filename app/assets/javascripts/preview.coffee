@@ -1,7 +1,7 @@
 require(["jquery", "leapjs", "threejs", "lib/LeapCameraControls", "2dview", "3dview"], ($, Leap, THREE, LeapCameraControls) ->
   init2dPreview = (elem) ->
     elem.attr("fit", "knitted")
-    elem.knitted2d()
+    elem.knitted2d(true)
     jsRoutes.controllers.KnittingResult.mainBed().ajax {
       success: (data) ->
         elem.data("knitted", data.output)

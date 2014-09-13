@@ -9,7 +9,7 @@
 
   Usage: $(".knitting").knitted2d()
 ###
-define(["jquery"], ($) ->
+define(["jquery", "canvas-manipulation"], ($, CanvasManipulation) ->
   knittingRenderer = (knitted) ->
     canvas = document.createElement("canvas")
     ctx = canvas.getContext("2d")
@@ -236,7 +236,7 @@ define(["jquery"], ($) ->
 
 
   $.fn.extend({
-    knitted2d: (dataName = "knitted") -> this.each(->
+    knitted2d: (allowZoom = false, dataName = "knitted") -> this.each(->
       root = $(this)
       canvasJ = $("<canvas style='width: 100%; height: 100%'></canvas>")
       canvasJ.appendTo(root)
@@ -247,33 +247,50 @@ define(["jquery"], ($) ->
       createImage = () ->
         output = if root.data(dataName)? then root.data(dataName) else []
         renderer = knittingRenderer(output)
+        control = new CanvasManipulation(canvas, () -> )
 
         updateImage = () ->
           fromRow = root.attr("from-row")
           fromRow = if (fromRow?) then fromRow else 0
           toRow = root.attr("to-row")
           toRow = if (toRow?) then toRow else output.length
-          fit = root.attr("fit")
-          fit = if (fit?) then fit else "full-width"
+
+          ctx.setTransform(1, 0, 0, 1, 0, 0)
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          control.applyTransformation(ctx)
+          renderer.draw(ctx, fromRow, toRow)
+
+        updateSize = () ->
           canvas.width = canvasJ.width() * oversampling
           canvas.height = canvasJ.height() * oversampling
 
+          control.reset()
+          fit = root.attr("fit")
+          fit = if (fit?) then fit else "full-width"
           switch fit
             when "full-width"
               factor = canvas.width / renderer.fullWidth
-              ctx.scale(factor, factor)
+              control.scale(factor, factor)
             when "knitted"
+              fromRow = root.attr("from-row")
+              fromRow = if (fromRow?) then fromRow else 0
+              toRow = root.attr("to-row")
+              toRow = if (toRow?) then toRow else output.length
               rh = renderer.height(fromRow, toRow)
               factor = Math.min(canvas.width / renderer.width, canvas.height / rh)
-              ctx.scale(factor, factor)
-              ctx.translate((canvas.width / factor - renderer.width) / 2 - renderer.xOffset,
+              control.scale(factor, factor)
+              control.move((canvas.width / factor - renderer.width) / 2 - renderer.xOffset,
                   (canvas.height / factor - rh) / 2)
-          renderer.draw(ctx, fromRow, toRow)
+          updateImage()
+
+        control.repaint = updateImage
+        if allowZoom then control.registerHandlers()
 
         root.bind("from-row:attr", updateImage)
         root.bind("to-row:attr", updateImage)
         root.bind("fit:attr", updateImage)
-        updateImage()
+        root.resize(updateImage)
+        updateSize()
 
       root.bind(dataName + ":data", () -> createImage())
       createImage()
