@@ -120,7 +120,7 @@ object OptimizePatternKnitting extends PlanOptimizer {
     private def movedNeedles(s1: KnittingState, s2: KnittingState) =
       Needle.all.filterNot(n => s1.needles(MainBed)(n) == s2.needles(MainBed)(n))
     private def isMoveNeedlesOnMainBed(s: StepState) = s match {
-      case StepState(MoveNeedles(MainBed, _), _, _) => true
+      case StepState(MoveNeedles(MainBed, _), _) => true
       case _ => false
     }
   }
@@ -130,9 +130,9 @@ object OptimizePatternKnitting extends PlanOptimizer {
 object OptimizeRetires extends PlanOptimizer {
   def apply(plan: Plan) = {
     val segmented = plan.stepStates.foldLeft[List[Segment]](Nil) {
-      case (RetireSegment(retires, before) :: acc, StepState(step: RetireNeedle, _, _)) =>
+      case (RetireSegment(retires, before) :: acc, StepState(step: RetireNeedle, _)) =>
         RetireSegment(retires :+ step, before) :: acc
-      case (acc, StepState(step: RetireNeedle, before, _)) =>
+      case (acc, StepState(step: RetireNeedle, before)) =>
         RetireSegment(Seq(step), before) :: acc
       case (acc, otherStep) => OtherSegment(otherStep) :: acc
     }.reverse
@@ -148,10 +148,6 @@ object OptimizeRetires extends PlanOptimizer {
     }
     private def overlap(a: RetireNeedle)(b: RetireNeedle): Boolean = {
       a.at == b.target && a.bed == b.bed
-    }
-    private def stepState(step: Step, before: KnittingState) = {
-      val after = step.apply(before).getOrElse(throw new RuntimeException("Unexpected plan error"))
-      StepState(step, before, after)
     }
     @tailrec
     private def opt(todo: Seq[RetireNeedle], state: KnittingState, result: Seq[StepState]): Seq[StepState] = todo match {
@@ -170,7 +166,7 @@ object OptimizeRetires extends PlanOptimizer {
         } else {
           (step, rest)
         }
-        val ss = stepState(step2, state)
+        val ss = StepState(step2, state)
         opt(rest2, ss.after, result :+ ss)
 
       case Seq(step@RetireNeedle(bed, at, ToRight), rest@_*) =>
@@ -188,7 +184,7 @@ object OptimizeRetires extends PlanOptimizer {
         } else {
           (step, rest)
         }
-        val ss = stepState(step2, state)
+        val ss = StepState(step2, state)
         opt(rest2, ss.after, result :+ ss)
 
       case Seq() => result

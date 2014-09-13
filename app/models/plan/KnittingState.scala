@@ -48,7 +48,7 @@ case class KnittingState(
   def modifyNeedles(bed: Bed, newNeedles: NeedleStateRow) =
     copy(bedNeedles = bedNeedles + (bed -> newNeedles.toMap))
 
-  def knit(main: Needle => Stitch, double: Needle => Stitch) = copy(output = output + (main, double))
+  def knit(main: Needle => Stitch, double: Needle => Stitch) = copy(output = output +(main, double))
 
   def pushRow(forNeedles: Needle => Boolean) = {
     val changed = yarnAttachments.collect {
@@ -61,6 +61,9 @@ case class KnittingState(
   def detachYarn(yarn: YarnPiece) = copy(yarnAttachments = yarnAttachments - yarn)
 
   def knit2(f: Knitted3D => Knitted3D) = copy(output3D = f(output3D))
+
+  def sameOutput(other: KnittingState) = output == other.output
+  def sameState(other: KnittingState) = bedNeedles == other.bedNeedles && carriageState == other.carriageState
 }
 object KnittingState {
   val initial = KnittingState(Map.empty, CarriageStates.empty, Knitted.empty, Knitted3D.empty, Map.empty)

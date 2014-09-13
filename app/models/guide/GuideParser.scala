@@ -23,14 +23,14 @@ object GuideParser {
   private def parse(steps: Seq[StepState]): (GuideStep, Seq[StepState]) = steps.head.step match {
     case KnitRow(carriage, direction, _) =>
       val (knittingSteps, tail) = steps.span {
-        case StepState(KnitRow(`carriage`, _, _), _, _) => true
+        case StepState(KnitRow(`carriage`, _, _), _) => true
         case _ => false
       }
       val instructions = knittingSteps.zipWithIndex.map {
-        case (StepState(step@KnitRow(_, direction, _), before, after), i) =>
+        case (ss@StepState(step@KnitRow(_, direction, _), before), i) =>
           val remaining = knittingSteps.size - i
           Instruction(m("knitRow.instruction", direction, remaining), step,
-            Set.empty, before, after)
+            Set.empty, before, ss.after)
       }
       (GuideStep(
         m("knitRow.title", direction, knittingSteps.size, carriage),
