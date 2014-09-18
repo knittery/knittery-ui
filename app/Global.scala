@@ -126,7 +126,7 @@ object Global extends GlobalSettings {
 
   private def laptopPlanCheckerboard = {
     val yarnA = Yarn("cyan", Color.cyan)
-    val yarnB = Yarn("orange", Color.orange)
+    val yarnB = Yarn("orange", new Color(250, 170, 5))
     implicit val gauge = StandardGauge(34, 42, 5.tension)
 
     val patterns = LaptopCase.checkerboardPattern(yarnA, yarnB, 2.cm)
@@ -135,7 +135,7 @@ object Global extends GlobalSettings {
 
   private def laptopPlanDissolvingCheckerboard = {
     val yarnA = Yarn("cyan", Color.cyan)
-    val yarnB = Yarn("orange", Color.orange)
+    val yarnB = Yarn("orange", new Color(250, 170, 5))
     implicit val gauge = StandardGauge(34, 42, 5.tension)
 
     val patterns = LaptopCase.dissolvingCheckerboardPattern(yarnA, yarnB, 2.cm)
