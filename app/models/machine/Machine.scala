@@ -58,8 +58,8 @@ class Machine(connectorProps: Props) extends Actor {
       positions += carriage -> pos
 
     //Events from subactors
-    case RowTracker.NextRow =>
-      notify(Machine.NextRow)
+    case RowTracker.NextRow(carriage) =>
+      notify(Machine.NextRow(carriage))
 
     case Terminated(`connector`) => //Connector crashed
       //TODO handle the crash
@@ -92,7 +92,7 @@ object Machine {
 
   case class PositionChanged(carriage: Carriage, position: CarriagePosition) extends Notification
   case class NeedlePatternUpdate(currentRow: NeedleActionRow) extends Notification
-  case object NextRow extends Notification
+  case class NextRow(carriage: Carriage) extends Notification
 
   case object GetPositions extends Command
   case class Positions(positions: Map[Carriage, CarriagePosition]) extends Event with Notification

@@ -157,7 +157,7 @@ object Guider {
     }
 
     override def receive = {
-      case Machine.NextRow =>
+      case Machine.NextRow(carriage) =>
         //forward to next knitting step if we're not already at one
         while (!currentStep.isKnitting) modInstruction(1)
         modInstruction(1)
