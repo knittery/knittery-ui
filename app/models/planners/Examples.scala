@@ -1,21 +1,27 @@
 package models.planners
 
-import java.awt.Color
 import java.awt.image.BufferedImage
-import javax.imageio.ImageIO
-import java.io.File
-import scala.util.Random
 import scalaz._
 import Scalaz._
-import squants.space.Length
-import squants.space.LengthConversions._
 import utils._
-import models.units._
 import models._
 import models.plan._
-import models.KCarriage.TensionDial
 
 object Examples {
+
+  def triangle(base: Int, height: Int, yarn: Yarn): Planner = for {
+    _ <- Planner.noop
+    first = Needle.middle - (base / 2)
+    last = first + base
+    yarnPiece <- Cast.onOpen(first, last, YarnPiece(yarn))
+    _ <- Basics.knitRowWithK(yarnA = Some(yarnPiece))
+    _ <- (1 to height).toVector.traverse { _ =>
+      Basics.knitRowWithK(yarnA = Some(yarnPiece)) >>
+        Basics.knitRowWithK(yarnA = Some(yarnPiece)) >>
+        Planner.state(s => 3.min(s.workingNeedles.size / 2)) >>=
+        (count => FormGiving.raglanWithLCarriage(count))
+    }
+  } yield ()
 
   def handyHuelle(img: BufferedImage, background: Yarn, tension: Tension): Planner = for {
     width <- Planner.precondidtions(_ => img.getWidth)

@@ -68,9 +68,10 @@ object Global extends GlobalSettings {
     //    val planner = laptopPlanGradient
     //    val planner = laptopPlanCheckerboard
     //    val planner = laptopPlanDissolvingCheckerboard
-    val planner = laptopPlanDiamond
+    //    val planner = laptopPlanDiamond
     //    val planner = rigaScarfPlan
     //    val planner = scarfGauge
+    val planner = triangle
 
     def optimizer(plan: Plan) = {
       val t0 = System.currentTimeMillis
@@ -90,6 +91,11 @@ object Global extends GlobalSettings {
 
   @volatile private var _guider: Option[ActorRef] = None
   def guider = _guider.getOrElse(throw new IllegalStateException("not started"))
+
+  private def triangle = {
+    val yarn = Yarn("red", Color.red)
+    Examples.triangle(20, 10, yarn)
+  }
 
   private def rigaScarfPlan = {
     val yarnA = Yarn("black", Color.black)
