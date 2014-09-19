@@ -11,6 +11,10 @@ ls /dev/cu*
 ```
 play
 ```
+or 
+```
+activator
+```
 * start the application with the right usb-port, for example
 ```
 start -Dserial.port=/dev/cu.usbmodem1411
