@@ -144,11 +144,11 @@ object Guider {
         } else false
       }
     }
-    private def nextPattern(step: GuideStep, instruction: Instruction): NeedleActionRow = instruction.step match {
-      case knit: KnitRow => knit.pattern
+    private def nextPattern(step: GuideStep, instruction: Instruction): (Carriage, NeedleActionRow) = instruction.step match {
+      case knit: KnitRow => (knit.carriage, knit.pattern)
       case _ =>
         if (instruction.position.isLast) {
-          if (step.position.isLast) AllNeedlesToB
+          if (step.position.isLast) (KCarriage, AllNeedlesToB)
           else {
             val nextStep = steps(step.position.shift(1).index)
             nextPattern(nextStep, nextStep.instructions.head)
@@ -220,9 +220,9 @@ object Guider {
         sender ! res.getOrElse(CommandNotExecuted(cmd, "step/instruction does not exist"))
 
       case NotifyStepChange =>
-        val pattern = nextPattern(currentStep, currentInstruction)
+        val (carriage, pattern) = nextPattern(currentStep, currentInstruction)
         val workings = currentInstruction.before.workingNeedles
-        val margin = KCarriage.width / 2 - 8
+        val margin = carriage.width / 2 - 8
         val working = workings.headOption.map(first => (first, workings.last)).getOrElse((Needle.middle - 1, Needle.middle + 1))
         context.parent ! SetPattern(pattern, working._1 safeSubtract margin, working._2 safeAdd margin)
         context.parent ! ChangeEvent(currentStep, currentInstruction)
