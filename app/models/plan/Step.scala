@@ -41,7 +41,8 @@ case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActi
         val knitting = new KKnitting(state.carriageState(KCarriage), state, direction)
         knitting(pattern)
       case LCarriage =>
-        throw new NotImplementedError("LCarriage knitting not yet implemented")
+        val knitting = new LKnitting(state.carriageState(LCarriage), state, direction)
+        knitting(pattern)
       case GCarriage =>
         throw new NotImplementedError("GCarriage knitting not yet implemented")
     }

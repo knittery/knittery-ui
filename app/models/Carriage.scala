@@ -132,8 +132,11 @@ case object LCarriage extends Carriage {
     position: CarriagePosition = CarriageRemoved) extends CarriageState
   def initialState = State()
 
-  //TODO
-  case class Settings()
+  case class Settings(mode: Mode = Lace)
+
+  sealed trait Mode
+  case object FineLace extends Mode
+  case object Lace extends Mode
 }
 
 /** Electronic carriage. */

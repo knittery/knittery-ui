@@ -6,32 +6,7 @@ import org.specs2.mutable.Specification
 import models._
 import models.plan._
 
-class KKnittingSpec extends Specification {
-  implicit class ValidationCheck[A](val r: Validation[String, A]) {
-    def check(): A = {
-      ("Failure: " + r) <==> (r.isSuccess must beTrue)
-      val Success(a) = r
-      a
-    }
-  }
-
-  private trait StateSupport {
-    def stateWithYarn(pos: Needle => NeedlePosition, yarnToUse: YarnFlow) = {
-      val (yarn, ns) = Needle.all.foldLeft((yarnToUse, Map.empty[Needle, NeedleState])) {
-        case ((yarn, r), n) =>
-          val p = pos(n)
-          if (p.isWorking) {
-            val yarn2 = yarn.next(1)
-            (yarn2, r + (n -> NeedleState(p, yarn2)))
-          } else {
-            (yarn, r + (n -> NeedleState(p)))
-          }
-      }
-      KnittingState.initial.modifyNeedles(MainBed, ns).
-        attachYarn(YarnAttachment(yarn, Needle.all.reverse.head, MainBed))
-    }
-
-  }
+class KKnittingSpec extends Specification with KnittingStateMatchers {
   private trait plain extends Yarns with StateSupport {
     import KCarriage._
     val redPiece = YarnPiece(red)
@@ -53,17 +28,6 @@ class KKnittingSpec extends Specification {
     def mc = State(yarnA = Some(redPiece), yarnB = Some(greenPiece), settings = Settings(mc = true))
     def mcH = State(yarnA = Some(redPiece), yarnB = Some(greenPiece), settings = Settings(mc = true, holdingCamLever = HoldingCamH))
     def state(pos: Needle => NeedlePosition) = stateWithYarn(pos, redPiece)
-  }
-
-  def beAllStitch(stitch: Stitch) =
-    contain(stitch).forall
-  def beAtPosition(pos: NeedlePosition) = {
-    def adapt(in: Needle => NeedleState) = in.positions.all
-    contain(pos).forall ^^ adapt _
-  }
-  def carryYarn(yarn: YarnPiece*) = {
-    def adapt(in: Needle => NeedleState) = in.all.map(_.yarn.map(_.start))
-    contain(===(yarn.toSet)).forall ^^ adapt _
   }
 
   "plain single bed knitting" should {
