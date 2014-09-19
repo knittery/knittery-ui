@@ -230,7 +230,7 @@ define(["jquery", "underscorejs", "canvas-manipulation"], ($, _, CanvasManipulat
         m.push(r)
         m
     , [])
-    row.data = row.data.slice(first, last) for row in rows
+    row.data = row.data.slice(first, last + 1) for row in rows
 
     result =
       rows: rows
