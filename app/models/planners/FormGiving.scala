@@ -33,21 +33,21 @@ object FormGiving {
     _ <- Planner.precondidtions(s => require(s.workingNeedles(MainBed).size >= depth * 2, "Not enough working needles"))
     first <- Planner.state(_.workingNeedles(MainBed).head)
     last <- Planner.state(_.workingNeedles(MainBed).last)
-    positionOfL <- Planner.state(_.carriageState(KCarriage).position.directionTo(Needle.middle).towards)
-    _ <- Basics.needCarriage(LCarriage, positionOfL)
+    _ <- Basics.needCarriage(LCarriage, Left)
+    positionOfL <- Planner.state(_.carriageState(LCarriage).position.directionTo(Needle.middle).towards)
     _ <- (depth - 1 to 0 by -1).toVector.traverse { offset =>
-      val ld =
-        if (left) Some(Basics.knitRowWithL(LCarriage.Settings(LCarriage.Lace), n => if (n == first + offset) NeedleToD else NeedleToB))
-        else None
-      val rd =
-        if (right) Some(Basics.knitRowWithL(LCarriage.Settings(LCarriage.Lace), n => if (n == last - offset) NeedleToD else NeedleToB))
-        else None
-      val actions =
-        if (positionOfL == Left) ld.toVector ++ rd.toVector
-        else rd.toVector ++ ld.toVector
-      actions.sequence
+      val leftPattern: NeedleActionRow = if (left) (n => if (n == first - offset) NeedleToD else NeedleToB) else (n => NeedleToB)
+      val rightPattern: NeedleActionRow = if (right) (n => if (n == last + offset) NeedleToD else NeedleToB) else (n => NeedleToB)
+
+      if (positionOfL == Left) {
+        Basics.knitRowWithL(LCarriage.Settings(LCarriage.Lace), leftPattern) >>
+          Basics.knitRowWithL(LCarriage.Settings(LCarriage.Lace), rightPattern)
+      } else {
+        Basics.knitRowWithL(LCarriage.Settings(LCarriage.Lace), rightPattern) >>
+          Basics.knitRowWithL(LCarriage.Settings(LCarriage.Lace), leftPattern)
+      }
     }
     needlePosition <- Planner.state(_.needles(MainBed).positions)
-    _ <- MoveNeedles(MainBed, n => if (n == first || n == last) NeedleA else needlePosition(n))
+    _ <- MoveNeedles(MainBed, n => if ((n == first && left) || (n == last && right)) NeedleA else needlePosition(n))
   } yield ()
 }

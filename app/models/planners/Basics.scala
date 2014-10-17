@@ -7,10 +7,10 @@ import models.plan._
 
 object Basics {
   /** Add carriage if missing. */
-  def needCarriage(carriage: Carriage, at: LeftRight = Left) = for {
+  def needCarriage(carriage: Carriage, addAtIfMissing: LeftRight = Left) = for {
     position <- Planner.state(_.carriageState(carriage).position)
     _ <- {
-      if (position == CarriageRemoved) Planner.step(AddCarriage(carriage, at))
+      if (position == CarriageRemoved) Planner.step(AddCarriage(carriage, addAtIfMissing))
       else Planner.noop
     }
   } yield ()
