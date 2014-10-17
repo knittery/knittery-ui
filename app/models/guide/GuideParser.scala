@@ -68,9 +68,7 @@ object GuideParser {
         filter(n => steps.head.before.needles(bed)(n).position != to(n)).
         map((bed, _)).toSet
       val sorted = affects.toSeq.map(_._2).sorted
-      val first = sorted.head
-      val last = sorted.last
-      guideStepWithMark(steps, "moveNeedles", affects, bed, first, last, affects.size)
+      guideStepWithMark(steps, "moveNeedles", affects, bed, sorted.head, sorted.last, affects.size)
 
     case MoveToDoubleBed(_, offset, None) =>
       guideStep(steps, "moveToDoubleBed.noflip", offset)
