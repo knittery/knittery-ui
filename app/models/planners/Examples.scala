@@ -9,6 +9,40 @@ import models.plan._
 
 object Examples {
 
+
+  def threeColorPattern(stitches: Int, rows: Int, c1: Yarn, c2: Yarn, c3: Yarn): Planner = for {
+    _ <- Planner.noop
+    first = Needle.middle - (stitches / 2)
+    last = first + stitches
+    yarn1 <- Cast.onOpen(first, last, YarnPiece(c1))
+    _ <- (1 to 8).toVector.traverse(_ => Basics.knitRowWithK(yarnA = Some(yarn1)))
+    yarn2 = YarnPiece(c2)
+    yarn3 = YarnPiece(c3)
+    pattern = tcpattern(first, last, 3) _
+    emptyPattern = (_: Needle) => NeedleToB
+    settings = KCarriage.Settings(partLeft = true, partRight = true)
+    _ <- (1 to rows).toVector.traverse { i =>
+      for {
+        _ <- Basics.knitRowWithK(yarnA = Some(yarn1), settings = settings, pattern = emptyPattern)
+        _ <- Basics.knitRowWithK(yarnA = Some(yarn1), settings = settings, pattern = pattern(0 + i / 3))
+
+        _ <- Basics.knitRowWithK(yarnA = Some(yarn2), settings = settings, pattern = emptyPattern)
+        _ <- Basics.knitRowWithK(yarnA = Some(yarn2), settings = settings, pattern = pattern(1 + i / 3))
+
+        _ <- Basics.knitRowWithK(yarnA = Some(yarn3), settings = settings, pattern = emptyPattern)
+        _ <- Basics.knitRowWithK(yarnA = Some(yarn3), settings = settings, pattern = pattern(2 + i / 3))
+      } yield ()
+    }
+    _ <- (1 to 10).toVector.traverse(_ => Basics.knitRowWithK(yarnA = Some(yarn1)))
+  } yield ()
+
+  private def tcpattern(first: Needle, last: Needle, colorCount: Int)(nr: Int) = {
+    Needle.interval(first, last).map { n =>
+      val pos = if ((n.index + nr) % colorCount == 0) NeedleToD else NeedleToB
+      (n, pos)
+    }.toMap.withDefaultValue(NeedleToB)
+  }
+
   def triangle(base: Int, height: Int, yarn: Yarn): Planner = for {
     _ <- Planner.noop
     first = Needle.middle - (base / 2)

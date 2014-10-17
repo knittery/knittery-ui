@@ -72,6 +72,7 @@ object Global extends GlobalSettings {
     //    val planner = rigaScarfPlan
     //    val planner = scarfGauge
     //    val planner = triangle
+    //    val planner = threeColor
     val planner = pullover
 
     def optimizer(plan: Plan) = {
@@ -97,6 +98,13 @@ object Global extends GlobalSettings {
     val yarn = Yarn("red", Color.red)
     implicit val gauge = MeasuredGauge(48 stitches, 14.5 cm, 96 rows, 27.6 cm, 6 tension)
     SimplePullover.arm(yarn)
+  }
+
+  private def threeColor = {
+    val yarnA = Yarn("gray", Color.gray)
+    val yarnB = Yarn("cyan", Color.cyan)
+    val yarnC = Yarn("orange", Color.orange)
+    Examples.threeColorPattern(30, 20, yarnA, yarnB, yarnC)
   }
 
   private def triangle = {
