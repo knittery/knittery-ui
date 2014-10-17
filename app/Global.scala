@@ -71,7 +71,8 @@ object Global extends GlobalSettings {
     //    val planner = laptopPlanDiamond
     //    val planner = rigaScarfPlan
     //    val planner = scarfGauge
-    val planner = triangle
+    //    val planner = triangle
+    val planner = pullover
 
     def optimizer(plan: Plan) = {
       val t0 = System.currentTimeMillis
@@ -91,6 +92,12 @@ object Global extends GlobalSettings {
 
   @volatile private var _guider: Option[ActorRef] = None
   def guider = _guider.getOrElse(throw new IllegalStateException("not started"))
+
+  private def pullover = {
+    val yarn = Yarn("red", Color.red)
+    implicit val gauge = MeasuredGauge(48 stitches, 14.5 cm, 96 rows, 27.6 cm, 6 tension)
+    SimplePullover.arm(yarn)
+  }
 
   private def triangle = {
     val yarn = Yarn("red", Color.red)
