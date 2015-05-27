@@ -151,11 +151,11 @@ case class ClosedCastOn(bed: Bed, from: Needle, until: Needle, yarn: YarnPiece) 
       knit(
         n => {
           if (bed == MainBed && needles.contains(n)) CastOnStitch(yarn.yarn)
-          else NoStitch
+          else NoStitch()
         },
         n => {
           if (bed == DoubleBed && needles.contains(n)) CastOnStitch(yarn.yarn)
-          else NoStitch
+          else NoStitch()
         }
       ).
       //TODO Knit2? we don't really have stitches..
@@ -171,27 +171,27 @@ case class ClosedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolea
 
     def knitLast(n: Needle) = {
       if (filter(n)) needles(n) match {
-        case NeedleState(_, yarns) if yarns.isEmpty => EmptyStitch
+        case NeedleState(_, yarns) if yarns.isEmpty => EmptyStitch()
         case NeedleState(_, yarns) => PlainStitch(yarns.map(_.yarn).toList)
-      } else if (needles(n).yarn.isEmpty) EmptyStitch
-      else NoStitch
+      } else if (needles(n).yarn.isEmpty) EmptyStitch()
+      else NoStitch()
     }
     def knitCastOff(n: Needle) = {
       if (filter(n)) needles(n) match {
-        case NeedleState(_, yarns) if yarns.isEmpty => EmptyStitch
+        case NeedleState(_, yarns) if yarns.isEmpty => EmptyStitch()
         case NeedleState(_, yarns) => CastOffStitch(withYarn.yarn)
-      } else if (needles(n).yarn.isEmpty) EmptyStitch
-      else NoStitch
+      } else if (needles(n).yarn.isEmpty) EmptyStitch()
+      else NoStitch()
     }
 
     state.
       knit(
-        if (bed == MainBed) knitLast else _ => NoStitch,
-        if (bed == DoubleBed) knitLast else _ => NoStitch
+        if (bed == MainBed) knitLast else _ => NoStitch(),
+        if (bed == DoubleBed) knitLast else _ => NoStitch()
       ).
       knit(
-        if (bed == MainBed) knitCastOff else _ => NoStitch,
-        if (bed == DoubleBed) knitCastOff else _ => NoStitch
+        if (bed == MainBed) knitCastOff else _ => NoStitch(),
+        if (bed == DoubleBed) knitCastOff else _ => NoStitch()
       ).
       //TODO implement .knit2
       modifyNeedles(bed, n => if (filter(n)) NeedleState(NeedleA) else needles(n)).
