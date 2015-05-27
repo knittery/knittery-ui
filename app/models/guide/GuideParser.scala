@@ -16,8 +16,15 @@ object GuideParser {
         parseRecursive(rest, acc :+ step)
       }
     }
-    val steps = parseRecursive(plan.stepStates, Vector.empty)
+    val steps = parseRecursive(plan.stepStates.filterNot(ignoredStep), Vector.empty)
     GuideStep.updatePos(steps)
+  }
+
+  private def ignoredStep(step: StepState): Boolean = {
+    val f: PartialFunction[Step, Unit] = {
+      case MarkRow(_) => ()
+    }
+    f.isDefinedAt(step.step)
   }
 
   private def parse(steps: Seq[StepState]): (GuideStep, Seq[StepState]) = steps.head.step match {

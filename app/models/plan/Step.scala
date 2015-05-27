@@ -316,3 +316,10 @@ case class RetireWithTriple(bed: Bed, leftmost: Needle, direction: Direction) ex
 case class HangOnCastOnComb() extends Step with NonOptimizable {
   override def apply(state: KnittingState) = state.success
 }
+
+/** Marks the last knitted row. */
+case class MarkRow(as: KnittingMark) extends Step with NonOptimizable {
+  override def apply(state: KnittingState) = {
+    state.copy(output = state.output.markLastRow(as)).success
+  }
+}
