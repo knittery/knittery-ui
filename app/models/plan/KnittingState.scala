@@ -8,7 +8,6 @@ case class KnittingState(
   bedNeedles: Map[Bed, Map[Needle, NeedleState]],
   carriageState: CarriageStates,
   output: Knitted,
-  output3D: Knitted3D,
   yarnAttachments: Map[YarnPiece, YarnAttachment]) {
 
   def nextDirection(carriage: Carriage) = carriageState(carriage).position match {
@@ -55,18 +54,16 @@ case class KnittingState(
       case (yarn, ya) if forNeedles(ya.needle) =>
         (yarn, ya.copy(rowDistance = ya.rowDistance + 1))
     }
-    copy(yarnAttachments = yarnAttachments ++ changed, output3D = output3D.pushDown)
+    copy(yarnAttachments = yarnAttachments ++ changed)
   }
   def attachYarn(ya: YarnAttachment) = copy(yarnAttachments = yarnAttachments + (ya.yarn.start -> ya))
   def detachYarn(yarn: YarnPiece) = copy(yarnAttachments = yarnAttachments - yarn)
-
-  def knit2(f: Knitted3D => Knitted3D) = copy(output3D = f(output3D))
 
   def sameOutput(other: KnittingState) = output == other.output
   def sameState(other: KnittingState) = bedNeedles == other.bedNeedles && carriageState == other.carriageState
 }
 object KnittingState {
-  val initial = KnittingState(Map.empty, CarriageStates.empty, Knitted.empty, Knitted3D.empty, Map.empty)
+  val initial = KnittingState(Map.empty, CarriageStates.empty, Knitted.empty, Map.empty)
   private def allNeedlesA(n: Needle) = NeedleState(NeedleA)
 }
 

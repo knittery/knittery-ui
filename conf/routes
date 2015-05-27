@@ -33,8 +33,6 @@ GET         /preview                              controllers.Preview.show
 GET         /result/state                         controllers.KnittingResult.state
 GET         /result/2d/mainBed                    controllers.KnittingResult.mainBed
 GET         /result/2d/doubleBed                  controllers.KnittingResult.doubleBed
-GET         /result/3d/dot                        controllers.KnittingResult.dot3d
-GET         /result/3d/json                       controllers.KnittingResult.json3d
 
 # Assets
 GET         /assets/javascripts/routes.js         controllers.Application.javascriptRoutes()

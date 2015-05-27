@@ -15,7 +15,7 @@ object Application extends Controller {
       Routes.javascriptRouter("jsRoutes")(
         SerialSimulator.send, SerialSimulator.subscribe, //
         Display.subscribe,
-        KnittingResult.json3d, KnittingResult.mainBed, KnittingResult.doubleBed,
+        KnittingResult.mainBed, KnittingResult.doubleBed,
         Guide.subscribe, Guide.next, Guide.previous, Guide.first, Guide.last,
         Guide.nextInstruction, Guide.previousInstruction, Guide.jumpTo)). //
       as("text/javascript")

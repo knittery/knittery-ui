@@ -89,8 +89,7 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, MainBed).noose)
-      x2.knit(Stitch3D(l, ys, r), MainBed, n).
-        knit(n, MainBed, PlainStitch.orEmpty(ys.map(_.yarn))).
+      x2.knit(n, MainBed, PlainStitch.orEmpty(ys.map(_.yarn))).
         needle(n, pattern(n).toPosition, t)
   }
 
@@ -109,8 +108,7 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, MainBed).noose)
-      x2.knit(Stitch3D(l, ys, r), MainBed, n).
-        knit(n, MainBed, PlainStitch(ys.map(_.yarn).toList)).
+      x2.knit(n, MainBed, PlainStitch(ys.map(_.yarn).toList)).
         needle(n, pattern(n).toPosition, t)
   }
 
@@ -125,15 +123,13 @@ private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: Nee
     case (x, (n, NeedleB, ys)) =>
       //knit yarnA
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, MainBed).noose)
-      x2.knit(Stitch3D(l, ys, r), MainBed, n).
-        knit(n, MainBed, PlainStitch.orEmpty(ys.map(_.yarn))).
+      x2.knit(n, MainBed, PlainStitch.orEmpty(ys.map(_.yarn))).
         needle(n, pattern(n).toPosition, t)
     case (x, (n, _, ys)) =>
       //knit yarnB
       require(x.yarnB.isDefined, "MC knitting with needle at D without yarn in B")
       val (x2, (l, t, r)) = x.withYarnB(_.to(n, MainBed).noose)
-      x2.knit(Stitch3D(l, ys, r), MainBed, n).
-        knit(n, MainBed, PlainStitch.orEmpty(ys.map(_.yarn))).
+      x2.knit(n, MainBed, PlainStitch.orEmpty(ys.map(_.yarn))).
         needle(n, pattern(n).toPosition, t)
   }
 }
@@ -154,8 +150,7 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, DoubleBed).noose)
-      x2.knit(Stitch3D(r, ys, l), DoubleBed, n).
-        knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
+      x2.knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
         doubleBedNeedle(n, NeedleB, t)
   }
 
@@ -174,8 +169,7 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
     case (x, (n, _, ys)) =>
       //knit normally
       val (x2, (l, t, r)) = x.withYarnA(_.to(n, DoubleBed).noose)
-      x2.knit(Stitch3D(r, ys, l), DoubleBed, n).
-        knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
+      x2.knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
         doubleBedNeedle(n, NeedleB, t)
   }
 
@@ -196,8 +190,7 @@ private class KDoubleBed(takeback: Boolean, needles: NeedleStateRow) {
       case (x, (n, _, ys)) =>
         //knit normally
         val (x2, (l, t, r)) = x.withYarnA(_.to(n, DoubleBed).noose)
-        x2.knit(Stitch3D(r, ys, l), DoubleBed, n).
-          knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
+        x2.knit(n, DoubleBed, PurlStitch.orEmpty(ys.map(_.yarn))).
           doubleBedNeedle(n, position, t)
     }
   }

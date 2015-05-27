@@ -166,8 +166,7 @@ object JsonSerialization {
         "doubleBedNeedles" -> state.needles(DoubleBed).pattern,
         "outputRow" -> state.output.mainBed.rows.size,
         "doubleBedOutputRow" -> state.output.doubleBed.rows.size,
-        "carriage" -> state.carriageState,
-        "visibleStitches3D" -> state.output3D.stitches.size)
+        "carriage" -> state.carriageState)
     }
   }
 
