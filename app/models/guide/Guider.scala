@@ -44,10 +44,6 @@ object Guider {
   case object GetFinalState extends Command
   case class FinalState(state: KnittingState) extends Event
 
-  /** Get 3D Layout as soon as ready. Answer: Knitted3DLayout. */
-  case object GetKnitted3D extends Command
-  case class Knitted3DLayout(knitted: Knitted3D, layout: Layout[Stitch3D]) extends Event
-
   /** Subscribe to ChangeEvent. Answer: Command[Not]Executed. */
   case object Subscribe extends Command
   /** Unsubscribe from ChangeEvent. Answer: Command[Not]Executed. */
@@ -118,7 +114,6 @@ object Guider {
 
   /** Keeps track of the position within a plan and answers all commands. */
   private class GuiderForPlan(plan: Plan) extends Actor {
-    val layouter = context actorOf Layouter.props(plan.run.output3D)
     val steps = GuideParser(plan)
     var currentStep = steps.head
     var currentInstruction = currentStep.instructions.head
@@ -162,12 +157,6 @@ object Guider {
         while (!currentStep.isKnitting) modInstruction(1)
         modInstruction(1)
         self ! NotifyStepChange
-
-      case GetKnitted3D =>
-        implicit val timeout: Timeout = 10.minutes
-        (layouter ? Layouter.Get).map {
-          case layout: Layout[Stitch3D] => Knitted3DLayout(plan.run.output3D, layout)
-        }.pipeTo(sender)
 
       case GetFinalState =>
         sender ! FinalState(steps.last.after)

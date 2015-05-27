@@ -57,7 +57,9 @@ object LaptopCase {
     bg <- Cast.onClosed(MainBed, first, last, ps.front(0)(0))
     _ <- Basics.knitRowWithK(yarnA = Some(bg))
     _ <- FairIslePlanner.singleBed(ps.front, Some(first))
+    _ <- Marker.lastRow(KnittingMark("front/back"))
     _ <- FairIslePlanner.singleBed(ps.back.reverse, Some(first))
+    _ <- Marker.lastRow(KnittingMark("back/lash"))
     _ <- (0 until toDecrease).toVector.traverse { i =>
       for {
         working <- Planner.state(_.workingNeedles(MainBed).size)

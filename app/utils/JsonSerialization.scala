@@ -61,15 +61,18 @@ object JsonSerialization {
   implicit object YarnWrite extends Writes[Yarn] {
     override def writes(yarn: Yarn) = Json.obj("name" -> yarn.name, "color" -> yarn.color)
   }
+  implicit object KnittingMarkWrite extends Writes[KnittingMark] {
+    override def writes(mark: KnittingMark) = JsString(mark.label)
+  }
 
   implicit object StitchWrite extends Writes[Stitch] {
     override def writes(stitch: Stitch) = stitch match {
-      case NoStitch => Json.obj("type" -> "no")
-      case EmptyStitch => Json.obj("type" -> "empty")
-      case PlainStitch(yarns) => Json.obj("type" -> "plain", "yarns" -> yarns)
-      case PurlStitch(yarns) => Json.obj("type" -> "purl", "yarns" -> yarns)
-      case CastOnStitch(yarns) => Json.obj("type" -> "castOn", "yarns" -> yarns)
-      case CastOffStitch(yarns) => Json.obj("type" -> "castOff", "yarns" -> yarns)
+      case NoStitch(marks) => Json.obj("type" -> "no", "marks" -> marks)
+      case EmptyStitch(marks) => Json.obj("type" -> "empty", "marks" -> marks)
+      case PlainStitch(yarns, marks) => Json.obj("type" -> "plain", "yarns" -> yarns, "marks" -> marks)
+      case PurlStitch(yarns, marks) => Json.obj("type" -> "purl", "yarns" -> yarns, "marks" -> marks)
+      case CastOnStitch(yarns, marks) => Json.obj("type" -> "castOn", "yarns" -> yarns, "marks" -> marks)
+      case CastOffStitch(yarns, marks) => Json.obj("type" -> "castOff", "yarns" -> yarns, "marks" -> marks)
     }
   }
 
@@ -166,8 +169,7 @@ object JsonSerialization {
         "doubleBedNeedles" -> state.needles(DoubleBed).pattern,
         "outputRow" -> state.output.mainBed.rows.size,
         "doubleBedOutputRow" -> state.output.doubleBed.rows.size,
-        "carriage" -> state.carriageState,
-        "visibleStitches3D" -> state.output3D.stitches.size)
+        "carriage" -> state.carriageState)
     }
   }
 
