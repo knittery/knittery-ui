@@ -11,23 +11,7 @@ require(["jquery", "leapjs", "threejs", "lib/LeapCameraControls", "2dview", "3dv
 
 
   init3dPreview = (elem) ->
-    initLeapCamera = (elem) ->
-      cameraControls = new LeapCameraControls(elem.camera())
-      cameraControls.rotateEnabled = true
-      cameraControls.rotateSpeed = 3
-      cameraControls.rotateHands = 1
-      cameraControls.rotateFingers = [2, 3]
-      cameraControls.zoomEnabled = true
-      cameraControls.zoomSpeed = 2
-      cameraControls.zoomHands = 1
-      cameraControls.zoomFingers = [4, 5]
-      cameraControls.panEnabled = false
-      cameraControls
     elem.knitted3d()
-    cameraControls = initLeapCamera(elem)
-    Leap.loop((frame) ->
-      cameraControls.update(frame)
-    )
 
   $(() ->
     $("#btn-output-3d").click(->
