@@ -37,11 +37,13 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
       front: subimage(0, frontBackIndex)
       back: subimage(frontBackIndex + 1, backLashIndex)
       lash: subimage(backLashIndex, data.length)
+      full: canvas
     else
 #     Empty textures
       front: canvas
       back: canvas
       lash: canvas
+      full: canvas
 
   $.fn.extend({
     knitted3d: (dataName = "knitted") -> this.each(->
@@ -120,16 +122,33 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
       animate()
 
       model = undefined
+      textures = undefined
+      added = false
+
+      updateModel = -> if model? and textures?
+        texture = new THREE.Texture(textures.full)
+        texture.needsUpdate = true
+        model.material.map = texture
+        scene.add(model) unless added
+        added = true
 
       loader = new THREE.JSONLoader()
       loader.load("assets/models/laptop.json", (geometry, materials) ->
-        if model? then scene.remove(model)
         model = new THREE.Mesh(geometry, materials[0])
         model.geometry.computeBoundingBox()
         size = model.geometry.boundingBox.max.clone().sub(model.geometry.boundingBox.min)
         model.position.copy(size.divideScalar(4).negate())
-        scene.add(model)
+        updateModel()
       )
+
+      createModel = ->
+        data = if root.data(dataName)? then root.data(dataName) else []
+        if (data.length > 0)
+          textures = makeTextures(data)
+          updateModel()
+
+      root.bind(dataName + ":data", () -> createModel())
+      createModel()
     )
   })
 )
