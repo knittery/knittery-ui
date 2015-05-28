@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "org.webjars" %% "webjars-play" % "2.3.0",
   "org.webjars" % "jquery" % "2.1.1",
   "org.webjars" % "bootstrap" % "3.2.0",
-  "org.webjars" % "three.js" % "r68",
+  "org.webjars" % "three.js" % "r71",
   "org.webjars" % "leapjs" % "0.6.2",
   "org.webjars" % "reconnecting-websocket" % "23d2fbc",
   "org.webjars" % "underscorejs" % "1.6.0-3")
