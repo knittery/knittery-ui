@@ -5,7 +5,7 @@
 ###
 
 define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, TrackballControls, stitchRenderer) ->
-  textures = (data) ->
+  makeTextures = (data) ->
     canvas = document.createElement("canvas")
     if data? and data.length > 0
       size = stitchRenderer.sizeOf(data)
@@ -55,7 +55,7 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
 
       createModel = () ->
         data = if root.data(dataName)? then root.data(dataName) else []
-        txt = textures(data)
+        txt = makeTextures(data)
         updateImage = () ->
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(txt.front, 0, 0, txt.front.width, txt.front.height, 0, 0, 300,
@@ -74,59 +74,61 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
     knitted3dModel: (dataName = "knitted") -> this.each(->
       root = $(this)
 
+      scene = new THREE.Scene()
+      scene.fog = new THREE.FogExp2(0x000000, 0.035)
+      scene.add(new THREE.AmbientLight(0xcccccc))
+      pointLight = new THREE.PointLight(0xff4444, 5, 30)
+      pointLight.position.set(5, 0, 0)
+      scene.add(pointLight)
+
+      camera = new THREE.PerspectiveCamera(50, root.width() / root.height(), 1, 2000)
+      camera.position.x = 2
+      camera.position.y = 2
+      camera.position.z = 2
+
+      renderer = new THREE.WebGLRenderer({alpha: true})
+      renderer.setPixelRatio(window.devicePixelRatio)
+      renderer.setSize(root.width(), root.height())
+      root.append(renderer.domElement)
+
+      controls = new TrackballControls(camera);
+      controls.rotateSpeed = 1.0
+      controls.zoomSpeed = 1.2
+      controls.panSpeed = 0.8
+      controls.noZoom = false
+      controls.noPan = false
+      controls.staticMoving = true
+      controls.dynamicDampingFactor = 0.3
+      controls.keys = [65, 83, 68]
+
+      onResize = () ->
+        renderer.setSize(root.width(), root.height())
+        camera.aspect = root.width() / root.height()
+        camera.updateProjectionMatrix()
+        controls.handlerResize()
+      root.resize(onResize)
+
+      render = () ->
+        camera.lookAt(scene.position)
+        renderer.render(scene, camera)
+      animate = () ->
+        requestAnimationFrame(animate)
+        controls.update()
+        render()
+
+      controls.addEventListener('change', render)
+      animate()
+
+      model = undefined
+
       loader = new THREE.JSONLoader()
       loader.load("assets/models/laptop.json", (geometry, materials) ->
+        if model? then scene.remove(model)
         model = new THREE.Mesh(geometry, materials[0])
-
-        scene = new THREE.Scene()
-        scene.fog = new THREE.FogExp2(0x000000, 0.035)
-        scene.add(new THREE.AmbientLight(0xcccccc))
-        pointLight = new THREE.PointLight(0xff4444, 5, 30)
-        pointLight.position.set(5, 0, 0)
-        scene.add(pointLight)
-
         model.geometry.computeBoundingBox()
         size = model.geometry.boundingBox.max.clone().sub(model.geometry.boundingBox.min)
         model.position.copy(size.divideScalar(4).negate())
         scene.add(model)
-
-        camera = new THREE.PerspectiveCamera(50, root.width() / root.height(), 1, 2000)
-        camera.position.x = 2
-        camera.position.y = 2
-        camera.position.z = 2
-
-        renderer = new THREE.WebGLRenderer({alpha: true})
-        renderer.setPixelRatio(window.devicePixelRatio)
-        renderer.setSize(root.width(), root.height())
-        root.append(renderer.domElement)
-
-        controls = new TrackballControls(camera);
-        controls.rotateSpeed = 1.0
-        controls.zoomSpeed = 1.2
-        controls.panSpeed = 0.8
-        controls.noZoom = false
-        controls.noPan = false
-        controls.staticMoving = true
-        controls.dynamicDampingFactor = 0.3
-        controls.keys = [65, 83, 68]
-
-        onResize = () ->
-          renderer.setSize(root.width(), root.height())
-          camera.aspect = root.width() / root.height()
-          camera.updateProjectionMatrix()
-          controls.handlerResize()
-        root.resize(onResize)
-
-        render = () ->
-          camera.lookAt(scene.position)
-          renderer.render(scene, camera)
-        animate = () ->
-          requestAnimationFrame(animate)
-          controls.update()
-          render()
-
-        controls.addEventListener('change', render)
-        animate()
       )
     )
   })
