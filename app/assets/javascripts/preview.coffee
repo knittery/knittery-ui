@@ -9,9 +9,13 @@ require(["jquery", "leapjs", "threejs", "lib/LeapCameraControls", "2dview", "3dv
     }
     Leap.loop(() ->)
 
-
   init3dPreview = (elem) ->
     elem.knitted3d()
+    jsRoutes.controllers.KnittingResult.mainBed().ajax {
+      success: (data) ->
+        elem.data("knitted", data.output)
+        elem.trigger("knitted:data")
+    }
 
   $(() ->
     $("#btn-output-3d").click(->
@@ -35,6 +39,6 @@ require(["jquery", "leapjs", "threejs", "lib/LeapCameraControls", "2dview", "3dv
       init2dPreview(preview)
     )
 
-    $("#btn-output-2d").click()
+    $("#btn-output-3d").click()
   )
 )

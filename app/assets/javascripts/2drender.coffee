@@ -245,6 +245,12 @@ define([], () ->
         stitches: knitted.stitches
         originalRowToRow: (index) -> knitted.originalRowToRow(index)
         stitchOffset: knitted.stitchOffset
+        originalRowToCoordinates: (index) ->
+          (@rows - @originalRowToRow(index) - 1) * stitchHeight
+        originalStitchToCoordinates: (index) ->
+          if index <= @stitchOffset then 0
+          else if index - @stitchOffset >= @stitches then @stitches * stitchWidth
+          else (index - @stitchOffset) * stitchWidth
       result
   }
   module

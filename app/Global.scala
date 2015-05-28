@@ -67,13 +67,13 @@ object Global extends GlobalSettings {
     //    val planner = handyPlan
     //    val planner = laptopPlanGradient
     //    val planner = laptopPlanCheckerboard
-    //    val planner = laptopPlanDissolvingCheckerboard
+    val planner = laptopPlanDissolvingCheckerboard
     //    val planner = laptopPlanDiamond
     //    val planner = rigaScarfPlan
     //    val planner = scarfGauge
     //    val planner = triangle
     //    val planner = threeColor
-    val planner = pullover
+    //    val planner = pullover
 
     def optimizer(plan: Plan) = {
       val t0 = System.currentTimeMillis
