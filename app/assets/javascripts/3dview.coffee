@@ -7,7 +7,7 @@
 define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, TrackballControls, stitchRenderer) ->
   textures = (data) ->
     canvas = document.createElement("canvas")
-    if data? and data.length >0
+    if data? and data.length > 0
       size = stitchRenderer.sizeOf(data)
       ctx = canvas.getContext("2d")
       aspectRatio = 0.8
@@ -18,7 +18,7 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
       renderMetadata = stitchRenderer.drawStitches(data, ctx, aspectRatio, stitchWidth)
 
       rowOfMark = (mark) ->
-        rawIndex = i for e, i in data when e[0].marks and e[0].marks.indexOf(mark)>=0
+        rawIndex = i for e, i in data when e[0].marks and e[0].marks.indexOf(mark) >= 0
         renderMetadata.originalRowToRow(rawIndex)
 
       subimage = (startRow, endRow) ->
@@ -35,10 +35,10 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
       backLashIndex = rowOfMark("back/lash")
 
       front: subimage(0, frontBackIndex)
-      back: subimage(frontBackIndex+1, backLashIndex)
+      back: subimage(frontBackIndex + 1, backLashIndex)
       lash: subimage(backLashIndex, data.length)
     else
-      # Empty textures
+#     Empty textures
       front: canvas
       back: canvas
       lash: canvas
