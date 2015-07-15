@@ -88,9 +88,36 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
       createModel()
     )
 
+    knitted3dTexture: (dataName = "knitted", stitchWidth = 10) -> this.each(->
+      root = $(this)
+      canvasJ = $("<canvas style='width: 100%; height: 100%'></canvas>")
+      canvasJ.appendTo(root)
+      canvas = canvasJ.get(0)
+      ctx = canvas.getContext("2d")
+
+      updateModel = (textures) ->
+        elems = [textures.front, textures.back, textures.lash, textures.inside]
+
+        ws = (e.width for e in elems)
+        canvas.width = ws.reduce((a, b) -> a + b)
+        canvas.height = (e.height for e in elems).reduce((a, b) -> Math.max(a, b))
+        xoff = 0
+        for e in elems
+          ctx.drawImage(e, xoff, canvas.height - e.height)
+          xoff += e.width
+
+      createModel = ->
+        data = if root.data(dataName)? then root.data(dataName) else []
+        if (data.length > 0)
+          textures = makeTextures(data, stitchWidth)
+          updateModel(textures)
+
+      root.bind(dataName + ":data", () -> createModel())
+      createModel()
+    )
+
     knitted3dModel: (dataName = "knitted") -> this.each(->
       root = $(this)
-
       scene = new THREE.Scene()
       scene.fog = new THREE.FogExp2(0x000000, 0.035)
       scene.add(new THREE.AmbientLight(0xcccccc))
