@@ -5,13 +5,12 @@
 ###
 
 define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, TrackballControls, stitchRenderer) ->
-  makeTextures = (data) ->
+  makeTextures = (data, stitchWidth = 5) ->
     canvas = document.createElement("canvas")
     if data? and data.length > 0
       size = stitchRenderer.sizeOf(data)
       ctx = canvas.getContext("2d")
       aspectRatio = 0.8
-      stitchWidth = 20
       stitchHeight = stitchWidth * aspectRatio
       canvas.width = size.stitches * stitchWidth
       canvas.height = size.rows * stitchHeight
@@ -21,28 +20,44 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
         rawIndex = i for e, i in data when e[0].marks and e[0].marks.indexOf(mark) >= 0
         renderMetadata.originalRowToRow(rawIndex)
 
-      subimage = (startRow, endRow) ->
+      subimage = (startRow, endRow, rotate = false) ->
         start = renderMetadata.originalRowToCoordinates(endRow)
         end = renderMetadata.originalRowToCoordinates(startRow)
         cnv = document.createElement("canvas")
         cnv.width = renderMetadata.stitches * stitchWidth
         cnv.height = end - start
         cnvCtx = cnv.getContext("2d")
+        cnvCtx.save()
+        if rotate
+          cnvCtx.translate(cnv.width, cnv.height)
+          cnvCtx.rotate(Math.PI)
         cnvCtx.drawImage(canvas, 0, start, cnv.width, cnv.height, 0, 0, cnv.width, cnv.height)
+        cnvCtx.restore()
+        cnv
+
+      inside = (height) ->
+        cnv = document.createElement("canvas")
+        cnv.width = 30 * stitchWidth
+        cnv.height = 30 * stitchWidth
+        cnvCtx = cnv.getContext("2d")
+        cnvCtx.fillStyle = "#515050"
+        cnvCtx.fillRect(0, 0, cnv.width, cnv.height)
         cnv
 
       frontBackIndex = rowOfMark("front/back")
       backLashIndex = rowOfMark("back/lash")
 
       front: subimage(0, frontBackIndex)
-      back: subimage(frontBackIndex + 1, backLashIndex)
-      lash: subimage(backLashIndex, data.length)
+      back: subimage(frontBackIndex + 1, backLashIndex, true)
+      lash: subimage(backLashIndex, data.length, true)
+      inside: inside()
       full: canvas
     else
 #     Empty textures
       front: canvas
       back: canvas
       lash: canvas
+      inside: canvas
       full: canvas
 
   $.fn.extend({
