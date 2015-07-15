@@ -10,7 +10,8 @@ require(["jquery", "leapjs", "threejs", "lib/LeapCameraControls", "2dview", "3dv
     Leap.loop(() ->)
 
   init3dPreview = (elem) ->
-    elem.knitted3dModel()
+    elem.knitted3dTexture()
+#    elem.knitted3dModel()
     jsRoutes.controllers.KnittingResult.mainBed().ajax {
       success: (data) ->
         elem.data("knitted", data.output)

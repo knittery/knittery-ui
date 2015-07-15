@@ -6,6 +6,7 @@
 
 define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, TrackballControls, stitchRenderer) ->
   makeTextures = (data, stitchWidth = 5) ->
+    thicknessInStiches = 10 # TODO figure that out from the model itself
     canvas = document.createElement("canvas")
     if data? and data.length > 0
       size = stitchRenderer.sizeOf(data)
@@ -20,18 +21,20 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
         rawIndex = i for e, i in data when e[0].marks and e[0].marks.indexOf(mark) >= 0
         renderMetadata.originalRowToRow(rawIndex)
 
-      subimage = (startRow, endRow, rotate = false) ->
-        start = renderMetadata.originalRowToCoordinates(endRow)
-        end = renderMetadata.originalRowToCoordinates(startRow)
+      subimage = (startRow, endRow, startStitch, endStitch, rotate = 0) ->
+        startX = renderMetadata.originalStitchToCoordinates(startStitch + renderMetadata.stitchOffset)
+        endX = renderMetadata.originalStitchToCoordinates(endStitch + 1 + renderMetadata.stitchOffset)
+        startY = renderMetadata.originalRowToCoordinates(endRow)
+        endY = renderMetadata.originalRowToCoordinates(startRow)
         cnv = document.createElement("canvas")
-        cnv.width = renderMetadata.stitches * stitchWidth
-        cnv.height = end - start
+        cnv.width = endX - startX
+        cnv.height = endY - startY
         cnvCtx = cnv.getContext("2d")
         cnvCtx.save()
-        if rotate
-          cnvCtx.translate(cnv.width, cnv.height)
-          cnvCtx.rotate(Math.PI)
-        cnvCtx.drawImage(canvas, 0, start, cnv.width, cnv.height, 0, 0, cnv.width, cnv.height)
+        cnvCtx.translate(cnv.width / 2, cnv.height / 2)
+        cnvCtx.rotate(Math.PI * rotate / 180) if rotate is not 0
+        cnvCtx.drawImage(canvas, startX, startY, cnv.width, cnv.height,
+          -cnv.width / 2, -cnv.height / 2, cnv.width, cnv.height)
         cnvCtx.restore()
         cnv
 
@@ -44,12 +47,41 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
         cnvCtx.fillRect(0, 0, cnv.width, cnv.height)
         cnv
 
+      combineX = (imageA, imageB) ->
+        cnv = document.createElement("canvas")
+        cnv.width = imageA.width + imageB.width
+        cnv.height = Math.max(imageA.height, imageB.height)
+        cnvCtx = cnv.getContext("2d")
+        cnvCtx.drawImage(imageA, 0, 0)
+        cnvCtx.drawImage(imageB, imageA.width, 0)
+        cnv
+
       frontBackIndex = rowOfMark("front/back")
       backLashIndex = rowOfMark("back/lash")
+      forSides = Math.round(thicknessInStiches / 2)
+      forSidesRows = Math.round(thicknessInStiches / 2) #approx..
 
-      front: subimage(0, frontBackIndex)
-      back: subimage(frontBackIndex + 1, backLashIndex, true)
-      lash: subimage(backLashIndex, data.length, true)
+      frontStart = 0
+      frontEnd = frontBackIndex - forSides
+      backStart = frontBackIndex + forSides + 1
+      backEnd = backLashIndex
+      lashStart = backLashIndex + 1
+      lashEnd = data.length
+      sideHeight = frontEnd - frontStart
+      totalWidth = renderMetadata.stitches
+      coverStart = forSides
+      coverEnd = totalWidth - forSides
+
+      front: subimage(frontStart, frontEnd, coverStart, coverEnd)
+      back: subimage(backStart, backEnd, coverStart, coverEnd, 180)
+      lash: subimage(lashStart, lashEnd, coverStart, coverEnd, 180)
+      left: combineX(
+        subimage(frontStart, frontEnd, 0, forSides),
+        subimage(backStart, backStart + sideHeight, 0, forSides))
+      right: combineX(
+        subimage(frontStart, frontEnd, coverEnd + 1, totalWidth),
+        subimage(backStart, backStart + sideHeight, coverEnd + 1, totalWidth))
+      bottom: subimage(frontEnd + 1, backStart - 1, coverStart, coverEnd, 90)
       inside: inside()
       full: canvas
     else
@@ -57,8 +89,37 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
       front: canvas
       back: canvas
       lash: canvas
+      left: canvas
+      right: canvas
+      bottom: canvas
       inside: canvas
       full: canvas
+
+  sum = (a, b) -> a + b
+
+  composeSingleTexture = (textures) ->
+    parts = [
+      {texture: textures.left, width: 25},
+      {texture: textures.front, width: 500},
+      {texture: textures.right, width: 25},
+      {texture: textures.back, width: 500},
+      {texture: textures.bottom, width: 25},
+      {texture: textures.lash, width: 500},
+      {texture: textures.inside, width: 25}
+    ]
+
+    canvas = $("<canvas style='width: 100%; height: 100%'></canvas>").get(0)
+    canvas.heigh = 700
+    canvas.width = (p.width for p in parts).reduce(sum)
+    ctx = canvas.getContext("2d")
+    drawPart = (part, width) ->
+      ctx.drawImage(part, 0, 0, part.width, part.height, 0, 0, width, canvas.height)
+    ctx.save()
+    for part in parts
+      drawPart(part.texture, part.width)
+      ctx.translate(part.width, 0)
+    ctx.restore()
+    canvas
 
   $.fn.extend({
     knitted3d: (dataName = "knitted") -> this.each(->
@@ -66,22 +127,15 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
       canvasJ = $("<canvas style='width: 100%; height: 100%'></canvas>")
       canvasJ.appendTo(root)
       canvas = canvasJ.get(0)
-      canvas.width = 1000
-      canvas.height = canvas.width / canvasJ.width() * canvasJ.height()
       ctx = canvas.getContext("2d")
 
       createModel = () ->
         data = if root.data(dataName)? then root.data(dataName) else []
-        txt = makeTextures(data)
-        updateImage = () ->
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
-          ctx.drawImage(txt.front, 0, 0, txt.front.width, txt.front.height, 0, 0, 300,
-            300 / txt.front.width * txt.front.height)
-          ctx.drawImage(txt.back, 0, 0, txt.back.width, txt.back.height, 350, 0, 300,
-            300 / txt.back.width * txt.back.height)
-          ctx.drawImage(txt.lash, 0, 0, txt.lash.width, txt.lash.height, 700, 0, 300,
-            300 / txt.lash.width * txt.lash.height)
-        updateImage()
+        txts = makeTextures(data)
+        txt = composeSingleTexture(txts)
+        canvas.width = txt.width
+        canvas.height = txt.height
+        ctx.drawImage(txt, 0, 0, txt.width, txt.height)
 
       root.bind(dataName + ":data", () -> createModel())
 
@@ -95,22 +149,14 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
       canvas = canvasJ.get(0)
       ctx = canvas.getContext("2d")
 
-      updateModel = (textures) ->
-        elems = [textures.front, textures.back, textures.lash, textures.inside]
-
-        ws = (e.width for e in elems)
-        canvas.width = ws.reduce((a, b) -> a + b)
-        canvas.height = (e.height for e in elems).reduce((a, b) -> Math.max(a, b))
-        xoff = 0
-        for e in elems
-          ctx.drawImage(e, xoff, canvas.height - e.height)
-          xoff += e.width
-
       createModel = ->
         data = if root.data(dataName)? then root.data(dataName) else []
         if (data.length > 0)
           textures = makeTextures(data, stitchWidth)
-          updateModel(textures)
+          txt = composeSingleTexture(textures)
+          canvas.width = txt.width
+          canvas.height = txt.height
+          ctx.drawImage(txt, 0, 0, txt.width, txt.height)
 
       root.bind(dataName + ":data", () -> createModel())
       createModel()
@@ -168,7 +214,7 @@ define(["jquery", "threejs", "lib/trackball-controls", "2drender"], ($, THREE, T
       added = false
 
       updateModel = -> if model? and textures?
-        texture = new THREE.Texture(textures.full)
+        texture = new THREE.Texture(composeSingleTexture(textures))
         texture.needsUpdate = true
         model.material.map = texture
         scene.add(model) unless added
