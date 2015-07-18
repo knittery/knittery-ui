@@ -6,7 +6,11 @@ import play.api.mvc._
 class Application extends Controller {
 
   def index = Action {
-    Ok("Your new application is ready.")
+    Redirect(routes.Application.swaggerUI)
+  }
+
+  def swaggerUI = Action {
+    Redirect("/swagger-ui/index.html?url=/v1/swagger.yaml")
   }
 
 }

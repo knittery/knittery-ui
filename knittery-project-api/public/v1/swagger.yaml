@@ -3,7 +3,7 @@ swagger: '2.0'
 
 info:
   version: "0.1.0"
-  title: knittery.ch
+  title: knittery.ch Project APIs
 
 
 paths:
