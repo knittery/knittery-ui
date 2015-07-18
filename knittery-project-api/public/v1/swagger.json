@@ -1,0 +1,149 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "0.1.0",
+    "title": "knittery.ch Project APIs"
+  },
+  "paths": {
+    "/projects": {
+      "post": {
+        "description": "Create a new project.",
+        "responses": {
+          "201": {
+            "description": "Created new project",
+            "headers": {
+              "location": {
+                "description": "Path to the created project.",
+                "type": "string",
+                "format": "URI"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}": {
+      "get": {
+        "description": "Get a project by its ID.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the project.",
+            "type": "string",
+            "format": "UUID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
+          },
+          "400": {
+            "description": "Syntactically invalid ID."
+          },
+          "404": {
+            "description": "Project does not exist."
+          }
+        }
+      }
+    },
+    "/projects/{id}/knitted": {
+      "get": {
+        "description": "The garnment that will be knitted as the result of the project.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the project.",
+            "type": "string",
+            "format": "UUID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/KnittedOutput"
+            }
+          },
+          "400": {
+            "description": "Syntactically invalid ID."
+          },
+          "404": {
+            "description": "Project does not exist."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Project": {
+      "title": "Knittery Project",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "UUID"
+        }
+      }
+    },
+    "KnittedOutput": {
+      "title": "Description of a knitted output as Stitches.",
+      "type": "object",
+      "properties": {
+        "mainBed": {
+          "description": "Rows knitted by the main bed, first row knitted is first in the array.",
+          "type": "array",
+          "items": {
+            "description": "Stitches of the knitted row.",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Stitch"
+            }
+          }
+        }
+      }
+    },
+    "Stitch": {
+      "title": "A stitch in a garnment.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "Type of the stitch. 'No' means the previous line of the garnment is joined with the next line (double height stitch).",
+          "enum": [
+            "no",
+            "empty",
+            "plain",
+            "purl",
+            "castOn",
+            "castOff"
+          ]
+        },
+        "yarns": {
+          "description": "Yarn(s) used for this stitch.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Yarn label."
+          }
+        },
+        "marks": {
+          "description": "Special attributes of this stitch. I.e. folding line between the front and the back side of the garnment.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

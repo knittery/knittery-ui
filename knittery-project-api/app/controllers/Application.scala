@@ -10,7 +10,7 @@ class Application extends Controller {
   }
 
   def swaggerUI = Action {
-    Redirect("/swagger-ui/index.html?url=/v1/swagger.yaml")
+    Redirect("/swagger-ui/index.html?url=/v1/swagger.json")
   }
 
 }
