@@ -2,12 +2,37 @@
   "swagger": "2.0",
   "info": {
     "version": "0.1.0",
-    "title": "knittery.ch Project APIs"
+    "title": "knittery.ch Project APIs",
+    "description": "Create, modify and preview knittery projects.",
+    "contact": {
+      "name": "Knittery on Github",
+      "url": "https://github.com/knittery",
+      "email": "ms@inventsoft.ch"
+    },
+    "license": {
+      "name": "GNU General Public License, version 2",
+      "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html"
+    }
   },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "tags": [
+    {
+      "name": "Project",
+      "description": "Manage the knittery projects"
+    }
+  ],
   "paths": {
     "/projects": {
       "post": {
         "description": "Create a new project.",
+        "tags": [
+          "Project"
+        ],
         "responses": {
           "201": {
             "description": "Created new project",
@@ -25,6 +50,9 @@
     "/projects/{id}": {
       "get": {
         "description": "Get a project by its ID.",
+        "tags": [
+          "Project"
+        ],
         "produces": [
           "application/json"
         ],
@@ -56,6 +84,9 @@
     "/projects/{id}/knitted": {
       "get": {
         "description": "The garnment that will be knitted as the result of the project.",
+        "tags": [
+          "Project"
+        ],
         "produces": [
           "application/json"
         ],
@@ -145,5 +176,6 @@
         }
       }
     }
-  }
+  },
+  "basePath": "/v1"
 }
