@@ -6,13 +6,17 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import javax.inject._
 import akka.util.Timeout
-import model.ProjectRepository.{ProjectCreated, CreateProject}
+import model.Project.{ProjectInfo, GetInfo}
+import model.ProjectRepository._
 import play.api.mvc._
-import scala.concurrent.ExecutionContext
+import play.api.libs.json._
+import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.duration._
 
 class ProjectController @Inject()(@Named("project-repository") projectRepository: ActorRef)(implicit ec: ExecutionContext) extends Controller {
   implicit val timeout: Timeout = 1.second
+
+  implicit val projectInfoFormat = Json.format[ProjectInfo]
 
   def create() = Action.async {
     (projectRepository ? CreateProject).map {
@@ -22,7 +26,14 @@ class ProjectController @Inject()(@Named("project-repository") projectRepository
     }
   }
 
-  def get(id: UUID) = Action {
-    NotImplemented
+  def get(id: UUID) = Action.async {
+    (projectRepository ? GetProject(id)).flatMap {
+      case ProjectFound(`id`, project) =>
+        (project ? GetInfo).map {
+          case info: ProjectInfo => Ok(Json.toJson(info))
+        }
+      case ProjectNotFound(`id`) =>
+        Future.successful(NotFound(s"Project $id does not exist."))
+    }
   }
 }

@@ -29,6 +29,6 @@ class ProjectRepository extends Actor {
       context become handler(projects + (id -> actor))
 
     case GetProject(id) =>
-      projects.get(id).fold[Message](ProjectNotFound(id))(ProjectFound(id, _))
+      sender() ! projects.get(id).fold[Message](ProjectNotFound(id))(ProjectFound(id, _))
   }
 }
