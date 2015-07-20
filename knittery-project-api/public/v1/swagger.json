@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "title": "knittery.ch Project APIs",
     "description": "Create, modify and preview knittery projects.",
     "contact": {
@@ -62,7 +62,8 @@
             "in": "path",
             "description": "ID of the project.",
             "type": "string",
-            "format": "UUID"
+            "format": "UUID",
+            "required": true
           }
         ],
         "responses": {
@@ -77,6 +78,45 @@
           },
           "404": {
             "description": "Project does not exist."
+          }
+        }
+      },
+      "put": {
+        "description": "Update the project.",
+        "tags": [
+          "Project"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the project.",
+            "type": "string",
+            "format": "UUID",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Project object that contains the updated data.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProjectUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project updated"
+          },
+          "400": {
+            "description": "Invalid data (either the ID or the content)."
+          },
+          "404": {
+            "description": "Project does not exist, create first with a POST to /project."
           }
         }
       }
@@ -96,7 +136,8 @@
             "in": "path",
             "description": "ID of the project.",
             "type": "string",
-            "format": "UUID"
+            "format": "UUID",
+            "required": true
           }
         ],
         "responses": {
@@ -124,6 +165,24 @@
         "id": {
           "type": "string",
           "format": "UUID"
+        },
+        "name": {
+          "type": "string",
+          "example": "My Project"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "ProjectUpdate": {
+      "title": "Update of a knittery project",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "User definied name of the project.",
+          "example": "My Project"
         }
       }
     },

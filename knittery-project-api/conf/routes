@@ -7,6 +7,7 @@ GET         /                        controllers.Application.index
 
 POST        /v1/projects             controllers.ProjectController.create()
 GET         /v1/projects/:id         controllers.ProjectController.get(id: java.util.UUID)
+PUT         /v1/projects/:id         controllers.ProjectController.update(id: java.util.UUID)
 GET         /v1/*file                controllers.Assets.versioned(path = "/public/v1", file: Asset)
 
 GET         /swagger-ui              controllers.Application.swaggerUI

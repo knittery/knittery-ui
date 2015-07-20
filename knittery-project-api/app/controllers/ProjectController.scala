@@ -6,7 +6,7 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import javax.inject._
 import akka.util.Timeout
-import model.Project.{ProjectInfo, GetInfo}
+import model.Project.{ProjectInfoUpdated, UpdateProjectInfo, ProjectInfo, GetInfo}
 import model.ProjectRepository._
 import play.api.mvc._
 import play.api.libs.json._
@@ -16,6 +16,7 @@ import scala.concurrent.duration._
 class ProjectController @Inject()(@Named("project-repository") projectRepository: ActorRef)(implicit ec: ExecutionContext) extends Controller {
   implicit val timeout: Timeout = 1.second
   implicit val projectInfoFormat = Json.format[ProjectInfo]
+  implicit val updateProjectInfoFormat = Json.format[UpdateProjectInfo]
 
   class ProjectRequest[A](val projectId: UUID, val project: ActorRef, request: Request[A]) extends WrappedRequest[A](request)
   def ProjectAction(projectId: UUID) = new ActionRefiner[Request, ProjectRequest] {
@@ -38,5 +39,16 @@ class ProjectController @Inject()(@Named("project-repository") projectRepository
     (req.project ? GetInfo).map {
       case info: ProjectInfo => Ok(Json.toJson(info))
     }
+  }
+
+  def update(id: UUID) = ActionOnProject(id).async(BodyParsers.parse.json) { req =>
+    req.body.validate[UpdateProjectInfo].fold(
+      errors => {
+        Future.successful(BadRequest(Json.obj("message" -> JsError.toJson(errors))))
+      },
+      update => (req.project ? update).map {
+        case ProjectInfoUpdated => Ok("Project updated")
+      }
+    )
   }
 }
