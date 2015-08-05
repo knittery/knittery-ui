@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "0.1.1",
+    "version": "0.1.2",
     "title": "knittery.ch Project APIs",
     "description": "Create, modify and preview knittery projects.",
     "contact": {
@@ -36,6 +36,9 @@
         "responses": {
           "201": {
             "description": "Created new project",
+            "schema": {
+              "$ref": "#/definitions/StatusSuccess"
+            },
             "headers": {
               "location": {
                 "description": "Path to the created project.",
@@ -74,10 +77,16 @@
             }
           },
           "400": {
-            "description": "Syntactically invalid ID."
+            "description": "Syntactically invalid ID.",
+            "schema": {
+              "$ref": "#/definitions/Errors"
+            }
           },
           "404": {
-            "description": "Project does not exist."
+            "description": "Project does not exist.",
+            "schema": {
+              "$ref": "#/definitions/Errors"
+            }
           }
         }
       },
@@ -110,13 +119,22 @@
         ],
         "responses": {
           "200": {
-            "description": "Project updated"
+            "description": "Project updated",
+            "schema": {
+              "$ref": "#/definitions/StatusSuccess"
+            }
           },
           "400": {
-            "description": "Invalid data (either the ID or the content)."
+            "description": "Invalid data (either the ID or the content).",
+            "schema": {
+              "$ref": "#/definitions/Errors"
+            }
           },
           "404": {
-            "description": "Project does not exist, create first with a POST to /project."
+            "description": "Project does not exist, create first with a POST to /project.",
+            "schema": {
+              "$ref": "#/definitions/Errors"
+            }
           }
         }
       }
@@ -148,16 +166,65 @@
             }
           },
           "400": {
-            "description": "Syntactically invalid ID."
+            "description": "Syntactically invalid ID.",
+            "schema": {
+              "$ref": "#/definitions/Errors"
+            }
           },
           "404": {
-            "description": "Project does not exist."
+            "description": "Project does not exist.",
+            "schema": {
+              "$ref": "#/definitions/Errors"
+            }
           }
         }
       }
     }
   },
   "definitions": {
+    "Errors": {
+      "title": "Errors",
+      "description": "Error while processing the request.",
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "description": "Errors",
+          "items": {
+            "$ref": "#/definitions/Error"
+          }
+        }
+      }
+    },
+    "Error": {
+      "title": "Error",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "UUID",
+          "description": "ID of this error occurence."
+        },
+        "title": {
+          "type": "string",
+          "description": "Human readable description of the error.",
+          "example": "Resource does not exist"
+        },
+        "code": {
+          "type": "string",
+          "description": "Textual error code for this type of errors.",
+          "example": "AlreadyExists"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Detail information about the error.",
+          "example": "Validation failed, expected a not b"
+        }
+      }
+    },
     "Project": {
       "title": "Knittery Project",
       "type": "object",
@@ -174,6 +241,24 @@
       "required": [
         "id"
       ]
+    },
+    "StatusSuccess": {
+      "title": "Successful operation",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "description": "Reference to the affected object",
+          "type": "string",
+          "format": "UUID"
+        },
+        "detail": {
+          "description": "Additional information about the success.",
+          "type": "string"
+        }
+      }
     },
     "ProjectUpdate": {
       "title": "Update of a knittery project",

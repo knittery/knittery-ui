@@ -15,23 +15,42 @@ import scala.concurrent.duration._
 
 class ProjectController @Inject()(@Named("project-repository") projectRepository: ActorRef)(implicit ec: ExecutionContext) extends Controller {
   implicit val timeout: Timeout = 1.second
+
+  case class Error(title: String, code: String, detail: Option[String] = None, id: UUID = UUID.randomUUID())
+
+  implicit val errorFormat = Json.format[Error]
   implicit val projectInfoFormat = Json.format[ProjectInfo]
   implicit val updateProjectInfoFormat = Json.format[UpdateProjectInfo]
 
-  class ProjectRequest[A](val projectId: UUID, val project: ActorRef, request: Request[A]) extends WrappedRequest[A](request)
+  class ProjectRequest[A](val projectId: UUID, val project: ActorRef, request: Request[A]) extends WrappedRequest[A](request) {
+    def successStatus(detail: String): Result = successStatus(Some(detail))
+    def successStatus(detail: Option[String] = None) = {
+      val json = Json.obj("id" -> projectId)
+      Ok(detail.fold(json)(d => json + ("detail" -> JsString(d))))
+    }
+    def errorStatus(code: Int, error: Error*): Result = {
+      val json = Json.obj("errors" -> error)
+      Status(code)(json)
+    }
+  }
   def ProjectAction(projectId: UUID) = new ActionRefiner[Request, ProjectRequest] {
     def refine[A](input: Request[A]) = (projectRepository ? GetProject(projectId)).map {
-      case ProjectFound(`projectId`, project) => Right(new ProjectRequest(projectId, project, input))
-      case ProjectNotFound(`projectId`) => Left(NotFound(s"Project $projectId does not exist."))
+      case ProjectFound(`projectId`, project) =>
+        Right(new ProjectRequest(projectId, project, input))
+      case ProjectNotFound(`projectId`) =>
+        val error = Error("Project does not exist.", "NotFound", Some(s"Project with id $projectId does not exist."))
+        Left(NotFound(Json.obj("errors" -> error)))
     }
   }
   def ActionOnProject(id: UUID) = Action andThen ProjectAction(id)
 
-  def create() = Action.async {
+
+  def create() = Action.async { implicit req =>
     (projectRepository ? CreateProject).map {
       case ProjectCreated(id) =>
-        val url = routes.ProjectController.get(id).url
-        Created(s"Project $id created.").withHeaders(LOCATION -> url)
+        val url = routes.ProjectController.get(id).absoluteURL()
+        val json = Json.obj("id" -> id.toString)
+        Created(json).withHeaders(LOCATION -> url)
     }
   }
 
@@ -44,10 +63,15 @@ class ProjectController @Inject()(@Named("project-repository") projectRepository
   def update(id: UUID) = ActionOnProject(id).async(BodyParsers.parse.json) { req =>
     req.body.validate[UpdateProjectInfo].fold(
       errors => {
-        Future.successful(BadRequest(Json.obj("message" -> JsError.toJson(errors))))
+        Future.successful(
+          req.errorStatus(
+            BAD_REQUEST,
+            Error("Validation error", "VALIDATION_ERROR", Some(JsError.toJson(errors).toString))
+          )
+        )
       },
       update => (req.project ? update).map {
-        case ProjectInfoUpdated => Ok("Project updated")
+        case ProjectInfoUpdated => req.successStatus("Project updated.")
       }
     )
   }
