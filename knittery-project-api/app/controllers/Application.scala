@@ -1,6 +1,6 @@
 package controllers
 
-import play.api._
+import play.api.libs.json.Json
 import play.api.mvc._
 
 class Application extends Controller {
@@ -9,8 +9,12 @@ class Application extends Controller {
     Redirect(routes.Application.swaggerUI)
   }
 
+  def api = Action {
+    Ok(Json.obj("api-versions" -> List("v1")))
+  }
+
   def swaggerUI = Action {
-    Redirect("/swagger-ui/index.html?url=/v1/swagger.json#!/Project")
+    Redirect("/swagger-ui/index.html?url=/api/swagger.json")
   }
 
 }

@@ -22,16 +22,36 @@
   ],
   "tags": [
     {
-      "name": "Project",
-      "description": "Manage the knittery projects"
+      "name": "api",
+      "description": "Get available API versions"
+    },
+    {
+      "name": "api/v1",
+      "description": "v1 of the Knittery Project API"
     }
   ],
   "paths": {
-    "/projects": {
+    "/api": {
+      "get": {
+        "description": "Get available API versions",
+        "tags": [
+          "api"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/APIVersions"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects": {
       "post": {
         "description": "Create a new project.",
         "tags": [
-          "Project"
+          "api/v1"
         ],
         "responses": {
           "201": {
@@ -50,11 +70,11 @@
         }
       }
     },
-    "/projects/{id}": {
+    "/api/v1/projects/{id}": {
       "get": {
         "description": "Get a project by its ID.",
         "tags": [
-          "Project"
+          "api/v1"
         ],
         "produces": [
           "application/json"
@@ -93,7 +113,7 @@
       "put": {
         "description": "Update the project.",
         "tags": [
-          "Project"
+          "api/v1"
         ],
         "consumes": [
           "application/json"
@@ -139,11 +159,11 @@
         }
       }
     },
-    "/projects/{id}/knitted": {
+    "/api/v1/projects/{id}/knitted": {
       "get": {
         "description": "The garnment that will be knitted as the result of the project.",
         "tags": [
-          "Project"
+          "api/v1"
         ],
         "produces": [
           "application/json"
@@ -182,6 +202,20 @@
     }
   },
   "definitions": {
+    "APIVersions": {
+      "title": "API Versions",
+      "type": "object",
+      "properties": {
+        "api-versions": {
+          "type": "array",
+          "items": {
+            "description": "API-Version. Use as subpath (i.e. /api/v1).",
+            "type": "string",
+            "example": "v1"
+          }
+        }
+      }
+    },
     "Errors": {
       "title": "Errors",
       "description": "Error while processing the request.",
@@ -321,5 +355,5 @@
       }
     }
   },
-  "basePath": "/v1"
+  "basePath": "/"
 }

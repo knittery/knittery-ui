@@ -3,14 +3,17 @@
 # ~~~~
 
 # Home page
-GET         /                        controllers.Application.index
+GET         /                           controllers.Application.index
 
-POST        /v1/projects             controllers.ProjectController.create()
-GET         /v1/projects/:id         controllers.ProjectController.get(id: java.util.UUID)
-PUT         /v1/projects/:id         controllers.ProjectController.update(id: java.util.UUID)
-GET         /v1/*file                controllers.Assets.versioned(path = "/public/v1", file: Asset)
+GET         /api                        controllers.Application.api
 
-GET         /swagger-ui              controllers.Application.swaggerUI
-GET         /swagger-ui/             controllers.Application.swaggerUI
-GET         /swagger-ui/*file        controllers.Assets.versioned(path="/public/lib/swagger-ui", file: Asset)
+POST        /api/v1/projects            controllers.ProjectController.create()
+GET         /api/v1/projects/:id        controllers.ProjectController.get(id: java.util.UUID)
+PUT         /api/v1/projects/:id        controllers.ProjectController.update(id: java.util.UUID)
+
+GET         /api/*file                  controllers.Assets.versioned(path = "/public/api", file: Asset)
+
+GET         /swagger-ui                 controllers.Application.swaggerUI
+GET         /swagger-ui/                controllers.Application.swaggerUI
+GET         /swagger-ui/*file           controllers.Assets.versioned(path="/public/lib/swagger-ui", file: Asset)
 
