@@ -35,7 +35,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plain, state(_ => NeedleA), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(EmptyStitch)
+      end.output.mainBed.rows.head must beAllStitch(EmptyStitch)
       end.needles(MainBed) must beAtPosition(NeedleA)
       end.needles(MainBed) must carryYarn()
     }
@@ -43,7 +43,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plain, state(_ => NeedleB), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -51,7 +51,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plain, state(_ => NeedleD), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -59,7 +59,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plain, state(_ => NeedleE), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -69,7 +69,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plainH, state(_ => NeedleA), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(EmptyStitch)
+      end.output.mainBed.rows.head must beAllStitch(EmptyStitch)
       end.needles(MainBed) must beAtPosition(NeedleA)
       end.needles(MainBed) must carryYarn()
     }
@@ -77,7 +77,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plainH, state(_ => NeedleB), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -85,7 +85,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plainH, state(_ => NeedleD), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -93,7 +93,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plainH, state(_ => NeedleE), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(NoStitch)
+      end.output.mainBed.rows.head must beAllStitch(NoStitch)
       end.needles(MainBed) must beAtPosition(NeedleE)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -103,7 +103,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plain, state(_ => NeedleA), ToRight)
       val end = knit(AllNeedlesToD).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(EmptyStitch)
+      end.output.mainBed.rows.head must beAllStitch(EmptyStitch)
       end.needles(MainBed) must beAtPosition(NeedleA)
       end.needles(MainBed) must carryYarn()
     }
@@ -111,7 +111,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(plain, state(_ => NeedleB), ToRight)
       val end = knit(AllNeedlesToD).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleD)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -122,7 +122,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(part, state(_ => NeedleA), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(EmptyStitch)
+      end.output.mainBed.rows.head must beAllStitch(EmptyStitch)
       end.needles(MainBed) must beAtPosition(NeedleA)
       end.needles(MainBed) must carryYarn()
     }
@@ -130,7 +130,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(part, state(_ => NeedleB), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(NoStitch)
+      end.output.mainBed.rows.head must beAllStitch(NoStitch)
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -138,7 +138,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(part, state(_ => NeedleD), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -146,7 +146,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(part, state(_ => NeedleE), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -156,7 +156,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(partH, state(_ => NeedleB), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(NoStitch)
+      end.output.mainBed.rows.head must beAllStitch(NoStitch)
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -164,7 +164,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(partH, state(_ => NeedleD), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -172,7 +172,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(partH, state(_ => NeedleE), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(NoStitch)
+      end.output.mainBed.rows.head must beAllStitch(NoStitch)
       end.needles(MainBed) must beAtPosition(NeedleE)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -183,7 +183,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(part, state(_ => NeedleB), ToRight)
       val end = knit(AllNeedlesToD).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(NoStitch)
+      end.output.mainBed.rows.head must beAllStitch(NoStitch)
       end.needles(MainBed) must beAtPosition(NeedleD)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -191,7 +191,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(part, state(_ => NeedleD), ToRight)
       val end = knit(AllNeedlesToD).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleD)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -199,7 +199,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(part, state(_ => NeedleE), ToRight)
       val end = knit(AllNeedlesToD).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleD)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -210,7 +210,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(mc, state(_ => NeedleA), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(EmptyStitch)
+      end.output.mainBed.rows.head must beAllStitch(EmptyStitch)
       end.needles(MainBed) must beAtPosition(NeedleA)
       end.needles(MainBed) must carryYarn()
     }
@@ -218,7 +218,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(mc, state(_ => NeedleB), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -226,7 +226,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(mc, state(_ => NeedleD), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(greenPiece)
     }
@@ -234,7 +234,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(mc, state(_ => NeedleE), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(greenPiece)
     }
@@ -244,7 +244,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(mcH, state(_ => NeedleB), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(redPiece)
     }
@@ -252,7 +252,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(mcH, state(_ => NeedleD), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(PlainStitch(red))
+      end.output.mainBed.rows.head must beAllStitch(PlainStitch(red))
       end.needles(MainBed) must beAtPosition(NeedleB)
       end.needles(MainBed) must carryYarn(greenPiece)
     }
@@ -260,7 +260,7 @@ class KKnittingSpec extends Specification with KnittingStateMatchers {
       val knit = new KKnitting(mcH, state(_ => NeedleE), ToRight)
       val end = knit(AllNeedlesToB).check()
       end.output.mainBed.rows.size must_== 1
-      end.output.mainBed.rows(0) must beAllStitch(NoStitch)
+      end.output.mainBed.rows.head must beAllStitch(NoStitch)
       end.needles(MainBed) must beAtPosition(NeedleE)
       end.needles(MainBed) must carryYarn(redPiece)
     }

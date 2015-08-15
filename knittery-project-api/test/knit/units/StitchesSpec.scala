@@ -5,6 +5,7 @@ import knit._
 import knit.gauge.StandardGauge
 import org.specs2.mutable.Specification
 
+//noinspection ScalaUnnecessaryParentheses
 class StitchesSpec extends Specification {
   "stitches" should {
     "implicitly convert from ints" in {
@@ -28,8 +29,8 @@ class StitchesSpec extends Specification {
       x.approx must_== 24
     }
 
-    "convertable to length" in {
-      implicit val g = StandardGauge(10, 33, 5 tension)
+    "convertible to length" in {
+      implicit val g = StandardGauge(10, 33, 5.tension)
       val a = 123.stitches
       a.toLength must_== 123.cm
     }
