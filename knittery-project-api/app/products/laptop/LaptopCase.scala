@@ -54,7 +54,7 @@ object LaptopCase {
     toDecrease = (bodyWidth - dims.lashWidth).approx / 2
     firstLash = first + toDecrease
 
-    bg <- Cast.onClosed(MainBed, first, last, ps.front(0)(0))
+    bg <- Cast.onClosed(MainBed, first, last, ps.front.head.head)
     _ <- Basics.knitRowWithK(yarnA = Some(bg))
     _ <- FairIslePlanner.singleBed(ps.front, Some(first))
     _ <- FairIslePlanner.singleBed(ps.back.reverse, Some(first))
@@ -92,10 +92,10 @@ object LaptopCase {
       val cb = checkerboard(dims.bodyWidth.approx)
 
       val frontOffset = squareHeight - (dims.frontHeight.approx % squareHeight)
-      val front = cb.drop(frontOffset).take(dims.frontHeight.approx).toIndexedSeq
+      val front = cb.slice(frontOffset, frontOffset + dims.frontHeight.approx).toIndexedSeq
 
       val backOffset = squareHeight - (dims.backHeight.approx % squareHeight)
-      val back = cb.drop(backOffset).take(dims.backHeight.approx).toIndexedSeq
+      val back = cb.slice(backOffset, backOffset + dims.backHeight.approx).toIndexedSeq
 
       val lash = IndexedSeq.fill(dims.lashHeight.approx, dims.lashWidth.approx)(yarnA)
       Patterns(front, back, lash)
@@ -103,7 +103,7 @@ object LaptopCase {
   }
 
   /** Dissolving checkerboard on front and back. Top is dissolved, bottom is checkerboard.
-    * Checkerboard starts at the bottom (front/back are inversed). Lash is plain with yarnA. */
+    * Checkerboard starts at the bottom (front/back are reversed). Lash is plain with yarnA. */
   def dissolvingCheckerboardPattern(yarnA: Yarn, yarnB: Yarn, squareSize: Length, exponent: Double = 1.5, seed: Long = 0)(implicit gauge: Gauge) = {
     val squareWidth = squareSize.toStitches.approx
     val squareHeight = squareSize.toRows.approx
