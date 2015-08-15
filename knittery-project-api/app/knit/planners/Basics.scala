@@ -1,9 +1,9 @@
-package models.planners
+package knit.planners
 
 import scalaz._
 import Scalaz._
-import models._
-import models.plan._
+import knit._
+import knit.plan._
 
 object Basics {
   /** Add carriage if missing. */

@@ -1,11 +1,11 @@
-package models.planners
+package knit.planners
 
 import scalaz._
 import Scalaz._
-import models._
-import models.plan._
+import knit._
+import knit.plan._
 import utils._
-import models.KCarriage.{SlideLeverIiIi, KRChangeKnobIiIi}
+import KCarriage.{SlideLeverIiIi, KRChangeKnobIiIi}
 
 /**
  * Knits a fair isle pattern (aka Norwegermuster).

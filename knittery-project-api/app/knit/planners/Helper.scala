@@ -1,10 +1,10 @@
-package models.planners
+package knit.planners
 
 import java.awt.Color
 import java.awt.image.BufferedImage
 import utils._
-import models.{Yarn, Needle}
-import models.units.Stitches
+import knit.{Yarn, Needle}
+import knit.units.Stitches
 
 object Helper {
   /** First/last needle for the knitting with the given width when center alignment. */

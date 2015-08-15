@@ -1,10 +1,10 @@
-package models.planners
+package knit.planners
 
 import scalaz._
 import Scalaz._
-import models._
-import models.plan._
-import models.KCarriage.{DoubleBedCarriage, TensionDial}
+import knit._
+import knit.plan._
+import KCarriage.{DoubleBedCarriage, TensionDial}
 
 object Cast {
   def onOpen(from: Needle, until: Needle, withYarn: YarnPiece): PlannerM[YarnPiece] = for {
