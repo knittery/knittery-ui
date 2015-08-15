@@ -1,13 +1,11 @@
-package models.planner
+package knit.planner
 
-import java.awt.Color
+import org.specs2.mutable.Specification
 import scalaz._
 import Scalaz._
-import org.specs2.mutable.Specification
-import org.specs2.specification.Scope
-import models._
-import models.plan._
-import models.planners._
+import knit._
+import knit.plan._
+import knit.planners._
 import utils._
 
 class FairIslePlannerSpec extends Specification {
@@ -45,7 +43,6 @@ class FairIslePlannerSpec extends Specification {
         Cast.offClosed(MainBed, redStart)
       val state = runPlan(planner)
       val out = state.output
-      //println(out.patternString)
       out.height must_== 8
       out.mainBed.rows(0) must_== knittedRow(CastOnStitch(red), CastOnStitch(red), CastOnStitch(red), CastOnStitch(red), CastOnStitch(red))(NoStitch)
       out.mainBed.rows(1) must_== knittedRow(PlainStitch(red), PlainStitch(red), PlainStitch(red), PlainStitch(red), PlainStitch(red))(EmptyStitch)
@@ -53,8 +50,8 @@ class FairIslePlannerSpec extends Specification {
       out.mainBed.rows(3) must_== knittedRow(PlainStitch(red), PlainStitch(green), PlainStitch(red), PlainStitch(green), PlainStitch(red))(EmptyStitch)
       out.mainBed.rows(4) must_== knittedRow(PlainStitch(green), PlainStitch(red), PlainStitch(green), PlainStitch(red), PlainStitch(green))(EmptyStitch)
       out.mainBed.rows(5) must_== knittedRow(PlainStitch(red), PlainStitch(green), PlainStitch(red), PlainStitch(green), PlainStitch(red))(EmptyStitch)
-      out.mainBed.rows(6) must_== knittedRow(PlainStitch(green), PlainStitch(red), PlainStitch(green), PlainStitch(red), PlainStitch(green))(NoStitch)
-      out.mainBed.rows(7) must_== knittedRow(CastOffStitch(red), CastOffStitch(red), CastOffStitch(red), CastOffStitch(red), CastOffStitch(red))(NoStitch)
+      out.mainBed.rows(6) must_== knittedRow(PlainStitch(green), PlainStitch(red), PlainStitch(green), PlainStitch(red), PlainStitch(green))(EmptyStitch)
+      out.mainBed.rows(7) must_== knittedRow(CastOffStitch(red), CastOffStitch(red), CastOffStitch(red), CastOffStitch(red), CastOffStitch(red))(EmptyStitch)
     }
   }
 }
