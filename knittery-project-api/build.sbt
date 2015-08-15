@@ -20,6 +20,11 @@ libraryDependencies ++= Seq(
   "com.assembla.scala-incubator" %% "graph-json" % "1.9.1"
 )
 
+// Test dependencies
+libraryDependencies ++= Seq(
+  specs2 % Test
+)
+
 
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.

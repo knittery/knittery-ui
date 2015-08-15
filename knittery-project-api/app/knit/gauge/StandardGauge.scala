@@ -1,7 +1,7 @@
-package models.gauge
+package knit.gauge
 
-import models.Tension
-import models.units.{Stitches, Rows, Gauge}
+import knit.Tension
+import knit.units.{Stitches, Rows, Gauge}
 import squants.space.Length
 import squants.space.LengthConversions._
 

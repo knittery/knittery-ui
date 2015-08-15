@@ -1,8 +1,8 @@
-package models.units
+package knit.units
 
 import squants.space.LengthConversions._
-import models._
-import models.gauge.StandardGauge
+import knit._
+import knit.gauge.StandardGauge
 import org.specs2.mutable.Specification
 
 class StitchesSpec extends Specification {
