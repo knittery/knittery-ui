@@ -1,5 +1,6 @@
 package models.plan.knitting
 
+import scala.language.implicitConversions
 import scala.util.Try
 import models._
 import models.KCarriage._

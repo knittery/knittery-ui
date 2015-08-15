@@ -1,5 +1,6 @@
 package models
 
+import scala.language.implicitConversions
 import scalaz._
 import Scalaz._
 

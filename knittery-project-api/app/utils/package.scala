@@ -1,3 +1,4 @@
+import scala.language.implicitConversions
 import scalaz._
 import Scalaz._
 import scala.util.Try

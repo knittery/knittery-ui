@@ -1,5 +1,6 @@
 package models.plan
 
+import scala.language.implicitConversions
 import scala.util.Try
 import scalaz._
 import scalaz.syntax._
