@@ -1,9 +1,9 @@
-package model
+package models
 
 import java.util.UUID
 
 import akka.actor.{ActorRef, Actor}
-import model.ProjectRepository._
+import models.ProjectRepository._
 
 object ProjectRepository {
   sealed trait Message

@@ -1,9 +1,9 @@
-package model
+package models
 
 import java.util.UUID
 
 import akka.actor.{Props, Actor}
-import model.Project.{ProjectInfoUpdated, UpdateProjectInfo, ProjectInfo, GetInfo}
+import models.Project.{ProjectInfoUpdated, UpdateProjectInfo, ProjectInfo, GetInfo}
 
 object Project {
   def apply(id: UUID) = Props(new Project(id))

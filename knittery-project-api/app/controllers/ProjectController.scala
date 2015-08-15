@@ -6,8 +6,8 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import javax.inject._
 import akka.util.Timeout
-import model.Project.{ProjectInfoUpdated, UpdateProjectInfo, ProjectInfo, GetInfo}
-import model.ProjectRepository._
+import models.Project.{ProjectInfoUpdated, UpdateProjectInfo, ProjectInfo, GetInfo}
+import models.ProjectRepository._
 import play.api.mvc._
 import play.api.libs.json._
 import scala.concurrent.{Future, ExecutionContext}
