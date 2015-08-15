@@ -237,7 +237,7 @@ case class MoveToMainBed(filter: Needle => Boolean, offset: Int = 0) extends Ste
     val (nm, nd) = Needle.all.
       filter(filter).
       filter(working).
-      foldLeft(((state.needles(MainBed).toMap, state.needles(DoubleBed).toMap))) {
+      foldLeft((state.needles(MainBed).toMap, state.needles(DoubleBed).toMap)) {
       case ((main, double), doubleNeedle) =>
         val mainNeedle = doubleNeedle + offset
         val m = main(mainNeedle)

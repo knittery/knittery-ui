@@ -3,6 +3,7 @@ package knit
 import scala.language.implicitConversions
 import scalaz._
 import Scalaz._
+import scalaz.syntax.{FunctorOps, BindOps}
 
 package object plan {
   type NeedleStateRow = Needle => NeedleState
@@ -16,9 +17,9 @@ package object plan {
   type Planner = PlannerM[Unit]
   implicit def plannerMonad = PlannerM.plannerMonad
   implicit def plannerMonoid = Planner.plannerMonoid
-  implicit def stepToPlanner(s: Step) = Planner.step(s)
-  implicit def stepToPlannerBindOps(s: Step) = Planner.stepToPlannerBindOps(s)
-  implicit def stepToPlannerFunctorOps(s: Step) = Planner.stepToPlannerFunctorOps(s)
+  implicit def stepToPlanner(s: Step): Planner = Planner.step(s)
+  implicit def stepToPlannerBindOps(s: Step): BindOps[PlannerM, Unit] = Planner.stepToPlannerBindOps(s)
+  implicit def stepToPlannerFunctorOps(s: Step): FunctorOps[PlannerM, Unit] = Planner.stepToPlannerFunctorOps(s)
 
   type PlanOptimizer = Plan => Plan
   implicit object planOptimizerMonoid extends Monoid[PlanOptimizer] {

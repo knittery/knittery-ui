@@ -55,7 +55,7 @@ object Planner {
   def validate[A](f: KnittingState => Validation[String, A]) = PlannerM.validate(f)
 
   /** PlannerM that only does validation (no step). Catches exceptions. */
-  def precondidtions[A](f: KnittingState => A): PlannerM[A] = validate(s => Try(f(s)).toSuccess)
+  def preconditions[A](f: KnittingState => A): PlannerM[A] = validate(s => Try(f(s)).toSuccess)
 
   /** Alias for zero. */
   def noop = Monoid[Planner].zero

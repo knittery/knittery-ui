@@ -14,9 +14,9 @@ object FairIslePlanner {
 
   def doubleBed(pattern: Matrix[Yarn], tension: Tension, startNeedle: Option[Needle] = None) = for {
     workingNeedles <- Planner.state(_.workingNeedles)
-    _ <- Planner.precondidtions(_ => require(workingNeedles.nonEmpty, "No working needles"))
+    _ <- Planner.preconditions(_ => require(workingNeedles.nonEmpty, "No working needles"))
     _ <- checkPattern(pattern)
-    _ <- Planner.precondidtions(_ => require(pattern.width % 2 == 0, "Pattern with non-even width"))
+    _ <- Planner.preconditions(_ => require(pattern.width % 2 == 0, "Pattern with non-even width"))
     needle0 = startNeedle.getOrElse(workingNeedles.head)
     doubleBedNeedles = (n: Needle) => n >= needle0 && n < (needle0 + pattern.width)
     pattern2 <- patternToYarnPiece(pattern)
@@ -61,7 +61,7 @@ object FairIslePlanner {
    */
   def singleBed(pattern: Matrix[Yarn], startNeedle: Option[Needle] = None) = for {
     workingNeedles <- Planner.state(_.workingNeedles)
-    _ <- Planner.precondidtions(_ => require(workingNeedles.nonEmpty, "No working needles"))
+    _ <- Planner.preconditions(_ => require(workingNeedles.nonEmpty, "No working needles"))
     _ <- checkPattern(pattern)
     needle0 = startNeedle.getOrElse(workingNeedles.head)
     settings = KCarriage.Settings(mc = true)
@@ -76,7 +76,7 @@ object FairIslePlanner {
       } yield ())
   } yield ()
 
-  private def checkPattern(pattern: Matrix[Yarn]) = Planner.precondidtions { _ =>
+  private def checkPattern(pattern: Matrix[Yarn]) = Planner.preconditions { _ =>
     pattern.validate()
     require(pattern.height > 0, "Empty pattern")
     pattern.rows.map(_.toSet).zipWithIndex.foreach {

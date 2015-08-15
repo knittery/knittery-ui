@@ -79,7 +79,7 @@ sealed trait CarriageStates {
     }
   }
   def apply(carriage: Carriage) = {
-    data.get(carriage).getOrElse(carriage.initialState).
+    data.getOrElse(carriage, carriage.initialState).
       asInstanceOf[carriage.State]
   }
 
@@ -89,12 +89,12 @@ sealed trait CarriageStates {
     case _: GCarriage.State => GCarriage
   }
 
-  override def hashCode = data.hashCode
+  override def hashCode = data.hashCode()
   override def equals(o: Any) = o match {
     case o: CarriageStates => data == o.data
     case _ => false
   }
-  override def toString = data.toString
+  override def toString = data.toString()
 }
 object CarriageStates {
   def empty = new CarriageStates {

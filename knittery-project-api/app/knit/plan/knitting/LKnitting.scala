@@ -27,7 +27,7 @@ class LKnitting(carriageState: State, initial: KnittingState, direction: Directi
 
   private def handleNeedle(needle: Needle, state: NeedleState, carry: Set[YarnFlow], target: NeedleAction): (NeedleState, Set[YarnFlow]) = state match {
     case NeedleState(NeedleE, _) =>
-      throw new IllegalStateException(s"Needle ${needle} is in E position when knitting with L carriage")
+      throw new IllegalStateException(s"Needle $needle is in E position when knitting with L carriage")
     case NeedleState(NeedleA, _) =>
       (state, Set.empty)
     case NeedleState(NeedleB, yarns) =>

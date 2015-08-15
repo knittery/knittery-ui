@@ -22,7 +22,7 @@ case class Knitted3D private(ends: Map[YarnPiece, YarnFlow], stitches: Seq[Stitc
   def ++(toAdd: Traversable[(Stitch3D, Bed, Needle)]) = {
     val newEnds = toAdd.flatMap(_._1.points).foldLeft(ends)(addFlow)
     val positionsToAdd = toAdd.map {
-      case (stitch, atBed, atNeedle) => (stitch -> Vector3(atNeedle.number, yOffset, if (atBed == MainBed) -1 else 1))
+      case (stitch, atBed, atNeedle) => stitch -> Vector3(atNeedle.number, yOffset, if (atBed == MainBed) -1 else 1)
     }
     copy(
       stitches = stitches ++ toAdd.map(_._1),

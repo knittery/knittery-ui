@@ -76,6 +76,7 @@ class KKnitting(carriageState: State, state: KnittingState, direction: Direction
 }
 
 /** Knitting on the main bed of with the K-carriage. */
+//c VariablePatternShadow
 private class KMainBed(takeback: Boolean, pattern: NeedleActionRow, needles: NeedleStateRow) {
   private implicit def toSet[A](a: A): Set[A] = Set(a)
 

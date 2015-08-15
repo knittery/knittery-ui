@@ -8,7 +8,7 @@ import KCarriage.{DoubleBedCarriage, TensionDial}
 
 object Cast {
   def onOpen(from: Needle, until: Needle, withYarn: YarnPiece): PlannerM[YarnPiece] = for {
-    _ <- Planner.precondidtions(_ => require(from < until))
+    _ <- Planner.preconditions(_ => require(from < until))
     needles = Needle.interval(from, until)
     castOnNeedles = needles.filter(_.index % 2 == 0)
     _ <- MoveNeedles(MainBed, n => if (castOnNeedles.contains(n)) NeedleB else NeedleA)
@@ -26,7 +26,7 @@ object Cast {
 
   def onClosedRound(from: Needle, until: Needle, yarn: YarnPiece) = for {
     _ <- Planner.noop
-    until2 <- Planner.precondidtions { _ =>
+    until2 <- Planner.preconditions { _ =>
       require(from <= until, s"Cannot perform closed round cast on from right to left ($from -> $until)")
       val u2 = until.index + (until distanceTo from) - 1
       require(u2 < Needle.count, "Needle bed not wide enough")
