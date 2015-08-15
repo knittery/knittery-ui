@@ -1,4 +1,4 @@
-package knittings
+package products.laptop
 
 import java.io.File
 import javax.imageio.ImageIO
@@ -7,10 +7,10 @@ import scalaz._
 import Scalaz._
 import squants.space.Length
 import utils._
-import models._
-import models.plan._
-import models.units._
-import models.planners._
+import knit._
+import knit.plan._
+import knit.units._
+import knit.planners._
 
 /**
  * Laptop case that wraps the laptop in a rectangular enclosure and has a square lash over the small side.
@@ -31,7 +31,7 @@ object LaptopCase {
 
   def form(width: Length, height: Length, topGap: Length, lash: Length, thickness: Length, patterns: Dimensions => Patterns)
     (implicit gauge: Gauge): Planner = for {
-    _ <- Planner.precondidtions(_ => true)
+    _ <- Planner.preconditions(_ => true)
     border = 2.stitches //used sew together front and back
 
     bodyWidth = (width + thickness).toStitches.discardPartials + border
@@ -43,10 +43,10 @@ object LaptopCase {
       lashHeight = lash.toRows.discardPartials
     )
 
-    ps <- Planner.precondidtions { _ =>
+    ps <- Planner.preconditions { _ =>
       dims.checkPatterns(patterns(dims))
     }
-    first <- Planner.precondidtions { _ =>
+    first <- Planner.preconditions { _ =>
       require(bodyWidth.approx <= Needle.count - 1)
       Needle.middle - (bodyWidth.approx / 2)
     }
