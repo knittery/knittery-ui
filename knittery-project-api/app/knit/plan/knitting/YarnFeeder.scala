@@ -1,7 +1,7 @@
-package models.plan.knitting
+package knit.plan.knitting
 
-import models._
-import models.plan.YarnAttachment
+import knit._
+import knit.plan.YarnAttachment
 
 private case class YarnFeeder(pos: YarnFlow, attachedTo: Option[(Needle, Int, Bed)]) {
   /** Straight yarn towards the needle. */

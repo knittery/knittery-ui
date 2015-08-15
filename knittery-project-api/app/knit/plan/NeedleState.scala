@@ -1,6 +1,6 @@
-package models.plan
+package knit.plan
 
-import models._
+import knit._
 
 case class NeedleState(position: NeedlePosition, yarn: Set[YarnFlow]) {
   if (yarn.nonEmpty) require(position.isWorking, "Cannot have yarn on non working needle.")

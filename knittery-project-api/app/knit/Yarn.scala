@@ -1,4 +1,4 @@
-package models
+package knit
 
 import java.util.concurrent.atomic.AtomicLong
 import java.awt.Color

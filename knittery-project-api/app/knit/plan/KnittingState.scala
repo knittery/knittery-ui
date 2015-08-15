@@ -1,8 +1,8 @@
-package models.plan
+package knit.plan
 
 import scalaz._
 import Scalaz._
-import models._
+import knit._
 
 case class KnittingState(
   bedNeedles: Map[Bed, Map[Needle, NeedleState]],

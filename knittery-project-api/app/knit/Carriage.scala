@@ -1,4 +1,4 @@
-package models
+package knit
 
 sealed trait Carriage {
   def name: String

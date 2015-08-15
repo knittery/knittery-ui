@@ -1,8 +1,7 @@
-package models.units
+package knit.units
 
 import squants.space.Length
-import models.units.Stitches.NumericStitches
-
+import Stitches.NumericStitches
 
 /** Unit for stitches. */
 case class Stitches(amount: Double) {

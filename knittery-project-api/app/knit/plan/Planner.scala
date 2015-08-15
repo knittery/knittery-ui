@@ -1,4 +1,4 @@
-package models.plan
+package knit.plan
 
 import scala.language.implicitConversions
 import scala.util.Try

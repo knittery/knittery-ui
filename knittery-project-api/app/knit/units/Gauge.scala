@@ -1,6 +1,6 @@
-package models.units
+package knit.units
 
-import models.Tension
+import knit.Tension
 import squants.space.Length
 import squants.space.LengthConversions._
 

@@ -1,11 +1,11 @@
-package models.plan
+package knit.plan
 
 import scala.util.Try
 import scalaz._
 import Scalaz._
 import scalaz.Validation.FlatMap._
-import models._
-import models.plan.knitting._
+import knit._
+import knitting.{KKnitting, LKnitting}
 import utils._
 
 /** Step to perform during knitting. */

@@ -1,10 +1,10 @@
-package models.plan
+package knit.plan
 
 import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
 import scalaz.Validation.FlatMap._
-import models._
+import knit._
 
 object Optimizers {
   val list =

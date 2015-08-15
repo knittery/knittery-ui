@@ -1,10 +1,10 @@
-package models.plan.knitting
+package knit.plan.knitting
 
 import scala.language.implicitConversions
 import scala.util.Try
-import models._
-import models.KCarriage._
-import models.plan._
+import knit._
+import KCarriage._
+import knit.plan._
 import utils._
 
 class KKnitting(carriageState: State, state: KnittingState, direction: Direction) {

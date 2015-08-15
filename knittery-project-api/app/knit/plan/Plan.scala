@@ -1,4 +1,4 @@
-package models.plan
+package knit.plan
 
 import scalaz._
 import Scalaz._

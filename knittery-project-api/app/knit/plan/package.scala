@@ -1,4 +1,4 @@
-package models
+package knit
 
 import scala.language.implicitConversions
 import scalaz._

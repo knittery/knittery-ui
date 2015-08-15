@@ -1,4 +1,4 @@
-package models
+package knit
 
 sealed trait Needle extends Ordered[Needle] {
   /** Numbered from left to right starting with 0 (leftmost needle is 0). */

@@ -1,7 +1,7 @@
-package models.plan.knitting
+package knit.plan.knitting
 
-import models._
-import models.plan._
+import knit._
+import knit.plan._
 
 private case class ResultBuilder(
   yarnA: Option[YarnFeeder] = None,

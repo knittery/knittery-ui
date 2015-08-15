@@ -1,6 +1,6 @@
-package models.plan
+package knit.plan
 
-import models._
+import knit._
 import utils._
 
 case class Knitted private(mainBed: KnittedBed, doubleBed: KnittedBed) {

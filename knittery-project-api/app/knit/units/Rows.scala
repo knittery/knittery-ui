@@ -1,6 +1,6 @@
-package models.units
+package knit.units
 
-import models.units.Rows.NumericRows
+import Rows.NumericRows
 import squants.space.Length
 
 /** Unit for stitched rows. */

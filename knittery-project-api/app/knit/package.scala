@@ -1,6 +1,4 @@
-import models.NeedlePosition
-
-package object models {
+package object knit {
   sealed trait Bed
   case object MainBed extends Bed
   case object DoubleBed extends Bed

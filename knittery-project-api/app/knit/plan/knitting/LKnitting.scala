@@ -1,9 +1,11 @@
-package models.plan.knitting
+package knit.plan.knitting
+
+import knit.LCarriage
 
 import scala.util.Try
-import models._
+import knit._
 import LCarriage._
-import models.plan.{NeedleState, KnittingState}
+import knit.plan.{NeedleState, KnittingState}
 import utils._
 
 class LKnitting(carriageState: State, initial: KnittingState, direction: Direction) {

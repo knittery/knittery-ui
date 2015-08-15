@@ -1,4 +1,4 @@
-package models
+package knit
 
 import squants.space.Length
 

@@ -1,4 +1,4 @@
-package models
+package knit
 
 sealed trait CarriagePosition {
   def directionTo(needle: Needle): Direction

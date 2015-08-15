@@ -1,10 +1,10 @@
-package models.plan
+package knit.plan
 
-import models._
 import scalax.collection.Graph
 import scalax.collection.edge.Implicits._
 import ch.inventsoft.graph.layout.Layout
 import ch.inventsoft.graph.vector.Vector3
+import knit._
 
 case class Knitted3D private(ends: Map[YarnPiece, YarnFlow], stitches: Seq[Stitch3D], stitchPosition: Map[Stitch3D, Vector3], yOffset: Int) {
   private def addFlow(ends: Map[YarnPiece, YarnFlow], flow: YarnFlow) = {
