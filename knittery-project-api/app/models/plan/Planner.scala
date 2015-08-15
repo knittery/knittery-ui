@@ -4,6 +4,7 @@ import scala.util.Try
 import scalaz._
 import scalaz.syntax._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 import utils._
 
 /** Monad to create a KnittingPlan. */
@@ -33,10 +34,10 @@ object PlannerM {
     override def bind[A, B](pa: PlannerM[A])(fb: A => PlannerM[B]) = {
       new PlannerM[B] {
         override def buildPlan(before: Plan) = for {
-          (a, planA) <- pa.buildPlan(before)
-          pb = fb(a)
-          (b, planB) <- pb.buildPlan(planA)
-        } yield (b, planB)
+          a <- pa.buildPlan(before)
+          pb = fb(a._1)
+          bt <- pb.buildPlan(a._2)
+        } yield bt
       }
     }
   }

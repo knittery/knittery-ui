@@ -3,8 +3,8 @@ package models.plan
 import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
+import scalaz.Validation.FlatMap._
 import models._
-import scala.util.Try
 
 object Optimizers {
   val list =

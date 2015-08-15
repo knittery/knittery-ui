@@ -3,9 +3,10 @@ package models.plan
 import scala.util.Try
 import scalaz._
 import Scalaz._
+import scalaz.Validation.FlatMap._
 import models._
-import utils._
 import models.plan.knitting._
+import utils._
 
 /** Step to perform during knitting. */
 sealed trait Step {
@@ -33,7 +34,7 @@ case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActi
   override def apply(state: KnittingState) = for {
     nextDir <- state.nextDirection(carriage)
     _ <- {
-      if (nextDir != direction) s"Cannot move carriage from $direction to $direction".fail
+      if (nextDir != direction) s"Cannot move carriage from $direction to $direction".failure
       else ().success
     }
     state2 <- carriage match {
@@ -66,7 +67,7 @@ case class KnitRow(carriage: Carriage, direction: Direction, pattern: NeedleActi
 case class MoveNeedles(bed: Bed, to: NeedlePatternRow) extends Step {
   override def apply(state: KnittingState) = {
     val toAButYarn = Needle.all.filter(n => to(n).nonWorking && state.needles(bed)(n).yarn.nonEmpty)
-    if (toAButYarn.nonEmpty) s"Needles ${toAButYarn.mkString(", ")} have yarn and cannot be moved to A".fail
+    if (toAButYarn.nonEmpty) s"Needles ${toAButYarn.mkString(", ")} have yarn and cannot be moved to A".failure
     else state.moveNeedles(bed, to).success
   }
   override def hashCode = bed.hashCode ^ to.all.hashCode

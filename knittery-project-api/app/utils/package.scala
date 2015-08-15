@@ -40,7 +40,7 @@ package object utils {
   implicit class RichTry[A](val t: Try[A]) {
     def toSuccess: Validation[String, A] = {
       t.map(_.success).recover {
-        case e: Exception => e.getMessage.fail
+        case e: Exception => e.getMessage.failure
       }.get
 
     }

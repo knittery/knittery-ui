@@ -2,6 +2,7 @@ package models.plan
 
 import scalaz._
 import Scalaz._
+import scalaz.Validation.FlatMap._
 
 case class StepState(step: Step, before: KnittingState) {
   def after: KnittingState = afterOrError.valueOr(e => throw new IllegalStateException(s"invalid plan: $e"))
@@ -10,7 +11,7 @@ case class StepState(step: Step, before: KnittingState) {
     try {
       step(before)
     } catch {
-      case e: NotImplementedError => "not implemented".fail
+      case e: NotImplementedError => "not implemented".failure
     }
   }
 }
@@ -48,7 +49,7 @@ private object CompositePlan {
   def apply(previous: Plan, step: Step): Validation[PlanError, CompositePlan] = {
     val stepState = StepState(step, previous.run)
     stepState.afterOrError.fold(
-      e => PlanError(step, previous.steps.size + 1, e).fail,
+      e => PlanError(step, previous.steps.size + 1, e).failure,
       _ => CompositePlan(previous, stepState).success
     )
   }

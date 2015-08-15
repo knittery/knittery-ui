@@ -12,11 +12,11 @@ case class KnittingState(
   yarnAttachments: Map[YarnPiece, YarnAttachment]) {
 
   def nextDirection(carriage: Carriage) = carriageState(carriage).position match {
-    case CarriageRemoved => "Cannot find direction for removed carriage".fail
+    case CarriageRemoved => "Cannot find direction for removed carriage".failure
     case pos =>
       val working = this.workingNeedles.toSet
       val overlappedWorking = carriage.over(pos).filter(working.contains)
-      if (overlappedWorking.nonEmpty) s"carriage still over working needeles ${overlappedWorking.mkString(",")}".fail
+      if (overlappedWorking.nonEmpty) s"carriage still over working needeles ${overlappedWorking.mkString(",")}".failure
       else pos.directionTo(workingNeedles.headOption.getOrElse(Needle.middle)).success
   }
 
