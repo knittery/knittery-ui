@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
   specs2 % Test
 )
-
+javaOptions in Test := Seq("-Djava.awt.headless=true")
 
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.

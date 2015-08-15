@@ -1,12 +1,11 @@
-package models.plan.knitting
+package knit.plan.knitting
 
 import org.specs2.mutable.Specification
-
+import org.specs2.matcher.{MustMatchers, Matchers}
 import scalaz._
 import Scalaz._
-import org.specs2.matcher.{MustMatchers, Matchers}
-import models._
-import models.plan.{NeedleState, Stitch}
+import knit._
+import knit.plan.{NeedleState, Stitch}
 
 
 trait KnittingStateMatchers extends Matchers with MustMatchers {

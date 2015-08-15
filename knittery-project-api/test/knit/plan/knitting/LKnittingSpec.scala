@@ -1,8 +1,8 @@
-package models.plan.knitting
+package knit.plan.knitting
 
-import models._
-import LCarriage._
 import org.specs2.mutable.Specification
+import knit._
+import LCarriage._
 
 import scalaz.{Success, Validation}
 

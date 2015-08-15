@@ -1,10 +1,10 @@
-package models.plan.knitting
+package knit.plan.knitting
 
+import org.specs2.mutable.Specification
 import scalaz._
 import Scalaz._
-import org.specs2.mutable.Specification
-import models._
-import models.plan._
+import knit._
+import knit.plan._
 
 class KKnittingSpec extends Specification with KnittingStateMatchers {
   private trait plain extends Yarns with StateSupport {

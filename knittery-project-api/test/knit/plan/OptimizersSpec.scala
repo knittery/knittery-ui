@@ -1,7 +1,7 @@
-package models.plan
+package knit.plan
 
 import org.specs2.mutable.Specification
-import models._
+import knit._
 
 
 class OptimizersSpec extends Specification {

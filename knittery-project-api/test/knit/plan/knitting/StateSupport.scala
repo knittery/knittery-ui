@@ -1,7 +1,7 @@
-package models.plan.knitting
+package knit.plan.knitting
 
-import models.plan.{YarnAttachment, KnittingState, NeedleState}
-import models.{MainBed, YarnFlow, NeedlePosition, Needle}
+import knit.plan.{YarnAttachment, KnittingState, NeedleState}
+import knit.{MainBed, YarnFlow, NeedlePosition, Needle}
 
 private trait StateSupport {
   def stateWithYarn(pos: Needle => NeedlePosition, yarnToUse: YarnFlow) = {

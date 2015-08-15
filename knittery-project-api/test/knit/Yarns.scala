@@ -1,4 +1,4 @@
-package models
+package knit
 
 import org.specs2.specification.Scope
 import java.awt.Color
