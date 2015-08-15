@@ -6,7 +6,7 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import javax.inject._
 import akka.util.Timeout
-import models.Project.{ProjectInfoUpdated, UpdateProjectInfo, ProjectInfo, GetInfo}
+import models.Project._
 import models.ProjectRepository._
 import play.api.mvc._
 import play.api.libs.json._
@@ -14,7 +14,7 @@ import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.duration._
 
 class ProjectController @Inject()(@Named("project-repository") projectRepository: ActorRef)(implicit ec: ExecutionContext) extends Controller {
-  implicit val timeout: Timeout = 1.second
+  implicit val timeout: Timeout = 10.seconds
 
   case class Error(title: String, code: String, detail: Option[String] = None, id: UUID = UUID.randomUUID())
 
@@ -72,6 +72,8 @@ class ProjectController @Inject()(@Named("project-repository") projectRepository
       },
       update => (req.project ? update).map {
         case ProjectInfoUpdated => req.successStatus("Project updated.")
+        case ProjectInfoUpdateInvalid(detail) =>
+          req.errorStatus(400, Error("Invalid data", "INVALID_DATA", Some(detail)))
       }
     )
   }

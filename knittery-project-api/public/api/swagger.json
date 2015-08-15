@@ -1,359 +1,465 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "version": "0.1.2",
-    "title": "knittery.ch Project APIs",
-    "description": "Create, modify and preview knittery projects.",
-    "contact": {
-      "name": "Knittery on Github",
-      "url": "https://github.com/knittery",
-      "email": "ms@inventsoft.ch"
-    },
-    "license": {
-      "name": "GNU General Public License, version 2",
-      "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html"
-    }
-  },
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
-  "tags": [
-    {
-      "name": "api",
-      "description": "Get available API versions"
-    },
-    {
-      "name": "api/v1",
-      "description": "v1 of the Knittery Project API"
-    }
-  ],
-  "paths": {
-    "/api": {
-      "get": {
-        "description": "Get available API versions",
-        "tags": [
-          "api"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "schema": {
-              "$ref": "#/definitions/APIVersions"
-            }
-          }
+    "swagger": "2.0",
+    "info": {
+        "version": "0.1.2",
+        "title": "knittery.ch Project APIs",
+        "description": "Create, modify and preview knittery projects.",
+        "contact": {
+            "name": "Knittery on Github",
+            "url": "https://github.com/knittery",
+            "email": "ms@inventsoft.ch"
+        },
+        "license": {
+            "name": "GNU General Public License, version 2",
+            "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html"
         }
-      }
     },
-    "/api/v1/projects": {
-      "post": {
-        "description": "Create a new project.",
-        "tags": [
-          "api/v1"
-        ],
-        "responses": {
-          "201": {
-            "description": "Created new project",
-            "schema": {
-              "$ref": "#/definitions/StatusSuccess"
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "tags": [
+        {
+            "name": "api",
+            "description": "Get available API versions"
+        },
+        {
+            "name": "api/v1",
+            "description": "v1 of the Knittery Project API"
+        }
+    ],
+    "paths": {
+        "/api": {
+            "get": {
+                "description": "Get available API versions",
+                "tags": [
+                    "api"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/APIVersions"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects": {
+            "post": {
+                "description": "Create a new project.",
+                "tags": [
+                    "api/v1"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created new project",
+                        "schema": {
+                            "$ref": "#/definitions/StatusSuccess"
+                        },
+                        "headers": {
+                            "location": {
+                                "description": "Path to the created project.",
+                                "type": "string",
+                                "format": "URI"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{id}": {
+            "get": {
+                "description": "Get a project by its ID.",
+                "tags": [
+                    "api/v1"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the project.",
+                        "type": "string",
+                        "format": "UUID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation.",
+                        "schema": {
+                            "$ref": "#/definitions/Project"
+                        }
+                    },
+                    "400": {
+                        "description": "Syntactically invalid ID.",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    },
+                    "404": {
+                        "description": "Project does not exist.",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
             },
-            "headers": {
-              "location": {
-                "description": "Path to the created project.",
-                "type": "string",
-                "format": "URI"
-              }
+            "put": {
+                "description": "Update the project.",
+                "tags": [
+                    "api/v1"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the project.",
+                        "type": "string",
+                        "format": "UUID",
+                        "required": true
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Project object that contains the updated data.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ProjectUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Project updated",
+                        "schema": {
+                            "$ref": "#/definitions/StatusSuccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data (either the ID or the content).",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    },
+                    "404": {
+                        "description": "Project does not exist, create first with a POST to /project.",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
             }
-          }
-        }
-      }
-    },
-    "/api/v1/projects/{id}": {
-      "get": {
-        "description": "Get a project by its ID.",
-        "tags": [
-          "api/v1"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of the project.",
-            "type": "string",
-            "format": "UUID",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation.",
-            "schema": {
-              "$ref": "#/definitions/Project"
-            }
-          },
-          "400": {
-            "description": "Syntactically invalid ID.",
-            "schema": {
-              "$ref": "#/definitions/Errors"
-            }
-          },
-          "404": {
-            "description": "Project does not exist.",
-            "schema": {
-              "$ref": "#/definitions/Errors"
-            }
-          }
-        }
-      },
-      "put": {
-        "description": "Update the project.",
-        "tags": [
-          "api/v1"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of the project.",
-            "type": "string",
-            "format": "UUID",
-            "required": true
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Project object that contains the updated data.",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ProjectUpdate"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Project updated",
-            "schema": {
-              "$ref": "#/definitions/StatusSuccess"
-            }
-          },
-          "400": {
-            "description": "Invalid data (either the ID or the content).",
-            "schema": {
-              "$ref": "#/definitions/Errors"
-            }
-          },
-          "404": {
-            "description": "Project does not exist, create first with a POST to /project.",
-            "schema": {
-              "$ref": "#/definitions/Errors"
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/projects/{id}/knitted": {
-      "get": {
-        "description": "The garnment that will be knitted as the result of the project.",
-        "tags": [
-          "api/v1"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of the project.",
-            "type": "string",
-            "format": "UUID",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation.",
-            "schema": {
-              "$ref": "#/definitions/KnittedOutput"
-            }
-          },
-          "400": {
-            "description": "Syntactically invalid ID.",
-            "schema": {
-              "$ref": "#/definitions/Errors"
-            }
-          },
-          "404": {
-            "description": "Project does not exist.",
-            "schema": {
-              "$ref": "#/definitions/Errors"
-            }
-          }
-        }
-      }
-    }
-  },
-  "definitions": {
-    "APIVersions": {
-      "title": "API Versions",
-      "type": "object",
-      "properties": {
-        "api-versions": {
-          "type": "array",
-          "items": {
-            "description": "API-Version. Use as subpath (i.e. /api/v1).",
-            "type": "string",
-            "example": "v1"
-          }
-        }
-      }
-    },
-    "Errors": {
-      "title": "Errors",
-      "description": "Error while processing the request.",
-      "type": "object",
-      "properties": {
-        "errors": {
-          "type": "array",
-          "description": "Errors",
-          "items": {
-            "$ref": "#/definitions/Error"
-          }
-        }
-      }
-    },
-    "Error": {
-      "title": "Error",
-      "type": "object",
-      "required": [
-        "id"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "UUID",
-          "description": "ID of this error occurence."
         },
-        "title": {
-          "type": "string",
-          "description": "Human readable description of the error.",
-          "example": "Resource does not exist"
-        },
-        "code": {
-          "type": "string",
-          "description": "Textual error code for this type of errors.",
-          "example": "AlreadyExists"
-        },
-        "detail": {
-          "type": "string",
-          "description": "Detail information about the error.",
-          "example": "Validation failed, expected a not b"
-        }
-      }
-    },
-    "Project": {
-      "title": "Knittery Project",
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "UUID"
-        },
-        "name": {
-          "type": "string",
-          "example": "My Project"
-        }
-      },
-      "required": [
-        "id"
-      ]
-    },
-    "StatusSuccess": {
-      "title": "Successful operation",
-      "type": "object",
-      "required": [
-        "id"
-      ],
-      "properties": {
-        "id": {
-          "description": "Reference to the affected object",
-          "type": "string",
-          "format": "UUID"
-        },
-        "detail": {
-          "description": "Additional information about the success.",
-          "type": "string"
-        }
-      }
-    },
-    "ProjectUpdate": {
-      "title": "Update of a knittery project",
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "User definied name of the project.",
-          "example": "My Project"
-        }
-      }
-    },
-    "KnittedOutput": {
-      "title": "Description of a knitted output as Stitches.",
-      "type": "object",
-      "properties": {
-        "mainBed": {
-          "description": "Rows knitted by the main bed, first row knitted is first in the array.",
-          "type": "array",
-          "items": {
-            "description": "Stitches of the knitted row.",
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/Stitch"
+        "/api/v1/projects/{id}/knitted": {
+            "get": {
+                "description": "The garnment that will be knitted as the result of the project.",
+                "tags": [
+                    "api/v1"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the project.",
+                        "type": "string",
+                        "format": "UUID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation.",
+                        "schema": {
+                            "$ref": "#/definitions/KnittedOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Syntactically invalid ID.",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    },
+                    "404": {
+                        "description": "Project does not exist.",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     },
-    "Stitch": {
-      "title": "A stitch in a garnment.",
-      "type": "object",
-      "properties": {
-        "type": {
-          "description": "Type of the stitch. 'No' means the previous line of the garnment is joined with the next line (double height stitch).",
-          "enum": [
-            "no",
-            "empty",
-            "plain",
-            "purl",
-            "castOn",
-            "castOff"
-          ]
+    "definitions": {
+        "APIVersions": {
+            "title": "API Versions",
+            "type": "object",
+            "properties": {
+                "api-versions": {
+                    "type": "array",
+                    "items": {
+                        "description": "API-Version. Use as subpath (i.e. /api/v1).",
+                        "type": "string",
+                        "example": "v1"
+                    }
+                }
+            }
         },
-        "yarns": {
-          "description": "Yarn(s) used for this stitch.",
-          "type": "array",
-          "items": {
-            "type": "string",
-            "description": "Yarn label."
-          }
+        "Errors": {
+            "title": "Errors",
+            "description": "Error while processing the request.",
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "description": "Errors",
+                    "items": {
+                        "$ref": "#/definitions/Error"
+                    }
+                }
+            }
         },
-        "marks": {
-          "description": "Special attributes of this stitch. I.e. folding line between the front and the back side of the garnment.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "Error": {
+            "title": "Error",
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "UUID",
+                    "description": "ID of this error occurence."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "Human readable description of the error.",
+                    "example": "Resource does not exist"
+                },
+                "code": {
+                    "type": "string",
+                    "description": "Textual error code for this type of errors.",
+                    "example": "AlreadyExists"
+                },
+                "detail": {
+                    "type": "string",
+                    "description": "Detail information about the error.",
+                    "example": "Validation failed, expected a not b"
+                }
+            }
+        },
+        "Project": {
+            "title": "Knittery Project",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "UUID"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "My Project"
+                },
+                "kind": {
+                    "type": "string",
+                    "description": "Product template used."
+                },
+                "product": {
+                    "$ref": "#/definitions/Template"
+                }
+            },
+            "required": [
+                "id"
+            ]
+        },
+        "StatusSuccess": {
+            "title": "Successful operation",
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "description": "Reference to the affected object",
+                    "type": "string",
+                    "format": "UUID"
+                },
+                "detail": {
+                    "description": "Additional information about the success.",
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectUpdate": {
+            "title": "Update of a knittery project",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "User definied name of the project.",
+                    "example": "My Project"
+                },
+                "product": {
+                    "$ref": "#/definitions/Template"
+                }
+            }
+        },
+        "Template": {
+            "title": "Knittable product (use one of the properties).",
+            "type": "object",
+            "example": "laptopCase",
+            "properties": {
+                "laptopCase": {
+                    "$ref": "#/definitions/LaptopCase"
+                }
+            }
+        },
+        "LaptopCase": {
+            "title": "Knitted laptop case.",
+            "type": "object",
+            "required": [
+                "width",
+                "height",
+                "thickness"
+            ],
+            "properties": {
+                "width": {
+                    "type": "number",
+                    "description": "Width of the laptop in cm (short side).",
+                    "example": 25
+                },
+                "height": {
+                    "type": "number",
+                    "description": "Height of the laptop in cm (long side).",
+                    "example": 36
+                },
+                "thickness": {
+                    "type": "number",
+                    "description": "Thickness of the laptop in cm.",
+                    "example": 1.5
+                },
+                "frontGap": {
+                    "type": "number",
+                    "description": "Gap between the end of the laptop and the start of the fabric in the front in cm (default is 2cm).",
+                    "example": 2
+                },
+                "lashLength": {
+                    "type": "number",
+                    "description": "Length of the lash in cm (default is 10cm).",
+                    "example": 10
+                },
+                "pattern": {
+                    "$ref": "#/definitions/LaptopCasePattern"
+                }
+            }
+        },
+        "LaptopCasePattern": {
+            "title": "Patterns for the laptop case (use one of the properties).",
+            "type": "object",
+            "properties": {
+                "checkerboard": {
+                    "$ref": "#/definitions/CheckerboardPattern"
+                }
+            }
+        },
+        "CheckerboardPattern": {
+            "title": "Checkerboard pattern.",
+            "type": "object",
+            "required": [
+                "size",
+                "color1",
+                "color2"
+            ],
+            "properties": {
+                "size": {
+                    "type": "number",
+                    "description": "Size of the squares in cm.",
+                    "example": 2
+                },
+                "color1": {
+                    "type": "string",
+                    "description": "First color (RGB-value).",
+                    "pattern": "#[0-9A-Fa-f]{6}",
+                    "example": "#ff0000"
+                },
+                "color2": {
+                    "type": "string",
+                    "description": "Second color (RGB-value).",
+                    "pattern": "#[0-9A-Fa-f]{6}",
+                    "example": "#0000ff"
+                },
+                "dissolveExponent": {
+                    "type": "number",
+                    "description": "Exponent for dissolving the pattern.",
+                    "example": 1.5
+                },
+                "seed": {
+                    "type": "integer",
+                    "description": "Seed for the dissolving pattern.",
+                    "example": 53232
+                }
+            }
+        },
+        "KnittedOutput": {
+            "title": "Description of a knitted output as Stitches.",
+            "type": "object",
+            "properties": {
+                "mainBed": {
+                    "description": "Rows knitted by the main bed, first row knitted is first in the array.",
+                    "type": "array",
+                    "items": {
+                        "description": "Stitches of the knitted row.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/Stitch"
+                        }
+                    }
+                }
+            }
+        },
+        "Stitch": {
+            "title": "A stitch in a garnment.",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "description": "Type of the stitch. 'No' means the previous line of the garnment is joined with the next line (double height stitch).",
+                    "enum": [
+                        "no",
+                        "empty",
+                        "plain",
+                        "purl",
+                        "castOn",
+                        "castOff"
+                    ]
+                },
+                "yarns": {
+                    "description": "Yarn(s) used for this stitch.",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "Yarn label."
+                    }
+                },
+                "marks": {
+                    "description": "Special attributes of this stitch. I.e. folding line between the front and the back side of the garnment.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         }
-      }
-    }
-  },
-  "basePath": "/"
+    },
+    "basePath": "/"
 }

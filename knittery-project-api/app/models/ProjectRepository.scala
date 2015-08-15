@@ -1,7 +1,6 @@
 package models
 
 import java.util.UUID
-
 import akka.actor.{ActorRef, Actor}
 import models.ProjectRepository._
 
