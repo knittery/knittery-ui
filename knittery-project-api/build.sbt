@@ -20,6 +20,13 @@ libraryDependencies ++= Seq(
   "com.assembla.scala-incubator" %% "graph-json" % "1.9.1"
 )
 
+// Java Options
+initialize ~= { _ =>
+  System.setProperty("java.awt.headless", "true")
+}
+NativePackagerKeys.bashScriptExtraDefines += """addJava "-Djava.awt.headless=true""""
+
+
 // Test dependencies
 libraryDependencies ++= Seq(
   specs2 % Test
