@@ -1,17 +1,19 @@
 package controllers
 
+import java.awt.Color
 import java.util.UUID
-
-import akka.actor.ActorRef
-import akka.pattern.ask
 import javax.inject._
-import akka.util.Timeout
-import models.Project._
-import models.ProjectRepository._
-import play.api.mvc._
-import play.api.libs.json._
 import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.duration._
+import akka.actor.ActorRef
+import akka.pattern.ask
+import akka.util.Timeout
+import play.api.mvc._
+import play.api.libs.json._
+import knit.Yarn
+import knit.plan._
+import models.Project._
+import models.ProjectRepository._
 
 class ProjectController @Inject()(@Named("project-repository") projectRepository: ActorRef)(implicit ec: ExecutionContext) extends Controller {
   implicit val timeout: Timeout = 10.seconds
@@ -21,6 +23,23 @@ class ProjectController @Inject()(@Named("project-repository") projectRepository
   implicit val errorFormat = Json.format[Error]
   implicit val projectInfoFormat = Json.format[ProjectInfo]
   implicit val updateProjectInfoFormat = Json.format[UpdateProjectInfo]
+  implicit object ColorWrite extends Writes[Color] {
+    override def writes(color: Color) = {
+      val value = color.getRGB | 0xff000000
+      JsString("#" + value.toHexString.drop(2))
+    }
+  }
+  implicit val yarnWrites = Json.writes[Yarn]
+  implicit object StitchWrite extends Writes[Stitch] {
+    override def writes(stitch: Stitch) = stitch match {
+      case NoStitch => Json.obj("type" -> "no")
+      case EmptyStitch => Json.obj("type" -> "empty")
+      case PlainStitch(yarns) => Json.obj("type" -> "plain", "yarns" -> yarns.map(_.name))
+      case PurlStitch(yarns) => Json.obj("type" -> "purl", "yarns" -> yarns.map(_.name))
+      case CastOnStitch(yarns) => Json.obj("type" -> "castOn", "yarns" -> yarns.map(_.name))
+      case CastOffStitch(yarns) => Json.obj("type" -> "castOff", "yarns" -> yarns.map(_.name))
+    }
+  }
 
   class ProjectRequest[A](val projectId: UUID, val project: ActorRef, request: Request[A]) extends WrappedRequest[A](request) {
     def successStatus(detail: String): Result = successStatus(Some(detail))
@@ -76,5 +95,24 @@ class ProjectController @Inject()(@Named("project-repository") projectRepository
           req.errorStatus(400, Error("Invalid data", "INVALID_DATA", Some(detail)))
       }
     )
+  }
+
+  def knitted(id: UUID) = ActionOnProject(id).async { req =>
+    (req.project ? GetKnitted).map {
+      case KnittedResponse(knitted) =>
+        Ok(Json.obj(
+          "mainBed" -> knitted.mainBed.data,
+          "yarns" ->
+            (knitted.mainBed.data.flatten.flatMap {
+              case PlainStitch(yarns) => yarns
+              case PurlStitch(yarns) => yarns
+              case CastOnStitch(yarns) => yarns
+              case CastOffStitch(yarns) => yarns
+              case _ => Seq.empty[Yarn]
+            }).toSet[Yarn]
+        ))
+      case NoProduct =>
+        req.errorStatus(400, Error("Creation not finished (no PUT received)", "INVALID_STATUS"))
+    }
   }
 }

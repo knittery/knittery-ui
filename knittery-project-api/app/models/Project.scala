@@ -3,6 +3,7 @@ package models
 import java.util.UUID
 import akka.actor.{Props, Actor}
 import play.api.libs.json.{JsValue, JsObject}
+import knit.plan.Knitted
 import models.Project._
 
 
@@ -16,6 +17,10 @@ object Project {
   case class UpdateProjectInfo(name: Option[String], product: JsObject) extends Message
   case object ProjectInfoUpdated extends Message
   case class ProjectInfoUpdateInvalid(detail: String) extends Message
+
+  case object GetKnitted extends Message
+  case class KnittedResponse(knitted: Knitted) extends Message
+  case object NoProduct extends Message
 }
 class Project private(id: UUID) extends Actor {
   private var name = Option.empty[String]
@@ -37,5 +42,11 @@ class Project private(id: UUID) extends Actor {
             sender ! ProjectInfoUpdated
           }
         )
+
+    case GetKnitted =>
+      sender() ! product.fold[Message](NoProduct) { product =>
+        val finalState = product.plan.run
+        KnittedResponse(finalState.output)
+      }
   }
 }

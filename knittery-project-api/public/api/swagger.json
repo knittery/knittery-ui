@@ -415,17 +415,26 @@
             "title": "Description of a knitted output as Stitches.",
             "type": "object",
             "properties": {
+                "yarns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Yarn"
+                    }
+                },
                 "mainBed": {
                     "description": "Rows knitted by the main bed, first row knitted is first in the array.",
                     "type": "array",
                     "items": {
-                        "description": "Stitches of the knitted row.",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/Stitch"
-                        }
+                        "$ref": "#/definitions/KnittedRow"
                     }
                 }
+            }
+        },
+        "KnittedRow": {
+            "description": "Stitches of a knitted row.",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Stitch"
             }
         },
         "Stitch": {
@@ -434,6 +443,7 @@
             "properties": {
                 "type": {
                     "description": "Type of the stitch. 'No' means the previous line of the garnment is joined with the next line (double height stitch).",
+                    "type": "string",
                     "enum": [
                         "no",
                         "empty",
@@ -441,14 +451,16 @@
                         "purl",
                         "castOn",
                         "castOff"
-                    ]
+                    ],
+                    "example": "plain"
                 },
                 "yarns": {
                     "description": "Yarn(s) used for this stitch.",
                     "type": "array",
                     "items": {
                         "type": "string",
-                        "description": "Yarn label."
+                        "description": "Yarn label.",
+                        "example": "red-wool"
                     }
                 },
                 "marks": {
@@ -457,6 +469,23 @@
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "Yarn": {
+            "title": "Kind of yarn",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of the yarn",
+                    "type": "string",
+                    "example": "red-wool"
+                },
+                "color": {
+                    "description": "Color of the yarn (RGB)",
+                    "type": "string",
+                    "pattern": "#[0-9A-Fa-f]{6}",
+                    "example": "#ff0000"
                 }
             }
         }
