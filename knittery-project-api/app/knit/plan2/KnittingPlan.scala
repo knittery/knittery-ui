@@ -1,6 +1,7 @@
 package knit.plan2
 
 import scalaz._
+import Scalaz._
 import knit._
 
 object KnittingPlan {
@@ -10,51 +11,59 @@ object KnittingPlan {
   type KnittingPlan[A] = Free[KnittingPlanF, A]
 
   /** Knits a row using the specified carriage. */
-  def knitRow(carriage: Carriage, direction: Direction, pattern: NeedleActionRow = AllNeedlesToB) =
+  def knitRow(carriage: Carriage, direction: Direction, pattern: NeedleActionRow = AllNeedlesToB): KnittingPlan[Unit] =
     Free.liftFC(KnitRow(carriage, direction, pattern))
 
   /** Manual movement of needles. */
-  def moveNeedles(bed: Bed, to: NeedlePatternRow) = Free.liftFC(MoveNeedles(bed, to))
+  def moveNeedles(bed: Bed, to: NeedlePatternRow): KnittingPlan[Unit] = Free.liftFC(MoveNeedles(bed, to))
 
   /**
    * Moves the needle into A position and moves the yarns that were on in one needle in the
    * given direction. The needle the yarn is moved to is left in the B position.
    */
-  def retireNeedle(bed: Bed, at: Needle, direction: Direction) = Free.liftFC(RetireNeedle(bed, at, direction))
+  def retireNeedle(bed: Bed, at: Needle, direction: Direction): KnittingPlan[Unit] = Free
+    .liftFC(RetireNeedle(bed, at, direction))
 
   /** Retire needles with the double decker. */
-  def retireWithDouble(bed: Bed, leftmost: Needle, direction: Direction) =
+  def retireWithDouble(bed: Bed, leftmost: Needle, direction: Direction): KnittingPlan[Unit] =
     Free.liftFC(RetireWithDouble(bed, leftmost, direction))
 
   /** Retire needles with the triple decker. */
-  def retireWithTriple(bed: Bed, leftmost: Needle, direction: Direction) =
+  def retireWithTriple(bed: Bed, leftmost: Needle, direction: Direction): KnittingPlan[Unit] =
     Free.liftFC(RetireWithTriple(bed, leftmost, direction))
 
-  def addCarriage(carriage: Carriage, at: LeftRight = Left) = Free.liftFC(AddCarriage(carriage, at))
-  def changeKCarriageSettings(settings: KCarriage.Settings, assembly: KCarriage.Assembly)
-  = Free.liftFC(ChangeKCarriageSettings(settings, assembly))
-  def changeLCarriageSettings(settings: LCarriage.Settings) = Free.liftFC(ChangeLCarriageSettings(settings))
-  def changeGCarriageSettings(settings: GCarriage.Settings) = Free.liftFC(ChangeGCarriageSettings(settings))
+  def addCarriage(carriage: Carriage, at: LeftRight = Left): KnittingPlan[Unit] =
+    Free.liftFC(AddCarriage(carriage, at))
+  def changeKCarriageSettings(settings: KCarriage.Settings, assembly: KCarriage.Assembly): KnittingPlan[Unit] =
+    Free.liftFC(ChangeKCarriageSettings(settings, assembly))
+  def changeLCarriageSettings(settings: LCarriage.Settings): KnittingPlan[Unit] =
+    Free.liftFC(ChangeLCarriageSettings(settings))
+  def changeGCarriageSettings(settings: GCarriage.Settings): KnittingPlan[Unit] =
+    Free.liftFC(ChangeGCarriageSettings(settings))
 
-  def threadYarnK(yarnA: Option[YarnPiece], yarnB: Option[YarnPiece]) = Free.liftFC(ThreadYarnK(yarnA, yarnB))
-  def threadYarnG(yarn: Option[YarnPiece]) = Free.liftFC(ThreadYarnG(yarn))
+  def threadYarnK(yarnA: Option[YarnPiece], yarnB: Option[YarnPiece]): KnittingPlan[Unit] =
+    Free.liftFC(ThreadYarnK(yarnA, yarnB))
+  def threadYarnG(yarn: Option[YarnPiece]): KnittingPlan[Unit] =
+    Free.liftFC(ThreadYarnG(yarn))
 
   /**
    * Performs a closed cast on for the needles. The needles are then moved to D position.
    * All other needles are not touched.
    */
-  def closedCastOn(bed: Bed, from: Needle, until: Needle, yarn: YarnPiece) =
+  def closedCastOn(bed: Bed, from: Needle, until: Needle, yarn: YarnPiece): KnittingPlan[Unit] =
     Free.liftFC(ClosedCastOn(bed, from, until, yarn))
-  def closedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolean) =
+  def closedCastOff(bed: Bed, withYarn: YarnPiece, filter: Needle => Boolean): KnittingPlan[Unit] =
     Free.liftFC(ClosedCastOff(bed, withYarn, filter))
 
   /** Moves the yarn from the main to the double bed. Needles affected are moved to B position. */
-  def moveToDoubleBed(filter: Needle => Boolean, offset: Int = 0, flip: Option[Needle] = None) =
+  def moveToDoubleBed(filter: Needle => Boolean, offset: Int = 0, flip: Option[Needle] = None): KnittingPlan[Unit] =
     Free.liftFC(MoveToDoubleBed(filter, offset, flip))
   /** Transfer the yarn from the double bed to the main bed. Affected needles are moved to B position. */
-  def moveToMainBed(filter: Needle => Boolean, offset: Int = 0) = Free.liftFC(MoveToMainBed(filter, offset))
+  def moveToMainBed(filter: Needle => Boolean, offset: Int = 0): KnittingPlan[Unit] =
+    Free.liftFC(MoveToMainBed(filter, offset))
 
-  def hangOnCastOnComb() = Free.liftFC(HangOnCastOnComb)
+  def hangOnCastOnComb(): KnittingPlan[Unit] =
+    Free.liftFC(HangOnCastOnComb)
 
 
   object KnittingPlanOps {
