@@ -24,13 +24,26 @@ object Helper {
     a = Needle.all.filter(n => positions(n).isWorking).toSet
   } yield a
 
-
+  //
   /** Add carriage if missing. */
-  def needCarriage(carriage: Carriage, addAt: LeftRight = Left) = {
+  def needCarriage(carriage: Carriage, addAt: LeftRight = Left): KnittingPlan[Unit] = {
     carriagePosition(carriage).map(_.onBoard).ifM(
       noop,
       addCarriage(carriage, addAt)
     )
+  }
+
+  /** Change K settings and make sure the carriage is on the board. */
+  def carriageSettings(settings: KCarriage.Settings, assembly: KCarriage.Assembly) = {
+    needCarriage(KCarriage) >> changeKCarriageSettings(settings, assembly)
+  }
+  /** Change L settings and make sure the carriage is on the board. */
+  def carriageSettings(settings: LCarriage.Settings) = {
+    needCarriage(LCarriage) >> changeLCarriageSettings(settings)
+  }
+  /** Change G settings and make sure the carriage is on the board. */
+  def carriageSettings(settings: GCarriage.Settings) = {
+    needCarriage(GCarriage) >> changeGCarriageSettings(settings)
   }
 
   /** Next direction to use for the carriage. Will fail if the carriage is not on the board. */
