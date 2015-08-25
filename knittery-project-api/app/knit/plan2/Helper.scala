@@ -6,6 +6,14 @@ import knit._
 import knit.plan2.KnittingPlan._
 
 object Helper {
+  def noop = value(())
+
+  /** Require that the condition is true, else fail knitting with the error. */
+  def require(condition: Boolean, error: String = "requirement failed") = {
+    if (condition) value(())
+    else knittingError(error)
+  }
+
   /** Working needles (across all bed) */
   def workingNeedles: KnittingPlan[Set[Needle]] =
     Beds.all.foldMap(workingNeedles)
