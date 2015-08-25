@@ -2,6 +2,7 @@ package knit
 
 sealed trait CarriagePosition {
   def directionTo(needle: Needle): Direction
+  def onBoard: Boolean
 }
 
 case class CarriageOverNeedles(
@@ -10,6 +11,7 @@ case class CarriageOverNeedles(
   extends CarriagePosition {
 
   override def directionTo(needle: Needle) = if (needle < currentNeedle) ToLeft else ToRight
+  override def onBoard = true
 }
 
 case class CarriageLeft(
@@ -18,6 +20,7 @@ case class CarriageLeft(
   extends CarriagePosition {
 
   override def directionTo(needle: Needle) = ToRight
+  override def onBoard = true
 }
 
 case class CarriageRight(
@@ -26,12 +29,14 @@ case class CarriageRight(
   extends CarriagePosition {
 
   override def directionTo(needle: Needle) = ToLeft
+  override def onBoard = true
 }
 
 /** The carriage is not in use. */
 case object CarriageRemoved extends CarriagePosition {
   override def directionTo(needle: Needle) =
     throw new IllegalStateException(s"Removed carriage has no direction to $needle")
+  override def onBoard = false
 }
 
 /** Direction of movement */

@@ -17,16 +17,24 @@ object Helper {
   } yield a
 
 
+  /** Add carriage if missing. */
+  def needCarriage(carriage: Carriage, addAt: LeftRight = Left) = {
+    carriagePosition(carriage).map(_.onBoard).ifM(
+      noop,
+      addCarriage(carriage, addAt)
+    )
+  }
+
   /** Next direction to use for the carriage. Will fail if the carriage is not on the board. */
   def nextDirection(carriage: Carriage): KnittingPlan[Direction] = (for {
     pos <- carriagePosition(carriage)
     working <- workingNeedles
-  } yield pos match {
-      case CarriageRemoved => s"Trying to use removed carriage ${carriage.name}.".left
-      case pos =>
+  } yield {
+      if (pos.onBoard)
         if (working.intersect(carriage.over(pos).toSet).nonEmpty)
           s"carriage ${carriage.name} still over working needeles".left
         else pos.directionTo(working.headOption.getOrElse(Needle.middle)).right
+      else s"Trying to use removed carriage ${carriage.name}.".left
     }).flatten
 
 }
