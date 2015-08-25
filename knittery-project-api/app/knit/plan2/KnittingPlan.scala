@@ -1,5 +1,6 @@
 package knit.plan2
 
+import scala.language.higherKinds
 import scalaz._
 import Scalaz._
 import knit._
@@ -65,8 +66,29 @@ object KnittingPlan {
   def moveToMainBed(filter: Needle => Boolean, offset: Int = 0): KnittingPlan[Unit] =
     Free.liftFC(MoveToMainBed(filter, offset))
 
-  def hangOnCastOnComb(): KnittingPlan[Unit] =
-    Free.liftFC(HangOnCastOnComb)
+  def hangOnCastOnComb(): KnittingPlan[Unit] = Free.liftFC(HangOnCastOnComb)
+
+  /** Fail the knitting because of an error. */
+  def knittingError[A](error: String): KnittingPlan[A] = Free.liftFC(KnittingError(error))
+
+  /** Convert a String \/ into a knitting plan action. */
+  implicit object fromDisjunction extends (({type λ[A] = String \/ A})#λ ~> KnittingPlan) {
+    def apply[A](fa: String \/ A) = fa.fold[KnittingPlan[A]](knittingError, value)
+  }
+  def valueOrError[A](v: String \/ A) = fromDisjunction(v)
+
+
+  // Functions for the plan monad
+  def flatten[A[_], B](plan: KnittingPlan[A[B]])(implicit t: A ~> KnittingPlan): KnittingPlan[B] =
+    plan.flatMap(t.apply)
+  implicit class KnittingPlanFlattenOp[A[_], B](plan: KnittingPlan[A[B]]) {
+    def flatten(implicit t: A ~> KnittingPlan): KnittingPlan[B] = KnittingPlan.flatten(plan)
+  }
+  // to help the compiler that has problems finding out that from disjunction matches..
+  def flatten[A](plan: KnittingPlan[String \/ A]): KnittingPlan[A] = plan.flatMap(fromDisjunction.apply)
+  implicit class KnittingPlanFlattenDisjunctionOp[A](plan: KnittingPlan[String \/ A]) {
+    def flatten: KnittingPlan[A] = KnittingPlan.flatten(plan)
+  }
 
 
   object KnittingPlanOps {
@@ -112,5 +134,7 @@ object KnittingPlan {
     case class MoveToMainBed(filter: Needle => Boolean, offset: Int = 0) extends KnittingPlanOp[Unit]
 
     case object HangOnCastOnComb extends KnittingPlanOp[Unit]
+
+    case class KnittingError(error: String) extends KnittingPlanOp[Nothing]
   }
 }
