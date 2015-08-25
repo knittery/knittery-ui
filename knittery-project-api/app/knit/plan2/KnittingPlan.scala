@@ -68,6 +68,10 @@ object KnittingPlan {
 
   def hangOnCastOnComb(): KnittingPlan[Unit] = Free.liftFC(HangOnCastOnComb)
 
+  def carriagePosition(carriage: Carriage): KnittingPlan[CarriagePosition] = Free.liftFC(GetCarriagePosition(carriage))
+
+  def needlePositions(bed: Bed): KnittingPlan[NeedlePatternRow] = Free.liftFC(GetNeedlePositions(bed))
+
   /** Fail the knitting because of an error. */
   def knittingError[A](error: String): KnittingPlan[A] = Free.liftFC(KnittingError(error))
 
@@ -134,6 +138,10 @@ object KnittingPlan {
     case class MoveToMainBed(filter: Needle => Boolean, offset: Int = 0) extends KnittingPlanOp[Unit]
 
     case object HangOnCastOnComb extends KnittingPlanOp[Unit]
+
+    case class GetCarriagePosition(carriage: Carriage) extends KnittingPlanOp[CarriagePosition]
+
+    case class GetNeedlePositions(bed: Bed) extends KnittingPlanOp[NeedlePatternRow]
 
     case class KnittingError(error: String) extends KnittingPlanOp[Nothing]
   }
