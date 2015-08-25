@@ -10,6 +10,9 @@ object KnittingPlan {
   //cannot use FreeC, because type inference for implicits will diverge
   type KnittingPlan[A] = Free[KnittingPlanF, A]
 
+  /** Alias for value.pure[KnittingPlan] */
+  def value[A](value: A): KnittingPlan[A] = value.pure[KnittingPlan]
+
   /** Knits a row using the specified carriage. */
   def knitRow(carriage: Carriage, direction: Direction, pattern: NeedleActionRow = AllNeedlesToB): KnittingPlan[Unit] =
     Free.liftFC(KnitRow(carriage, direction, pattern))
