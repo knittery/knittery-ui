@@ -58,4 +58,22 @@ object Helper {
       else s"Trying to use removed carriage ${carriage.name}.".left
     }).flatten
 
+
+  /** Generates NeedlePatternRow by applying the pattern to the pattern row. */
+  def patternOnActiveNeedles(before: NeedlePatternRow, pattern: NeedleActionRow): NeedlePatternRow = {
+    (n: Needle) => if (before(n).isWorking) pattern(n).toPosition else NeedleA
+  }
+
+  /** Knit a row with the K-Carriage. */
+  def knitRowWithK(settings: KCarriage.Settings = KCarriage.Settings(),
+    assembly: KCarriage.Assembly = KCarriage.SinkerPlate(),
+    yarnA: Option[YarnPiece] = None, yarnB: Option[YarnPiece] = None, pattern: NeedleActionRow = AllNeedlesToB) = for {
+    _ <- carriageSettings(settings, assembly)
+    before <- needlePositions(MainBed)
+    _ <- moveNeedles(MainBed, patternOnActiveNeedles(before, pattern))
+    _ <- threadYarnK(yarnA, yarnB)
+    direction <- nextDirection(KCarriage)
+    _ <- knitRow(KCarriage, direction)
+  } yield ()
+
 }
