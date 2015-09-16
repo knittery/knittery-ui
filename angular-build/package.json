@@ -1,5 +1,5 @@
 {
-  "name": "gulp-build",
+  "name": "knittery-gulp-build",
   "version": "1.0.0",
   "description": "Gulp Tasks for building angular JS applications",
   "main": "gulp/index.js",

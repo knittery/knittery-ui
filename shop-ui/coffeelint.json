@@ -1,0 +1,17 @@
+{
+  "max_line_length": {
+    "name": "max_line_length",
+    "value": 120,
+    "level": "warn",
+    "limitComments": true
+  },
+  "line_endings": {
+    "name": "line_endings",
+    "level": "error",
+    "value": "unix"
+  },
+  "missing_fat_arrows": {
+    "name": "missing_fat_arrows",
+    "level": "warn"
+  }
+}

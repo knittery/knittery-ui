@@ -1,0 +1,18 @@
+{
+  "private": "true",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {},
+  "dependencies": {
+    "angular": "^1.4.1",
+    "angular-bootstrap": "^0.12.0",
+    "angular-route": "^1.4.1",
+    "bootstrap": "^3.3.5"
+  },
+  "browserify-shim": {},
+  "devDependencies": {
+    "knittery-gulp-build": "^1.0.0",
+    "gulp": "^3.9.0"
+  }
+}
