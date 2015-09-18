@@ -6,6 +6,9 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 scalaVersion := "2.11.7"
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
+
+libraryDependencies += filters
+
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.1.3",
   "com.squants" %% "squants" % "0.4.2",
