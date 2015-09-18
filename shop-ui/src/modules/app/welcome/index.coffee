@@ -8,3 +8,5 @@ m.config(($routeProvider) ->
     templateUrl: 'app/welcome/welcome.html'
   )
 )
+
+require('./WelcomeCtrl')(m)
