@@ -1,6 +1,16 @@
 <div ng-controller="ProjectCtrl as c">
 <span ng-show="c.project">
-  your project (id = {{c.project.id}}):
-  {{ c.project.name }}
+  <h1>{{ c.project.name }}</h1>
+  <small>ID is {{c.project.id}}</small>
+
+  <h2>Settings</h2>
+
+  <span ng-repeat="setting in c.product.settings">
+    <h3>{{ setting.title }}</h3>
+    <div>
+      Settings go here..
+    </div>
+  </span>
+
 </span>
 </div>

@@ -1,5 +1,7 @@
 'use strict'
 
+_ = require('underscore')
+
 module.exports = (m) ->
   m.provider('Products', ->
     products = []
@@ -19,4 +21,5 @@ module.exports = (m) ->
       products.push(product)
     $get: ->
       list: -> angular.copy(products)
+      get: (name) -> _.find(products, (p) -> p.name == name)
   )
