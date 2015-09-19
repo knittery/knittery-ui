@@ -4,5 +4,11 @@
   <div ng-show="c.message" class="alert alert-success">
     {{c.message}}
   </div>
-  <button class="btn btn-default" ng-click="c.create()">new project</button>
+
+  <h2>Available Products</h2>
+  <ul class="list-inline">
+    <li ng-repeat="product in c.products">
+      {{product.label}} <a href ng-click="c.create(product)">Create</a>
+    </li>
+  </ul>
 </div>
