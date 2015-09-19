@@ -12,4 +12,7 @@ module.exports = (m) ->
         project.product = settings
         project.put().then(-> id)
       )
+
+    get: (id) ->
+      Restangular.one('projects', id).get()
   )

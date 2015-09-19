@@ -1,13 +1,14 @@
 'use strict'
 
 class WelcomeCtrl
-  constructor: (@Projects, @Products) ->
+  constructor: (@Projects, @Products, @$location) ->
     @products = @Products.list()
 
   create: (product) =>
+    @message = 'Your project is being created...'
     @Projects
     .create(product)
-    .then((id) => @message = "Created project #{id}.")
+    .then((id) => @$location.path("/project/#{id}"))
 
 module.exports = (m) ->
-  m.controller("WelcomeCtrl", ['Projects', 'Products', WelcomeCtrl])
+  m.controller("WelcomeCtrl", ['Projects', 'Products', '$location', WelcomeCtrl])
