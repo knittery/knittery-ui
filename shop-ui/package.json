@@ -14,7 +14,7 @@
   },
   "browserify-shim": {},
   "devDependencies": {
-    "knittery-gulp-build": "^1.0.0",
-    "gulp": "^3.9.0"
+    "gulp": "^3.9.0",
+    "knittery-gulp-build": "^1.0.0"
   }
 }
