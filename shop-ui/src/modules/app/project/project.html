@@ -1,16 +1,19 @@
-<div ng-controller="ProjectCtrl as c">
-<span ng-show="c.project">
-  <h1>{{ c.project.name }}</h1>
-  <small>ID is {{c.project.id}}</small>
+<div ng-controller="ProjectCtrl as c" class="section">
+  <div class="container" ng-show="c.project">
+    <div class="row">
+      <div class="col-md-3">
+        <h1>{{ c.project.name }}</h1>
+        <small>ID is {{c.project.id}}</small>
 
-  <h2>Settings</h2>
-
-  <span ng-repeat="setting in c.product.settings">
-    <h3>{{ setting.title }}</h3>
-    <div>
-      Settings go here..
+        <accordion close-others="false">
+          <accordion-group ng-repeat="setting in c.product.settings" heading="{{setting.title}}" is-open="true">
+            Settings go here..
+          </accordion-group>
+        </accordion>
+      </div>
+      <div class="col-md-9">
+        <img src="http://pingendo.github.io/pingendo-bootstrap/assets/placeholder.png" class="img-responsive">
+      </div>
     </div>
-  </span>
-
-</span>
+  </div>
 </div>
