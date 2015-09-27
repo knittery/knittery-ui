@@ -23,9 +23,18 @@ module.exports = (m) ->
           title: 'Measurements' #TODO i18n
           directive: 'laptop-case-settings-measurements'
         }
+        {
+          title: 'Pattern' #TODO i18n
+          directive: 'laptop-case-settings-measurements'
+        }
       ]
     )
   )
 
   m.directive('laptopCaseSettingsMeasurements', ->
+    template: """
+      <div>Hello there! {{settings.laptopCase.width}}</div>
+      """
+    scope:
+      settings: '='
   )
