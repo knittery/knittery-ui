@@ -10,80 +10,19 @@
 
   <title>knittery.ch</title>
 
-    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-    <link href="knittery-bootsrap.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet"
+        type="text/css">
+  <link href="knittery-bootsrap.css" rel="stylesheet" type="text/css">
   <!--styles-->
 </head>
 <body>
 <ng-include src="'app/navigation/navigation.html'"></ng-include>
 
-    <div class="section">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-3">
-            <ul class="list-group"></ul>
-            <p></p>
-            
-            <form class="form-horizontal" role="form">
-              <div class="form-group">
-                <div class="col-sm-2">
-                  <label for="inputWidth" class="control-label">width</label>
-                </div>
-                <div class="col-sm-10">
-                  <input type="text" class="form-control input-sm" id="inputEmail3" placeholder="width">
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="col-sm-2">
-                  <label for="inputWidth" class="control-label">length
-                    <br>
-                  </label>
-                </div>
-                <div class="col-sm-10">
-                  <input type="text" class="form-control input-sm" id="inputEmail3" placeholder="length">
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="col-sm-2">
-                  <label for="inputWidth" class="control-label">height
-                    <br>
-                  </label>
-                </div>
-                <div class="col-sm-10">
-                  <input type="text" class="form-control input-sm" id="inputEmail3" placeholder="height">
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                  <hr>
-                  <button type="submit" class="btn btn-default">load</button>
-                </div>
-              </div>
-            </form>
-            <p></p>
-          </div>
-          <div class="col-md-9">
-            <img src="http://pingendo.github.io/pingendo-bootstrap/assets/placeholder.png" class="img-responsive">
-            <p></p>
-            <p></p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <footer class="section section-info text-right">
-      <div class="container">
-        <div class="row">
-          <div class="col-sm-6 col-md-6"></div>
-          <div class="col-sm-6">
-            <h3 class="text-right">knittery.ch</h3>
-            <p class="text-right">a machine knitting project by Mario Siegenthaler &amp; Alex Habermann</p>
-          </div>
-        </div>
-      </div>
-    </footer>
+<div ng-view></div>
 
+<ng-include src="'app/navigation/footer.html'"></ng-include>
 <!--scripts-->
 </body>
 </html>
