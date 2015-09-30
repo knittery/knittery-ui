@@ -27,12 +27,22 @@ m.config((ProductsProvider) ->
         title: 'Measurements' #TODO i18n
         directive: 'laptop-case-settings-measurements'
       }
+      {
+        title: 'Lash' #TODO i18n
+        directive: 'laptop-case-settings-lash'
+      }
     ]
   )
 )
 
 m.directive('laptopCaseSettingsMeasurements', ->
   templateUrl: 'app/products/laptop-case/measurements.html'
+  scope: {settings: '='}
+  link: (scope) -> scope.m = scope.settings.laptopCase
+)
+
+m.directive('laptopCaseSettingsLash', ->
+  templateUrl: 'app/products/laptop-case/lash.html'
   scope: {settings: '='}
   link: (scope) -> scope.m = scope.settings.laptopCase
 )
