@@ -6,6 +6,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 scalaVersion := "2.11.7"
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
+resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
 
 libraryDependencies += filters
 

@@ -1,0 +1,15 @@
+<form class="form-horizontal" role="form">
+    <length-input label="Size" id="size" ng-model="m.pattern.checkerboard.size"></length-input>
+    <color-input label="Color I" id="color1" ng-model="m.pattern.checkerboard.color1"></color-input>
+    <color-input label="Color II" id="color2" ng-model="m.pattern.checkerboard.color2"></color-input>
+
+    <div class="form-group">
+        <div class="col-sm-4">
+            <label for="dissolveExponent" class="control-label">Dissolve Exponent</label>
+        </div>
+        <div class="col-sm-8">
+            <input type="number" class="form-control input-sm text-right" id="dissolveExponent"
+                   ng-model="m.pattern.checkerboard.dissolveExponent" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.1">
+        </div>
+    </div>
+</form>

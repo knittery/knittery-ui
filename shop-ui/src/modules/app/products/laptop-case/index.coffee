@@ -31,6 +31,10 @@ m.config((ProductsProvider) ->
         title: 'Lash' #TODO i18n
         directive: 'laptop-case-settings-lash'
       }
+      {
+        title: 'Pattern' #TODO i18n
+        directive: 'laptop-case-settings-pattern'
+      }
     ]
   )
 )
@@ -43,6 +47,12 @@ m.directive('laptopCaseSettingsMeasurements', ->
 
 m.directive('laptopCaseSettingsLash', ->
   templateUrl: 'app/products/laptop-case/lash.html'
+  scope: {settings: '='}
+  link: (scope) -> scope.m = scope.settings.laptopCase
+)
+
+m.directive('laptopCaseSettingsPattern', ->
+  templateUrl: 'app/products/laptop-case/pattern.html'
   scope: {settings: '='}
   link: (scope) -> scope.m = scope.settings.laptopCase
 )
