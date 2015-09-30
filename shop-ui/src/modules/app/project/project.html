@@ -1,5 +1,5 @@
 <div ng-controller="ProjectCtrl as c" class="section">
-  <div class="container" ng-show="c.project">
+  <div class="container fullheight-container" ng-show="c.project">
     <div class="row">
       <div class="col-md-3">
         <h1>{{ c.project.name }}</h1>
@@ -21,7 +21,8 @@
         <div class="alert alert-success" ng-hide="c.updating">
           Up to Date
         </div>
-        <img src="http://pingendo.github.io/pingendo-bootstrap/assets/placeholder.png" class="img-responsive">
+        <!--<img src="http://pingendo.github.io/pingendo-bootstrap/assets/placeholder.png" class="img-responsive">-->
+        <knitting-view2d class="img-responsive img-rounded" style="height: 90%"></knitting-view2d>
       </div>
     </div>
   </div>

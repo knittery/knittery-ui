@@ -7,5 +7,6 @@ module.exports = angular.module('knittery-shop', [
   require('./products').name
   require('./project').name
   require('./welcome').name
+  require('./render').name
   require('./overview').name
 ])
