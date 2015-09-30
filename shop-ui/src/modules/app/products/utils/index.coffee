@@ -13,7 +13,7 @@ m.directive('lengthInput', ->
       </div>
       <div class="col-sm-8">
         <div class="input-group">
-          <input type="number" class="form-control input-sm" id="{{id}}" placeholder="{{label}}"
+          <input type="number" class="form-control input-sm text-right" id="{{id}}" placeholder="{{label}}"
                  ng-model="ngModel">
           <div class="input-group-addon">cm</div>
         </div>
