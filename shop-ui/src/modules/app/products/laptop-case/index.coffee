@@ -54,5 +54,24 @@ m.directive('laptopCaseSettingsLash', ->
 m.directive('laptopCaseSettingsPattern', ->
   templateUrl: 'app/products/laptop-case/pattern.html'
   scope: {settings: '='}
-  link: (scope) -> scope.m = scope.settings.laptopCase
+  link: (scope) ->
+    defaultGradient =
+        color1: '#ff0000'
+        color2: '#0000ff'
+        color3: '#00ff00'
+        seed: Math.floor(Math.random() * 1000000000)
+
+    scope.checkerboard = angular.extend({}, scope.settings.laptopCase.pattern.checkerboard)
+    scope.gradient = angular.extend({}, defaultGradient, scope.settings.laptopCase.pattern.gradient)
+
+    scope.$watch('active', (active) ->
+      if active == 'checkerboard'
+        scope.settings.laptopCase.pattern = checkerboard: scope.checkerboard
+      else if active == 'gradient'
+        scope.settings.laptopCase.pattern = gradient: scope.gradient
+    )
+
+    scope.active = if scope.settings.laptopCase.pattern.checkerboard? then "checkerboard" else "gradient"
+
+    #scope.active = "checkerboard"
 )

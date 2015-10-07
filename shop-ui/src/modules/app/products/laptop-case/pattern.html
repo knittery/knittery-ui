@@ -1,15 +1,41 @@
 <form class="form-horizontal" role="form">
-    <length-input label="Size" id="size" ng-model="m.pattern.checkerboard.size"></length-input>
-    <color-input label="Color I" id="color1" ng-model="m.pattern.checkerboard.color1"></color-input>
-    <color-input label="Color II" id="color2" ng-model="m.pattern.checkerboard.color2"></color-input>
-
     <div class="form-group">
-        <div class="col-sm-4">
-            <label for="dissolveExponent" class="control-label">Dissolve Exponent</label>
+        <div class="col-sm-12">
+            <div class="radio">
+                <label>
+                    <input type="radio" name="checkerboard" value="checkerboard" ng-model="active">
+                    Checkerboard
+                </label>
+            </div>
         </div>
-        <div class="col-sm-8">
-            <input type="number" class="form-control input-sm text-right" id="dissolveExponent"
-                   ng-model="m.pattern.checkerboard.dissolveExponent" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.1">
+        <div class="col-sm-12">
+            <div class="radio">
+                <label>
+                    <input type="radio" name="gradient" value="gradient" ng-model="active">
+                    Gradient
+                </label>
+            </div>
         </div>
+    </div>
+
+    <div ng-if="active=='checkerboard'">
+        <length-input label="Size" id="size" ng-model="checkerboard.size"></length-input>
+        <color-input label="Color I" id="color1" ng-model="checkerboard.color1"></color-input>
+        <color-input label="Color II" id="color2" ng-model="checkerboard.color2"></color-input>
+        <div class="form-group">
+            <div class="col-sm-4">
+                <label for="dissolveExponent" class="control-label">Dissolve Exponent</label>
+            </div>
+            <div class="col-sm-8">
+                <input type="number" class="form-control input-sm text-right" id="dissolveExponent"
+                       ng-model="checkerboard.dissolveExponent" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.1">
+            </div>
+        </div>
+    </div>
+
+    <div ng-if="active=='gradient'">
+        <color-input label="Color I" id="color1" ng-model="gradient.color1"></color-input>
+        <color-input label="Color II" id="color2" ng-model="gradient.color2"></color-input>
+        <color-input label="Color Leash" id="color3" ng-model="gradient.color3"></color-input>
     </div>
 </form>

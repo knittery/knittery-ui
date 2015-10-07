@@ -80,9 +80,22 @@ object KnittingProduct {
       }
     }
 
-    case class PatternChoice(checkerboard: Option[Checkerboard] = None) extends Choice[Pattern]
+    case class Gradient(color1: String, color2: String, color3: String, seed: Option[Long]) extends Pattern {
+      private def yarnForHex(hex: String) =
+        Yarn(hex, Color.decode(hex))
+
+      def patterns(implicit gauge: Gauge) = {
+        val yarnA = yarnForHex(color1)
+        val yarnB = yarnForHex(color2)
+        val yarnC = yarnForHex(color3)
+        products.laptop.Gradient.apply(yarnA, yarnB, yarnC, seed.getOrElse(0))
+       }
+    }
+
+    case class PatternChoice(checkerboard: Option[Checkerboard] = None, gradient: Option[Gradient] = None) extends Choice[Pattern]
 
     implicit val checkerboardFormat = Json.format[Checkerboard]
+    implicit val gradientFormat = Json.format[Gradient]
     implicit val patternChoiceFormat = Json.format[PatternChoice]
     implicit val format = Json.format[LaptopTemplate]
   }
