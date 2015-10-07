@@ -21,8 +21,8 @@ class Stitch
 class PlainStitch extends Stitch
   constructor: (@color, @size) ->
   render: (ctx) ->
-    darker = changeLuminance(color, -0.1)
-    brighter = changeLuminance(color, 0.1)
+    darker = changeLuminance(@color, -0.1)
+    brighter = changeLuminance(@color, 0.1)
     ctx.save()
     ctx.translate(7.7, -2)
     ctx.rotate(0.38)
@@ -32,7 +32,7 @@ class PlainStitch extends Stitch
     ctx.arc(5, 5, 10.5, 0, 2 * Math.PI, false)
     ctx.fill()
     ctx.closePath()
-    ctx.fillStyle = color
+    ctx.fillStyle = @color
     ctx.beginPath()
     ctx.arc(5, 5, 5.9, 0, 2 * Math.PI, false)
     ctx.fill()
@@ -52,7 +52,7 @@ class PlainStitch extends Stitch
     ctx.arc(5, 5, 10.5, 0, 2 * Math.PI, false)
     ctx.fill()
     ctx.closePath()
-    ctx.fillStyle = color
+    ctx.fillStyle = @color
     ctx.beginPath()
     ctx.arc(5, 5, 5.9, 0, 2 * Math.PI, false)
     ctx.fill()
@@ -68,9 +68,9 @@ class PlainStitch extends Stitch
 class PurlStitch extends Stitch
   constructor: (@color, @size) ->
   render: (ctx) ->
-    bg = changeLuminance(color, -0.3)
-    darker = changeLuminance(color, -0.1)
-    brighter = changeLuminance(color, 0.1)
+    bg = changeLuminance(@color, -0.3)
+    darker = changeLuminance(@color, -0.1)
+    brighter = changeLuminance(@color, 0.1)
     ctx.save()
     ctx.translate(-2, 0)
     ctx.fillStyle = bg
@@ -101,8 +101,8 @@ class PurlStitch extends Stitch
 class CastOnStitch extends Stitch
   constructor: (@color, @size) ->
   render: (ctx) ->
-    darker = changeLuminance(color, -0.1)
-    brighter = changeLuminance(color, 0.1)
+    darker = changeLuminance(@color, -0.1)
+    brighter = changeLuminance(@color, 0.1)
     ctx.save()
     g = ctx.createLinearGradient(-5, 0, 5, 0)
     g.addColorStop(0, darker)
@@ -119,8 +119,8 @@ class CastOnStitch extends Stitch
 class CastOffStitch extends Stitch
   constructor: (@color, @size) ->
   render: (ctx) ->
-    darker = changeLuminance(color, -0.1)
-    brighter = changeLuminance(color, 0.1)
+    darker = changeLuminance(@color, -0.1)
+    brighter = changeLuminance(@color, 0.1)
     ctx.save()
     g = ctx.createLinearGradient(0, 0, 10, 0)
     g.addColorStop(0, darker)
