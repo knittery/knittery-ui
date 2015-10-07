@@ -10,12 +10,18 @@ class ProjectCtrl
       @project = project
       productType = _.keys(project.product)[0]
       @product = @Products.get(productType)
-      @updating = false
-    )
+      @Projects.getKnitting(id).then((knitting) =>
+        @knitting = knitting
+        @updating = false
+      ))
 
   update: =>
     @updating = true
-    @project.put().then(=> @updating = false)
+    @project.put().then(=>
+      @Projects.getKnitting(@project.id).then((knitting) =>
+        @knitting = knitting
+        @updating = false
+      ))
 
 module.exports = (m) ->
   m.controller("ProjectCtrl", ['Projects', 'Products', '$routeParams', ProjectCtrl])

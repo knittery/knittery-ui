@@ -15,4 +15,7 @@ module.exports = (m) ->
 
     get: (id) ->
       Restangular.one('projects', id).get()
+
+    getKnitting: (id) ->
+      Restangular.one('projects', id).one('knitted').get()
   )
