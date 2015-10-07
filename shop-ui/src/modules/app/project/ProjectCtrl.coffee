@@ -17,6 +17,7 @@ class ProjectCtrl
 
   update: =>
     @updating = true
+    @knitting = null
     @project.put().then(=>
       @Projects.getKnitting(@project.id).then((knitting) =>
         @knitting = knitting
