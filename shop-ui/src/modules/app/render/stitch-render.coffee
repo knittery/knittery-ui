@@ -17,9 +17,11 @@ changeLuminance = (color, luminance) ->
 class Stitch
   constructor: (@size) ->
   render: (ctx) ->
+  empty: true
 
 class PlainStitch extends Stitch
   constructor: (@color, @size) ->
+  empty: false
   render: (ctx) ->
     darker = changeLuminance(@color, -0.1)
     brighter = changeLuminance(@color, 0.1)
@@ -67,6 +69,7 @@ class PlainStitch extends Stitch
 
 class PurlStitch extends Stitch
   constructor: (@color, @size) ->
+  empty: false
   render: (ctx) ->
     bg = changeLuminance(@color, -0.3)
     darker = changeLuminance(@color, -0.1)
@@ -100,6 +103,7 @@ class PurlStitch extends Stitch
 
 class CastOnStitch extends Stitch
   constructor: (@color, @size) ->
+  empty: false
   render: (ctx) ->
     darker = changeLuminance(@color, -0.1)
     brighter = changeLuminance(@color, 0.1)
@@ -118,6 +122,7 @@ class CastOnStitch extends Stitch
 
 class CastOffStitch extends Stitch
   constructor: (@color, @size) ->
+  empty: false
   render: (ctx) ->
     darker = changeLuminance(@color, -0.1)
     brighter = changeLuminance(@color, 0.1)
