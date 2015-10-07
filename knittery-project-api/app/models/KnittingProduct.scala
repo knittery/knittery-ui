@@ -67,7 +67,7 @@ object KnittingProduct {
     case class Checkerboard(size: Double, color1: String, color2: String,
       dissolveExponent: Option[Double], seed: Option[Long]) extends Pattern {
       private def yarnForHex(hex: String) =
-        Yarn(color1, Color.decode(color1))
+        Yarn(hex, Color.decode(hex))
 
       def patterns(implicit gauge: Gauge) = {
         val yarnA = yarnForHex(color1)
