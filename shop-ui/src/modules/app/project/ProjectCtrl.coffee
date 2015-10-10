@@ -3,7 +3,7 @@
 _ = require('underscore')
 
 class ProjectCtrl
-  constructor: (@Projects, @Products, $routeParams, @$scope) ->
+  constructor: (@Projects, @Products, $routeParams, @$scope, $interval) ->
     id = $routeParams.projectId
     @updating = true
     @Projects.get(id).then((project) =>
@@ -14,6 +14,13 @@ class ProjectCtrl
         @knitting = knitting
         @updating = false
       )).catch(@onError)
+    stopTimer = $interval(@checkForChange, 1000)
+    @$scope.$on('$destroy', -> $inverval.cancel(stopTimer))
+
+  checkForChange: =>
+    if not @updating and (@$scope.settings.$dirty or @error)
+      console.log('Triggering live update')
+      @update()
 
   onError: (e) =>
     @error =
@@ -39,4 +46,4 @@ class ProjectCtrl
       )).catch(@onError)
 
 module.exports = (m) ->
-  m.controller("ProjectCtrl", ['Projects', 'Products', '$routeParams', '$scope', ProjectCtrl])
+  m.controller("ProjectCtrl", ['Projects', 'Products', '$routeParams', '$scope', '$interval', ProjectCtrl])
