@@ -13,6 +13,26 @@ changeLuminance = (color, luminance) ->
     rgb += ("00" + comp).substr(comp.length)
   rgb
 
+getRandomColor = () ->
+  letters = '0123456789ABCDEF'.split('')
+  color = '#'
+  for i in [0..6]
+    color += letters[Math.floor(Math.random() * 16)]
+  console.log(color)
+  color
+
+_stitchCache = {}
+cachedRender = (kind, color, size, renderFun) ->
+  key = [kind, color, size]
+  cached = _stitchCache[key]
+  overdraw = size
+  if not cached?
+    canvas = document.createElement("canvas")
+    ctx = canvas.getContext("2d")
+    ctx.translate(overdraw, overdraw)
+    renderFun(ctx)
+    cached = _stitchCache[key] = canvas
+  (ctx) -> ctx.drawImage(cached, -overdraw, -overdraw)
 
 class Stitch
   constructor: (@size) ->
@@ -21,8 +41,9 @@ class Stitch
 
 class PlainStitch extends Stitch
   constructor: (@color, @size) ->
+    @render = cachedRender('plain', @color, @size, @_render)
   empty: false
-  render: (ctx) ->
+  _render: (ctx) =>
     darker = changeLuminance(@color, -0.1)
     brighter = changeLuminance(@color, 0.1)
     ctx.save()
@@ -69,8 +90,9 @@ class PlainStitch extends Stitch
 
 class PurlStitch extends Stitch
   constructor: (@color, @size) ->
+    @render = cachedRender('purl', @color, @size, @_render)
   empty: false
-  render: (ctx) ->
+  _render: (ctx) =>
     bg = changeLuminance(@color, -0.3)
     darker = changeLuminance(@color, -0.1)
     brighter = changeLuminance(@color, 0.1)
@@ -103,8 +125,9 @@ class PurlStitch extends Stitch
 
 class CastOnStitch extends Stitch
   constructor: (@color, @size) ->
+    @render = cachedRender('castOn', @color, @size, @_render)
   empty: false
-  render: (ctx) ->
+  _render: (ctx) =>
     darker = changeLuminance(@color, -0.1)
     brighter = changeLuminance(@color, 0.1)
     ctx.save()
@@ -122,8 +145,9 @@ class CastOnStitch extends Stitch
 
 class CastOffStitch extends Stitch
   constructor: (@color, @size) ->
+    @render = cachedRender('castOf', @color, @size, @_render)
   empty: false
-  render: (ctx) ->
+  _render: (ctx) =>
     darker = changeLuminance(@color, -0.1)
     brighter = changeLuminance(@color, 0.1)
     ctx.save()

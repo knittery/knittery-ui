@@ -40,6 +40,7 @@ module.exports = (m) ->
       scope.$watch('knitting', (knitting) ->
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         if knitting
+          t0 = performance.now()
           data = render.parseJson(knitting, stitchSize)
           ctx.save()
           k = new EffectiveKnitting(data.mainBed)
@@ -53,5 +54,7 @@ module.exports = (m) ->
             ctx.restore()
             ctx.translate(0, stitchSize)
           ctx.restore()
+          t1 = performance.now()
+          console.log("Rendering took #{t1-t0} ms")
       )
   )
