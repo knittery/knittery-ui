@@ -21,13 +21,13 @@ class EffectiveKnitting
     @rows.length
 
 module.exports = (m) ->
-  m.directive('knittingView2d', ->
+  m.directive('knittingView2d', ($window) ->
     replace: true
     scope:
       knitting: '='
 
     template: """
-      <canvas></canvas>
+      <canvas style="width: 100%; height: height: 100%"></canvas>
       """
 
     link: (scope, elem) ->
@@ -37,15 +37,24 @@ module.exports = (m) ->
       canvas.height = 1
       stitchSize = 10
 
-      scope.$watch('knitting', (knitting) ->
+      draw = () ->
         ctx.clearRect(0, 0, canvas.width, canvas.height)
-        if knitting
+        if scope.knitting
           t0 = performance.now()
-          data = render.parseJson(knitting, stitchSize)
+          data = render.parseJson(scope.knitting, stitchSize)
           ctx.save()
           k = new EffectiveKnitting(data.mainBed)
-          canvas.width = k.width() * stitchSize
-          canvas.height = k.height() * stitchSize
+
+          oversampling = 2
+          canvas.width = $(canvas).width() * oversampling
+          canvas.height = $(canvas).height() * oversampling
+          drawingWidth = k.width() * stitchSize
+          drawingHeight = k.height() * stitchSize
+          scale = Math.min(canvas.width / drawingWidth, canvas.height / drawingHeight)
+          ctx.scale(scale, scale)
+          ctx.translate((canvas.width / scale - drawingWidth) / 2,
+            (canvas.height / scale - drawingHeight) / 2)
+
           for row in k.rows
             ctx.save()
             for stitch in row
@@ -55,6 +64,8 @@ module.exports = (m) ->
             ctx.translate(0, stitchSize)
           ctx.restore()
           t1 = performance.now()
-          console.log("Rendering took #{t1-t0} ms")
-      )
+          console.log("Rendering took #{t1 - t0} ms")
+
+      scope.$watch('knitting', draw)
+      $($window).resize(draw)
   )
