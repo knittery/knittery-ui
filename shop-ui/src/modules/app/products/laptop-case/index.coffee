@@ -3,6 +3,19 @@ module.exports = m = angular.module('knittery-shop.products.laptop-case', [
   'knittery-shop.products.utils'
 ])
 
+defaultCheckerboard =
+  size: 2
+  color1: '#8925ad'
+  color2: '#b5cf32'
+  dissolveExponent: 1.5
+  seed: Math.floor(Math.random() * 1000000000)
+
+defaultGradient =
+  color1: '#006fff'
+  color2: '#ffffff'
+  color3: '#cca219'
+  seed: Math.floor(Math.random() * 1000000000)
+
 m.config((ProductsProvider) ->
   ProductsProvider.register(
     name: 'laptopCase'
@@ -16,12 +29,7 @@ m.config((ProductsProvider) ->
         frontGap: 2
         lashLength: 10
         pattern:
-          checkerboard:
-            size: 2
-            color1: '#ff0000'
-            color2: '#0000ff'
-            dissolveExponent: 1.5
-            seed: Math.floor(Math.random() * 1000000000)
+          checkerboard: defaultCheckerboard
     settings: [
       {
         title: 'Measurements' #TODO i18n
@@ -55,18 +63,6 @@ m.directive('laptopCaseSettingsPattern', ->
   templateUrl: 'app/products/laptop-case/pattern.html'
   scope: {settings: '='}
   link: (scope) ->
-    defaultGradient =
-      color1: '#ff0000'
-      color2: '#0000ff'
-      color3: '#00ff00'
-      seed: Math.floor(Math.random() * 1000000000)
-    defaultCheckerboard =
-      size: 2
-      color1: '#ff0000'
-      color2: '#0000ff'
-      dissolveExponent: 1.5
-      seed: Math.floor(Math.random() * 1000000000)
-
     scope.checkerboard = angular.extend({}, defaultCheckerboard, scope.settings.laptopCase.pattern.checkerboard)
     scope.gradient = angular.extend({}, defaultGradient, scope.settings.laptopCase.pattern.gradient)
 
