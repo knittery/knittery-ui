@@ -18,11 +18,14 @@ class ProjectCtrl
     @$scope.$on('$destroy', -> $inverval.cancel(stopTimer))
 
   checkForChange: =>
-    if not @updating and (@$scope.settings.$dirty or @error)
+    if not @updating and @$scope.settings.$dirty
       console.log('Triggering live update')
       @update()
 
   onError: (e) =>
+    @updating = false
+    @knitting = null
+    @$scope.settings.$setPristine()
     @error =
       if e?.data?.errors?.length > 0 then e.data.errors[0].title
       else e.statusText
