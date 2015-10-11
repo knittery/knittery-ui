@@ -4,7 +4,7 @@ changeLuminance = (color, luminance) ->
   hex = color.replace(/[^0-9a-f]/gi, '')
   if (hex.length < 6)
     hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
-  luminance = luminance || 0;
+  luminance = luminance || 0
   rgb = "#"
   for i in [0..2]
     c = parseInt(hex.substr(i * 2, 2), 16)
