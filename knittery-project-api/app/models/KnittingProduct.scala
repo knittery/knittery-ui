@@ -10,7 +10,7 @@ import scalaz.Validation.FlatMap._
 import knit._
 import knit.gauge.StandardGauge
 import knit.units.Gauge
-import knit.plan.Plan
+import knit.plan.{Optimizers, Plan}
 
 
 /** Product that can be knitted. */
@@ -52,7 +52,7 @@ object KnittingProduct {
         topGap = frontGap.getOrElse(2d).cm,
         lash = lashLength.getOrElse(10d).cm,
         patterns = patterns
-      ).plan().map { plan =>
+      ).plan(Optimizers.no).map { plan =>
         val json = Json.obj(kind -> Json.toJson(this)(LaptopTemplate.format))
         KnittingProduct(kind, plan, json)
       }
