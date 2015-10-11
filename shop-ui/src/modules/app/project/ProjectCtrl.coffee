@@ -14,7 +14,7 @@ class ProjectCtrl
         @knitting = knitting
         @updating = false
       )).catch(@onError)
-    stopTimer = $interval(@checkForChange, 1000)
+    stopTimer = $interval(@checkForChange, 100)
     @$scope.$on('$destroy', -> $inverval.cancel(stopTimer))
 
   checkForChange: =>
