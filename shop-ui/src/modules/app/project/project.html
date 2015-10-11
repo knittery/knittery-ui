@@ -5,15 +5,15 @@
         <h1>{{ c.project.name }}</h1>
         <small>ID is {{c.project.id}}</small>
         <form name="settings" ng-submit="c.update()">
-          <div class="btn-toolbar" role="toolbar">
-            <button class="btn btn-primary btn-sm" ng-click="c.update()">Update</button>
-          </div>
-          <p></p>
           <accordion close-others="false">
             <accordion-group ng-repeat="setting in c.product.settings" heading="{{setting.title}}" is-open="true">
               <settings-section setting-type="setting" settings="c.project.product"></settings-section>
             </accordion-group>
           </accordion>
+          <p></p>
+          <div class="btn-toolbar" role="toolbar">
+            <button class="btn btn-primary btn-sm" ng-click="c.update()">Update</button>
+          </div>
         </form>
       </div>
       <div class="col-md-9">
