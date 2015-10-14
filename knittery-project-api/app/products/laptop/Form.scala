@@ -41,7 +41,9 @@ object Form {
     bg <- Cast.onClosed(MainBed, first, last, ps.front.head.head)
     _ <- Basics.knitRowWithK(yarnA = Some(bg))
     _ <- FairIslePlanner.singleBed(ps.front, Some(first))
+    _ <- Basics.markLastRow(KnittingMark("front/back"))
     _ <- FairIslePlanner.singleBed(ps.back.reverse, Some(first))
+    _ <- Basics.markLastRow(KnittingMark("back/lash"))
     _ <- (0 until toDecrease).toVector.traverse { i =>
       for {
         working <- Planner.state(_.workingNeedles(MainBed).size)

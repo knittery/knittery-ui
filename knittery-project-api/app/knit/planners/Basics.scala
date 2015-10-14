@@ -100,4 +100,7 @@ object Basics {
     dir <- nextDirection(GCarriage)
     _ <- KnitRow(GCarriage, dir, pattern)
   } yield ()
+
+  /** Marks all stitches of the last row. */
+  def markLastRow(as: KnittingMark): Planner = MarkRow(as)
 }
