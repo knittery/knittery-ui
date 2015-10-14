@@ -18,8 +18,8 @@ module.exports = (m) ->
     renderer.setPixelRatio(window.devicePixelRatio)
     [scene, camera, renderer]
 
-  createControl = (camera) ->
-    controls = new TrackballControls(camera);
+  createControl = (camera, elem) ->
+    controls = new TrackballControls(camera, elem);
     controls.rotateSpeed = 1.0
     controls.zoomSpeed = 1.2
     controls.panSpeed = 0.8
