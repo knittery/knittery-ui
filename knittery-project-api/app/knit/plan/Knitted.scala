@@ -3,12 +3,20 @@ package knit.plan
 import knit._
 import utils._
 
+/** Used to mark certain stitches as 'special' (i.e. a change from the front-side to the back-side of the garnment). */
+case class KnittingMark(label: String)
+
 case class Knitted private(mainBed: KnittedBed, doubleBed: KnittedBed) {
   def height = mainBed.height
   def width = mainBed.width
 
   def +(mainBedRow: Needle => Stitch, doubleBedRow: Needle => Stitch) =
     new Knitted(mainBed + mainBedRow, doubleBed + doubleBedRow)
+
+  def markLastRow(as: KnittingMark) = copy(
+    mainBed = mainBed.markLastRow(as),
+    doubleBed = doubleBed.markLastRow(as)
+  )
 }
 object Knitted {
   val empty = new Knitted(KnittedBed.empty, KnittedBed.empty)
@@ -20,9 +28,19 @@ case class KnittedBed private(data: Matrix[Stitch]) {
 
   def rows = data.rows
 
+  def markLastRow(as: KnittingMark) = {
+    if (rows.nonEmpty)
+      copy(data = data.rows.dropRight(1) :+ data.rows.last.map(_.mark(as)))
+    else this
+  }
+
   def +(row: Needle => Stitch) = new KnittedBed(data :+ row.all)
 
-  private def emptyOrNo(s: Seq[Stitch]) = s.forall(s => s == NoStitch || s == EmptyStitch)
+  private def emptyOrNo(s: Seq[Stitch]) = s.forall(_ match {
+    case NoStitch(_) => true
+    case EmptyStitch(_) => true
+    case _ => false
+  })
   def clean = {
     data.rows.
       filterNot(_.forall(_ == NoStitch)). // Filter all rows containing no stitches
@@ -43,15 +61,15 @@ case class KnittedBed private(data: Matrix[Stitch]) {
   }
   private def noOverlap(a: Seq[Stitch], b: Seq[Stitch]) = {
     a.zip(b).forall {
-      case (NoStitch, _) => true
-      case (_, NoStitch) => true
-      case (EmptyStitch, EmptyStitch) => true
+      case (NoStitch(_), _) => true
+      case (_, NoStitch(_)) => true
+      case (EmptyStitch(_), EmptyStitch(_)) => true
       case _ => false
     }
   }
   private def merge(a: Seq[Stitch], b: Seq[Stitch]) = {
     a.zip(b).map {
-      case (NoStitch, s) => s
+      case (NoStitch(_), s) => s
       case (s, _) => s
     }
   }
@@ -74,51 +92,68 @@ object KnittedBed {
 }
 
 sealed trait Stitch {
+  type Self <: Stitch
+
+  def marks: Set[KnittingMark]
+  def mark(as: KnittingMark): Self
+
   def patternString: String
 }
 
-case object NoStitch extends Stitch {
+case class NoStitch(marks: Set[KnittingMark] = Set.empty) extends Stitch {
+  type Self = NoStitch
+  override def mark(as: KnittingMark) = copy(marks = marks + as)
   override def patternString = "|"
 }
 
-case object EmptyStitch extends Stitch {
+case class EmptyStitch(marks: Set[KnittingMark] = Set.empty) extends Stitch {
+  type Self = EmptyStitch
+  override def mark(as: KnittingMark) = copy(marks = marks + as)
   override def patternString = " "
 }
 
-case class PlainStitch(yarns: List[Yarn]) extends Stitch {
+case class PlainStitch(yarns: List[Yarn], marks: Set[KnittingMark] = Set.empty) extends Stitch {
+  type Self = PlainStitch
   require(yarns.nonEmpty, "No yarn on plain stitch")
+  override def mark(as: KnittingMark) = copy(marks = marks + as)
   override def patternString = yarns.head.consoleColor + "^" + Console.RESET
 }
 object PlainStitch {
   def apply(yarn: Yarn): PlainStitch = PlainStitch(yarn :: Nil)
   def orEmpty(yarns: Traversable[Yarn]) = {
-    if (yarns.isEmpty) EmptyStitch
+    if (yarns.isEmpty) EmptyStitch()
     else apply(yarns.toList)
   }
 }
 
-case class PurlStitch(yarns: List[Yarn]) extends Stitch {
+case class PurlStitch(yarns: List[Yarn], marks: Set[KnittingMark] = Set.empty) extends Stitch {
+  type Self = PurlStitch
   require(yarns.nonEmpty, "No yarn on purl stitch")
+  override def mark(as: KnittingMark) = copy(marks = marks + as)
   override def patternString = yarns.head.consoleColor + "-" + Console.RESET
 }
 object PurlStitch {
   def apply(yarn: Yarn): PurlStitch = PurlStitch(yarn :: Nil)
   def orEmpty(yarns: Traversable[Yarn]) = {
-    if (yarns.isEmpty) EmptyStitch
+    if (yarns.isEmpty) EmptyStitch()
     else apply(yarns.toList)
   }
 }
 
-case class CastOnStitch(yarns: List[Yarn]) extends Stitch {
+case class CastOnStitch(yarns: List[Yarn], marks: Set[KnittingMark] = Set.empty) extends Stitch {
+  type Self = CastOnStitch
   require(yarns.nonEmpty, "No yarn for cast-on-stitch")
+  override def mark(as: KnittingMark) = copy(marks = marks + as)
   override def patternString = yarns.head.consoleColor + "_" + Console.RESET
 }
 object CastOnStitch {
   def apply(yarn: Yarn): CastOnStitch = CastOnStitch(yarn :: Nil)
 }
 
-case class CastOffStitch(yarns: List[Yarn]) extends Stitch {
+case class CastOffStitch(yarns: List[Yarn], marks: Set[KnittingMark] = Set.empty) extends Stitch {
+  type Self = CastOffStitch
   require(yarns.nonEmpty, "No yarn for cast=off-stitch")
+  override def mark(as: KnittingMark) = copy(marks = marks + as)
   override def patternString = yarns.head.consoleColor + "_" + Console.RESET
 }
 object CastOffStitch {

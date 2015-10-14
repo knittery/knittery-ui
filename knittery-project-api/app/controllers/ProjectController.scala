@@ -30,14 +30,17 @@ class ProjectController @Inject()(@Named("project-repository") projectRepository
     }
   }
   implicit val yarnWrites = Json.writes[Yarn]
+  implicit object KnittingMarkWrite extends Writes[KnittingMark] {
+    def writes(mark: KnittingMark) = JsString(mark.label)
+  }
   implicit object StitchWrite extends Writes[Stitch] {
     override def writes(stitch: Stitch) = stitch match {
-      case NoStitch => Json.obj("type" -> "no")
-      case EmptyStitch => Json.obj("type" -> "empty")
-      case PlainStitch(yarns) => Json.obj("type" -> "plain", "yarns" -> yarns.map(_.name))
-      case PurlStitch(yarns) => Json.obj("type" -> "purl", "yarns" -> yarns.map(_.name))
-      case CastOnStitch(yarns) => Json.obj("type" -> "castOn", "yarns" -> yarns.map(_.name))
-      case CastOffStitch(yarns) => Json.obj("type" -> "castOff", "yarns" -> yarns.map(_.name))
+      case NoStitch(marks) => Json.obj("type" -> "no", "marks" -> marks)
+      case EmptyStitch(marks) => Json.obj("type" -> "empty", "marks" -> marks)
+      case PlainStitch(yarns, marks) => Json.obj("type" -> "plain", "yarns" -> yarns.map(_.name), "marks" -> marks)
+      case PurlStitch(yarns, marks) => Json.obj("type" -> "purl", "yarns" -> yarns.map(_.name), "marks" -> marks)
+      case CastOnStitch(yarns, marks) => Json.obj("type" -> "castOn", "yarns" -> yarns.map(_.name), "marks" -> marks)
+      case CastOffStitch(yarns, marks) => Json.obj("type" -> "castOff", "yarns" -> yarns.map(_.name), "marks" -> marks)
     }
   }
 
@@ -104,10 +107,10 @@ class ProjectController @Inject()(@Named("project-repository") projectRepository
           "mainBed" -> knitted.mainBed.data,
           "yarns" ->
             (knitted.mainBed.data.flatten.flatMap {
-              case PlainStitch(yarns) => yarns
-              case PurlStitch(yarns) => yarns
-              case CastOnStitch(yarns) => yarns
-              case CastOffStitch(yarns) => yarns
+              case PlainStitch(yarns, _) => yarns
+              case PurlStitch(yarns, _) => yarns
+              case CastOnStitch(yarns, _) => yarns
+              case CastOffStitch(yarns, _) => yarns
               case _ => Seq.empty[Yarn]
             }).toSet[Yarn]
         ))
