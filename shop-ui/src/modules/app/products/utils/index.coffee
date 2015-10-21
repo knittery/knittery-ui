@@ -38,7 +38,8 @@ m.directive('colorInput', ->
         <label for="{{id}}" class="control-label">{{label}}</label>
       </div>
       <div class="col-sm-8">
-            <ngjs-color-picker selected="selected" options="colorOptions" ng-click="changed"></ngjs-color-picker>
+        <ngjs-color-picker selected="selected" options="{columns: 4, roundCorners: true}" ng-click="changed">
+        </ngjs-color-picker>
       </div>
     </div>
     """
@@ -47,7 +48,6 @@ m.directive('colorInput', ->
     ngModel.$render = ->
       updating = true
       scope.selected = ngModel.$viewValue
-
     scope.$watch('selected', (value) ->
       if updating
         updating = false
