@@ -72,7 +72,7 @@ module.exports = (m) ->
 
     link: (scope, elem) ->
       [scene, camera, renderer] = createScene()
-      controls = createControl(camera)
+      controls = createControl(camera, elem[0])
       elem.append(renderer.domElement)
 
       resize = ->
