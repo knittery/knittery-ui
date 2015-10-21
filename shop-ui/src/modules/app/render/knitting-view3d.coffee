@@ -1,6 +1,6 @@
 THREE = require('three')
 TrackballControls = require('three.trackball')
-render = require('./stitch-render')
+stitchRender = require('./stitch-render')
 EffectiveKnittingArea = require('./knitting-areas').EffectiveKnittingArea
 MarkedArea = require('./knitting-areas').MarkedArea
 
@@ -37,7 +37,7 @@ module.exports = (m) ->
 
   makeTextureCanvas = (knitting) ->
     stitchSize = 10
-    data = render.parseJson(knitting, stitchSize)
+    data = stitchRender.parseJson(knitting, stitchSize)
     effective = new EffectiveKnittingArea(data.mainBed)
     front = new MarkedArea(effective.rows, null, 'front/back')
     back = new MarkedArea(effective.rows, 'front/back', 'back/lash')
@@ -45,7 +45,7 @@ module.exports = (m) ->
     draw = (what) -> (ctx) ->
       ctx.save()
       ctx.scale(1/stitchSize / what.width(), 1/stitchSize / what.height())
-      render.renderStitches(ctx, stitchSize)(what)
+      stitchRender.renderStitches(ctx, stitchSize)(what)
       ctx.restore()
     left = right = bottom = (ctx) ->
       ctx.fillStyle = 'red'
@@ -66,7 +66,6 @@ module.exports = (m) ->
 
     canvas = document.createElement("canvas")
     ctx = canvas.getContext("2d")
-    draw = render.renderStitches(ctx, stitchSize)
     canvas.height = 700
     canvas.width = (p.width for p in parts).reduce((x, y)-> x + y)
 
