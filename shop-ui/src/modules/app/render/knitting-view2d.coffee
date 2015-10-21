@@ -1,5 +1,6 @@
 render = require('./stitch-render')
-EffectiveKnitting = require('./knitting-areas').EffectiveKnitting
+EffectiveKnittingArea = require('./knitting-areas').EffectiveKnittingArea
+MarkedArea = require('./knitting-areas').MarkedArea
 
 module.exports = (m) ->
   m.directive('knittingView2d', ($window) ->
@@ -24,7 +25,7 @@ module.exports = (m) ->
           t0 = performance.now()
           data = render.parseJson(scope.knitting, stitchSize)
           ctx.save()
-          k = new EffectiveKnitting(data.mainBed)
+          k = new EffectiveKnittingArea(data.mainBed)
 
           oversampling = 2
           canvas.width = $(canvas).width() * oversampling
@@ -36,13 +37,7 @@ module.exports = (m) ->
           ctx.translate((canvas.width / scale - drawingWidth) / 2,
             (canvas.height / scale - drawingHeight) / 2)
 
-          for row in k.rows
-            ctx.save()
-            for stitch in row
-              stitch.render(ctx)
-              ctx.translate(stitchSize, 0)
-            ctx.restore()
-            ctx.translate(0, stitchSize)
+          render.renderStitches(ctx, stitchSize)(k)
           ctx.restore()
           t1 = performance.now()
           console.log("Rendering took #{t1 - t0} ms")
