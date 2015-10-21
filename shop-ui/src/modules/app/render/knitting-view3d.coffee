@@ -1,5 +1,9 @@
 THREE = require('three')
 TrackballControls = require('three.trackball')
+render = require('./stitch-render')
+EffectiveKnittingArea = require('./knitting-areas').EffectiveKnittingArea
+MarkedArea = require('./knitting-areas').MarkedArea
+
 
 module.exports = (m) ->
 
@@ -30,8 +34,56 @@ module.exports = (m) ->
     controls.keys = [65, 83, 68]
     controls
 
+
+  makeTextureCanvas = (knitting) ->
+    stitchSize = 10
+    data = render.parseJson(knitting, stitchSize)
+    effective = new EffectiveKnittingArea(data.mainBed)
+    front = new MarkedArea(effective.rows, null, 'front/back')
+    back = new MarkedArea(effective.rows, 'front/back', 'back/lash')
+    lash = new MarkedArea(effective.rows, 'back/lash')
+    draw = (what) -> (ctx) ->
+      ctx.save()
+      ctx.scale(1/stitchSize / what.width(), 1/stitchSize / what.height())
+      render.renderStitches(ctx, stitchSize)(what)
+      ctx.restore()
+    left = right = bottom = (ctx) ->
+      ctx.fillStyle = 'red'
+      ctx.fillRect(0, 0, 1, 1)
+    inside = (ctx) ->
+      ctx.fillStyle = 'grey'
+      ctx.fillRect(0, 0, 1, 1)
+
+    #render: (ctx) -> {effect: draws the thing into the context into the rect [0,0,1,1]}
+    parts = [
+      {render: left, width: 25},
+      {render: draw(front), width: 500},
+      {render: right, width: 25},
+      {render: draw(back), width: 500},
+      {render: bottom, width: 25},
+      {render: draw(lash), width: 500},
+      {render: inside, width: 25}]
+
+    canvas = document.createElement("canvas")
+    ctx = canvas.getContext("2d")
+    draw = render.renderStitches(ctx, stitchSize)
+    canvas.height = 700
+    canvas.width = (p.width for p in parts).reduce((x, y)-> x + y)
+
+    ctx.save()
+    for part in parts
+      ctx.save()
+      ctx.scale(part.width, canvas.height)
+      part.render(ctx)
+      ctx.restore()
+      ctx.translate(part.width, 0)
+    ctx.restore()
+    canvas
+
   loader = new THREE.JSONLoader()
 
+
+  # shows 3d model of the resulting product using Three.js
   m.directive('knittingView3d', ($window) ->
     scope:
       knitting: '='
@@ -39,7 +91,7 @@ module.exports = (m) ->
 
     link: (scope, elem) ->
       [scene, camera, renderer] = createScene()
-      controls = createControl(camera)
+      controls = createControl(camera, elem[0])
       elem.append(renderer.domElement)
 
       resize = ->
@@ -59,10 +111,54 @@ module.exports = (m) ->
         render()
       animate()
 
+      modelAdded = false
+      texture = null
+      model = null
+
+      updateModel = ->
+        if scope.knitting?
+          texture = new THREE.Texture(makeTextureCanvas(scope.knitting))
+          texture.needsUpdate = true
+          model.material.map = texture
+          if not modelAdded
+            scene.add(model)
+            modelAdded = true
+
+      scope.$watch('knitting', updateModel)
       scope.$watch('modelUrl', (url) ->
         if url?
           loader.load(url, (geometry, materials) -> scope.$apply(->
             model = new THREE.Mesh(geometry, materials[0])
-            scene.add(model)
-          )))
+          ))
+        else
+          model = null
+        updateModel()
+      )
+  )
+
+  # Shows the texture that will be used for the 3d model
+  m.directive('knittingView3dTexture', ($window) ->
+    replace: true
+    scope:
+      knitting: '='
+
+    template: """
+      <canvas style="width: 100%; height: height: 100%"></canvas>
+      """
+
+    link: (scope, elem) ->
+      canvas = elem[0]
+      ctx = canvas.getContext("2d")
+      canvas.width = 1
+      canvas.height = 1
+      draw = () ->
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        if scope.knitting
+          cvs = makeTextureCanvas(scope.knitting)
+          canvas.width = cvs.width
+          canvas.height = cvs.height
+          ctx.drawImage(cvs, 0, 0)
+
+      scope.$watch('knitting', draw)
+      $($window).resize(draw)
   )

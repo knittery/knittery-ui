@@ -13,14 +13,6 @@ changeLuminance = (color, luminance) ->
     rgb += ("00" + comp).substr(comp.length)
   rgb
 
-getRandomColor = () ->
-  letters = '0123456789ABCDEF'.split('')
-  color = '#'
-  for i in [0..6]
-    color += letters[Math.floor(Math.random() * 16)]
-  console.log(color)
-  color
-
 _stitchCache = {}
 cachedRender = (kind, color, size, renderFun) ->
   key = [kind, color, size]
@@ -35,12 +27,13 @@ cachedRender = (kind, color, size, renderFun) ->
   (ctx) -> ctx.drawImage(cached, -overdraw, -overdraw)
 
 class Stitch
-  constructor: (@size) ->
+  constructor: (@size, @marks) ->
+  hasMark: (mark) => @marks? and _.contains(@marks, mark)
   render: (ctx) ->
   empty: true
 
 class PlainStitch extends Stitch
-  constructor: (@color, @size) ->
+  constructor: (@color, @size, @marks) ->
     @render = cachedRender('plain', @color, @size, @_render)
   empty: false
   _render: (ctx) =>
@@ -89,7 +82,7 @@ class PlainStitch extends Stitch
 
 
 class PurlStitch extends Stitch
-  constructor: (@color, @size) ->
+  constructor: (@color, @size, @marks) ->
     @render = cachedRender('purl', @color, @size, @_render)
   empty: false
   _render: (ctx) =>
@@ -124,7 +117,7 @@ class PurlStitch extends Stitch
 
 
 class CastOnStitch extends Stitch
-  constructor: (@color, @size) ->
+  constructor: (@color, @size, @marks) ->
     @render = cachedRender('castOn', @color, @size, @_render)
   empty: false
   _render: (ctx) =>
@@ -144,7 +137,7 @@ class CastOnStitch extends Stitch
 
 
 class CastOffStitch extends Stitch
-  constructor: (@color, @size) ->
+  constructor: (@color, @size, @marks) ->
     @render = cachedRender('castOf', @color, @size, @_render)
   empty: false
   _render: (ctx) =>
@@ -172,18 +165,18 @@ stitchFromJson = (json, yarns, size) ->
   switch json.type
     when 'plain'
       yarn = yarns[json.yarns[0]]
-      new PlainStitch(yarn.color, size)
+      new PlainStitch(yarn.color, size, json.marks)
     when 'purl'
       yarn = yarns[json.yarns[0]]
-      new PurlStitch(yarn.color, size)
+      new PurlStitch(yarn.color, size, json.marks)
     when 'castOn'
       yarn = yarns[json.yarns[0]]
-      new CastOnStitch(yarn.color, size)
+      new CastOnStitch(yarn.color, size, json.marks)
     when 'castOff'
       yarn = yarns[json.yarns[0]]
-      new CastOffStitch(yarn.color, size)
+      new CastOffStitch(yarn.color, size, json.marks)
     else
-      new Stitch(size)
+      new Stitch(size, json.marks)
 
 matrixMap = (matrix, fun) ->
   _.map(matrix, (e) -> e.map(fun))
@@ -195,6 +188,17 @@ parseJson = (json, size) ->
   mainBed: matrixMap(json.mainBed, stitchFun)
   doubleBed: matrixMap(json.doubleBed, stitchFun)
 
+renderStitches = (ctx, stitchSize) -> (data) ->
+  ctx.save()
+  for row in data.rows
+    ctx.save()
+    for stitch in row
+      stitch.render(ctx)
+      ctx.translate(stitchSize, 0)
+    ctx.restore()
+    ctx.translate(0, stitchSize)
+  ctx.restore()
 
 module.exports =
   parseJson: parseJson
+  renderStitches: renderStitches
