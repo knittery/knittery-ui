@@ -5,7 +5,7 @@ require('ngjs-color-picker')
 module.exports = m = angular.module('knittery-shop.products.utils', ['minicolors', 'ngjsColorPicker'])
 
 m.directive('lengthInput', ->
-  require: 'ng-model'
+  require: 'ngModel'
   scope:
     label: '@'
     id: '@'
@@ -27,24 +27,33 @@ m.directive('lengthInput', ->
 )
 
 m.directive('colorInput', ->
-  require: 'ng-model'
+  require: 'ngModel'
   scope:
     label: '@'
     id: '@'
     colorOptions: '='
-    ngModel: '='
   template: """
     <div class="form-group">
       <div class="col-sm-4">
         <label for="{{id}}" class="control-label">{{label}}</label>
       </div>
       <div class="col-sm-8">
-            <ngjs-color-picker selected="selected" options="colorOptions"></ngjs-color-picker>
+            <ngjs-color-picker selected="selected" options="colorOptions" ng-click="changed"></ngjs-color-picker>
       </div>
     </div>
     """
-  link: (scope, elem, attrs) ->
+  link: (scope, elem, attrs, ngModel) ->
+    updating = false
+    ngModel.$render = ->
+      updating = true
+      scope.selected = ngModel.$viewValue
 
+    scope.$watch('selected', (value) ->
+      if updating
+        updating = false
+      else
+        console.log("Value changed to #{value}")
+        ngModel.$setViewValue(value))
 )
 
 
