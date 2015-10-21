@@ -12,6 +12,7 @@
     "bootstrap": "^3.3.5",
     "jquery": "^2.1.4",
     "jquery-minicolors": "^2.1.10",
+    "ngjs-color-picker": "^1.0.0",
     "restangular": "^1.5.1",
     "three": "^0.72.0",
     "three.trackball": "0.0.1",

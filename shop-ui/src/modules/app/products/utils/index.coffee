@@ -1,7 +1,8 @@
 require('angular-minicolors')
 require('jquery-minicolors')
+require('ngjs-color-picker')
 
-module.exports = m = angular.module('knittery-shop.products.utils', ['minicolors'])
+module.exports = m = angular.module('knittery-shop.products.utils', ['minicolors', 'ngjsColorPicker'])
 
 m.directive('lengthInput', ->
   require: 'ng-model'
@@ -30,6 +31,7 @@ m.directive('colorInput', ->
   scope:
     label: '@'
     id: '@'
+    colorOptions: '='
     ngModel: '='
   template: """
     <div class="form-group">
@@ -37,11 +39,12 @@ m.directive('colorInput', ->
         <label for="{{id}}" class="control-label">{{label}}</label>
       </div>
       <div class="col-sm-8">
-
-            <input minicolors="wheelsettings" id="wheel-demo" class="form-control" type="text" ng-model="ngModel">
+            <ngjs-color-picker selected="selected" options="colorOptions"></ngjs-color-picker>
       </div>
     </div>
     """
+  link: (scope, elem, attrs) ->
+
 )
 
 
