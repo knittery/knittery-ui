@@ -36,28 +36,47 @@ module.exports = (m) ->
 
 
   makeTextureCanvas = (knitting) ->
-    canvas = document.createElement("canvas")
-    ctx = canvas.getContext("2d")
-
     stitchSize = 10
     data = render.parseJson(knitting, stitchSize)
     effective = new EffectiveKnittingArea(data.mainBed)
     front = new MarkedArea(effective.rows, null, 'front/back')
     back = new MarkedArea(effective.rows, 'front/back', 'back/lash')
     lash = new MarkedArea(effective.rows, 'back/lash')
+    draw = (what) -> (ctx) ->
+      ctx.save()
+      ctx.scale(1/stitchSize / what.width(), 1/stitchSize / what.height())
+      render.renderStitches(ctx, stitchSize)(what)
+      ctx.restore()
+    left = right = bottom = (ctx) ->
+      ctx.fillStyle = 'red'
+      ctx.fillRect(0, 0, 1, 1)
+    inside = (ctx) ->
+      ctx.fillStyle = 'grey'
+      ctx.fillRect(0, 0, 1, 1)
 
-    toPixels = (stitches) -> stitches * stitchSize
+    #render: (ctx) -> {effect: draws the thing into the context into the rect [0,0,1,1]}
+    parts = [
+      {render: left, width: 25},
+      {render: draw(front), width: 500},
+      {render: right, width: 25},
+      {render: draw(back), width: 500},
+      {render: bottom, width: 25},
+      {render: draw(lash), width: 500},
+      {render: inside, width: 25}]
+
+    canvas = document.createElement("canvas")
+    ctx = canvas.getContext("2d")
     draw = render.renderStitches(ctx, stitchSize)
-    canvas.width = toPixels(front.width() + back.width() + lash.width())
-    canvas.height = toPixels(Math.max(front.height(), back.height(), lash.height()))
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    canvas.height = 700
+    canvas.width = (p.width for p in parts).reduce((x, y)-> x + y)
 
     ctx.save()
-    draw(front)
-    ctx.translate(toPixels(front.width()), 0)
-    draw(back)
-    ctx.translate(toPixels(back.width()), 0)
-    draw(lash)
+    for part in parts
+      ctx.save()
+      ctx.scale(part.width, canvas.height)
+      part.render(ctx)
+      ctx.restore()
+      ctx.translate(part.width, 0)
     ctx.restore()
     canvas
 
