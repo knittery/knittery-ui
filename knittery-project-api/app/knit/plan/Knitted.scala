@@ -17,6 +17,12 @@ case class Knitted private(mainBed: KnittedBed, doubleBed: KnittedBed) {
     mainBed = mainBed.markLastRow(as),
     doubleBed = doubleBed.markLastRow(as)
   )
+
+  def markStitch(as: KnittingMark, at: Needle, bed: Bed, rows: Int) = bed match {
+    case MainBed => copy(mainBed = mainBed.markStitch(as, at, rows))
+    case DoubleBed => copy(doubleBed = doubleBed.markStitch(as, at, rows))
+  }
+
 }
 object Knitted {
   val empty = new Knitted(KnittedBed.empty, KnittedBed.empty)
@@ -32,6 +38,9 @@ case class KnittedBed private(data: Matrix[Stitch]) {
     if (rows.nonEmpty)
       copy(data = data.rows.dropRight(1) :+ data.rows.last.map(_.mark(as)))
     else this
+  }
+  def markStitch(as: KnittingMark, at: Needle, rowCount: Int) = {
+    copy(data = data.rows.take(rowCount).map(row => row.updated(at.index, row(at.index).mark(as))))
   }
 
   def +(row: Needle => Stitch) = new KnittedBed(data :+ row.all)

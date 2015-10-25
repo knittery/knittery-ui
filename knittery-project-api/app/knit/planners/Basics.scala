@@ -103,4 +103,7 @@ object Basics {
 
   /** Marks all stitches of the last row. */
   def markLastRow(as: KnittingMark): Planner = MarkRow(as)
+
+  /** Marks the stitch produced at a certain needle in the last n-rows. */
+  def markStitch(as: KnittingMark, at: Needle, bed: Bed, rows: Int = 1): Planner = MarkStitch(as, at, bed, rows)
 }

@@ -323,3 +323,9 @@ case class MarkRow(as: KnittingMark) extends Step with NonOptimizable {
     state.copy(output = state.output.markLastRow(as)).success
   }
 }
+
+case class MarkStitch(as: KnittingMark, at: Needle, bed: Bed, rows: Int) extends Step with NonOptimizable {
+  override def apply(state: KnittingState) = {
+    state.copy(output = state.output.markStitch(as, at, bed, rows)).success
+  }
+}
