@@ -106,4 +106,9 @@ object Basics {
 
   /** Marks the stitch produced at a certain needle in the last n-rows. */
   def markStitch(as: KnittingMark, at: Needle, bed: Bed, rows: Int = 1): Planner = MarkStitch(as, at, bed, rows)
+
+  /** Marks the matching stitchesin the last n-rows. */
+  def markStitches(as: KnittingMark, at: Needle => Boolean, bed: Bed, rows: Int = 1): Planner = {
+    Needle.all.filter(at).toVector.traverse(markStitch(as, _, bed, rows)) >> Planner.noop
+  }
 }
