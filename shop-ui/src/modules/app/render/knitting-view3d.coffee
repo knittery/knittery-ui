@@ -1,9 +1,7 @@
 THREE = require('three')
 TrackballControls = require('three.trackball')
 stitchRender = require('./stitch-render')
-EffectiveKnittingArea = require('./knitting-areas').EffectiveKnittingArea
-MarkedArea = require('./knitting-areas').MarkedArea
-
+areas = require('./knitting-areas')
 
 module.exports = (m) ->
 
@@ -38,13 +36,22 @@ module.exports = (m) ->
   makeTextureCanvas = (knitting) ->
     stitchSize = 10
     data = stitchRender.parseJson(knitting, stitchSize)
-    effective = new EffectiveKnittingArea(data.mainBed)
-    front = new MarkedArea(effective.rows, null, 'front/back')
-    back = new MarkedArea(effective.rows, 'front/back', 'back/lash')
-    lash = new MarkedArea(effective.rows, 'back/lash')
+    effective = new areas.EffectiveKnittingArea(data.mainBed)
+    #Front
+    frontAll = new areas.MarkedRowArea(effective.rows, null, 'front/back')
+    frontFull = new areas.EffectiveKnittingArea(frontAll.rows, 'hidden')
+    front = new areas.MarkedColumnArea(frontFull.rows, 'left-side', 'right-side')
+    #Back
+    backAll = new areas.MarkedRowArea(effective.rows, 'front/back', 'back/lash')
+    backFull = new areas.EffectiveKnittingArea(backAll.rows, 'hidden')
+    back = new areas.MarkedColumnArea(backFull.rows, 'left-side', 'right-side')
+    #Lash
+    lashAll = new areas.MarkedRowArea(effective.rows, 'back/lash')
+    lash = new areas.EffectiveKnittingArea(lashAll.rows, 'hidden')
+
     draw = (what) -> (ctx) ->
       ctx.save()
-      ctx.scale(1/stitchSize / what.width(), 1/stitchSize / what.height())
+      ctx.scale(1 / stitchSize / what.width(), 1 / stitchSize / what.height())
       stitchRender.renderStitches(ctx, stitchSize)(what)
       ctx.restore()
     left = right = bottom = (ctx) ->

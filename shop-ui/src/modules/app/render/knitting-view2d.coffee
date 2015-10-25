@@ -1,6 +1,5 @@
 render = require('./stitch-render')
 EffectiveKnittingArea = require('./knitting-areas').EffectiveKnittingArea
-MarkedArea = require('./knitting-areas').MarkedArea
 
 module.exports = (m) ->
   m.directive('knittingView2d', ($window) ->
