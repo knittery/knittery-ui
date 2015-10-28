@@ -1,7 +1,7 @@
 THREE = require('three')
 TrackballControls = require('three.trackball')
 stitchRender = require('./stitch-render')
-areas = require('./knitting-areas')
+cutpiece = require('./cutpiece')
 
 module.exports = (m) ->
 
@@ -21,7 +21,7 @@ module.exports = (m) ->
     [scene, camera, renderer]
 
   createControl = (camera, elem) ->
-    controls = new TrackballControls(camera, elem);
+    controls = new TrackballControls(camera, elem)
     controls.rotateSpeed = 1.0
     controls.zoomSpeed = 1.2
     controls.panSpeed = 0.8
@@ -36,18 +36,18 @@ module.exports = (m) ->
   makeTextureCanvas = (knitting) ->
     stitchSize = 10
     data = stitchRender.parseJson(knitting, stitchSize)
-    effective = new areas.EffectiveKnittingArea(data.mainBed)
+    effective = cutpiece.effectiveKnitted(cutpiece.create(data.mainBed))
     #Front
-    frontAll = new areas.MarkedRowArea(effective.rows, null, 'front/back')
-    frontFull = new areas.EffectiveKnittingArea(frontAll.rows, 'hidden')
-    front = new areas.MarkedColumnArea(frontFull.rows, 'left-side', 'right-side')
+    frontAll = cutpiece.betweenMarkedRows(effective, null, 'front/back')
+    frontFull = cutpiece.effectiveKnitted(frontAll, 'hidden')
+    front = cutpiece.betweenMarkedColumns(frontFull, 'left-side', 'right-side')
     #Back
-    backAll = new areas.MarkedRowArea(effective.rows, 'front/back', 'back/lash')
-    backFull = new areas.EffectiveKnittingArea(backAll.rows, 'hidden')
-    back = new areas.MarkedColumnArea(backFull.rows, 'left-side', 'right-side')
+    backAll = cutpiece.betweenMarkedRows(effective, 'front/back', 'back/lash')
+    backFull = cutpiece.effectiveKnitted(backAll, 'hidden')
+    back = cutpiece.betweenMarkedColumns(backFull, 'left-side', 'right-side')
     #Lash
-    lashAll = new areas.MarkedRowArea(effective.rows, 'back/lash')
-    lash = new areas.EffectiveKnittingArea(lashAll.rows, 'hidden')
+    lashAll = cutpiece.betweenMarkedRows(effective, 'back/lash')
+    lash = cutpiece.effectiveKnitted(lashAll, 'hidden')
 
     draw = (what) -> (ctx) ->
       ctx.save()

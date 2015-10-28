@@ -1,5 +1,5 @@
 render = require('./stitch-render')
-EffectiveKnittingArea = require('./knitting-areas').EffectiveKnittingArea
+cutpiece = require('./cutpiece')
 
 module.exports = (m) ->
   m.directive('knittingView2d', ($window) ->
@@ -24,7 +24,7 @@ module.exports = (m) ->
           t0 = performance.now()
           data = render.parseJson(scope.knitting, stitchSize)
           ctx.save()
-          k = new EffectiveKnittingArea(data.mainBed)
+          k = cutpiece.effectiveKnitted(cutpiece.create(data.mainBed))
 
           oversampling = 2
           canvas.width = $(canvas).width() * oversampling
