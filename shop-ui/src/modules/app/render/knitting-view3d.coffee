@@ -38,12 +38,15 @@ module.exports = (m) ->
     emptyStitch = new stitchRender.emptyStitch(stitchSize)
     effective = cutpiece.effectiveKnitted(cutpiece.create(data.mainBed))
     #Front
-    frontAll = cutpiece.betweenMarkedRows(effective, null, 'front/back')
+    frontAll = cutpiece.betweenMarkedRows(effective, null, 'front/bottom')
     front = cutpiece.betweenMarkedColumns(frontAll, 'left-side', 'right-side')
     frontLeft = cutpiece.betweenMarkedColumns(frontAll, 'hidden', 'left-side', false, true)
     frontRight = cutpiece.betweenMarkedColumns(frontAll, 'right-side', 'hidden', true, false)
+    #Bottom
+    bottomAll = cutpiece.betweenMarkedRows(effective, 'front/bottom', 'bottom/back')
+    bottom = cutpiece.betweenMarkedColumns(bottomAll, 'left-side', 'right-side')
     #Back
-    backAll = cutpiece.betweenMarkedRows(effective, 'front/back', 'back/lash').mirrorRows()
+    backAll = cutpiece.betweenMarkedRows(effective, 'bottom/back', 'back/lash').mirrorRows()
     back = cutpiece.betweenMarkedColumns(backAll, 'left-side', 'right-side')
     backLeft = cutpiece.betweenMarkedColumns(backAll, 'hidden', 'left-side', false, true)
     backRight = cutpiece.betweenMarkedColumns(backAll, 'right-side', 'hidden', true, false)
@@ -58,9 +61,13 @@ module.exports = (m) ->
       ctx.scale(1 / stitchSize / what.width(), 1 / stitchSize / what.height())
       stitchRender.renderStitches(ctx, stitchSize)(what)
       ctx.restore()
-    bottom = (ctx) ->
-      ctx.fillStyle = 'red'
-      ctx.fillRect(0, 0, 1, 1)
+    drawRotated = (what) -> (ctx) ->
+      ctx.save()
+      ctx.rotate(Math.PI / 2)
+      ctx.translate(0, -1)
+      ctx.scale(1 / stitchSize / what.width(), 1 / stitchSize / what.height())
+      stitchRender.renderStitches(ctx, stitchSize)(what)
+      ctx.restore()
     inside = (ctx) ->
       ctx.fillStyle = 'grey'
       ctx.fillRect(0, 0, 1, 1)
@@ -71,7 +78,7 @@ module.exports = (m) ->
       {render: draw(front), width: 500},
       {render: draw(right), width: 25},
       {render: draw(back), width: 500},
-      {render: bottom, width: 25},
+      {render: drawRotated(bottom), width: 25},
       {render: draw(lash), width: 500},
       {render: inside, width: 25}]
 

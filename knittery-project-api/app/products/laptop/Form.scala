@@ -27,6 +27,7 @@ object Form {
       lashHeight = lash.toRows.discardPartials
     )
     sideSize = (thickness.toStitches + border) / 2
+    bottomHalf = (thickness / 2).toRows.approx
 
     ps <- Planner.preconditions { _ =>
       dims.checkPatterns(patterns(dims))
@@ -39,11 +40,17 @@ object Form {
     toDecrease = (bodyWidth - dims.lashWidth).approx / 2
     firstLash = first + toDecrease
 
+    (front, bottom1) = ps.front.splitAt(ps.front.length - bottomHalf)
+    (bottom2, back) = ps.back.reverse.splitAt(bottomHalf)
+    bottom = bottom1 ++ bottom2
+
     bg <- Cast.onClosed(MainBed, first, last, ps.front.head.head)
     _ <- Basics.knitRowWithK(yarnA = Some(bg))
-    _ <- FairIslePlanner.singleBed(ps.front, Some(first))
-    _ <- Basics.markLastRow(KnittingMark("front/back"))
-    _ <- FairIslePlanner.singleBed(ps.back.reverse, Some(first))
+    _ <- FairIslePlanner.singleBed(front, Some(first))
+    _ <- Basics.markLastRow(KnittingMark("front/bottom"))
+    _ <- FairIslePlanner.singleBed(bottom, Some(first))
+    _ <- Basics.markLastRow(KnittingMark("bottom/back"))
+    _ <- FairIslePlanner.singleBed(back, Some(first))
 
     _ <- Basics.markStitch(KnittingMark("left-side"),
       first + sideSize.approx, MainBed, (dims.frontHeight + dims.backHeight).approx)
