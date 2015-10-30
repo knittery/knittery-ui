@@ -53,7 +53,7 @@ module.exports = (m) ->
     #Lash
     lash = cutpiece.effectiveBetweenMarkedRows(effective, 'back/lash', undefined, true, false, 'hidden')
     #Left/Right
-    left = cutpiece.composeHorizontal(frontLeft, backLeft, emptyStitch)
+    left = cutpiece.composeHorizontal(frontLeft, backLeft, emptyStitch).mirrorColumns()
     right = cutpiece.composeHorizontal(frontRight, backRight, emptyStitch)
 
     draw = (what) -> (ctx) ->

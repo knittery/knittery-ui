@@ -6,6 +6,7 @@ class Cutpiece
   width: () => if @rows.length > 0 then @rows[0].length else undefined
   height: () => @rows.length
   mirrorRows: () => new Cutpiece(@rows.reverse())
+  mirrorColumns: () => new Cutpiece(_.map(@rows, (r) -> r.reverse()))
 
 ### Part of a Cutpiece. ###
 class SubCutpiece extends Cutpiece
