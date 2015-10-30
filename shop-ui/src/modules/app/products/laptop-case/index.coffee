@@ -11,9 +11,9 @@ defaultCheckerboard =
   seed: Math.floor(Math.random() * 1000000000)
 
 defaultGradient =
-  color1: '#006fff'
-  color2: '#ffffff'
-  color3: '#cca219'
+  topColor: '#006fff'
+  bottomColor: '#ffffff'
+  lashColor: '#cca219'
   seed: Math.floor(Math.random() * 1000000000)
 
 m.config((ProductsProvider) ->

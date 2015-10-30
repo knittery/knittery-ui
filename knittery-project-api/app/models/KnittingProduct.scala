@@ -60,36 +60,31 @@ object KnittingProduct {
   }
   private object LaptopTemplate {
     import products.laptop._
+    private def yarnForHex(hex: String) =
+      Yarn(hex, Color.decode(hex))
 
     sealed trait Pattern {
       def patterns(implicit gauge: Gauge): Dimensions => Patterns
     }
+
     case class Checkerboard(size: Double, color1: String, color2: String,
       dissolveExponent: Option[Double], seed: Option[Long]) extends Pattern {
-      private def yarnForHex(hex: String) =
-        Yarn(hex, Color.decode(hex))
-
       def patterns(implicit gauge: Gauge) = {
         val yarnA = yarnForHex(color1)
         val yarnB = yarnForHex(color2)
         dissolveExponent.fold {
-          products.laptop.Checkerboard.apply(yarnA, yarnB, size.cm)
+          products.laptop.Checkerboard(yarnA, yarnB, size.cm)
         } { exp =>
           products.laptop.Checkerboard.dissolving(yarnA, yarnB, size.cm, exp, seed.getOrElse(0))
         }
       }
     }
 
-    case class Gradient(color1: String, color2: String, color3: String, seed: Option[Long]) extends Pattern {
-      private def yarnForHex(hex: String) =
-        Yarn(hex, Color.decode(hex))
-
+    case class Gradient(topColor: String, bottomColor: String, lashColor: String, seed: Option[Long]) extends Pattern {
       def patterns(implicit gauge: Gauge) = {
-        val yarnA = yarnForHex(color1)
-        val yarnB = yarnForHex(color2)
-        val yarnC = yarnForHex(color3)
-        products.laptop.Gradient.apply(yarnA, yarnB, yarnC, seed.getOrElse(0))
-       }
+        products.laptop
+          .Gradient(yarnForHex(topColor), yarnForHex(bottomColor), yarnForHex(lashColor), seed.getOrElse(0))
+      }
     }
 
     case class PatternChoice(checkerboard: Option[Checkerboard] = None, gradient: Option[Gradient] = None) extends Choice[Pattern]

@@ -370,6 +370,9 @@
             "properties": {
                 "checkerboard": {
                     "$ref": "#/definitions/CheckerboardPattern"
+                },
+                "grandient": {
+                    "$ref": "#/definitions/GradientPattern"
                 }
             }
         },
@@ -403,6 +406,40 @@
                     "type": "number",
                     "description": "Exponent for dissolving the pattern.",
                     "example": 1.5
+                },
+                "seed": {
+                    "type": "integer",
+                    "description": "Seed for the dissolving pattern.",
+                    "example": 53232
+                }
+            }
+        },
+        "GradientPattern": {
+            "title": "Gradient pattern",
+            "type": "object",
+            "required": [
+                "topColor",
+                "bottomColor",
+                "lashColor"
+            ],
+            "properties": {
+                "topColor": {
+                    "type": "string",
+                    "description": "Color at the top (RGB-value).",
+                    "pattern": "#[0-9A-Fa-f]{6}",
+                    "example": "#ff0000"
+                },
+                "bottomColor": {
+                    "type": "string",
+                    "description": "Color at the bottom (RGB-value).",
+                    "pattern": "#[0-9A-Fa-f]{6}",
+                    "example": "#0000ff"
+                },
+                "lashColor": {
+                    "type": "string",
+                    "description": "Color of the lash (RGB-value).",
+                    "pattern": "#[0-9A-Fa-f]{6}",
+                    "example": "#00ff00"
                 },
                 "seed": {
                     "type": "integer",
