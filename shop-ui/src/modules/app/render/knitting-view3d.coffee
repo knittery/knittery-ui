@@ -32,29 +32,33 @@ module.exports = (m) ->
     controls.keys = [65, 83, 68]
     controls
 
-
   makeTextureCanvas = (knitting) ->
     stitchSize = 10
     data = stitchRender.parseJson(knitting, stitchSize)
+    emptyStitch = new stitchRender.emptyStitch(stitchSize)
     effective = cutpiece.effectiveKnitted(cutpiece.create(data.mainBed))
     #Front
     frontAll = cutpiece.betweenMarkedRows(effective, null, 'front/back')
-    frontFull = cutpiece.effectiveKnitted(frontAll, 'hidden')
-    front = cutpiece.betweenMarkedColumns(frontFull, 'left-side', 'right-side')
+    front = cutpiece.betweenMarkedColumns(frontAll, 'left-side', 'right-side')
+    frontLeft = cutpiece.betweenMarkedColumns(frontAll, 'hidden', 'left-side', false, true)
+    frontRight = cutpiece.betweenMarkedColumns(frontAll, 'right-side', 'hidden', true, false)
     #Back
-    backAll = cutpiece.betweenMarkedRows(effective, 'front/back', 'back/lash')
-    backFull = cutpiece.effectiveKnitted(backAll, 'hidden')
-    back = cutpiece.betweenMarkedColumns(backFull, 'left-side', 'right-side')
+    backAll = cutpiece.betweenMarkedRows(effective, 'front/back', 'back/lash').mirrorRows()
+    back = cutpiece.betweenMarkedColumns(backAll, 'left-side', 'right-side')
+    backLeft = cutpiece.betweenMarkedColumns(backAll, 'hidden', 'left-side', false, true)
+    backRight = cutpiece.betweenMarkedColumns(backAll, 'right-side', 'hidden', true, false)
     #Lash
-    lashAll = cutpiece.betweenMarkedRows(effective, 'back/lash')
-    lash = cutpiece.effectiveKnitted(lashAll, 'hidden')
+    lash = cutpiece.effectiveBetweenMarkedRows(effective, 'back/lash', undefined, true, false, 'hidden')
+    #Left/Right
+    left = cutpiece.composeHorizontal(frontLeft, backLeft, emptyStitch)
+    right = cutpiece.composeHorizontal(frontRight, backRight, emptyStitch)
 
     draw = (what) -> (ctx) ->
       ctx.save()
       ctx.scale(1 / stitchSize / what.width(), 1 / stitchSize / what.height())
       stitchRender.renderStitches(ctx, stitchSize)(what)
       ctx.restore()
-    left = right = bottom = (ctx) ->
+    bottom = (ctx) ->
       ctx.fillStyle = 'red'
       ctx.fillRect(0, 0, 1, 1)
     inside = (ctx) ->
@@ -63,9 +67,9 @@ module.exports = (m) ->
 
     #render: (ctx) -> {effect: draws the thing into the context into the rect [0,0,1,1]}
     parts = [
-      {render: left, width: 25},
+      {render: draw(left), width: 25},
       {render: draw(front), width: 500},
-      {render: right, width: 25},
+      {render: draw(right), width: 25},
       {render: draw(back), width: 500},
       {render: bottom, width: 25},
       {render: draw(lash), width: 500},

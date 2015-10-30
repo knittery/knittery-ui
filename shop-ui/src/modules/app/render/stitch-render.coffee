@@ -202,3 +202,4 @@ renderStitches = (ctx, stitchSize) -> (data) ->
 module.exports =
   parseJson: parseJson
   renderStitches: renderStitches
+  emptyStitch: (size) -> new Stitch(size)

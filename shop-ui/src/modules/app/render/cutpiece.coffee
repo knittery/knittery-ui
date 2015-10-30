@@ -5,6 +5,7 @@ class Cutpiece
   constructor: (@rows) ->
   width: () => if @rows.length > 0 then @rows[0].length else undefined
   height: () => @rows.length
+  mirrorRows: () => new Cutpiece(@rows.reverse())
 
 ### Part of a Cutpiece. ###
 class SubCutpiece extends Cutpiece
@@ -20,6 +21,14 @@ class SubCutpiece extends Cutpiece
     cutRow = (row) => row.slice(@view.columns.from, @view.columns.until)
     @rows = _.map(@base.rows.slice(@view.rows.from, @view.rows.until), cutRow)
   unwrap: => @base
+
+class HorizontalComposedCutpiece extends Cutpiece
+  constructor: (@left, @right, fillWith) ->
+    pairs = _.zip(@left.rows, @right.rows)
+    @rows = for [l,r] in pairs
+      l ?= (fillWith for i in [1..@left.width()])
+      r ?= (fillWith for i in [1..@right.width()])
+      l.concat(r)
 
 
 MAX_INDEX = Math.pow(2, 53) - 1 #Number.MAX_SAFE_INTEGER
@@ -90,6 +99,12 @@ betweenMarkedColumns = (base, startMark, endMark, includeStart = false, includeE
     from: start
     until: end)
 
+effectiveBetweenMarkedRows = (base, startMark, endMark, includeStart = true, includeEnd = false, hiddenMarks...) ->
+  effectiveKnittedColumns(betweenMarkedRows(base, startMark, endMark, includeStart, includeEnd), hiddenMarks)
+
+composeHorizontal = (left, right, fillWith) ->
+  new HorizontalComposedCutpiece(left, right, fillWith)
+
 
 module.exports =
   create: cutpiece
@@ -98,3 +113,5 @@ module.exports =
   effectiveKnitted: effectiveKnitted
   betweenMarkedRows: betweenMarkedRows
   betweenMarkedColumns: betweenMarkedColumns
+  effectiveBetweenMarkedRows: effectiveBetweenMarkedRows
+  composeHorizontal: composeHorizontal
