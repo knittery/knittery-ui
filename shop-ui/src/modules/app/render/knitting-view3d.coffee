@@ -12,7 +12,7 @@ module.exports = (m) ->
     pointLight = new THREE.PointLight(0xff4444, 5, 30)
     pointLight.position.set(5, 0, 0)
     scene.add(pointLight)
-    camera = new THREE.PerspectiveCamera(50, 1, 1, 2000)
+    camera = new THREE.PerspectiveCamera(65, 1, 0.001, 2000)
     camera.position.x = 2
     camera.position.y = 2
     camera.position.z = 2
@@ -119,7 +119,7 @@ module.exports = (m) ->
       resize()
 
       render = ->
-        camera.lookAt(scene.position)
+        camera.lookAt(new THREE.Vector3(1, 0, 0).add(scene.position))
         renderer.render(scene, camera)
       animate = ->
         $window.requestAnimationFrame(animate)
