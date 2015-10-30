@@ -74,6 +74,7 @@ object Form {
       } yield ()
     }
     _ <- FairIslePlanner.singleBed(ps.lash.drop(toDecrease), Some(firstLash))
-    _ <- Cast.offClosed(MainBed, bg)
+    end <- Basics.nearestYarn(ps.lash.last.last)
+    _ <- Cast.offClosed(MainBed, end.get.start)
   } yield ()
 }
