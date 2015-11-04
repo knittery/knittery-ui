@@ -7,7 +7,6 @@ import knit.units._
 import squants.space.Length
 
 import scalaz.Scalaz._
-import scalaz._
 
 /**
  * Laptop case that wraps the laptop in a rectangular enclosure and has a square lash over the small side.
@@ -62,7 +61,7 @@ object Form {
       hiddenFilter, MainBed, (dims.frontHeight + dims.backHeight).approx)
     _ <- Basics.markLastRow(KnittingMark("back/lash"))
 
-    _ <- (0 until toDecrease).toVector.traverse { i =>
+    _ <- (0 until toDecrease).toVector.traverse[PlannerM, Unit] { i =>
       for {
         working <- Planner.state(_.workingNeedles(MainBed).size)
         patternLine = ps.lash.drop(i).head
